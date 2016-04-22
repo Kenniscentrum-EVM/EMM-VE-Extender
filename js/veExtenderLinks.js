@@ -3,6 +3,7 @@
 /**
  * addEMMLinks
  * adds menu-itmes, each one starts a dialog
+ * 
  */
 function addEMMLinks() {
 
