@@ -126,7 +126,7 @@ var pagenames = [];
           parameters:'limit:10000',//check how to increase limit of ask-result; done in LocalSettings.php
           //query was: [[Modification date::+]]|?Modification date|?Heading nl
           //test-query:[[Category:Context]]|?Modification date|?Heading nl
-          query: askQuery+'|?Semantic title'//get all pages; include property Semantic title
+          query: askQuery+'|?Semantic title|limit=10000'//get all pages; include property Semantic title
       } ).done( function ( data ) {
         //parse data
         //first get results within data

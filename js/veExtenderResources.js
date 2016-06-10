@@ -37,7 +37,7 @@ function getContextOfCurrentPage(){
     api.get( {
 	action: 'ask',
 	parameters:'limit:10000',//check how to increase limit of ask-result; done in LocalSettings.php
-	query: '[['+pageProperties.pagename+']]|?Supercontext|?Topcontext'//get all pages; include property Semantic title
+	query: '[['+pageProperties.pagename+']]|?Supercontext|?Topcontext|limit=10000'//get all pages; include property Semantic title
     } ).done( function ( data ) {
       var res=data.query.results;
       //console.log(res);
