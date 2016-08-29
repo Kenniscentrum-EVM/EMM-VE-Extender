@@ -9,5 +9,5 @@ function loadExtenderUI(){
 	$('.oo-ui-toolbar-tools').find('.oo-ui-tool-name-advancedSettings').remove(); /* Page options > Advanced settings */
 	$('.oo-ui-toolbar-tools').find('.oo-ui-tool-name-categories').remove(); /* Page options > Categories */
 	$('.oo-ui-toolbar-tools').find('.oo-ui-tool-name-languages').remove(); /* Page options > Languages */
-	$('.oo-ui-toolbar-tools').find('.oo-ui-icon-wikiText').remove(); /* Switch to source editing */
+	$('.oo-ui-toolbar-tools').find('.oo-ui-tool-name-editModeSource').remove(); /* Switch to source editing */
 }
