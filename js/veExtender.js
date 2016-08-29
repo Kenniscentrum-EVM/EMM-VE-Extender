@@ -1,6 +1,6 @@
   //redefine what tools will be initially available in the insert-menu
 function redefineMenu(){
-  var force=ve.ui.toolFactory.bindings.register[6].context.forceExpand;
+  var force=ve.ui.toolFactory.bindings.register[5].context.forceExpand;
   //remove transclusion from neu if available
   for (var i=0;i<force.length;i++)
     if (force[i]=="transclusion"){

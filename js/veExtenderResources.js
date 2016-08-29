@@ -24,7 +24,7 @@ function doOpen(address){
  */
 function getStartAddress(){
 	    var totaladdress=window.location.href;
-	    return totaladdress.substr(0, totaladdress.indexOf('index.php')); 
+	    return totaladdress.substr(0, totaladdress.indexOf('index.php'));
 }
 
 //global variable to keep page properties
@@ -57,7 +57,7 @@ function getContextOfCurrentPage(){
 	  pageProperties.topcontext=topcontext;
 	  //contexttype=res[prop].printouts['Contexttype'][0].fulltext;
       }
-      
+
     });
 }
 
@@ -79,6 +79,7 @@ function addEMMResources(){
      AddPageTool.static.name = 'addpage';
      AddPageTool.static.icon = 'page-existing';
      AddPageTool.static.title = OO.ui.deferMsg( 'visualeditor-emm-menuaddpagetitle' )();
+     AddPageTool.prototype.onUpdateState = function () {};
      AddPageTool.prototype.onSelect = function () {
        ve.init.target.getSurface().execute( 'window', 'open', 'addresourcedialog', null );
        //processResult();
@@ -95,6 +96,7 @@ function addEMMResources(){
      AddHyperlinkTool.static.name = 'addhyperlink';
      AddHyperlinkTool.static.icon = 'link';
      AddHyperlinkTool.static.title = OO.ui.deferMsg( 'visualeditor-emm-menuaddhyperlinktitle' )();
+     AddHyperlinkTool.prototype.onUpdateState = function () {};
      AddHyperlinkTool.prototype.onSelect = function () {
        ve.init.target.getSurface().execute( 'window', 'open', 'addhyperlinkdialog', null );//addlocallinkdialog
 
@@ -109,8 +111,9 @@ function addEMMResources(){
      }
      OO.inheritClass( AddInternalDocumentTool, OO.ui.Tool );
      AddInternalDocumentTool.static.name = 'addinternaldocument';
-     AddInternalDocumentTool.static.icon = 'reference';
+     AddInternalDocumentTool.static.icon = 'parameter';
      AddInternalDocumentTool.static.title = OO.ui.deferMsg( 'visualeditor-emm-menuaddinternaldocumenttitle' )();
+     AddInternalDocumentTool.prototype.onUpdateState = function () {};
      AddInternalDocumentTool.prototype.onSelect = function () {
 	 //doOpen(getStartAddress()+'index.php/Special:FormEdit/Resource_Light?Resource_Description%5Bcreated+in+page%5D='+pageProperties.pagename);
        ve.init.target.getSurface().execute( 'window', 'open', 'addlocallinkdialog', null );//
@@ -132,7 +135,7 @@ function addEMMResources(){
      //console.log(toolbar);
      $( '.ve-test-toolbar-insert' ).after(
          toolbar.$group);
-     
+
      		  function processResult(){
 		    //console.log('save!');
 		    //check if page has Category Light Context
@@ -156,7 +159,7 @@ function addEMMResources(){
    //todo: use queries.resourcepages
      createDialog('addresourcedialog',queries.resourcepages,OO.ui.deferMsg( 'visualeditor-emm-add-page' )(),
 		  processResult,OO.ui.deferMsg( 'visualeditor-emm-add-page' )(),
-		  OO.ui.deferMsg( 'visualeditor-emm-manage-pages' )(), 
+		  OO.ui.deferMsg( 'visualeditor-emm-manage-pages' )(),
 		  OO.ui.deferMsg( 'visualeditor-emm-existing-page' )()+':',function (pageName){
   //todo: characters are added to end of string; see why this happens!?
 	  doOpen(encodeURI(getStartAddress()+'index.php?title='+spacesToUnderscore(pageName)));
@@ -167,7 +170,7 @@ function addEMMResources(){
 	  doOpen(getStartAddress()+'index.php/Special:FormEdit/Resource_Hyperlink?Resource_Description%5Bcreated+in+page%5D='+pageProperties.pagename);
 	}
       ,OO.ui.deferMsg( 'visualeditor-emm-add-hyperlink' )(),
-      OO.ui.deferMsg( 'visualeditor-emm-manage-hyperlinks' )(), 
+      OO.ui.deferMsg( 'visualeditor-emm-manage-hyperlinks' )(),
 		  OO.ui.deferMsg( 'visualeditor-emm-existing-hyperlink' )()+':',function (pageName){
   //todo: characters are added to end of string; see why this happens!?
 	  doOpen(encodeURI(getStartAddress()+'index.php?title='+spacesToUnderscore(pageName)+'&action=formedit​'));
@@ -180,7 +183,7 @@ function addEMMResources(){
 	  doOpen(getStartAddress()+'index.php/Special:FormEdit/Resource_Light?Resource_Description%5Bcreated+in+page%5D='+pageProperties.pagename);
 	}
       ,OO.ui.deferMsg( 'visualeditor-emm-add-file' )(),
-      OO.ui.deferMsg( 'visualeditor-emm-manage-files' )(), 
+      OO.ui.deferMsg( 'visualeditor-emm-manage-files' )(),
 		  OO.ui.deferMsg( 'visualeditor-emm-existing-file' )()+':',function (pageName){
   //todo: characters are added to end of string; see why this happens!?
 	  doOpen(encodeURI(getStartAddress()+'index.php/Special:FormEdit/Resource_Light/'+spacesToUnderscore(pageName)));
@@ -208,7 +211,7 @@ addOrEditResourceDialog.static.title = dialogTitle;
 addOrEditResourceDialog.static.size = 'medium';
 addOrEditResourceDialog.prototype.getBodyHeight = function () {
   var dialogthat=this;
-  
+
   var api = new mw.Api();
   // Start a "GET" request
   //console.log('Query:'+askQuery+'|?Semantic title');
@@ -241,8 +244,8 @@ addOrEditResourceDialog.prototype.getBodyHeight = function () {
 	    title=pagename;
 	  pagenames.push({ value: title, data: pagename });
       }
-      
-      
+
+
       pagenames.sort(function(a, b) {
 	  if (a.value > b.value) {
 	    return 1;
@@ -265,12 +268,12 @@ addOrEditResourceDialog.prototype.getBodyHeight = function () {
 	    prevTitle=title;
 	  }
       }
-      
+
 
       var complete=$( "#"+dialogName+"id" ).find("input");
       //TODO workaround, set width of label to 450px
       $(".oo-ui-fieldLayout-body").width(450);
-    //store data in inputfields 
+    //store data in inputfields
       $(complete).autocomplete({
 	  lookup: pagenames,//pagenames are created at the start of dialog
 	  onSelect: function (suggestion) {
@@ -311,7 +314,7 @@ addOrEditResourceDialog.prototype.initialize = function () {
 	}
 	];
 	this.inputsFieldset.$element.append(
-		
+
 		this.subjectField.$element
 	);
 	this.panel.$element.append(	this.inputsFieldset.$element );
@@ -341,5 +344,5 @@ addOrEditResourceDialog.prototype.initialize = function () {
 	};
       ve.ui.windowFactory.register( addOrEditResourceDialog );
 }
- 
- 
+
+
