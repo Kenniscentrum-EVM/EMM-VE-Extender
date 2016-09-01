@@ -30,7 +30,15 @@ $wgResourceModules['ext.EMMVEExtension'] = array(
 	'localBasePath' => __DIR__,
 	'remoteExtPath' => 'EMM-VE-Extender',
 );
+class EMMVEExtenderExtension {
 
+	public static function onBeforePageDisplay( OutputPage &$output, Skin &$skin ) {
+		$output->addModules( 'ext.EMMVEExtension' );
+		return true;
+	}
+}
+// set Hook so module will be loaded
+$wgHooks['BeforePageDisplay'][] = 'EMMVEExtenderExtension::onBeforePageDisplay';
 
 ?>
 
