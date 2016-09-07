@@ -7,47 +7,47 @@
  *  @param menutext a string that displays the text that is displayed at the top of the dialogue
  *  @param linktotext a string to be displayed as link (?)
  *  @param askQuery a string which directs the askQuery where the desired information is stored
- *  @param templateresult a function that contains what is to be returned by the dialog when the user presses 'ok'
+ *  @param templateresult a function that contains what is to be returned by the dialog when the user presses "ok"
  *  @param myfields an array that contains elements which should be added to the dialog
  */
-function loadEMMDialog(template, toolid, menutext, dialogtext, linktotext, askQuery, templateResult, myfields, heightForm) {
+function loadEMMDialog(template, toolId, menuText, dialogText, linkToText, askQuery, templateResult, myFields, heightForm, windowManager) {
 
     /*  makeInsertTool
-    *   This function creates the menu items in the selection menu on the top of the visual editor window
-    *   @param buttonMessage the text on the button of the menu item
-    *   @param dialogueMessage the text that is displayed in the dialogue
-    *   @param collection handle for controling the element (?)
-    */
+     *   This function creates the menu items in the selection menu on the top of the visual editor window
+     *   @param buttonMessage the text on the button of the menu item
+     *   @param dialogueMessage the text that is displayed in the dialogue
+     *   @param collection handle for controling the element (?)
+     */
     var makeInsertTool = function (buttonMessage, collection) {
-        var dialogueName = collection + " dialogue",
-            toolName = collection + " tool";
+        var dialogueName = collection + " dialogue";
+            //toolName = collection + " tool";
 
-        createDialogue(dialogueName, OO.ui.deferMsg(dialogtext));
+        createDialogue(dialogueName, OO.ui.deferMsg(dialogText), windowManager);
 
-        var tool = function (toolGroup, config) {
+        var tool = function(toolGroup, config) {
             ve.ui.Tool.call(this, toolGroup, config);
             this.setDisabled(false);
             this.allowCollapse = null;
-            this.$element.addClass('oo-ui-tool-name-extratemplate');
+            this.$element.addClass("oo-ui-tool-name-extratemplate");
         };
         OO.inheritClass(tool, ve.ui.Tool);
-        tool.static.name = toolid;
+        tool.static.name = toolId;
         tool.static.title = buttonMessage;
-        tool.static.group = 'tools';
-        tool.static.icon = 'link';
+        tool.static.group = "tools";
+        tool.static.icon = "link";
         tool.static.allowCollapse = null;
         tool.static.dialog = dialogueName;
         tool.static.deactivateOnSelect = true;
-        tool.prototype.onSelect = function () {
-            this.toolbar.getSurface().execute('window', 'open', dialogueName, null);
+        tool.prototype.onSelect = function() {
+            this.toolbar.getSurface().execute("window", "open", dialogueName, null);
             this.setActive(false);
         };
         ve.ui.toolFactory.register(tool);
     };
 
     makeInsertTool(
-        OO.ui.deferMsg(menutext)(),
-        "process-" + toolid);
+        OO.ui.deferMsg(menuText)(),
+        "process-" + toolId);
 
 }
 /*  createDialogue
@@ -55,8 +55,8 @@ function loadEMMDialog(template, toolid, menutext, dialogtext, linktotext, askQu
  *  @param dialogueName a string that serves as the handle for the selection menu to access the dialogue
  *  @param dialogueMessage a string that will be displayed at the top of the dialogue
  */
-function createDialogue(dialogueName, dialogueMessage){
-    var dialogue = function (surface, config) {
+function createDialogue(dialogueName, dialogueMessage, windowManager) {
+    var dialogue = function(surface, config) {
         OO.ui.ProcessDialog.call(this, surface, config);
     };
     OO.inheritClass(dialogue, OO.ui.ProcessDialog);
@@ -66,110 +66,247 @@ function createDialogue(dialogueName, dialogueMessage){
     dialogue.static.name = dialogueName;
     dialogue.static.title = dialogueMessage;
 
-    // -- x -- //
-
-    dialogue.prototype.initialize = function () {
+    dialogue.prototype.initialize = function() {
+        //put the dialogue in a variable so it can be accessed later on
+        var that = this;
 
         // -- input widgets go here -- //
+        // todo zinvolle naamgeving voor de widgets
 
         var input1 = new OO.ui.TextInputWidget({
-            placeholder: 'A form text field'
+            placeholder: "A form text field"
         });
 
         var input2 = new OO.ui.TextInputWidget({
-            placeholder: 'A form text field'
+            placeholder: "A form text field"
         });
 
         var input3 = new OO.ui.TextInputWidget({
-            placeholder: 'A form text field with help'
+            placeholder: "A form text field with help"
         });
 
         var input4 = new OO.ui.CheckboxInputWidget({
             selected: true
         });
 
-        // create the layout
+        //  create the buttons
+        var buttonOk = new OO.ui.ButtonWidget({
+            label: "OK",
+            flags: ["progressive"],
+            target: "_blank"
+        });
+
+        var buttonCancel = new OO.ui.ButtonWidget({
+            label: "Cancel"
+        });
+
+        //  create the layout
         var fieldset = new OO.ui.FieldsetLayout({
-            label: 'FieldsetLayout: Examples of label alignment and help text',
+            label: "Nieuw item toevoegen",
             classes: ["container"]
         });
 
         fieldset.addItems([
             new OO.ui.FieldLayout(input1, {
-                label: 'Left-aligned label, the default',
-                align: 'left'
+                label: "Left-aligned label, the default",
+                align: "left"
             }),
 
             new OO.ui.FieldLayout(input2, {
-                label: 'Right-aligned label',
-                align: 'right'
+                label: "Right-aligned label",
+                align: "right"
             }),
 
             new OO.ui.FieldLayout(input3, {
-                label: 'Top-aligned label',
-                align: 'top',
-                help: 'A bit of help'
+                label: "Top-aligned label",
+                align: "top",
+                help: "Hallo :)"
             }),
 
             new OO.ui.FieldLayout(input4, {
-                label: 'Inline label',
-                align: 'inline'
-            })
+                label: "Inline label",
+                align: "inline"
+            }),
+
+
         ]);
 
-        // -- x -- //
+        //  button event handling
+        buttonOk.$element.attr("id", "buttonok");
+        buttonOk.$element.css("float", "right");
+        buttonOk.onClick = function() {
 
+            // -- behaviour after the user presses open goes here -- //
 
+            alert(":click");
+
+        }
+
+        buttonCancel.$element.attr("id", "buttoncancel");
+        buttonCancel.$element.css("float", "right");
+        buttonCancel.onClick = function() {
+
+            // -- bahvior after the user presses cancel goes here -- //
+            that.close();
+
+        }
+
+        //  register the event handler (?)
+        buttonOk.connect(buttonOk, {
+            click: "onClick"
+        });
+
+        buttonCancel.connect(buttonCancel, {
+            click: "onClick"
+        })
+
+        //  more initializing code
         dialogue.super.prototype.initialize.call(this)
-        this.content = new OO.ui.PanelLayout({padded: true, expanded: false});
+        this.content = new OO.ui.PanelLayout({
+            padded: true,
+            expanded: false
+        });
         this.content.$element.append(fieldset.$element);
         this.$element
-            .addClass('oo-ui-windowManager')
-            .toggleClass('oo-ui-windowManager-modal', true);
-
-
-
+            .addClass("oo-ui-windowManager")
+            .toggleClass("oo-ui-windowManager-modal", true);
         this.$body.append(this.content.$element);
-        
+
+        //  initializing the buttons visible at the bottom of the dialogue happens over here
+        //buttonOk.$element.insertBefore(".oo-ui-processDialog-actions-other");
+        //buttonCancel.$element.insertBefore(".oo-ui-processDialog-actions-other");
+        this.content.$element.append(buttonOk.$element);
+        this.content.$element.append(buttonCancel.$element);
+
     }
+    //  resgisters the dialogue to the window factory, from this point on the dialogue can be accessed calling the window factory
+
     ve.ui.windowFactory.register(dialogue);
 }
 
+/*  addEMMLinks
+ *  This method is executed when the extention is loaded and is responsible for passing the correct information to the loadEMMDialog methods
+ */
 function addEMMLinks() {
+
+    /*
+     var windowManager = new ve.ui.WindowManager();
+     $("body").append(windowManager.$element);
+     */
+
     var queries = veExtenderQueries();
-    loadEMMDialog('Internal link', "linkpage", 'visualeditor-emm-menuinternallinktitle', 'visualeditor-emm-dialoginternallinktitle', 'visualeditor-emm-link-to-page',
-        queries.linkpages, function (namedata, linkdata) {
+    loadEMMDialog("Internal link", "linkpage", "visualeditor-emm-menuinternallinktitle", "visualeditor-emm-dialoginternallinktitle", "visualeditor-emm-link-to-page",
+        queries.linkpages,
+        function(namedata, linkdata) {
             return {
-                link: {wt: linkdata},
-                name: {wt: namedata}
+                link: {
+                    wt: linkdata
+                },
+                name: {
+                    wt: namedata
+                }
             };
         }, [],
         120
     );
-    loadEMMDialog('External link', "linkwebsite", 'visualeditor-emm-menuexternallinktitle', 'visualeditor-emm-dialogexternallinktitle', 'visualeditor-emm-link-to-resource',
-        queries.linkwebsites, function (namedata, linkdata) {
+    loadEMMDialog("External link", "linkwebsite", "visualeditor-emm-menuexternallinktitle", "visualeditor-emm-dialogexternallinktitle", "visualeditor-emm-link-to-resource",
+        queries.linkwebsites,
+        function(namedata, linkdata) {
             return {
-                resource: {wt: linkdata},
-                name: {wt: namedata}
+                resource: {
+                    wt: linkdata
+                },
+                name: {
+                    wt: namedata
+                }
             };
         }, [],
         120
     );
-    loadEMMDialog('Cite', "linkreference", 'visualeditor-emm-menucitetitle', 'visualeditor-emm-dialogcitetitle', 'visualeditor-emm-link-to-resource',
-        queries.linkreferences, function (namedata, linkdata, data) {
+    loadEMMDialog("Cite", "linkreference", "visualeditor-emm-menucitetitle", "visualeditor-emm-dialogcitetitle", "visualeditor-emm-link-to-resource",
+        queries.linkreferences,
+        function(namedata, linkdata, data) {
             var optionaldata = data.optional.wt;
             return {
-                resource: {wt: linkdata},
-                name: {wt: namedata},
-                optional: {wt: optionaldata}
+                resource: {
+                    wt: linkdata
+                },
+                name: {
+                    wt: namedata
+                },
+                optional: {
+                    wt: optionaldata
+                }
             };
         }, [{
             label: "optional",
             defaultval: "",
             type: "text",
-            description: OO.ui.deferMsg('visualeditor-mwtemplate-cite-optional')
+            description: OO.ui.deferMsg("visualeditor-mwtemplate-cite-optional")
         }],
         160
     );
+}
 
+function semanticAskQuery(api, query)
+{
+
+    api.get({
+        action: "ask",
+        parameters: "limit:10000",
+        query: query + "|?Semantic title|limit=10000"
+    }).done(function (data) {
+
+        var res = data.query.results;
+        var arr = [];
+        var prevTitle = "";
+        var numTitle = 0;
+
+        for(var prop in res) {
+            if (!res.hasOwnProperty(prop))
+                continue;
+
+            var pagename = res[prop].fulltext;
+            var semantictitle = res[prop].printouts['Semantic title'][0];
+            var title = "";
+            if (semantictitle)
+                title = semantictitle;
+            else
+                title = pagename;
+            if (title == prevTitle) {
+                numTitle++;
+                title = title + "(" + pagename + ")";
+            }
+            else {
+                prevTitle = title;
+                numTitle = 0;
+            }
+            arr.push({value: title, data: pagename});
+        }
+        arr.sort(function (a, b) {
+            if (a.value > b.value) {
+                return 1;
+            }
+            if (a.value < b.value) {
+                return -1;
+            }
+            // a must be equal to b
+            return 0;
+        });
+
+        var prevTitle = "";
+        for (var i = 0; i < arr.length; i++) {
+            var item = arr[i];
+            var title = item.value;
+            if (title == prevTitle) {
+                arr[i].value = title + "(" + pagename + ")";
+            }
+            else {
+                prevTitle = title;
+            }
+        }
+        //pagenames = arr;
+
+
+    })
 }
