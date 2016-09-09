@@ -8,56 +8,44 @@
  *  @param linktotext a string to be displayed as link (?)
  *  @param askQuery a string which directs the askQuery where the desired information is stored
  *  @param templateresult a function that contains what is to be returned by the dialog when the user presses "ok"
- *  @param myfields an array that contains elements which should be added to the dialog
  */
-function loadEMMDialog(template, toolId, menuText, dialogText, linkToText, askQuery, templateResult, myFields, heightForm) {
+function loadEMMDialog(template, toolId, menuText, dialogText, askQuery, templateResult) {
 
-    /*  makeInsertTool
-     *   This function creates the menu items in the selection menu on the top of the visual editor window
-     *   @param buttonMessage the text on the button of the menu item
-     *   @param dialogueMessage the text that is displayed in the dialogue
-     *   @param collection handle for controling the element (?)
-     */
-    var makeInsertTool = function (buttonMessage, collection) {
-        var dialogueName = collection + " dialogue";
-            //toolName = collection + " tool";
+    var dialogueName = "process-" + toolId + " dialogue";
+    //toolName = collection + " tool";
 
-        createDialogue(dialogueName, OO.ui.deferMsg(dialogText), askQuery);
 
-        var tool = function(toolGroup, config) {
-            ve.ui.Tool.call(this, toolGroup, config);
-            this.setDisabled(false);
-            this.allowCollapse = null;
-            this.$element.addClass("oo-ui-tool-name-extratemplate");
-        };
-        OO.inheritClass(tool, ve.ui.Tool);
-        tool.static.name = toolId;
-        tool.static.title = buttonMessage;
-        tool.static.group = "tools";
-        tool.static.icon = "link";
-        tool.static.allowCollapse = null;
-        tool.static.dialog = dialogueName;
-        tool.static.deactivateOnSelect = true;
-        tool.prototype.onSelect = function() {
-            this.toolbar.getSurface().execute("window", "open", dialogueName, null);
-            this.setActive(false);
-        };
-        ve.ui.toolFactory.register(tool);
+    //  create the dialogue
+    createDialogue(dialogueName, OO.ui.deferMsg(dialogText), askQuery, template, templateResult);
+
+    var tool = function (toolGroup, config) {
+        ve.ui.Tool.call(this, toolGroup, config);
+        this.setDisabled(false);
+        this.allowCollapse = null;
+        this.$element.addClass("oo-ui-tool-name-extratemplate");
     };
-
-    makeInsertTool(
-        OO.ui.deferMsg(menuText)(),
-        "process-" + toolId);
-
+    OO.inheritClass(tool, ve.ui.Tool);
+    tool.static.name = toolId;
+    tool.static.title = OO.ui.deferMsg(menuText);
+    tool.static.group = "tools";
+    tool.static.icon = "link";
+    tool.static.allowCollapse = null;
+    tool.static.dialog = dialogueName;
+    tool.static.deactivateOnSelect = true;
+    tool.prototype.onSelect = function () {
+        this.toolbar.getSurface().execute("window", "open", dialogueName, null);
+        this.setActive(false);
+    };
+    ve.ui.toolFactory.register(tool);
 }
 /*  createDialogue
  *  This methods creates a dialogue which is a means of interaction with the user
  *  @param dialogueName a string that serves as the handle for the selection menu to access the dialogue
  *  @param dialogueMessage a string that will be displayed at the top of the dialogue
  */
-function createDialogue(dialogueName, dialogueMessage, askQuery) {
+function createDialogue(dialogueName, dialogueMessage, askQuery, template, templateResult) {
     //todo perhaps this isn't a suitable location for the askQuery
-    var dialogue = function(surface, config) {
+    var dialogue = function (surface, config) {
         OO.ui.ProcessDialog.call(this, surface, config);
     };
     OO.inheritClass(dialogue, OO.ui.ProcessDialog);
@@ -67,14 +55,13 @@ function createDialogue(dialogueName, dialogueMessage, askQuery) {
     dialogue.static.name = dialogueName;
     dialogue.static.title = dialogueMessage;
 
-
-
-    dialogue.prototype.initialize = function() {
+    dialogue.prototype.initialize = function () {
 
         //put the dialogue in a variable so it can be accessed later on
         var dialogueInstance = this;
+        dialogueInstance.pageid = "koek"; // wat is deze
         //var pageNames;
-        
+
         // -- input widgets go here -- //
         // todo zinvolle naamgeving voor de widgets
 
@@ -136,6 +123,67 @@ function createDialogue(dialogueName, dialogueMessage, askQuery) {
 
         ]);
 
+        //todo DIRTY HACK, PLEASE FIX
+        //todo inplaats van deze hack een eigen event afvuren en opvangen?
+        dialogue.prototype.getBodyHeight = function () {
+
+            grabSelectedText(dialogueInstance, nameControl);
+
+            return this.content.$element.outerHeight(true) + 50;
+        }
+
+
+        //  button event handling
+        buttonOk.$element.attr("id", "buttonok");
+        buttonOk.$element.css("float", "right");
+        buttonOk.onClick = function () {
+
+            var linkdata = dialogueInstance.pageid.length > 0 ? dialogueInstance.pageid : "";
+            var namedata = nameControl.getValue();
+            if (linkdata.length == 0) {
+                alert(OO.ui.deferMsg('visualeditor-emm-select-existing-item')() + '!');
+                return;
+            }
+
+
+            var mytemplate = [
+                    {
+                        type: 'mwTransclusionInline',
+                        attributes: {
+                            mw: {
+                                parts: [
+                                    {
+                                        template: {
+                                            target: {
+                                                href: 'Template:' + template,
+                                                wt: template
+                                            },
+                                            params: templateResult(namedata, linkdata, getContentFromFieldSet(fieldset))
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                ]
+                ;
+
+
+            //insert result in text
+            var surfaceModel = ve.init.target.getSurface().getModel();
+            var range = surfaceModel.getFragment().selection.range;
+            var rangeToRemove = new ve.Range(range.start, range.end);
+
+            var fragment = surfaceModel.getLinearFragment(rangeToRemove);
+            fragment.insertContent(mytemplate);
+
+
+            //  Clear the dialog
+            nameControl.setValue("");
+            resourceControl.setValue("");
+            dialogueInstance.close();
+
+        }
 
         var callback = function (value) {
             initAutoComplete(value, resourceControl, dialogueInstance);
@@ -143,43 +191,24 @@ function createDialogue(dialogueName, dialogueMessage, askQuery) {
 
         semanticAskQuery(new mw.Api(), askQuery, callback);
 
-        //todo event 
-        dialogue.prototype.getBodyHeight = function() {
-
-            grabSelectedText(dialogueInstance, nameControl);
-
-            return this.content.$element.outerHeight( true ) + 50;
-        }
-
-
-
-        //  button event handling
-        buttonOk.$element.attr("id", "buttonok");
-        buttonOk.$element.css("float", "right");
-        buttonOk.onClick = function() {
-
-            // -- behaviour after the user presses open goes here -- //
-
-        }
-
         buttonCancel.$element.attr("id", "buttoncancel");
         buttonCancel.$element.css("float", "right");
-        buttonCancel.onClick = function() {
+        buttonCancel.onClick = function () {
 
             // -- bahvior after the user presses cancel goes here -- //
             dialogueInstance.close();
 
         }
 
-        /*
-        nameControl.change = function(value) {
 
+        nameControl.change = function (value) {
+            console.log(dialogueInstance.pageid);
         }
 
         nameControl.connect(nameControl, {
             change: "change"
         });
-        */
+
 
         //  register the event handler (?)
         buttonOk.connect(buttonOk, {
@@ -208,12 +237,18 @@ function createDialogue(dialogueName, dialogueMessage, askQuery) {
         this.content.$element.append(buttonCancel.$element);
 
 
-
-
     }
     //  resgisters the dialogue to the window factory, from this point on the dialogue can be accessed calling the window factory
 
     ve.ui.windowFactory.register(dialogue);
+}
+
+function getContentFromFieldSet(fieldset) {
+
+    var result = [];
+    for (var i = 0; i < fieldset.getItems().length; i++)
+        result.push($(fieldset.getItems()[i].$element).find("input").val());
+    return result;
 }
 
 /*  addEMMLinks
@@ -230,9 +265,9 @@ function addEMMLinks() {
 
     var queries = veExtenderQueries();
 
-    loadEMMDialog("Internal link", "linkpage", "visualeditor-emm-menuinternallinktitle", "visualeditor-emm-dialoginternallinktitle", "visualeditor-emm-link-to-page",
+    loadEMMDialog("Internal link", "linkpage", "visualeditor-emm-menuinternallinktitle", "visualeditor-emm-dialoginternallinktitle",
         queries.linkpages,
-        function(namedata, linkdata) {
+        function (namedata, linkdata) {
             return {
                 link: {
                     wt: linkdata
@@ -241,12 +276,11 @@ function addEMMLinks() {
                     wt: namedata
                 }
             };
-        }, [],
-        120
+        }
     );
-    loadEMMDialog("External link", "linkwebsite", "visualeditor-emm-menuexternallinktitle", "visualeditor-emm-dialogexternallinktitle", "visualeditor-emm-link-to-resource",
+    loadEMMDialog("External link", "linkwebsite", "visualeditor-emm-menuexternallinktitle", "visualeditor-emm-dialogexternallinktitle",
         queries.linkwebsites,
-        function(namedata, linkdata) {
+        function (namedata, linkdata) {
             return {
                 resource: {
                     wt: linkdata
@@ -255,12 +289,11 @@ function addEMMLinks() {
                     wt: namedata
                 }
             };
-        }, [],
-        120
+        }
     );
-    loadEMMDialog("Cite", "linkreference", "visualeditor-emm-menucitetitle", "visualeditor-emm-dialogcitetitle", "visualeditor-emm-link-to-resource",
+    loadEMMDialog("Cite", "linkreference", "visualeditor-emm-menucitetitle", "visualeditor-emm-dialogcitetitle",
         queries.linkreferences,
-        function(namedata, linkdata, data) {
+        function (namedata, linkdata, data) {
             var optionaldata = data.optional.wt;
             return {
                 resource: {
@@ -273,18 +306,17 @@ function addEMMLinks() {
                     wt: optionaldata
                 }
             };
-        }, [{
-            label: "optional",
-            defaultval: "",
-            type: "text",
-            description: OO.ui.deferMsg("visualeditor-mwtemplate-cite-optional")
-        }],
-        160
+        }
     );
 }
 
-function semanticAskQuery(api, query, callback)
-{
+/*  semanticAskQuery
+ *  This method is responsible for executing a call to the mediawiki ask query API
+ *  @param api (object) the API object to use, this is passed because it may be resused
+ *  @param query (string) the query that is to be passed to the ask query API
+ *  @param callback (function) a function that contains the result the ask query as parameter
+ */
+function semanticAskQuery(api, query, callback) {
 
     api.get({
         action: "ask",
@@ -293,15 +325,13 @@ function semanticAskQuery(api, query, callback)
     }).done(function (data) {
 
         var res = data.query.results;
-
         var arr = [];
         var prevTitle = "";
         var numTitle = 0;
 
-        for(var prop in res) {
+        for (var prop in res) {
             if (!res.hasOwnProperty(prop))
                 continue;
-
             var pagename = res[prop].fulltext;
             var semantictitle = res[prop].printouts['Semantic title'][0];
             var title = "";
@@ -344,8 +374,9 @@ function semanticAskQuery(api, query, callback)
     });
 }
 
-
-
+/*  grabSelectedText
+ *
+ */
 function grabSelectedText(dialogueInstance, inputObject) {
     var surfaceModel = ve.init.target.getSurface().getModel();
     var selected = "";
@@ -373,12 +404,10 @@ function grabSelectedText(dialogueInstance, inputObject) {
 function initAutoComplete(data, inputObject, dialogueInstance) {
     var inputField = $(inputObject.$element).find("input");
 
-    //todo page id
-
     $(inputField).autocomplete({
         lookup: data,
         onSelect: function (suggestion) {
-            that.pageid = suggestion.data;
+            dialogueInstance.pageid = suggestion.data;
         },
         appendTo: inputField.parentElement,
         maxHeight: 300
