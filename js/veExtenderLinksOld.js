@@ -4,7 +4,7 @@
  * addEMMLinks
  * adds menu-items, each one starts a dialog
  */
-//function addEMMLinks() {
+function addEMMLinks() {
 
     var queries = veExtenderQueries();
     //console.log(queries);
@@ -203,9 +203,9 @@ function loadEMMDialog(template, toolid, menutext, dialogtext, linktotext, askQu
         dialogue.prototype.initialize = function () {
             var instance = this,
                 currentSelection,
-            /*
-             When we're finished with our dialogue, Insert a template in the page.
-             */
+                /*
+                 When we're finished with our dialogue, Insert a template in the page.
+                 */
                 insert = function () {
                     //check if data is filled in for nameControl
                     var data = {};
@@ -213,6 +213,7 @@ function loadEMMDialog(template, toolid, menutext, dialogtext, linktotext, askQu
                     for (i = 0; i < instance.fields.length; i += 1) {
                         data[instance.fields[i].text] = {wt: instance.fields[i].control.getValue()};
                     }
+                    console.log(data);
                     var linkdata = this.pageid.length > 0 ? this.pageid : "";
                     var namedata = nameControl.getValue();
                     if (linkdata.length == 0) {
@@ -279,7 +280,7 @@ function loadEMMDialog(template, toolid, menutext, dialogtext, linktotext, askQu
                     }
                 ),
 
-            //add functions to parse and add fieds at end of dialog
+                //add functions to parse and add fieds at end of dialog
                 getElements = function (fields) {
                     //for each field in parametr, create an element in the dialogue
                     var arr = [];

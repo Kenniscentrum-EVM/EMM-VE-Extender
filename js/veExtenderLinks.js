@@ -34,8 +34,8 @@ function addEMMLinks() {
     );
     loadEMMDialog("Cite", "linkreference", "visualeditor-emm-menucitetitle", "visualeditor-emm-dialogcitetitle",
         queries.linkreferences,
-        function (namedata, linkdata, data) {
-            var optionaldata = data.optional.wt;
+        function (namedata, linkdata, optionalData) {
+            //var optionaldata = data.optional.wt;
             return {
                 resource: {
                     wt: linkdata
@@ -44,7 +44,7 @@ function addEMMLinks() {
                     wt: namedata
                 },
                 optional: {
-                    wt: optionaldata
+                    wt: optionalData
                 }
             };
         }
@@ -122,8 +122,9 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
             placeholder: OO.ui.deferMsg("visualeditor-emm-search")
         });
 
-        var input3 = new OO.ui.TextInputWidget({
-            placeholder: "A form text field with help"
+        var optionalField = new OO.ui.TextInputWidget({
+            placeholder: "Optional",
+            id: "optional"
         });
 
         var input4 = new OO.ui.CheckboxInputWidget({
@@ -157,7 +158,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                 align: "left"
             }),
 
-            new OO.ui.FieldLayout(input3, {
+            new OO.ui.FieldLayout(optionalField, {
                 label: "Top-aligned label",
                 align: "top",
                 help: "Hallo :)"
@@ -187,12 +188,24 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
         this.content.$element.append(okButton.$element);
         this.content.$element.append(cancelButton.$element);
 
+        /**
+         * Clears the input fields of the dialog
+         */
+        function clearDialog()
+        {
+            nameField.setValue("");
+            resourceField.setValue("");
+            optionalField.setValue("");
+        }
+
+
         //  Add event-handling logic to okButton
         okButton.$element.attr("id", "okbutton");
         okButton.$element.css("float", "right");
         okButton.onClick = function () {
             var linkdata = dialogueInstance.pageid.length > 0 ? dialogueInstance.pageid : "";
             var namedata = nameField.getValue();
+            var optionaldata = optionalField.getValue();
             if (linkdata.length == 0) {
                 alert(OO.ui.deferMsg("visualeditor-emm-select-existing-item")() + "!");
                 return;
@@ -210,7 +223,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                                                 href: "Template:" + template,
                                                 wt: template
                                             },
-                                            params: templateResult(namedata, linkdata, getContentFromFieldSet(fieldset))
+                                            params: templateResult(namedata, linkdata, optionaldata)
                                         }
                                     }
                                 ]
@@ -227,9 +240,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
             var fragment = surfaceModel.getLinearFragment(rangeToRemove);
             fragment.insertContent(mytemplate);
 
-            //  Clear the dialog
-            nameField.setValue("");
-            resourceField.setValue("");
+            clearDialog();
             dialogueInstance.close();
         };
 
@@ -239,8 +250,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
         cancelButton.$element.css("float", "right");
         cancelButton.onClick = function () {
             //Clear the dialog
-            nameField.setValue("");
-            resourceField.setValue("");
+            clearDialog();
             dialogueInstance.close();
         };
 
@@ -264,7 +274,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
         semanticAskQuery(askQuery, callback);
 
         //fixme dirty hack
-        //todo inplaats van deze hack een eigen event afvuren en opvangen?
+        //todo in plaats van deze hack een eigen event afvuren en opvangen?
         dialogue.prototype.getBodyHeight = function () {
 
             grabSelectedText(nameField);
@@ -278,16 +288,17 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
     ve.ui.windowFactory.register(dialogue);
 }
 
-/**
- * Gathers the fields that are currently inside the fieldset
- * @param fieldset the fieldset of which you want to gather the fields
- * @returns {Array} an array with the fields that are inside the given fieldset
- */
-function getContentFromFieldSet(fieldset) {
-    var result = [];
-    for (var i = 0; i < fieldset.getItems().length; i++)
-        result.push($(fieldset.getItems()[i].$element).find("input").val());
-    return result;
+
+function getOptionalField(fieldset) {
+    var results = [];
+    for (var i = 0; i < fieldset.getItems().length; i++) {
+            var searchResult = ($(fieldset.getItems()[i].$element).find("#optional").find("input").val());
+        if(searchResult!=undefined)
+        {
+            results.push(searchResult);
+        }
+    }
+    return results[0];
 }
 
 /*  semanticAskQuery
