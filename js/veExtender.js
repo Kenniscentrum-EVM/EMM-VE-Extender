@@ -34,6 +34,7 @@ function loadEMMExtender(){
   addEMMLinks();
   addEMMResources();
   loadExtenderUI();
+  createExitDialog();
 }
 
 mw.hook( 've.activationComplete' ).add( function() {
