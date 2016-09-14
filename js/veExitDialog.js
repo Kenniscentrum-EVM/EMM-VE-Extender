@@ -3,6 +3,46 @@
  */
 function createExitDialog()
 {
+    /**
+     * Het annuleren knopje wordt hier aan de toolbar toegevoegd
+     */
+    var cancelToolFactory = new OO.ui.ToolFactory();
+    var cancelToolGroupFactory = new OO.ui.ToolGroupFactory();
+    var cancelToolbar = new OO.ui.Toolbar(cancelToolFactory, cancelToolGroupFactory);
+
+    function cancelButton() {
+        cancelButton.parent.apply(this, arguments);
+    }
+    OO.inheritClass(cancelButton, OO.ui.Tool);
+
+    cancelButton.static.name = 'cancelbutton';
+    cancelButton.static.title = OO.ui.deferMsg('visualeditor-emm-cancel');
+    cancelButton.prototype.onSelect = function () {
+
+        //Wanneer het document is aangepast...
+        if (ve.init.target.getSurface().getModel().hasBeenModified()) {
+            //open onze eigen exit dialog
+            ve.init.target.getSurface().execute("window", "open", "cancelconfirm", null);
+        }
+        else {
+
+            ve.init.target.cancel('navigate-read');
+            //ve.init.target.deactivate();
+        }
+    }
+
+    cancelToolFactory.register(cancelButton);
+    cancelToolbar.setup([
+        {
+            type: 'bar',
+            label: "Annuleren",
+            include: ['cancelbutton']
+        }
+    ]);
+
+    $('.oo-ui-toolbar-actions').children().first().after(cancelToolbar.$group);
+
+
     //Unregister the default exit dialogue which is part of the visualextender library, we don't use it because the chameleon skin breaks it.
     ve.ui.windowFactory.unregister(ve.ui.MWCancelConfirmDialog);
 

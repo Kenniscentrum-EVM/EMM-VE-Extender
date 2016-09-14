@@ -128,56 +128,15 @@ function addEMMResources() {
     toolFactory.register(AddInternalDocumentTool);
 
     //Maak een aparte toolbar voor de annuleerknop, deze moet namelijk niet naast de andere knoppen in dit document komen
-    var cancelToolFactory = new OO.ui.ToolFactory();
-    var cancelToolGroupFactory = new OO.ui.ToolGroupFactory();
-    var cancelToolbar = new OO.ui.Toolbar(cancelToolFactory, cancelToolGroupFactory);
-
-    function cancelButton() {
-        cancelButton.parent.apply(this, arguments);
-    }
-
-    OO.inheritClass(cancelButton, OO.ui.Tool);
-    cancelButton.static.name = 'cancelbutton';
-    cancelButton.static.title = OO.ui.deferMsg('visualeditor-emm-cancel');
-    cancelButton.prototype.onSelect = function () {
-
-        //Wanneer het document is aangepast...
-        if (ve.init.target.getSurface().getModel().hasBeenModified()) {
-            //open onze eigen exit dialog
-            ve.init.target.getSurface().execute("window", "open", "cancelconfirm", null);
-
-            /*
-             ve.init.target.getSurface().dialogs.openWindow('cancelconfirm').then(function (opened) {
-             opened.then(function (closing) {
-             closing.then(function (data) {
-             if (data && data.action === 'discard') {
-             ve.init.target.cancel('navigate-read');
-             }
-             });
-             });
-             });
-             */
-        }
-        else {
-            //anders mag de visual editor gesloten worden
-            ve.init.target.deactivate();
-        }
+    
         //ve.init.target.getSurface().execute('window', 'open', 'canceldialog', null);
 
         //alert( );
         //window.location.href = mw.config.get('wgServer') + mw.config.get('wgScript') + "/" + mw.config.get('wgPageName');
         //location.href(location.href.split(location.pathname)[0] + wgArticlePath.replace('$1', pageProperties.pagename) ); //?veaction=edit
 
-    }
 
-    cancelToolFactory.register(cancelButton);
-    cancelToolbar.setup([
-        {
-            type: 'bar',
-            label: "Annuleren",
-            include: ['cancelbutton']
-        }
-    ]);
+    
 
 
     //--------x---------
@@ -203,7 +162,7 @@ function addEMMResources() {
     //$('.oo-ui-barToolGroup').last().after(cancelToolbar.$group);
 
     //duw de annuleerknop achter de save knop.
-    $('.oo-ui-toolbar-actions').children().first().after(cancelToolbar.$group);
+    
     function processResult() {
         //console.log('save!');
         //check if page has Category Light Context
