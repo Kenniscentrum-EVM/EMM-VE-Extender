@@ -28,9 +28,10 @@ function defineTranslations() {
             'visualeditor-emm-text-in-page': "Text:",
             'visualeditor-mwtemplate-cite-optional': "Optional text:",
             'visualeditor-emm-cancel': "Cancel",
-            'visualeditor-emm-canceldialog-title': "Are you sure !?",
-            'visualeditor-emm-canceldialog-message': "HALLO WEET JE HET ZEKER?????? JE WIJZIGINGEN WORDEN NIET OPGESLAGEN!!!!!!!!!!!!!!!!!!!!!!!!!!",
-            'visualeditor-emm-confirm': "Confirm"
+            'visualeditor-emm-canceldialog-title': "Are you sure?",
+            'visualeditor-emm-canceldialog-message': "English variant :)",
+            'visualeditor-emm-canceldialog-confirm': "Confirm",
+            'visualeditor-emm-canceldialog-cancel': "Bevestigen"
         },
         nl: {
             'visualeditor-emm-add-file': "Toevoegen bestand",
@@ -60,9 +61,10 @@ function defineTranslations() {
             'visualeditor-emm-text-in-page': "Tekst:",
             'visualeditor-mwtemplate-cite-optional': "Optionele tekst:",
             'visualeditor-emm-cancel': "Annuleren",
-            'visualeditor-emm-canceldialog-title': "Weet je het zeker?!",
-            'visualeditor-emm-canceldialog-message': "HALLO WEET JE HET ZEKER?????? JE WIJZIGINGEN WORDEN NIET OPGESLAGEN!!!!!!!!!!!!!!!!!!!!!!!!!!",
-            'visualeditor-emm-confirm': "Bevestigen"
+            'visualeditor-emm-canceldialog-title': "Weet u het zeker?",
+            'visualeditor-emm-canceldialog-message': "Tekst",
+            'visualeditor-emm-canceldialog-confirm': "Doorgaan met annuleren",
+            'visualeditor-emm-canceldialog-cancel': "Terug naar editor"
         }
     };
     var userLanguage = mw.config.get('wgUserLanguage');
