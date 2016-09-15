@@ -6,6 +6,23 @@
 function addEMMLinks() {
     var queries = veExtenderQueries();
 
+    loadEMMDialog("File", "file", "visualeditor-emm-menufiletitle", "visualeditor-emm-dialogfiletitle",
+        queries.linkreferences,
+        function (namedata, linkdata, optionalData) {
+            //var optionaldata = data.optional.wt;
+            return {
+                resource: {
+                    wt: linkdata
+                },
+                name: {
+                    wt: namedata
+                },
+                optional: {
+                    wt: optionalData
+                }
+            };
+        }
+    );
     loadEMMDialog("Internal link", "linkpage", "visualeditor-emm-menuinternallinktitle", "visualeditor-emm-dialoginternallinktitle",
         queries.linkpages,
         function (namedata, linkdata) {
@@ -28,23 +45,6 @@ function addEMMLinks() {
                 },
                 name: {
                     wt: namedata
-                }
-            };
-        }
-    );
-    loadEMMDialog("Cite", "linkreference", "visualeditor-emm-menucitetitle", "visualeditor-emm-dialogcitetitle",
-        queries.linkreferences,
-        function (namedata, linkdata, optionalData) {
-            //var optionaldata = data.optional.wt;
-            return {
-                resource: {
-                    wt: linkdata
-                },
-                name: {
-                    wt: namedata
-                },
-                optional: {
-                    wt: optionalData
                 }
             };
         }
@@ -115,21 +115,73 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
         //put the dialogue in a variable for easier and more clear access
         var dialogueInstance = this;
 
-        //Create input fields
-        var nameField = new OO.ui.TextInputWidget({});
-
-        var resourceField = new OO.ui.TextInputWidget({
-            placeholder: OO.ui.deferMsg("visualeditor-emm-search")
+        //  create the fieldset, which is responsible for the layout of the dialogue
+        var fieldset = new OO.ui.FieldsetLayout({
+            classes: ["container"]
         });
 
-        var optionalField = new OO.ui.TextInputWidget({
-            placeholder: "Optional",
-            id: "optional"
-        });
+        if (template == "File") {
+            //Create input fields in case we're dealing with a dialogue to add a file
+            var nameField = new OO.ui.TextInputWidget({});
 
-        var input4 = new OO.ui.CheckboxInputWidget({
-            selected: true
-        });
+            var resourceField = new OO.ui.TextInputWidget({
+                placeholder: OO.ui.deferMsg("visualeditor-emm-search")
+            });
+
+            var optionalField = new OO.ui.TextInputWidget({
+                placeholder: "Optional",
+                id: "optional"
+            });
+
+            fieldset.addItems([
+                new OO.ui.FieldLayout(nameField, {
+                    label: OO.ui.deferMsg("visualeditor-emm-file-name"),
+                    align: "left"
+                }),
+
+                new OO.ui.FieldLayout(resourceField, {
+                    label: OO.ui.deferMsg("visualeditor-emm-link-to-resource"),
+                    align: "left"
+                }),
+
+                new OO.ui.FieldLayout(optionalField, {
+                    label: "Top-aligned label",
+                    align: "top",
+                    help: "Hallo :)"
+                })
+            ]);
+        } else if (template == "Internal link" || template == "External link") {
+            //Create input fields in case we're dealing with an external or internal link
+            var linkField = new OO.ui.TextInputWidget({});
+            var titleField = new OO.ui.TextInputWidget({});
+
+            var presentationTitleField = new OO.ui.TextInputWidget({
+                placeholder: OO.ui.deferMsg("visualeditor-emm-search")
+            });
+
+            var commentField = new OO.ui.TextInputWidget({});
+            var contextField = new OO.ui.TextInputWidget({});
+            var contextTypeField = new OO.ui.TextInputWidget({});
+
+            fieldset.addItems([
+                new OO.ui.FieldLayout(linkField, {
+                    label: OO.ui.deferMsg("visualeditor-emm-link"),
+                    align: "left"
+                }),
+
+                new OO.ui.FieldLayout(titleField, {
+                    label: OO.ui.deferMsg("visualeditor-emm-link-title"),
+                    align: "left"
+                }),
+
+                new OO.ui.FieldLayout(presentationTitleField, {
+                    label: OO.ui.deferMsg("viualeditor-emm-link-presentationtitle"),
+                    align: "left"
+                })
+            ]);
+        } else {
+            alert("Could not load a valid dialog")
+        }
 
         //  create the buttons
         var okButton = new OO.ui.ButtonWidget({
@@ -141,36 +193,6 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
         var cancelButton = new OO.ui.ButtonWidget({
             label: "Cancel"
         });
-
-        //  create the fieldset, which is responsible for the layout of the dialogue
-        var fieldset = new OO.ui.FieldsetLayout({
-            classes: ["container"]
-        });
-
-        fieldset.addItems([
-            new OO.ui.FieldLayout(nameField, {
-                label: OO.ui.deferMsg("visualeditor-emm-text-in-page"),
-                align: "left"
-            }),
-
-            new OO.ui.FieldLayout(resourceField, {
-                label: OO.ui.deferMsg("visualeditor-emm-link-to-resource"),
-                align: "left"
-            }),
-
-            new OO.ui.FieldLayout(optionalField, {
-                label: "Top-aligned label",
-                align: "top",
-                help: "Hallo :)"
-            }),
-
-            new OO.ui.FieldLayout(input4, {
-                label: "Inline label",
-                align: "inline"
-            })
-
-
-        ]);
 
         //Add the created items to the dialogue
         dialogue.super.prototype.initialize.call(this);
@@ -191,11 +213,10 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
         /**
          * Clears the input fields of the dialog
          */
-        function clearDialog()
-        {
-            nameField.setValue("");
-            resourceField.setValue("");
-            optionalField.setValue("");
+        function clearDialog() {
+            linkField.setValue("");
+            titleField.setValue("");
+            presentationTitleField.setValue("");
         }
 
 
@@ -204,8 +225,8 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
         okButton.$element.css("float", "right");
         okButton.onClick = function () {
             var linkdata = dialogueInstance.pageid.length > 0 ? dialogueInstance.pageid : "";
-            var namedata = nameField.getValue();
-            var optionaldata = optionalField.getValue();
+            var namedata = linkField.getValue();
+            var optionaldata = presentationTitleField.getValue();
             if (linkdata.length == 0) {
                 alert(OO.ui.deferMsg("visualeditor-emm-select-existing-item")() + "!");
                 return;
@@ -267,7 +288,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
         //This function initiates the autocmplete library for the resource input field
         //The user will be able to pick a resource from the list of all resources gathered by the askQuery
         var callback = function (value) {
-            initAutoComplete(value, resourceField, dialogueInstance);
+            initAutoComplete(value, titleField, dialogueInstance);
         };
 
         //Execute the askQuery in order to gather all resources
@@ -277,13 +298,14 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
         //todo in plaats van deze hack een eigen event afvuren en opvangen?
         dialogue.prototype.getBodyHeight = function () {
 
-            grabSelectedText(nameField);
+            grabSelectedText(linkField);
 
             return this.content.$element.outerHeight(true) + 50;
         };
 
 
-    };
+    }
+    ;
     //  registers the dialogue to the window factory, from this point on the dialogue can be accessed calling the window factory
     ve.ui.windowFactory.register(dialogue);
 }
@@ -292,9 +314,8 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
 function getOptionalField(fieldset) {
     var results = [];
     for (var i = 0; i < fieldset.getItems().length; i++) {
-            var searchResult = ($(fieldset.getItems()[i].$element).find("#optional").find("input").val());
-        if(searchResult!=undefined)
-        {
+        var searchResult = ($(fieldset.getItems()[i].$element).find("#optional").find("input").val());
+        if (searchResult != undefined) {
             results.push(searchResult);
         }
     }
