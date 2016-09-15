@@ -12,9 +12,15 @@ function defineTranslations() {
             "visualeditor-emm-existing-file": "Existing file",
             "visualeditor-emm-existing-hyperlink": "Existing link",
             "visualeditor-emm-existing-page": "Existing page",
+
             "visualeditor-emm-link": "Link*:",
             "visualeditor-emm-link-title": "Title*:",
             "viualeditor-emm-link-presentationtitle": "Presentationtitle*:",
+            "visualeditor-emm-link-creator": "creator*:",
+            "visualeditor-emm-link-date": "date*:",
+            "visualeditor-emm-link-organization": "organization:",
+            "visualeditor-emm-link-subject": "subject (SKOS concept):",
+
             "visualeditor-emm-link-to-resource": "Link:",
             "visualeditor-emm-manage-files": "Manage Files",
             "visualeditor-emm-manage-hyperlinks": "Manage Links",
@@ -42,9 +48,15 @@ function defineTranslations() {
             "visualeditor-emm-existing-file": "Bestaand bestand",
             "visualeditor-emm-existing-hyperlink": "Bestaande link",
             "visualeditor-emm-existing-page": "Bestaande pagina",
+
             "visualeditor-emm-link": "Koppeling*:",
             "visualeditor-emm-link-title": "Titel*:",
             "viualeditor-emm-link-presentationtitle": "Presentatietitel*:",
+            "visualeditor-emm-link-creator": "auteur*:",
+            "visualeditor-emm-link-date": "datum*:",
+            "visualeditor-emm-link-organization": "organisatie:",
+            "visualeditor-emm-link-subject": "onderwerp (SKOS concept):",
+
             "visualeditor-emm-link-to-resource": "Link:",
             "visualeditor-emm-manage-files": "Beheer bestanden",
             "visualeditor-emm-manage-hyperlinks": "Beheer links",

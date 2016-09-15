@@ -50,16 +50,12 @@ function getContextOfCurrentPage() {
                 //The current property is not a direct property of p
                 continue;
             }
-            if (res[prop].printouts['Supercontext'][0] != null) {
-                var supercontext = res[prop].printouts['Supercontext'][0].fulltext;
-            }
+            var supercontext = res[prop].printouts['Supercontext'][0].fulltext;
             console.log(supercontext);
             console.log(res[prop].printouts['Supercontext'][0]);
             pageProperties.supercontext = supercontext;
             //console.log('super:'+supercontext);
-            if (res[prop].printouts['Topcontext'][0] != null) {
-                var topcontext = res[prop].printouts['Topcontext'][0].fulltext;
-            }
+            var topcontext = res[prop].printouts['Topcontext'][0].fulltext;
             console.log(topcontext);
             console.log(res[prop].printouts['Topcontext'][0]);
             pageProperties.topcontext = topcontext;
@@ -159,8 +155,8 @@ function addEMMResources() {
                 lightContext = true;
         }
 
-        if (pageProperties.topcontext.length == 0 || !lightContext) {
-            alert(OO.ui.deferMsg('visualeditor-emm-cannot-create-page')());
+        if (pageProperties.topcontext.length == 0) {
+            alert(OO.ui.deferMsg('topcontexterror')());
         } else {
             var cmd = 'Light_Context?Light_Context%5BSupercontext%5D=' + pageProperties.pagename + '&Light_Context%5BTopcontext%5D=' + pageProperties.topcontext + '&Light_Context%5BContext+type%5D=Situation';
             var uri = getStartAddress() + 'index.php/Special:FormEdit/' + cmd;

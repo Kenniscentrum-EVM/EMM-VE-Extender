@@ -7,7 +7,7 @@ function addEMMLinks() {
     var queries = veExtenderQueries();
 
     loadEMMDialog("File", "file", "visualeditor-emm-menufiletitle", "visualeditor-emm-dialogfiletitle",
-        queries.linkreferences,
+        queries.linkfiles,
         function (namedata, linkdata, optionalData) {
             //var optionaldata = data.optional.wt;
             return {
@@ -120,68 +120,116 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
             classes: ["container"]
         });
 
-        if (template == "File") {
-            //Create input fields in case we're dealing with a dialogue to add a file
-            var nameField = new OO.ui.TextInputWidget({});
+        switch (template) {
+            case "File":
+                //Create input fields in case we're dealing with a dialogue to add a file
+                var nameField = new OO.ui.TextInputWidget({});
 
-            var resourceField = new OO.ui.TextInputWidget({
-                placeholder: OO.ui.deferMsg("visualeditor-emm-search")
-            });
+                var resourceField = new OO.ui.TextInputWidget({
+                    placeholder: OO.ui.deferMsg("visualeditor-emm-search")
+                });
 
-            var optionalField = new OO.ui.TextInputWidget({
-                placeholder: "Optional",
-                id: "optional"
-            });
+                var optionalField = new OO.ui.TextInputWidget({
+                    placeholder: "Optional",
+                    id: "optional"
+                });
 
-            fieldset.addItems([
-                new OO.ui.FieldLayout(nameField, {
-                    label: OO.ui.deferMsg("visualeditor-emm-file-name"),
-                    align: "left"
-                }),
+                fieldset.addItems([
+                    new OO.ui.FieldLayout(nameField, {
+                        label: OO.ui.deferMsg("visualeditor-emm-file-name"),
+                        align: "left"
+                    }),
 
-                new OO.ui.FieldLayout(resourceField, {
-                    label: OO.ui.deferMsg("visualeditor-emm-link-to-resource"),
-                    align: "left"
-                }),
+                    new OO.ui.FieldLayout(resourceField, {
+                        label: OO.ui.deferMsg("visualeditor-emm-link-to-resource"),
+                        align: "left"
+                    }),
 
-                new OO.ui.FieldLayout(optionalField, {
-                    label: "Top-aligned label",
-                    align: "top",
-                    help: "Hallo :)"
-                })
-            ]);
-        } else if (template == "Internal link" || template == "External link") {
-            //Create input fields in case we're dealing with an external or internal link
-            var linkField = new OO.ui.TextInputWidget({});
-            var titleField = new OO.ui.TextInputWidget({});
+                    new OO.ui.FieldLayout(optionalField, {
+                        label: "Top-aligned label",
+                        align: "top",
+                        help: "Hallo :)"
+                    })
+                ]);
+                break;
+            case "Internal link":
+                //Create input fields in case we're dealing with an internal link
+                var linkField = new OO.ui.TextInputWidget({});
+                var titleField = new OO.ui.TextInputWidget({});
 
-            var presentationTitleField = new OO.ui.TextInputWidget({
-                placeholder: OO.ui.deferMsg("visualeditor-emm-search")
-            });
+                var presentationTitleField = new OO.ui.TextInputWidget({
+                    placeholder: OO.ui.deferMsg("visualeditor-emm-search")
+                });
 
-            var commentField = new OO.ui.TextInputWidget({});
-            var contextField = new OO.ui.TextInputWidget({});
-            var contextTypeField = new OO.ui.TextInputWidget({});
+                var contextField = new OO.ui.TextInputWidget({});
+                var contextTypeField = new OO.ui.TextInputWidget({});
 
-            fieldset.addItems([
-                new OO.ui.FieldLayout(linkField, {
-                    label: OO.ui.deferMsg("visualeditor-emm-link"),
-                    align: "left"
-                }),
+                fieldset.addItems([
+                    new OO.ui.FieldLayout(linkField, {
+                        label: OO.ui.deferMsg("visualeditor-emm-pagina"),
+                        align: "left"
+                    }),
+                    new OO.ui.FieldLayout(titleField, {
+                        label: OO.ui.deferMsg("visualeditor-emm-link-title"),
+                        align: "left"
+                    }),
+                    new OO.ui.FieldLayout(presentationTitleField, {
+                        label: OO.ui.deferMsg("viualeditor-emm-link-presentationtitle"),
+                        align: "left"
+                    }),
+                    new OO.ui.FieldLayout(contextField, {
+                        label: OO.ui.deferMsg("visualeditor-emm-link-")
+                    })
+                ]);
+                break;
+            case "External link": {
+                //Create input fields in case we're dealing with an external link
+                var linkField = new OO.ui.TextInputWidget({});
+                var titleField = new OO.ui.TextInputWidget({
+                    placeholder: OO.ui.deferMsg("visualeditor-emm-search")
+                });
 
-                new OO.ui.FieldLayout(titleField, {
-                    label: OO.ui.deferMsg("visualeditor-emm-link-title"),
-                    align: "left"
-                }),
+                var presentationTitleField = new OO.ui.TextInputWidget({});
+                var creatorField = new OO.ui.TextInputWidget({});
+                var dateField = new OO.ui.TextInputWidget({});
+                var organizationField = new OO.ui.TextInputWidget({});
+                var subjectField = new OO.ui.TextInputWidget({});
 
-                new OO.ui.FieldLayout(presentationTitleField, {
-                    label: OO.ui.deferMsg("viualeditor-emm-link-presentationtitle"),
-                    align: "left"
-                })
-            ]);
-        } else {
-            alert("Could not load a valid dialog")
+                fieldset.addItems([
+                    new OO.ui.FieldLayout(linkField, {
+                        label: OO.ui.deferMsg("visualeditor-emm-link"),
+                        align: "left"
+                    }),
+                    new OO.ui.FieldLayout(titleField, {
+                        label: OO.ui.deferMsg("visualeditor-emm-link-title"),
+                        align: "left"
+                    }),
+                    new OO.ui.FieldLayout(presentationTitleField, {
+                        label: OO.ui.deferMsg("viualeditor-emm-link-presentationtitle"),
+                        align: "left"
+                    }),
+                    new OO.ui.FieldLayout(creatorField, {
+                        label: OO.ui.deferMsg("visualeditor-emm-link-creator"),
+                        align: "left"
+                    }),
+                    new OO.ui.FieldLayout(dateField, {
+                        label: OO.ui.deferMsg("visualeditor-emm-link-date"),
+                        align: "left"
+                    }),
+                    new OO.ui.FieldLayout(organizationField, {
+                        label: OO.ui.deferMsg("visualeditor-emm-link-organization"),
+                        align: "left"
+                    }),
+                    new OO.ui.FieldLayout(subjectField, {
+                        label: OO.ui.deferMsg("visualeditor-emm-link-subject")
+                    })
+                ]);
+                break;
+            }
+            default:
+                alert("Invalid button was pressed")
         }
+        ;
 
         //  create the buttons
         var okButton = new OO.ui.ButtonWidget({
@@ -206,27 +254,29 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
             .toggleClass("oo-ui-windowManager-modal", true);
         this.$body.append(this.content.$element);
 
-        //  initializing the buttons visible at the bottom of the dialogue happens over here
+        //  Making the buttons visible at the bottom of the dialogue happens over here
         this.content.$element.append(okButton.$element);
         this.content.$element.append(cancelButton.$element);
-
-        /**
-         * Clears the input fields of the dialog
-         */
-        function clearDialog() {
-            linkField.setValue("");
-            titleField.setValue("");
-            presentationTitleField.setValue("");
-        }
-
 
         //  Add event-handling logic to okButton
         okButton.$element.attr("id", "okbutton");
         okButton.$element.css("float", "right");
         okButton.onClick = function () {
+            switch (template) {
+                case "File":
+                    //Do things
+                    break;
+                case "Internal link":
+                    //Do other things
+                    break;
+                case "External link":
+                    var namedata = presentationTitleField.getValue();
+                    break;
+                default:
+                    alert("Invalid dialog button was pressed");
+            }
+
             var linkdata = dialogueInstance.pageid.length > 0 ? dialogueInstance.pageid : "";
-            var namedata = linkField.getValue();
-            var optionaldata = presentationTitleField.getValue();
             if (linkdata.length == 0) {
                 alert(OO.ui.deferMsg("visualeditor-emm-select-existing-item")() + "!");
                 return;
@@ -244,7 +294,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                                                 href: "Template:" + template,
                                                 wt: template
                                             },
-                                            params: templateResult(namedata, linkdata, optionaldata)
+                                            params: templateResult(namedata, linkdata)
                                         }
                                     }
                                 ]
@@ -261,7 +311,8 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
             var fragment = surfaceModel.getLinearFragment(rangeToRemove);
             fragment.insertContent(mytemplate);
 
-            clearDialog();
+            //Clear the input fields and close the dialogue
+            clearInputFields(fieldset);
             dialogueInstance.close();
         };
 
@@ -270,8 +321,8 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
         cancelButton.$element.attr("id", "cancelbutton");
         cancelButton.$element.css("float", "right");
         cancelButton.onClick = function () {
-            //Clear the dialog
-            clearDialog();
+            //Clear the dialog and close it
+            clearInputFields(fieldset);
             dialogueInstance.close();
         };
 
@@ -287,8 +338,20 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
         //Declare a function to be called after the askQuery has been processed
         //This function initiates the autocmplete library for the resource input field
         //The user will be able to pick a resource from the list of all resources gathered by the askQuery
-        var callback = function (value) {
-            initAutoComplete(value, titleField, dialogueInstance);
+        var callback = function (queryResults) {
+            switch (template) {
+                case "File":
+                    //stuff
+                    break;
+                case "Internal link":
+                    //more things
+                    break;
+                case "External link":
+                    initAutoComplete(queryResults, titleField, dialogueInstance);
+                    break;
+                default:
+                    alert("Invalid dialog opened");
+            }
         };
 
         //Execute the askQuery in order to gather all resources
@@ -296,9 +359,21 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
 
         //fixme dirty hack
         //todo in plaats van deze hack een eigen event afvuren en opvangen?
+        //Selected text is gathered here and put inside the input field
         dialogue.prototype.getBodyHeight = function () {
-
-            grabSelectedText(linkField);
+            switch (template) {
+                case "File":
+                    //stuff
+                    break;
+                case "Internal link":
+                    //more things
+                    break;
+                case "External link":
+                    grabSelectedText(presentationTitleField);
+                    break;
+                default:
+                    alert("Invalid dialog opened");
+            }
 
             return this.content.$element.outerHeight(true) + 50;
         };
@@ -310,16 +385,14 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
     ve.ui.windowFactory.register(dialogue);
 }
 
-
-function getOptionalField(fieldset) {
-    var results = [];
+/**
+ * Clears the input fields of a given fieldset
+ * @param fieldset the fieldset whose input fields should be cleared
+ */
+function clearInputFields(fieldset) {
     for (var i = 0; i < fieldset.getItems().length; i++) {
-        var searchResult = ($(fieldset.getItems()[i].$element).find("#optional").find("input").val());
-        if (searchResult != undefined) {
-            results.push(searchResult);
-        }
+        (fieldset.getItems()[i]).getField().setValue("");
     }
-    return results[0];
 }
 
 /*  semanticAskQuery
@@ -332,8 +405,10 @@ function semanticAskQuery(query, callback) {
     api.get({
         action: "ask",
         parameters: "limit:10000",
-        query: query + "|?Semantic title|limit=10000"
+        query: query // + "|?Semantic title|limit=10000"
     }).done(function (data) {
+        console.log("results: ");
+        console.log(data.query.results);
         var res = data.query.results;
         var arr = [];
         var prevTitle = "";
@@ -345,11 +420,14 @@ function semanticAskQuery(query, callback) {
             var pagename = res[prop].fulltext;
             var semantictitle = res[prop].printouts["Semantic title"][0];
             var title = "";
-            if (semantictitle)
+            if (semantictitle) {
                 title = semantictitle;
+            }
             else
                 title = pagename;
             if (title == prevTitle) {
+                console.log("broodje ham");
+                console.log(prevTitle);
                 numTitle++;
                 title = title + "(" + pagename + ")";
             }
@@ -423,6 +501,7 @@ function initAutoComplete(data, inputObject, dialogueInstance) {
     $(inputField).autocomplete({
         lookup: data,
         onSelect: function (suggestion) {
+            console.log(suggestion);
             dialogueInstance.pageid = suggestion.data;
         },
         appendTo: inputField.parentElement,
