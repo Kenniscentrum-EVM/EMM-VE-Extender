@@ -6,7 +6,7 @@ function redefineMenu(){
   for (var j=0;j<tools.length;j++){
     var force1=ve.ui.toolFactory.bindings.register[j].context.forceExpand;
     if (force1 == null) {
-	// do something 
+	// do something
     } else{
       for (var k=0;k<force1.length;k++){
 	if (force1[k]=="media"){
@@ -34,6 +34,7 @@ function loadEMMExtender(){
   addEMMLinks();
   addEMMResources();
   loadExtenderUI();
+  createExitDialog();
 }
 
 mw.hook( 've.activationComplete' ).add( function() {
