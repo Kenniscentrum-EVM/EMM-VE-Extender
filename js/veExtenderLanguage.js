@@ -15,11 +15,18 @@ function defineTranslations() {
 
             "visualeditor-emm-link": "Link*:",
             "visualeditor-emm-link-title": "Title*:",
-            "viualeditor-emm-link-presentationtitle": "Presentationtitle*:",
+            "viualeditor-emm-link-presentationtitle": "Presentation title*:",
             "visualeditor-emm-link-creator": "creator*:",
             "visualeditor-emm-link-date": "date*:",
             "visualeditor-emm-link-organization": "organization:",
             "visualeditor-emm-link-subject": "subject (SKOS concept):",
+
+            "visualeditor-emm-page": "Page name*:",
+            "visualeditor-emm-page-title": "Presentation title*:",
+
+            "visualeditor-emm-file-name": "Filename*",
+            "visualeditor-emm-file-presentationtitle": "Presentation title*:",
+            "visualeditor-emm-file-optional": "Optional text:",
 
             "visualeditor-emm-link-to-resource": "Link:",
             "visualeditor-emm-manage-files": "Manage Files",
@@ -28,14 +35,14 @@ function defineTranslations() {
             "visualeditor-emm-menuaddhyperlinktitle": "Link",
             "visualeditor-emm-menuaddinternaldocumenttitle": "File",
             "visualeditor-emm-menuaddpagetitle": "Page",
+
             "visualeditor-emm-menufiletitle": "File...",
             "visualeditor-emm-menuexternallinktitle": "Link (website)...",
             "visualeditor-emm-menuinternallinktitle": "Link (page)...",
             "visualeditor-emm-menuresourcemenuname": "Resources",
             "visualeditor-emm-search": "Search",
             "visualeditor-emm-select-existing-item": "Please select an existing item",
-            "visualeditor-mwtemplate-file-optional": "Optional text:",
-            "visualeditor-emm-file-name": "Filename*"
+            "visualeditor-mwtemplate-file-optional": "Optional text:"
         },
         nl: {
             "visualeditor-emm-add-file": "Toevoegen bestand",
@@ -57,6 +64,13 @@ function defineTranslations() {
             "visualeditor-emm-link-organization": "organisatie:",
             "visualeditor-emm-link-subject": "onderwerp (SKOS concept):",
 
+            "visualeditor-emm-page": "pagina naam*:",
+            "visualeditor-emm-page-title": "Presentatietitel*:",
+
+            "visualeditor-emm-file-name": "Bestandsnaam*",
+            "visualeditor-emm-file-presentationtitle": "Presentatietitel*:",
+            "visualeditor-emm-file-optional": "Optionele tekst:",
+
             "visualeditor-emm-link-to-resource": "Link:",
             "visualeditor-emm-manage-files": "Beheer bestanden",
             "visualeditor-emm-manage-hyperlinks": "Beheer links",
@@ -70,8 +84,7 @@ function defineTranslations() {
             "visualeditor-emm-menuresourcemenuname": "Bronnen",
             "visualeditor-emm-search": "Zoeken",
             "visualeditor-emm-select-existing-item": "Kies een bestaande bron",
-            "visualeditor-mwtemplate-file-optional": "Optionele tekst:",
-            "visualeditor-emm-file-name": "Bestandsnaam*"
+            "visualeditor-mwtemplate-file-optional": "Optionele tekst:"
         }
     };
     var userLanguage = mw.config.get("wgUserLanguage");

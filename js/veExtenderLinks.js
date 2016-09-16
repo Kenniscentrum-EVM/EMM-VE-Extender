@@ -9,7 +9,6 @@ function addEMMLinks() {
     loadEMMDialog("File", "file", "visualeditor-emm-menufiletitle", "visualeditor-emm-dialogfiletitle",
         queries.linkfiles,
         function (namedata, linkdata, optionalData) {
-            //var optionaldata = data.optional.wt;
             return {
                 resource: {
                     wt: linkdata
@@ -123,11 +122,11 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
         switch (template) {
             case "File":
                 //Create input fields in case we're dealing with a dialogue to add a file
-                var nameField = new OO.ui.TextInputWidget({});
-
-                var resourceField = new OO.ui.TextInputWidget({
+                var fileNameField = new OO.ui.TextInputWidget({
                     placeholder: OO.ui.deferMsg("visualeditor-emm-search")
                 });
+
+                var presentationTextField = new OO.ui.TextInputWidget({});
 
                 var optionalField = new OO.ui.TextInputWidget({
                     placeholder: "Optional",
@@ -135,51 +134,52 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                 });
 
                 fieldset.addItems([
-                    new OO.ui.FieldLayout(nameField, {
+                    new OO.ui.FieldLayout(fileNameField, {
                         label: OO.ui.deferMsg("visualeditor-emm-file-name"),
                         align: "left"
                     }),
 
-                    new OO.ui.FieldLayout(resourceField, {
-                        label: OO.ui.deferMsg("visualeditor-emm-link-to-resource"),
+                    new OO.ui.FieldLayout(presentationTextField, {
+                        label: OO.ui.deferMsg("visualeditor-emm-file-presentationtitle"),
                         align: "left"
                     }),
 
                     new OO.ui.FieldLayout(optionalField, {
-                        label: "Top-aligned label",
-                        align: "top",
-                        help: "Hallo :)"
+                        label: OO.ui.deferMsg("visualeditor-emm-file-optional"),
+                        align: "left"
                     })
                 ]);
                 break;
             case "Internal link":
                 //Create input fields in case we're dealing with an internal link
-                var linkField = new OO.ui.TextInputWidget({});
-                var titleField = new OO.ui.TextInputWidget({});
-
-                var presentationTitleField = new OO.ui.TextInputWidget({
+                var pageNameField = new OO.ui.TextInputWidget({
                     placeholder: OO.ui.deferMsg("visualeditor-emm-search")
                 });
+                var presentationTitleField = new OO.ui.TextInputWidget({});
 
-                var contextField = new OO.ui.TextInputWidget({});
-                var contextTypeField = new OO.ui.TextInputWidget({});
+                //var presentationTitleField = new OO.ui.TextInputWidget({
+                //    placeholder: OO.ui.deferMsg("visualeditor-emm-search")
+                //});
+
+                //var contextField = new OO.ui.TextInputWidget({});
+                //var contextTypeField = new OO.ui.TextInputWidget({});
 
                 fieldset.addItems([
-                    new OO.ui.FieldLayout(linkField, {
-                        label: OO.ui.deferMsg("visualeditor-emm-pagina"),
-                        align: "left"
-                    }),
-                    new OO.ui.FieldLayout(titleField, {
-                        label: OO.ui.deferMsg("visualeditor-emm-link-title"),
+                    new OO.ui.FieldLayout(pageNameField, {
+                        label: OO.ui.deferMsg("visualeditor-emm-page"),
                         align: "left"
                     }),
                     new OO.ui.FieldLayout(presentationTitleField, {
-                        label: OO.ui.deferMsg("viualeditor-emm-link-presentationtitle"),
+                        label: OO.ui.deferMsg("visualeditor-emm-page-title"),
                         align: "left"
-                    }),
-                    new OO.ui.FieldLayout(contextField, {
-                        label: OO.ui.deferMsg("visualeditor-emm-link-")
                     })
+                    /*new OO.ui.FieldLayout(presentationTitleField, {
+                     label: OO.ui.deferMsg("viualeditor-emm-link-presentationtitle"),
+                     align: "left"
+                     }),
+                     new OO.ui.FieldLayout(contextField, {
+                     label: OO.ui.deferMsg("visualeditor-emm-link-")
+                     })*/
                 ]);
                 break;
             case "External link": {
@@ -264,10 +264,11 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
         okButton.onClick = function () {
             switch (template) {
                 case "File":
-                    //Do things
+                    var namedata = presentationTextField.getValue();
+                    var optionaldata = optionalField.getValue();
                     break;
                 case "Internal link":
-                    //Do other things
+                    var namedata = presentationTitleField.getValue();
                     break;
                 case "External link":
                     var namedata = presentationTitleField.getValue();
@@ -282,6 +283,10 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                 return;
             }
 
+            //Use this because the template to insert file links is for some reason named Cite
+            if (template == "File") {
+                template = "Cite";
+            }
             var mytemplate = [
                     {
                         type: "mwTransclusionInline",
@@ -294,7 +299,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                                                 href: "Template:" + template,
                                                 wt: template
                                             },
-                                            params: templateResult(namedata, linkdata)
+                                            params: templateResult(namedata, linkdata, optionaldata)
                                         }
                                     }
                                 ]
@@ -303,6 +308,10 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                     }
                 ]
                 ;
+            //Use this because the template to insert file links is for some reason named Cite
+            if (template == "Cite") {
+                template = "File";
+            }
 
             //insert result in text
             var surfaceModel = ve.init.target.getSurface().getModel();
@@ -341,13 +350,13 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
         var callback = function (queryResults) {
             switch (template) {
                 case "File":
-                    //stuff
+                    initAutoComplete(queryResults, fileNameField, dialogueInstance, template);
                     break;
                 case "Internal link":
-                    //more things
+                    initAutoComplete(queryResults, pageNameField, dialogueInstance, template);
                     break;
                 case "External link":
-                    initAutoComplete(queryResults, titleField, dialogueInstance);
+                    initAutoComplete(queryResults, titleField, dialogueInstance, template);
                     break;
                 default:
                     alert("Invalid dialog opened");
@@ -355,7 +364,11 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
         };
 
         //Execute the askQuery in order to gather all resources
-        semanticAskQuery(askQuery, callback);
+        semanticAskQuery(askQuery, callback, template);
+
+        dialogue.prototype.getFieldset = function () {
+            return fieldset;
+        };
 
         //fixme dirty hack
         //todo in plaats van deze hack een eigen event afvuren en opvangen?
@@ -363,10 +376,10 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
         dialogue.prototype.getBodyHeight = function () {
             switch (template) {
                 case "File":
-                    //stuff
+                    grabSelectedText(presentationTextField);
                     break;
                 case "Internal link":
-                    //more things
+                    grabSelectedText(presentationTitleField);
                     break;
                 case "External link":
                     grabSelectedText(presentationTitleField);
@@ -400,15 +413,13 @@ function clearInputFields(fieldset) {
  *  @param query (string) the query that is to be used in the API-call
  *  @param callback (function) a function that will be executed after the api-call is finished
  */
-function semanticAskQuery(query, callback) {
+function semanticAskQuery(query, callback, template) {
     var api = new mw.Api();
     api.get({
         action: "ask",
         parameters: "limit:10000",
-        query: query // + "|?Semantic title|limit=10000"
+        query: query //+ "|?Semantic title|limit=10000"
     }).done(function (data) {
-        console.log("results: ");
-        console.log(data.query.results);
         var res = data.query.results;
         var arr = [];
         var prevTitle = "";
@@ -420,14 +431,11 @@ function semanticAskQuery(query, callback) {
             var pagename = res[prop].fulltext;
             var semantictitle = res[prop].printouts["Semantic title"][0];
             var title = "";
-            if (semantictitle) {
+            if (semantictitle)
                 title = semantictitle;
-            }
             else
                 title = pagename;
             if (title == prevTitle) {
-                console.log("broodje ham");
-                console.log(prevTitle);
                 numTitle++;
                 title = title + "(" + pagename + ")";
             }
@@ -435,7 +443,46 @@ function semanticAskQuery(query, callback) {
                 prevTitle = title;
                 numTitle = 0;
             }
-            arr.push({value: title, data: pagename});
+            switch (template) {
+                case "File":
+                    arr.push({
+                        value: title,
+                        data: pagename
+                    });
+                    break;
+                case "Internal link":
+                    arr.push({
+                        value: title,
+                        data: pagename
+                    });
+                    break;
+                case "External link":
+                    var hyperlink = res[prop].printouts["Hyperlink"][0];
+                    var creator = res[prop].printouts["Dct:creator"][0];
+                    var date = res[prop].printouts["Dct:date"][0];
+                    var organization = res[prop].printouts["Organization"][0];
+                    var subjects = "";
+                    var querySubjects = res[prop].printouts["Dct:subject"];
+                    //Gathers all subjects and creates a single string which contains the fulltext name of all the subjects,
+                    //seperated by a ,
+                    for (var j = 0; j < querySubjects.length; j++) {
+                        subjects = subjects + querySubjects[j].fulltext + ", ";
+                    }
+                    subjects = subjects.slice(0, -2);
+                    //Use value for the title in the associative array to ensure it works with the autocmoplete library
+                    arr.push({
+                        value: title,
+                        data: pagename,
+                        hyperlink: hyperlink,
+                        creator: creator,
+                        date: date,
+                        organization: organization,
+                        subjects: subjects
+                    });
+                    break;
+                default:
+                    alert("Invalid dialog was used");
+            }
         }
         arr.sort(function (a, b) {
             if (a.value > b.value) {
@@ -495,14 +542,30 @@ function grabSelectedText(inputObject) {
  * @param inputObject The object in which the input field exists where the autocomplete function should be enabled
  * @param dialogueInstance The dialogue whose page-id should be edited in order to succesfully insert the link later on
  */
-function initAutoComplete(data, inputObject, dialogueInstance) {
+function initAutoComplete(data, inputObject, dialogueInstance, template) {
     var inputField = $(inputObject.$element).find("input");
 
     $(inputField).autocomplete({
         lookup: data,
         onSelect: function (suggestion) {
-            console.log(suggestion);
             dialogueInstance.pageid = suggestion.data;
+            //This part of the code is dependant on the order in which the fields of the dialogs are defined
+            //fixme make this independant of order
+            switch (template) {
+                case "File":
+                    break;
+                case "Internal link":
+                    break;
+                case "External link":
+                    dialogueInstance.getFieldset().getItems()[0].getField().setValue(suggestion.hyperlink);
+                    dialogueInstance.getFieldset().getItems()[3].getField().setValue(suggestion.creator);
+                    dialogueInstance.getFieldset().getItems()[4].getField().setValue(suggestion.date.raw);
+                    dialogueInstance.getFieldset().getItems()[5].getField().setValue(suggestion.organization);
+                    dialogueInstance.getFieldset().getItems()[6].getField().setValue(suggestion.subjects);
+                    break;
+                default:
+                    alert("Invalid dialog was used");
+            }
         },
         appendTo: inputField.parentElement,
         maxHeight: 300

@@ -51,13 +51,8 @@ function getContextOfCurrentPage() {
                 continue;
             }
             var supercontext = res[prop].printouts['Supercontext'][0].fulltext;
-            console.log(supercontext);
-            console.log(res[prop].printouts['Supercontext'][0]);
             pageProperties.supercontext = supercontext;
-            //console.log('super:'+supercontext);
             var topcontext = res[prop].printouts['Topcontext'][0].fulltext;
-            console.log(topcontext);
-            console.log(res[prop].printouts['Topcontext'][0]);
             pageProperties.topcontext = topcontext;
             //contexttype=res[prop].printouts['Contexttype'][0].fulltext;
         }
@@ -337,7 +332,6 @@ function createDialog(dialogName, askQuery, actionName, processResult, actionTit
         switch (action) {
             case "cancel":
                 return new OO.ui.Process(function () {
-                    console.log("cancel");
                     that.close();
                 });
 
