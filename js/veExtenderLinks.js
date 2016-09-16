@@ -113,12 +113,15 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
     dialogue.prototype.initialize = function () {
         //put the dialogue in a variable for easier and more clear access
         var dialogueInstance = this;
+        dialogueInstance.pageid = [];
+        var queryResult = "";
 
         //  create the fieldset, which is responsible for the layout of the dialogue
         var fieldset = new OO.ui.FieldsetLayout({
             classes: ["container"]
         });
 
+        //Create all the buttons and input fields depending on what kind of dialog we need to create
         switch (template) {
             case "File":
                 //Create input fields in case we're dealing with a dialogue to add a file
@@ -278,9 +281,14 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
             }
 
             var linkdata = dialogueInstance.pageid.length > 0 ? dialogueInstance.pageid : "";
+            var exists = true;
             if (linkdata.length == 0) {
-                alert(OO.ui.deferMsg("visualeditor-emm-select-existing-item")() + "!");
-                return;
+                exists = false;
+            }
+
+            if (!exists) {
+                var query = "";
+                semanticCreateQuery(query);
             }
 
             //Use this because the template to insert file links is for some reason named Cite
@@ -322,6 +330,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
 
             //Clear the input fields and close the dialogue
             clearInputFields(fieldset);
+            dialogueInstance.pageid = "";
             dialogueInstance.close();
         };
 
@@ -343,7 +352,6 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
             click: "onClick"
         });
 
-
         //Declare a function to be called after the askQuery has been processed
         //This function initiates the autocmplete library for the resource input field
         //The user will be able to pick a resource from the list of all resources gathered by the askQuery
@@ -361,6 +369,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                 default:
                     alert("Invalid dialog opened");
             }
+            queryResult = queryResults;
         };
 
         //Execute the askQuery in order to gather all resources
@@ -509,6 +518,11 @@ function semanticAskQuery(query, callback, template) {
     });
 }
 
+function semanticCreateQuery(query) {
+    var api = new mw.Api();
+    
+}
+
 /**
  * Grabs the text that is selected (outside the dialogue) and insert its into the resource input inside the dialogue
  * @param inputObject the input field in which the selected text should be inserted
@@ -549,8 +563,8 @@ function initAutoComplete(data, inputObject, dialogueInstance, template) {
         lookup: data,
         onSelect: function (suggestion) {
             dialogueInstance.pageid = suggestion.data;
-            //This part of the code is dependant on the order in which the fields of the dialogs are defined
-            //fixme make this independant of order
+            //This part of the code depends on the order in which the fields of the dialogs are defined
+            //fixme make this independent of order
             switch (template) {
                 case "File":
                     break;
