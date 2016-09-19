@@ -520,7 +520,7 @@ function semanticAskQuery(query, callback, template) {
 
 function semanticCreateQuery(query) {
     var api = new mw.Api();
-    
+
 }
 
 /**
