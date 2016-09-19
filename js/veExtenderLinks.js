@@ -281,52 +281,77 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
             }
 
             var linkdata = dialogueInstance.pageid.length > 0 ? dialogueInstance.pageid : "";
-            var exists = true;
-            if (linkdata.length == 0) {
-                exists = false;
-            }
+            //var exists = true;
+            //if (linkdata.length == 0) {
+            //exists = false;
+            //}
 
-            if (!exists) {
-                var query = "";
-                semanticCreateQuery(query);
-            }
-
-            //Use this because the template to insert file links is for some reason named Cite
-            if (template == "File") {
-                template = "Cite";
-            }
-            var mytemplate = [
-                    {
-                        type: "mwTransclusionInline",
-                        attributes: {
-                            mw: {
-                                parts: [
-                                    {
-                                        template: {
-                                            target: {
-                                                href: "Template:" + template,
-                                                wt: template
-                                            },
-                                            params: templateResult(namedata, linkdata, optionaldata)
+            var insertCallback = function (linkTitle) {
+                linkdata = linkTitle;
+                //Use this because the template to insert file links is for some reason named Cite
+                if (template == "File") {
+                    template = "Cite";
+                }
+                var mytemplate = [
+                        {
+                            type: "mwTransclusionInline",
+                            attributes: {
+                                mw: {
+                                    parts: [
+                                        {
+                                            template: {
+                                                target: {
+                                                    href: "Template:" + template,
+                                                    wt: template
+                                                },
+                                                params: templateResult(namedata, linkdata, optionaldata)
+                                            }
                                         }
-                                    }
-                                ]
+                                    ]
+                                }
                             }
                         }
-                    }
-                ]
-                ;
-            //Use this because the template to insert file links is for some reason named Cite
-            if (template == "Cite") {
-                template = "File";
-            }
+                    ]
+                    ;
+                //Use this because the template to insert file links is for some reason named Cite
+                if (template == "Cite") {
+                    template = "File";
+                }
 
-            //insert result in text
-            var surfaceModel = ve.init.target.getSurface().getModel();
-            var range = surfaceModel.getFragment().selection.range;
-            var rangeToRemove = new ve.Range(range.start, range.end);
-            var fragment = surfaceModel.getLinearFragment(rangeToRemove);
-            fragment.insertContent(mytemplate);
+                //insert result in text
+                var surfaceModel = ve.init.target.getSurface().getModel();
+                var range = surfaceModel.getFragment().selection.range;
+                var rangeToRemove = new ve.Range(range.start, range.end);
+                var fragment = surfaceModel.getLinearFragment(rangeToRemove);
+                fragment.insertContent(mytemplate);
+            };
+
+            //if (!exists) {
+                var currentPageID = mw.config.get('wgPageName');
+                var query = "Resource Description[created in page]=" + currentPageID;
+                switch (template) {
+                    case "File":
+                        //stuff
+                        break;
+                    case "Internal link":
+                        //things
+                        break;
+                    case "External link":
+                        query += "&Resource Description[hyperlink]=" + linkField.getValue() +
+                            "&Resource Description[title]=" + titleField.getValue() +
+                            "&Resource Description[creator]=" + creatorField.getValue() +
+                            "&Resource Description[date]=" + dateField.getValue();
+                        if (organizationField.getValue().length > 0) query += "&Resource Description[organization]=" + organizationField.getValue();
+                        if (subjectField.getValue().length > 0) query += "&Resource Description[subject]=" + subjectField.getValue();
+                        break;
+                    default:
+                        alert("Invalid dialog opened");
+                }
+                semanticCreateWithFromQuery(query, insertCallback);
+            //}
+            //else {
+            //    insertCallback(linkdata);
+            //}
 
             //Clear the input fields and close the dialogue
             clearInputFields(fieldset);
@@ -518,9 +543,15 @@ function semanticAskQuery(query, callback, template) {
     });
 }
 
-function semanticCreateQuery(query) {
+function semanticCreateWithFromQuery(query, callback) {
     var api = new mw.Api();
-
+    api.get({
+        action: "sfautoedit",
+        form: "Resource Hyperlink",
+        query: query
+    }).done(function (data) {
+        callback(data.target);
+    });
 }
 
 /**
