@@ -281,10 +281,10 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
             }
 
             var linkdata = dialogueInstance.pageid.length > 0 ? dialogueInstance.pageid : "";
-            //var exists = true;
-            //if (linkdata.length == 0) {
-            //exists = false;
-            //}
+            var exists = true;
+            if (linkdata.length == 0) {
+                exists = false;
+            }
 
             var insertCallback = function (linkTitle) {
                 linkdata = linkTitle;
@@ -326,32 +326,31 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                 fragment.insertContent(mytemplate);
             };
 
-            //if (!exists) {
-                var currentPageID = mw.config.get('wgPageName');
-                var query = "Resource Description[created in page]=" + currentPageID;
-                switch (template) {
-                    case "File":
-                        //stuff
-                        break;
-                    case "Internal link":
-                        //things
-                        break;
-                    case "External link":
-                        query += "&Resource Description[hyperlink]=" + linkField.getValue() +
-                            "&Resource Description[title]=" + titleField.getValue() +
-                            "&Resource Description[creator]=" + creatorField.getValue() +
-                            "&Resource Description[date]=" + dateField.getValue();
-                        if (organizationField.getValue().length > 0) query += "&Resource Description[organization]=" + organizationField.getValue();
-                        if (subjectField.getValue().length > 0) query += "&Resource Description[subject]=" + subjectField.getValue();
-                        break;
-                    default:
-                        alert("Invalid dialog opened");
-                }
-                semanticCreateWithFromQuery(query, insertCallback);
-            //}
-            //else {
-            //    insertCallback(linkdata);
-            //}
+            var currentPageID = mw.config.get('wgPageName');
+            var query = "Resource Description[created in page]=" + currentPageID;
+            switch (template) {
+                case "File":
+                    //stuff
+                    break;
+                case "Internal link":
+                    //things
+                    break;
+                case "External link":
+                    query += "&Resource Description[hyperlink]=" + linkField.getValue() +
+                        "&Resource Description[title]=" + titleField.getValue() +
+                        "&Resource Description[creator]=" + creatorField.getValue() +
+                        "&Resource Description[date]=" + dateField.getValue();
+                    if (organizationField.getValue().length > 0) query += "&Resource Description[organization]=" + organizationField.getValue();
+                    if (subjectField.getValue().length > 0) query += "&Resource Description[subject]=" + subjectField.getValue();
+                    break;
+                default:
+                    alert("Invalid dialog opened");
+            }
+            var target = "";
+            if (exists) {
+                target = linkdata;
+            }
+            semanticCreateWithFromQuery(query, insertCallback, target);
 
             //Clear the input fields and close the dialogue
             clearInputFields(fieldset);
@@ -407,7 +406,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
         //fixme dirty hack
         //todo in plaats van deze hack een eigen event afvuren en opvangen?
         //Selected text is gathered here and put inside the input field
-        dialogue.prototype.getBodyHeight = function () {
+        dialogue.prototype.setDimensions = function (dim) {
             switch (template) {
                 case "File":
                     grabSelectedText(presentationTextField);
@@ -421,13 +420,20 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                 default:
                     alert("Invalid dialog opened");
             }
-
-            return this.content.$element.outerHeight(true) + 50;
+            this.$frame.css({
+                width: 1500 || '',
+                height: this.content.$element.outerHeight(true) + 80
+            });
         };
 
-
+        console.log(this.$frame);
+        //this.$frame.css({width: 1500, backgroundColor : "blue"});
+        console.log(this.$frame);
+        //this.$frame.css({witdh: 40, backgroundColor: "red"});
     }
     ;
+
+    //dialogue.$frame.css({width: 800 || ''});
     //  registers the dialogue to the window factory, from this point on the dialogue can be accessed calling the window factory
     ve.ui.windowFactory.register(dialogue);
 }
@@ -543,13 +549,15 @@ function semanticAskQuery(query, callback, template) {
     });
 }
 
-function semanticCreateWithFromQuery(query, callback) {
+function semanticCreateWithFromQuery(query, callback, target) {
     var api = new mw.Api();
     api.get({
         action: "sfautoedit",
         form: "Resource Hyperlink",
-        query: query
+        query: query,
+        target: target
     }).done(function (data) {
+        console.log(data);
         callback(data.target);
     });
 }
