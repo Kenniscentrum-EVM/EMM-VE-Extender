@@ -16,10 +16,10 @@ function defineTranslations() {
             "visualeditor-emm-link": "Link*:",
             "visualeditor-emm-link-title": "Title*:",
             "viualeditor-emm-link-presentationtitle": "Presentation title*:",
-            "visualeditor-emm-link-creator": "creator*:",
-            "visualeditor-emm-link-date": "date*:",
-            "visualeditor-emm-link-organization": "organization:",
-            "visualeditor-emm-link-subject": "subject (SKOS concept):",
+            "visualeditor-emm-link-creator": "Creator*:",
+            "visualeditor-emm-link-date": "Date*:",
+            "visualeditor-emm-link-organization": "Organization:",
+            "visualeditor-emm-link-subject": "Subject (SKOS concept):",
 
             "visualeditor-emm-page": "Page name*:",
             "visualeditor-emm-page-title": "Presentation title*:",
@@ -27,6 +27,9 @@ function defineTranslations() {
             "visualeditor-emm-file-name": "Filename*",
             "visualeditor-emm-file-presentationtitle": "Presentation title*:",
             "visualeditor-emm-file-optional": "Optional text:",
+
+            "visualeditor-emm-cancel": "Cancel",
+            "visualeditor-emm-insert": "Insert",
 
             "visualeditor-emm-link-to-resource": "Link:",
             "visualeditor-emm-manage-files": "Manage Files",
@@ -59,10 +62,10 @@ function defineTranslations() {
             "visualeditor-emm-link": "Koppeling*:",
             "visualeditor-emm-link-title": "Titel*:",
             "viualeditor-emm-link-presentationtitle": "Presentatietitel*:",
-            "visualeditor-emm-link-creator": "auteur*:",
-            "visualeditor-emm-link-date": "datum*:",
-            "visualeditor-emm-link-organization": "organisatie:",
-            "visualeditor-emm-link-subject": "onderwerp (SKOS concept):",
+            "visualeditor-emm-link-creator": "Auteur*:",
+            "visualeditor-emm-link-date": "Datum*:",
+            "visualeditor-emm-link-organization": "Organisatie:",
+            "visualeditor-emm-link-subject": "Onderwerp (SKOS concept):",
 
             "visualeditor-emm-page": "pagina naam*:",
             "visualeditor-emm-page-title": "Presentatietitel*:",
@@ -70,6 +73,9 @@ function defineTranslations() {
             "visualeditor-emm-file-name": "Bestandsnaam*",
             "visualeditor-emm-file-presentationtitle": "Presentatietitel*:",
             "visualeditor-emm-file-optional": "Optionele tekst:",
+
+            "visualeditor-emm-cancel": "Annuleer",
+            "visualeditor-emm-insert": "Voeg in",
 
             "visualeditor-emm-link-to-resource": "Link:",
             "visualeditor-emm-manage-files": "Beheer bestanden",

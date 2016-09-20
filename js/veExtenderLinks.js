@@ -236,13 +236,13 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
 
         //  create the buttons
         var okButton = new OO.ui.ButtonWidget({
-            label: "OK",
+            label: OO.ui.deferMsg("visualeditor-emm-insert"),
             flags: ["progressive"],
             target: "_blank"
         });
 
         var cancelButton = new OO.ui.ButtonWidget({
-            label: "Cancel"
+            label: OO.ui.deferMsg("visualeditor-emm-cancel")
         });
 
         //Add the created items to the dialogue
@@ -406,6 +406,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
         //fixme dirty hack
         //todo in plaats van deze hack een eigen event afvuren en opvangen?
         //Selected text is gathered here and put inside the input field
+        //Beyong that this is also the place where the size of the dialog is set.
         dialogue.prototype.setDimensions = function (dim) {
             switch (template) {
                 case "File":
@@ -420,9 +421,10 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                 default:
                     alert("Invalid dialog opened");
             }
+            fieldset.$element.css({width: this.content.$element.outerWidth(true) - 50});
             this.$frame.css({
-                width: 1500 || '',
-                height: this.content.$element.outerHeight(true) + 80
+                width: this.content.$element.outerWidth(true) || "",
+                height: this.content.$element.outerHeight(true) + 100 || ""
             });
         };
 
