@@ -105,6 +105,10 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
     //Set properties of the dialogue
     dialogue.static.name = dialogueName;
     dialogue.static.title = dialogueMessage;
+    dialogue.static.actions = [
+        {action: "insert", label: OO.ui.deferMsg("visualeditor-emm-insert"), flags: "primary"},
+        {action: "cancel", label: OO.ui.deferMsg("visualeditor-emm-cancel"), flags: "safe"}
+    ];
 
     /**
      * Initializes the dialog.
@@ -230,20 +234,9 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                 break;
             }
             default:
-                alert("Invalid button was pressed")
+                alert(OO.ui.deferMsg("visualeditor-emm-dialog-error"));
         }
         ;
-
-        //  create the buttons
-        var okButton = new OO.ui.ButtonWidget({
-            label: OO.ui.deferMsg("visualeditor-emm-insert"),
-            flags: ["progressive"],
-            target: "_blank"
-        });
-
-        var cancelButton = new OO.ui.ButtonWidget({
-            label: OO.ui.deferMsg("visualeditor-emm-cancel")
-        });
 
         //Add the created items to the dialogue
         dialogue.super.prototype.initialize.call(this);
@@ -257,14 +250,8 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
             .toggleClass("oo-ui-windowManager-modal", true);
         this.$body.append(this.content.$element);
 
-        //  Making the buttons visible at the bottom of the dialogue happens over here
-        this.content.$element.append(okButton.$element);
-        this.content.$element.append(cancelButton.$element);
-
         //  Add event-handling logic to okButton
-        okButton.$element.attr("id", "okbutton");
-        okButton.$element.css("float", "right");
-        okButton.onClick = function () {
+        var insertButtonHandler = function () {
             switch (template) {
                 case "File":
                     var namedata = presentationTextField.getValue();
@@ -277,7 +264,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                     var namedata = presentationTitleField.getValue();
                     break;
                 default:
-                    alert("Invalid dialog button was pressed");
+                    alert(OO.ui.deferMsg("visualeditor-emm-dialog-error"));
             }
 
             var linkdata = dialogueInstance.pageid.length > 0 ? dialogueInstance.pageid : "";
@@ -344,7 +331,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                     if (subjectField.getValue().length > 0) query += "&Resource Description[subject]=" + subjectField.getValue();
                     break;
                 default:
-                    alert("Invalid dialog opened");
+                    alert(OO.ui.deferMsg("visualeditor-emm-dialog-error"));
             }
             var target = "";
             if (exists) {
@@ -360,21 +347,26 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
 
 
         // Add event handling logic to cancelButton
-        cancelButton.$element.attr("id", "cancelbutton");
-        cancelButton.$element.css("float", "right");
-        cancelButton.onClick = function () {
+        var cancelButtonHandler = function () {
             //Clear the dialog and close it
             clearInputFields(fieldset);
             dialogueInstance.close();
         };
 
-        //  register the event handlers to the buttons
-        okButton.connect(okButton, {
-            click: "onClick"
-        });
-        cancelButton.connect(cancelButton, {
-            click: "onClick"
-        });
+        dialogue.prototype.getActionProcess = function (action) {
+            if (action === "insert") {
+                return new OO.ui.Process(function () {
+                    insertButtonHandler();
+                });
+            }
+            if (action === "cancel") {
+                return new OO.ui.Process(function () {
+                    cancelButtonHandler();
+                });
+            }
+            //Use parent handler in case something goes wrong
+            return MyDialog.super.prototype.getActionProcess.call(this, action);
+        };
 
         //Declare a function to be called after the askQuery has been processed
         //This function initiates the autocmplete library for the resource input field
@@ -391,7 +383,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                     initAutoComplete(queryResults, titleField, dialogueInstance, template);
                     break;
                 default:
-                    alert("Invalid dialog opened");
+                    alert(OO.ui.deferMsg("visualeditor-emm-dialog-error"));
             }
             queryResult = queryResults;
         };
@@ -419,19 +411,20 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                     grabSelectedText(presentationTitleField);
                     break;
                 default:
-                    alert("Invalid dialog opened");
+                    alert(OO.ui.deferMsg("visualeditor-emm-dialog-error"));
             }
             fieldset.$element.css({width: this.content.$element.outerWidth(true) - 50});
+            //Inline css cause, adding classes doesn't overwrite existing css
+            for (var i = 0; i < fieldset.getItems().length; i++) {
+                fieldset.getItems()[i].$element.find(".oo-ui-labelElement-label").css("margin-right", 0).css("float", "left").css("width", "30%");
+                fieldset.getItems()[i].$element.find(".oo-ui-fieldLayout-field").css("width", "70%");
+                fieldset.getItems()[i].$element.find(".oo-ui-fieldLayout-body").css("width", "100%").css("overflow", "hidden");
+            }
             this.$frame.css({
                 width: this.content.$element.outerWidth(true) || "",
-                height: this.content.$element.outerHeight(true) + 100 || ""
+                height: this.content.$element.outerHeight(true) + 50 || ""
             });
         };
-
-        console.log(this.$frame);
-        //this.$frame.css({width: 1500, backgroundColor : "blue"});
-        console.log(this.$frame);
-        //this.$frame.css({witdh: 40, backgroundColor: "red"});
     }
     ;
 
@@ -460,7 +453,7 @@ function semanticAskQuery(query, callback, template) {
     api.get({
         action: "ask",
         parameters: "limit:10000",
-        query: query //+ "|?Semantic title|limit=10000"
+        query: query
     }).done(function (data) {
         var res = data.query.results;
         var arr = [];
@@ -523,7 +516,7 @@ function semanticAskQuery(query, callback, template) {
                     });
                     break;
                 default:
-                    alert("Invalid dialog was used");
+                    alert(OO.ui.deferMsg("visualeditor-emm-dialog-error"));
             }
         }
         arr.sort(function (a, b) {
@@ -559,7 +552,6 @@ function semanticCreateWithFromQuery(query, callback, target) {
         query: query,
         target: target
     }).done(function (data) {
-        console.log(data);
         callback(data.target);
     });
 }
@@ -604,6 +596,7 @@ function initAutoComplete(data, inputObject, dialogueInstance, template) {
         lookup: data,
         onSelect: function (suggestion) {
             dialogueInstance.pageid = suggestion.data;
+            console.log(suggestion);
             //This part of the code depends on the order in which the fields of the dialogs are defined
             //fixme make this independent of order
             switch (template) {
@@ -619,7 +612,7 @@ function initAutoComplete(data, inputObject, dialogueInstance, template) {
                     dialogueInstance.getFieldset().getItems()[6].getField().setValue(suggestion.subjects);
                     break;
                 default:
-                    alert("Invalid dialog was used");
+                    alert(OO.ui.deferMsg("visualeditor-emm-dialog-error"));
             }
         },
         appendTo: inputField.parentElement,

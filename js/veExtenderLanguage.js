@@ -12,6 +12,7 @@ function defineTranslations() {
             "visualeditor-emm-existing-file": "Existing file",
             "visualeditor-emm-existing-hyperlink": "Existing link",
             "visualeditor-emm-existing-page": "Existing page",
+            "visualeditor-emm-dialog-error": "Error: dialog not found.",
 
             "visualeditor-emm-link": "Link*:",
             "visualeditor-emm-link-title": "Title*:",
@@ -58,6 +59,7 @@ function defineTranslations() {
             "visualeditor-emm-existing-file": "Bestaand bestand",
             "visualeditor-emm-existing-hyperlink": "Bestaande link",
             "visualeditor-emm-existing-page": "Bestaande pagina",
+            "visualeditor-emm-dialog-error": "Error: dialoog niet gevonden.",
 
             "visualeditor-emm-link": "Koppeling*:",
             "visualeditor-emm-link-title": "Titel*:",
