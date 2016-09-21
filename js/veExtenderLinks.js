@@ -199,6 +199,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                 var presentationTitleField = new OO.ui.TextInputWidget({});
                 var creatorField = new OO.ui.TextInputWidget({});
                 var dateField = new OO.ui.TextInputWidget({});
+                console.log(dateField);
                 var organizationField = new OO.ui.TextInputWidget({});
                 var subjectField = new OO.ui.TextInputWidget({});
 
@@ -607,7 +608,7 @@ function initAutoComplete(data, inputObject, dialogueInstance, template) {
                 case "External link":
                     dialogueInstance.getFieldset().getItems()[0].getField().setValue(suggestion.hyperlink);
                     dialogueInstance.getFieldset().getItems()[3].getField().setValue(suggestion.creator);
-                    dialogueInstance.getFieldset().getItems()[4].getField().setValue(suggestion.date.raw);
+                    dialogueInstance.getFieldset().getItems()[4].getField().setValue(fixDate(suggestion.date.raw));
                     dialogueInstance.getFieldset().getItems()[5].getField().setValue(suggestion.organization);
                     dialogueInstance.getFieldset().getItems()[6].getField().setValue(suggestion.subjects);
                     break;
@@ -618,4 +619,15 @@ function initAutoComplete(data, inputObject, dialogueInstance, template) {
         appendTo: inputField.parentElement,
         maxHeight: 300
     });
+}
+
+function fixDate(dateString) {
+    var replacePattern = /[0-9]+\//;
+    //The result of the askQuery always returns an american date starting with *number*/, for example 1/
+    //The date is of the fomat n/yyyy/mm/dd
+    //Remove the first number and slash from the date and then reverse the date to change it to the european format
+    dateString = dateString.replace(replacePattern, "");
+    dateString = dateString.split("/");
+    dateString = dateString.reverse().join("/");
+    return dateString;
 }
