@@ -1,9 +1,16 @@
 "use strict";
 
+
 /*  addEMMLinks
  *  This method is executed when the extention is loaded and is responsible for passing the correct information to the loadEMMDialog methods
  */
 function addEMMLinks() {
+    //Include JQuery-UI
+    var script = document.createElement('script');
+    script.src = "https://code.jquery.com/ui/1.12.1/jquery-ui.js";
+    document.getElementsByTagName('head')[0].appendChild(script);
+
+
     var queries = veExtenderQueries();
 
     loadEMMDialog("File", "file", "visualeditor-emm-menufiletitle", "visualeditor-emm-dialogfiletitle",
@@ -199,7 +206,9 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                 var presentationTitleField = new OO.ui.TextInputWidget({});
                 var creatorField = new OO.ui.TextInputWidget({});
                 var dateField = new OO.ui.TextInputWidget({});
-                console.log(dateField);
+
+                dateField.$element.find('input').datepicker();
+
                 var organizationField = new OO.ui.TextInputWidget({});
                 var subjectField = new OO.ui.TextInputWidget({});
 
@@ -237,7 +246,6 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
             default:
                 alert(OO.ui.deferMsg("visualeditor-emm-dialog-error"));
         }
-        ;
 
         //Add the created items to the dialogue
         dialogue.super.prototype.initialize.call(this);
