@@ -164,13 +164,8 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                     placeholder: OO.ui.deferMsg("visualeditor-emm-search")
                 });
                 var presentationTitleField = new OO.ui.TextInputWidget({});
-
-                //var presentationTitleField = new OO.ui.TextInputWidget({
-                //    placeholder: OO.ui.deferMsg("visualeditor-emm-search")
-                //});
-
-                //var contextField = new OO.ui.TextInputWidget({});
-                //var contextTypeField = new OO.ui.TextInputWidget({});
+                var contextField = new OO.ui.TextInputWidget({});
+                var contextTypeField = new OO.ui.TextInputWidget({});
 
                 fieldset.addItems([
                     new OO.ui.FieldLayout(pageNameField, {
@@ -178,25 +173,25 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                         align: "left"
                     }),
                     new OO.ui.FieldLayout(presentationTitleField, {
-                        label: OO.ui.deferMsg("visualeditor-emm-page-title"),
+                        label: OO.ui.deferMsg("visualeditor-emm-page-presentationtitle"),
+                        align: "left"
+                    }),
+                    new OO.ui.FieldLayout(contextField, {
+                        label: OO.ui.deferMsg("visualeditor-emm-page-context"),
+                        align: "left"
+                    }),
+                    new OO.ui.FieldLayout(contextTypeField, {
+                        label: OO.ui.deferMsg("visualeditor-emm-page-contexttype"),
                         align: "left"
                     })
-                    /*new OO.ui.FieldLayout(presentationTitleField, {
-                     label: OO.ui.deferMsg("viualeditor-emm-link-presentationtitle"),
-                     align: "left"
-                     }),
-                     new OO.ui.FieldLayout(contextField, {
-                     label: OO.ui.deferMsg("visualeditor-emm-link-")
-                     })*/
                 ]);
                 break;
             case "External link": {
                 //Create input fields in case we're dealing with an external link
-                var linkField = new OO.ui.TextInputWidget({});
                 var titleField = new OO.ui.TextInputWidget({
                     placeholder: OO.ui.deferMsg("visualeditor-emm-search")
                 });
-
+                var linkField = new OO.ui.TextInputWidget({});
                 var presentationTitleField = new OO.ui.TextInputWidget({});
                 var creatorField = new OO.ui.TextInputWidget({});
                 var dateField = new OO.ui.TextInputWidget({});
@@ -207,12 +202,12 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                 });
 
                 fieldset.addItems([
-                    new OO.ui.FieldLayout(linkField, {
-                        label: OO.ui.deferMsg("visualeditor-emm-link"),
-                        align: "left"
-                    }),
                     new OO.ui.FieldLayout(titleField, {
                         label: OO.ui.deferMsg("visualeditor-emm-link-title"),
+                        align: "left"
+                    }),
+                    new OO.ui.FieldLayout(linkField, {
+                        label: OO.ui.deferMsg("visualeditor-emm-link"),
                         align: "left"
                     }),
                     new OO.ui.FieldLayout(presentationTitleField, {
@@ -275,7 +270,6 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                     alert(OO.ui.deferMsg("visualeditor-emm-dialog-error"));
             }
 
-            console.log(dialogueInstance.pageid);
             var linkdata = dialogueInstance.pageid.length > 0 ? dialogueInstance.pageid : "";
             var exists = true;
             if (linkdata.length == 0) {
@@ -284,9 +278,23 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
 
             var insertCallback = function (linkTitle) {
                 linkdata = linkTitle;
+                var templateToUse = "";
                 //Use this because the template to insert file links is for some reason named Cite
                 if (template == "File") {
-                    template = "Cite";
+                    templateToUse = "Cite";
+                }
+                //In case of an external link we need to check if the user wants to include this link in the
+                //references list
+                else if (template === "External link") {
+                    if (addToResourcesField.isSelected()) {
+                        templateToUse = "Cite";
+                    }
+                    else {
+                        templateToUse = template;
+                    }
+                }
+                else {
+                    templateToUse = template;
                 }
                 var mytemplate = [
                         {
@@ -297,8 +305,8 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                                         {
                                             template: {
                                                 target: {
-                                                    href: "Template:" + template,
-                                                    wt: template
+                                                    href: "Template:" + templateToUse,
+                                                    wt: templateToUse
                                                 },
                                                 params: templateResult(namedata, linkdata, optionaldata)
                                             }
@@ -309,10 +317,6 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                         }
                     ]
                     ;
-                //Use this because the template to insert file links is for some reason named Cite
-                if (template == "Cite") {
-                    template = "File";
-                }
 
                 //insert result in text
                 var surfaceModel = ve.init.target.getSurface().getModel();
@@ -323,16 +327,38 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
             };
 
             var currentPageID = mw.config.get('wgPageName');
-            var query = "Resource Description[created in page]=" + currentPageID;
+            var query = "";
             switch (template) {
                 case "File":
                     //stuff
                     break;
                 case "Internal link":
-                    //things
+                    //Build the sfautoedit query
+                    var api = new mw.Api();
+                    var superContext = "";
+                    console.log("hij doet dingen met links?");
+                    if (contextField.getValue() == "") {
+                        console.log("context was leeg");
+                        superContext = currentPageID;
+                    }
+                    console.log("[[" + superContext + "]]|?Topcontext|limit=10000");
+                    api.get({
+                        action: 'ask',
+                        parameters: 'limit:10000',//check how to increase limit of ask-result; done in LocalSettings.php
+                        query: "[[" + superContext + "]]|?Topcontext|limit=10000"//
+                    }).done(function (data) {
+                        var res = data.query.results;
+                        var topContext = res[superContext].printouts["Topcontext"][0].fulltext;
+                        query += "Light Context[Supercontext]=" + superContext +
+                            "&Light Context[Topcontext]=" + topContext +
+                            "&Light Context[Heading]=" + pageNameField.getValue();
+                        if (contextTypeField.getValue().length > 0) query += "&Light Context[Context type]=" + contextTypeField.getValue();
+                    });
                     break;
                 case "External link":
-                    query += "&Resource Description[hyperlink]=" + linkField.getValue() +
+                    //Build the sfautoedit query
+                    query += "Resource Description[created in page]=" + currentPageID +
+                        "&Resource Description[hyperlink]=" + linkField.getValue() +
                         "&Resource Description[title]=" + titleField.getValue() +
                         "&Resource Description[creator]=" + creatorField.getValue() +
                         "&Resource Description[date]=" + dateField.getValue();
@@ -383,15 +409,19 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
         var callback = function (queryResults) {
             switch (template) {
                 case "File":
-                    var fillFields = function(){};
+                    var fillFields = function () {
+                    };
                     initAutoComplete(queryResults, fileNameField, dialogueInstance, fillFields);
                     break;
                 case "Internal link":
-                    var fillFields = function(){};
+                    var fillFields = function () {
+                        dialogueInstance.getFieldset().getItems()[2].getField().setValue(suggestion.context);
+                        dialogueInstance.getFieldset().getItems()[3].getField().setValue(suggestion.contexttype);
+                    };
                     initAutoComplete(queryResults, pageNameField, dialogueInstance, fillFields);
                     break;
                 case "External link":
-                    var fillFields = function(suggestion){
+                    var fillFields = function (suggestion) {
                         //fixme make this independent of order
                         dialogueInstance.getFieldset().getItems()[0].getField().setValue(suggestion.hyperlink);
                         dialogueInstance.getFieldset().getItems()[3].getField().setValue(suggestion.creator);

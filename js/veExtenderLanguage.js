@@ -24,7 +24,9 @@ function defineTranslations() {
             "visualeditor-emm-link-add-resource": "Include in references list:",
 
             "visualeditor-emm-page": "Page name*:",
-            "visualeditor-emm-page-title": "Presentation title*:",
+            "visualeditor-emm-page-presentationtitle": "Presentation title*:",
+            "visualeditor-emm-page-context": "Context:",
+            "visualeditor-emm-page-contexttype": "Context type:",
 
             "visualeditor-emm-file-name": "Filename*",
             "visualeditor-emm-file-presentationtitle": "Presentation title*:",
@@ -72,7 +74,9 @@ function defineTranslations() {
             "visualeditor-emm-link-add-resource": "Opnemen in referentielijst:",
 
             "visualeditor-emm-page": "pagina naam*:",
-            "visualeditor-emm-page-title": "Presentatietitel*:",
+            "visualeditor-emm-page-presentationtitle": "Presentatietitel*:",
+            "visualeditor-emm-page-context": "Context:",
+            "visualeditor-emm-page-contexttype": "Context type:",
 
             "visualeditor-emm-file-name": "Bestandsnaam*",
             "visualeditor-emm-file-presentationtitle": "Presentatietitel*:",
