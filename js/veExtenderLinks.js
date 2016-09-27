@@ -5,12 +5,6 @@
  *  This method is executed when the extention is loaded and is responsible for passing the correct information to the loadEMMDialog methods
  */
 function addEMMLinks() {
-    //Include JQuery-UI
-    var script = document.createElement('script');
-    script.src = "https://code.jquery.com/ui/1.12.1/jquery-ui.js";
-    document.getElementsByTagName('head')[0].appendChild(script);
-
-
     var queries = veExtenderQueries();
 
     loadEMMDialog("File", "file", "visualeditor-emm-menufiletitle", "visualeditor-emm-dialogfiletitle",
@@ -73,7 +67,7 @@ function loadEMMDialog(template, toolId, menuText, dialogText, askQuery, templat
     // create the dialogue
     createDialogue(dialogueName, OO.ui.deferMsg(dialogText), askQuery, template, templateResult);
 
-    // Add a button that opens the dialog to te menu
+    // Add a menu-item that opens the dialog
     var tool = function (toolGroup, config) {
         ve.ui.Tool.call(this, toolGroup, config);
         this.setDisabled(false);
@@ -95,6 +89,7 @@ function loadEMMDialog(template, toolId, menuText, dialogText, askQuery, templat
     };
     ve.ui.toolFactory.register(tool);
 }
+
 /*  createDialogue
  *  This methods creates a dialogue that helps the user with inserting several types of links
  *  @param dialogueName a string that serves as the handle for the selection menu to access the dialogue
@@ -124,7 +119,6 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
     dialogue.prototype.initialize = function () {
         //put the dialogue in a variable for easier and more clear access
         var dialogueInstance = this;
-        dialogueInstance.pageid = [];
         var queryResult = "";
 
         //  create the fieldset, which is responsible for the layout of the dialogue
@@ -206,11 +200,11 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                 var presentationTitleField = new OO.ui.TextInputWidget({});
                 var creatorField = new OO.ui.TextInputWidget({});
                 var dateField = new OO.ui.TextInputWidget({});
-
-                dateField.$element.find('input').datepicker();
-
                 var organizationField = new OO.ui.TextInputWidget({});
                 var subjectField = new OO.ui.TextInputWidget({});
+                var addToResourcesField = new OO.ui.CheckboxInputWidget({
+                    selected: true
+                });
 
                 fieldset.addItems([
                     new OO.ui.FieldLayout(linkField, {
@@ -238,7 +232,12 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                         align: "left"
                     }),
                     new OO.ui.FieldLayout(subjectField, {
-                        label: OO.ui.deferMsg("visualeditor-emm-link-subject")
+                        label: OO.ui.deferMsg("visualeditor-emm-link-subject"),
+                        align: "left"
+                    }),
+                    new OO.ui.FieldLayout(addToResourcesField, {
+                        label: OO.ui.deferMsg("visualeditor-emm-link-add-resource"),
+                        align: "left"
                     })
                 ]);
                 break;
@@ -276,6 +275,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                     alert(OO.ui.deferMsg("visualeditor-emm-dialog-error"));
             }
 
+            console.log(dialogueInstance.pageid);
             var linkdata = dialogueInstance.pageid.length > 0 ? dialogueInstance.pageid : "";
             var exists = true;
             if (linkdata.length == 0) {
@@ -346,7 +346,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
             if (exists) {
                 target = linkdata;
             }
-            semanticCreateWithFromQuery(query, insertCallback, target);
+            semanticCreateWithFormQuery(query, insertCallback, target);
 
             //Clear the input fields and close the dialogue
             clearInputFields(fieldset);
@@ -383,13 +383,23 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
         var callback = function (queryResults) {
             switch (template) {
                 case "File":
-                    initAutoComplete(queryResults, fileNameField, dialogueInstance, template);
+                    var fillFields = function(){};
+                    initAutoComplete(queryResults, fileNameField, dialogueInstance, fillFields);
                     break;
                 case "Internal link":
-                    initAutoComplete(queryResults, pageNameField, dialogueInstance, template);
+                    var fillFields = function(){};
+                    initAutoComplete(queryResults, pageNameField, dialogueInstance, fillFields);
                     break;
                 case "External link":
-                    initAutoComplete(queryResults, titleField, dialogueInstance, template);
+                    var fillFields = function(suggestion){
+                        //fixme make this independent of order
+                        dialogueInstance.getFieldset().getItems()[0].getField().setValue(suggestion.hyperlink);
+                        dialogueInstance.getFieldset().getItems()[3].getField().setValue(suggestion.creator);
+                        dialogueInstance.getFieldset().getItems()[4].getField().setValue(fixDate(suggestion.date.raw));
+                        dialogueInstance.getFieldset().getItems()[5].getField().setValue(suggestion.organization);
+                        dialogueInstance.getFieldset().getItems()[6].getField().setValue(suggestion.subjects);
+                    };
+                    initAutoComplete(queryResults, titleField, dialogueInstance, fillFields);
                     break;
                 default:
                     alert(OO.ui.deferMsg("visualeditor-emm-dialog-error"));
@@ -553,7 +563,7 @@ function semanticAskQuery(query, callback, template) {
     });
 }
 
-function semanticCreateWithFromQuery(query, callback, target) {
+function semanticCreateWithFormQuery(query, callback, target) {
     var api = new mw.Api();
     api.get({
         action: "sfautoedit",
@@ -598,31 +608,15 @@ function grabSelectedText(inputObject) {
  * @param inputObject The object in which the input field exists where the autocomplete function should be enabled
  * @param dialogueInstance The dialogue whose page-id should be edited in order to succesfully insert the link later on
  */
-function initAutoComplete(data, inputObject, dialogueInstance, template) {
+function initAutoComplete(data, inputObject, dialogueInstance, fillFields) {
     var inputField = $(inputObject.$element).find("input");
 
     $(inputField).autocomplete({
         lookup: data,
         onSelect: function (suggestion) {
             dialogueInstance.pageid = suggestion.data;
-            console.log(suggestion);
             //This part of the code depends on the order in which the fields of the dialogs are defined
-            //fixme make this independent of order
-            switch (template) {
-                case "File":
-                    break;
-                case "Internal link":
-                    break;
-                case "External link":
-                    dialogueInstance.getFieldset().getItems()[0].getField().setValue(suggestion.hyperlink);
-                    dialogueInstance.getFieldset().getItems()[3].getField().setValue(suggestion.creator);
-                    dialogueInstance.getFieldset().getItems()[4].getField().setValue(fixDate(suggestion.date.raw));
-                    dialogueInstance.getFieldset().getItems()[5].getField().setValue(suggestion.organization);
-                    dialogueInstance.getFieldset().getItems()[6].getField().setValue(suggestion.subjects);
-                    break;
-                default:
-                    alert(OO.ui.deferMsg("visualeditor-emm-dialog-error"));
-            }
+            fillFields(suggestion);
         },
         appendTo: inputField.parentElement,
         maxHeight: 300
