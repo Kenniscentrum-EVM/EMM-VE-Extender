@@ -28,9 +28,13 @@ function defineTranslations() {
             "visualeditor-emm-page-context": "Context:",
             "visualeditor-emm-page-contexttype": "Context type:",
 
-            "visualeditor-emm-file-name": "Filename*",
+            "visualeditor-emm-file-title": "Title*:",
+            "visualeditor-emm-file-filename": "Filename*:",
             "visualeditor-emm-file-presentationtitle": "Presentation title*:",
-            "visualeditor-emm-file-optional": "Optional text:",
+            "visualeditor-emm-file-creator": "Author*:",
+            "visualeditor-emm-file-date": "Date*:",
+            "visualeditor-emm-file-organization": "Organization:",
+            "visualeditor-emm-file-subject": "Subject:",
 
             "visualeditor-emm-cancel": "Cancel",
             "visualeditor-emm-insert": "Insert",
@@ -78,9 +82,13 @@ function defineTranslations() {
             "visualeditor-emm-page-context": "Context:",
             "visualeditor-emm-page-contexttype": "Context type:",
 
-            "visualeditor-emm-file-name": "Bestandsnaam*",
+            "visualeditor-emm-file-title": "Titel*:",
+            "visualeditor-emm-file-filename": "Bestandsnaam*:",
             "visualeditor-emm-file-presentationtitle": "Presentatietitel*:",
-            "visualeditor-emm-file-optional": "Optionele tekst:",
+            "visualeditor-emm-file-creator": "Auteur*:",
+            "visualeditor-emm-file-date": "Datum*:",
+            "visualeditor-emm-file-organization": "Organisatie:",
+            "visualeditor-emm-file-subject": "Onderwerp:",
 
             "visualeditor-emm-cancel": "Annuleer",
             "visualeditor-emm-insert": "Voeg in",

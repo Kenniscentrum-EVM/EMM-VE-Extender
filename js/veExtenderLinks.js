@@ -9,16 +9,13 @@ function addEMMLinks() {
 
     loadEMMDialog("File", "file", "visualeditor-emm-menufiletitle", "visualeditor-emm-dialogfiletitle",
         queries.linkfiles,
-        function (namedata, linkdata, optionalData) {
+        function (namedata, linkdata) {
             return {
                 resource: {
                     wt: linkdata
                 },
                 name: {
                     wt: namedata
-                },
-                optional: {
-                    wt: optionalData
                 }
             };
         }
@@ -133,30 +130,44 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
         switch (template) {
             case "File":
                 //Create input fields in case we're dealing with a dialogue to add a file
-                var fileNameField = new OO.ui.TextInputWidget({
+                var titleField = new OO.ui.TextInputWidget({
                     placeholder: OO.ui.deferMsg("visualeditor-emm-search")
                 });
 
-                var presentationTextField = new OO.ui.TextInputWidget({});
-
-                var optionalField = new OO.ui.TextInputWidget({
-                    placeholder: "Optional",
-                    id: "optional"
-                });
+                var fileNameField = new OO.ui.TextInputWidget({});
+                var presentationTitleField = new OO.ui.TextInputWidget({});
+                var creatorField = new OO.ui.TextInputWidget({});
+                var dateField = new OO.ui.TextInputWidget({});
+                var organizationField = new OO.ui.TextInputWidget({});
+                var subjectField = new OO.ui.TextInputWidget({});
 
                 fieldset.addItems([
-                    new OO.ui.FieldLayout(fileNameField, {
-                        label: OO.ui.deferMsg("visualeditor-emm-file-name"),
+                    new OO.ui.FieldLayout(titleField, {
+                        label: OO.ui.deferMsg("visualeditor-emm-file-title"),
                         align: "left"
                     }),
-
-                    new OO.ui.FieldLayout(presentationTextField, {
+                    new OO.ui.FieldLayout(fileNameField, {
+                        label: OO.ui.deferMsg("visualeditor-emm-file-filename"),
+                        align: "left"
+                    }),
+                    new OO.ui.FieldLayout(presentationTitleField, {
                         label: OO.ui.deferMsg("visualeditor-emm-file-presentationtitle"),
                         align: "left"
                     }),
-
-                    new OO.ui.FieldLayout(optionalField, {
-                        label: OO.ui.deferMsg("visualeditor-emm-file-optional"),
+                    new OO.ui.FieldLayout(creatorField, {
+                        label: OO.ui.deferMsg("visualeditor-emm-file-creator"),
+                        align: "left"
+                    }),
+                    new OO.ui.FieldLayout(dateField, {
+                        label: OO.ui.deferMsg("visualeditor-emm-file-date"),
+                        align: "left"
+                    }),
+                    new OO.ui.FieldLayout(organizationField, {
+                        label: OO.ui.deferMsg("visualeditor-emm-file-organization"),
+                        align: "left"
+                    }),
+                    new OO.ui.FieldLayout(subjectField, {
+                        label: OO.ui.deferMsg("visualeditor-emm-file-subject"),
                         align: "left"
                     })
                 ]);
@@ -258,21 +269,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
 
         //  Add event-handling logic to okButton
         var insertButtonHandler = function () {
-            switch (template) {
-                case "File":
-                    var namedata = presentationTextField.getValue();
-                    var optionaldata = optionalField.getValue();
-                    break;
-                case "Internal link":
-                    var namedata = presentationTitleField.getValue();
-                    break;
-                case "External link":
-                    var namedata = presentationTitleField.getValue();
-                    break;
-                default:
-                    alert(OO.ui.deferMsg("visualeditor-emm-dialog-error"));
-            }
-
+            var namedata = presentationTitleField.getValue();
             var linkdata = dialogueInstance.pageid.length > 0 ? dialogueInstance.pageid : "";
             var exists = true;
             if (linkdata.length == 0) {
@@ -311,7 +308,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                                                     href: "Template:" + templateToUse,
                                                     wt: templateToUse
                                                 },
-                                                params: templateResult(namedata, linkdata, optionaldata)
+                                                params: templateResult(namedata, linkdata)
                                             }
                                         }
                                     ]
@@ -333,7 +330,14 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
             var query = "";
             switch (template) {
                 case "File":
-                    //stuff
+                    //Build the sfautoedit query
+                    query += "Resource Description[created in page]=" + currentPageID +
+                        "&Resource Description[file name]=" + fileNameField.getValue() +
+                        "&Resource Description[title]=" + titleField.getValue() +
+                        "&Resource Description[creator]=" + creatorField.getValue() +
+                        "&Resource Description[date]=" + dateField.getValue();
+                    if (organizationField.getValue().length > 0) query += "&Resource Description[organization]=" + organizationField.getValue();
+                    if (subjectField.getValue().length > 0) query += "&Resource Description[subject]=" + subjectField.getValue();
                     break;
                 case "Internal link":
                     //Build the sfautoedit query
@@ -390,6 +394,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
             }
             switch (template) {
                 case "File":
+                    semanticCreateWithFormQuery(query, insertCallback, target, "Resource Light")
                     break;
                 case "Internal link":
                     //done after getting the topcontext
@@ -436,12 +441,19 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
         var callback = function (queryResults) {
             switch (template) {
                 case "File":
-                    var fillFields = function () {
+                    var fillFields = function (suggestion) {
+                        //fixme make this independent of order
+                        dialogueInstance.getFieldset().getItems()[1].getField().setValue(suggestion.filename);
+                        dialogueInstance.getFieldset().getItems()[3].getField().setValue(suggestion.creator);
+                        dialogueInstance.getFieldset().getItems()[4].getField().setValue(fixDate(suggestion.date));
+                        dialogueInstance.getFieldset().getItems()[5].getField().setValue(suggestion.organization);
+                        dialogueInstance.getFieldset().getItems()[6].getField().setValue(suggestion.subjects);
                     };
-                    initAutoComplete(queryResults, fileNameField, dialogueInstance, fillFields);
+                    initAutoComplete(queryResults, titleField, dialogueInstance, fillFields);
                     break;
                 case "Internal link":
                     var fillFields = function (suggestion) {
+                        //fixme make this independent of order
                         dialogueInstance.getFieldset().getItems()[2].getField().setValue(suggestion.supercontext);
                         dialogueInstance.getFieldset().getItems()[3].getField().setValue(suggestion.contexttype);
                         dialogueInstance.setTopContext(suggestion.topcontext);
@@ -451,9 +463,9 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                 case "External link":
                     var fillFields = function (suggestion) {
                         //fixme make this independent of order
-                        dialogueInstance.getFieldset().getItems()[0].getField().setValue(suggestion.hyperlink);
+                        dialogueInstance.getFieldset().getItems()[1].getField().setValue(suggestion.hyperlink);
                         dialogueInstance.getFieldset().getItems()[3].getField().setValue(suggestion.creator);
-                        dialogueInstance.getFieldset().getItems()[4].getField().setValue(fixDate(suggestion.date.raw));
+                        dialogueInstance.getFieldset().getItems()[4].getField().setValue(fixDate(suggestion.date));
                         dialogueInstance.getFieldset().getItems()[5].getField().setValue(suggestion.organization);
                         dialogueInstance.getFieldset().getItems()[6].getField().setValue(suggestion.subjects);
                     };
@@ -481,19 +493,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
         //Selected text is gathered here and put inside the input field
         //Beyong that this is also the place where the size of the dialog is set.
         dialogue.prototype.setDimensions = function (dim) {
-            switch (template) {
-                case "File":
-                    grabSelectedText(presentationTextField);
-                    break;
-                case "Internal link":
-                    grabSelectedText(presentationTitleField);
-                    break;
-                case "External link":
-                    grabSelectedText(presentationTitleField);
-                    break;
-                default:
-                    alert(OO.ui.deferMsg("visualeditor-emm-dialog-error"));
-            }
+            grabSelectedText(presentationTitleField);
             fieldset.$element.css({width: this.content.$element.outerWidth(true) - 50});
             //Inline css cause, adding classes doesn't overwrite existing css
             for (var i = 0; i < fieldset.getItems().length; i++) {
@@ -561,9 +561,29 @@ function semanticAskQuery(query, callback, template) {
             }
             switch (template) {
                 case "File":
+                    var filename = res[prop].printouts["File name"][0];
+                    filename != null ? filename = filename.fulltext : filename = "";
+                    var creator = res[prop].printouts["Dct:creator"][0];
+                    var date = res[prop].printouts["Dct:date"][0];
+                    var organization = res[prop].printouts["Organization"][0];
+                    var subjects = "";
+                    var querySubjects = res[prop].printouts["Dct:subject"];
+                    //Gathers all subjects and creates a single string which contains the fulltext name of all the subjects,
+                    //seperated by a ,
+                    for (var j = 0; j < querySubjects.length; j++) {
+                        subjects = subjects + querySubjects[j].fulltext + ", ";
+                    }
+                    //Remove comma and space at the end of the subject list
+                    subjects = subjects.slice(0, -2);
+                    //Use value for the title in the associative array to ensure it works with the autocmoplete library
                     arr.push({
                         value: title,
-                        data: pagename
+                        data: pagename,
+                        filename: filename,
+                        creator: creator,
+                        date: date,
+                        organization: organization,
+                        subjects: subjects
                     });
                     break;
                 case "Internal link":
@@ -686,6 +706,7 @@ function initAutoComplete(data, inputObject, dialogueInstance, fillFields) {
     $(inputField).autocomplete({
         lookup: data,
         onSelect: function (suggestion) {
+            console.log(suggestion);
             dialogueInstance.pageid = suggestion.data;
             //This part of the code depends on the order in which the fields of the dialogs are defined
             fillFields(suggestion);
@@ -695,7 +716,12 @@ function initAutoComplete(data, inputObject, dialogueInstance, fillFields) {
     });
 }
 
-function fixDate(dateString) {
+function fixDate(date) {
+    if(date == null)
+    {
+        return "";
+    }
+    var dateString = date.raw;
     var replacePattern = /[0-9]+\//;
     //The result of the askQuery always returns an american date starting with *number*/, for example 1/
     //The date is of the fomat n/yyyy/mm/dd
