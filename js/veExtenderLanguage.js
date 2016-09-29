@@ -17,10 +17,10 @@ function defineTranslations() {
             "visualeditor-emm-link": "Link*:",
             "visualeditor-emm-link-title": "Title*:",
             "viualeditor-emm-link-presentationtitle": "Presentation title*:",
-            "visualeditor-emm-link-creator": "Creator*:",
+            "visualeditor-emm-link-creator": "Author*:",
             "visualeditor-emm-link-date": "Date*:",
             "visualeditor-emm-link-organization": "Organization:",
-            "visualeditor-emm-link-subject": "Subject (SKOS concept):",
+            "visualeditor-emm-link-subject": "Subject:",
             "visualeditor-emm-link-add-resource": "Include in references list:",
 
             "visualeditor-emm-page": "Page name*:",
@@ -70,7 +70,7 @@ function defineTranslations() {
             "visualeditor-emm-link-creator": "Auteur*:",
             "visualeditor-emm-link-date": "Datum*:",
             "visualeditor-emm-link-organization": "Organisatie:",
-            "visualeditor-emm-link-subject": "Onderwerp (SKOS concept):",
+            "visualeditor-emm-link-subject": "Onderwerp:",
             "visualeditor-emm-link-add-resource": "Opnemen in referentielijst:",
 
             "visualeditor-emm-page": "pagina naam*:",

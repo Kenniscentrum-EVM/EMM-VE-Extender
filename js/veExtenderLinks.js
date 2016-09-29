@@ -119,7 +119,10 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
     dialogue.prototype.initialize = function () {
         //put the dialogue in a variable for easier and more clear access
         var dialogueInstance = this;
-        var queryResult = "";
+        //Initialize fields for scoping and later use
+        dialogueInstance.queryResult = "";
+        dialogueInstance.topContext = "";
+        dialogueInstance.pageid = "";
 
         //  create the fieldset, which is responsible for the layout of the dialogue
         var fieldset = new OO.ui.FieldsetLayout({
@@ -164,7 +167,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                     placeholder: OO.ui.deferMsg("visualeditor-emm-search")
                 });
                 var presentationTitleField = new OO.ui.TextInputWidget({});
-                var contextField = new OO.ui.TextInputWidget({});
+                var contextField = new OO.ui.TextInputWidget({value: mw.config.get('wgPageName')});
                 var contextTypeField = new OO.ui.TextInputWidget({});
 
                 fieldset.addItems([
@@ -334,26 +337,39 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                     break;
                 case "Internal link":
                     //Build the sfautoedit query
-                    var api = new mw.Api();
                     var superContext = "";
-                    console.log("hij doet dingen met links?");
                     if (contextField.getValue() == "") {
-                        console.log("context was leeg");
                         superContext = currentPageID;
                     }
-                    console.log("[[" + superContext + "]]|?Topcontext|limit=10000");
-                    api.get({
-                        action: 'ask',
-                        parameters: 'limit:10000',//check how to increase limit of ask-result; done in LocalSettings.php
-                        query: "[[" + superContext + "]]|?Topcontext|limit=10000"//
-                    }).done(function (data) {
-                        var res = data.query.results;
-                        var topContext = res[superContext].printouts["Topcontext"][0].fulltext;
-                        query += "Light Context[Supercontext]=" + superContext +
-                            "&Light Context[Topcontext]=" + topContext +
-                            "&Light Context[Heading]=" + pageNameField.getValue();
-                        if (contextTypeField.getValue().length > 0) query += "&Light Context[Context type]=" + contextTypeField.getValue();
-                    });
+
+                    //Start building the query
+                    query += "Light Context[Supercontext]=" + superContext +
+                        "&Light Context[Heading]=" + pageNameField.getValue();
+                    if (contextTypeField.getValue().length > 0) query += "&Light Context[Context type]=" + contextTypeField.getValue();
+                    var target = "";
+                    if (exists) {
+                        target = linkdata;
+                    }
+
+                    //If there's no topcontext, find the topcontext
+                    if (dialogueInstance.topContext == null) {
+                        var api = new mw.Api();
+                        //Store the name of the page to be linked, mostly for asynchronous use
+                        api.get({
+                            action: 'ask',
+                            parameters: 'limit:10000',//check how to increase limit of ask-result; done in LocalSettings.php
+                            query: "[[" + superContext + "]]|?Topcontext|limit=10000"//
+                        }).done(function (data) {
+                            var res = data.query.results;
+                            var topContext = res[superContext].printouts["Topcontext"][0].fulltext;
+                            query += "&Light Context[Topcontext]=" + topContext;
+                            semanticCreateWithFormQuery(query, insertCallback, target, "Light Context");
+                        });
+                    }
+                    else {
+                        query += "&Light Context[Topcontext]=" + dialogueInstance.topContext;
+                        semanticCreateWithFormQuery(query, insertCallback, target, "Light Context");
+                    }
                     break;
                 case "External link":
                     //Build the sfautoedit query
@@ -372,7 +388,18 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
             if (exists) {
                 target = linkdata;
             }
-            semanticCreateWithFormQuery(query, insertCallback, target);
+            switch (template) {
+                case "File":
+                    break;
+                case "Internal link":
+                    //done after getting the topcontext
+                    break;
+                case "External link":
+                    semanticCreateWithFormQuery(query, insertCallback, target, "Resource Hyperlink");
+                    break;
+                default:
+                    alert(OO.ui.deferMsg("visualeditor-emm-dialog-error"));
+            }
 
             //Clear the input fields and close the dialogue
             clearInputFields(fieldset);
@@ -414,9 +441,10 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                     initAutoComplete(queryResults, fileNameField, dialogueInstance, fillFields);
                     break;
                 case "Internal link":
-                    var fillFields = function () {
-                        dialogueInstance.getFieldset().getItems()[2].getField().setValue(suggestion.context);
+                    var fillFields = function (suggestion) {
+                        dialogueInstance.getFieldset().getItems()[2].getField().setValue(suggestion.supercontext);
                         dialogueInstance.getFieldset().getItems()[3].getField().setValue(suggestion.contexttype);
+                        dialogueInstance.setTopContext(suggestion.topcontext);
                     };
                     initAutoComplete(queryResults, pageNameField, dialogueInstance, fillFields);
                     break;
@@ -434,7 +462,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                 default:
                     alert(OO.ui.deferMsg("visualeditor-emm-dialog-error"));
             }
-            queryResult = queryResults;
+            dialogueInstance.queryResult = queryResults;
         };
 
         //Execute the askQuery in order to gather all resources
@@ -442,6 +470,10 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
 
         dialogue.prototype.getFieldset = function () {
             return fieldset;
+        };
+
+        dialogue.prototype.setTopContext = function (context) {
+            dialogueInstance.topContext = context;
         };
 
         //fixme dirty hack
@@ -505,7 +537,7 @@ function semanticAskQuery(query, callback, template) {
         query: query
     }).done(function (data) {
         var res = data.query.results;
-        var arr = [];
+        var arr = []; //array to store the results
         var prevTitle = "";
         var numTitle = 0;
 
@@ -535,9 +567,18 @@ function semanticAskQuery(query, callback, template) {
                     });
                     break;
                 case "Internal link":
+                    var supercontext = "";
+                    if (res[prop].printouts["Supercontext"].length > 0) {
+                        supercontext = res[prop].printouts["Supercontext"][0].fulltext;
+                    }
+                    var topcontext = res[prop].printouts["Topcontext"][0];
+                    var contexttype = res[prop].printouts["Context type"][0];
                     arr.push({
                         value: title,
-                        data: pagename
+                        data: pagename,
+                        supercontext: supercontext,
+                        topcontext: topcontext,
+                        contexttype: contexttype
                     });
                     break;
                 case "External link":
@@ -552,6 +593,7 @@ function semanticAskQuery(query, callback, template) {
                     for (var j = 0; j < querySubjects.length; j++) {
                         subjects = subjects + querySubjects[j].fulltext + ", ";
                     }
+                    //Remove comma and space at the end of the subject list
                     subjects = subjects.slice(0, -2);
                     //Use value for the title in the associative array to ensure it works with the autocmoplete library
                     arr.push({
@@ -593,11 +635,11 @@ function semanticAskQuery(query, callback, template) {
     });
 }
 
-function semanticCreateWithFormQuery(query, callback, target) {
+function semanticCreateWithFormQuery(query, callback, target, form) {
     var api = new mw.Api();
     api.get({
         action: "sfautoedit",
-        form: "Resource Hyperlink",
+        form: form,
         query: query,
         target: target
     }).done(function (data) {
