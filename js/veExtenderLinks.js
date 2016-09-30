@@ -706,8 +706,8 @@ function initAutoComplete(data, inputObject, dialogueInstance, fillFields) {
     $(inputField).autocomplete({
         lookup: data,
         onSelect: function (suggestion) {
-            console.log(suggestion);
             dialogueInstance.pageid = suggestion.data;
+            console.log(dialogueInstance.pageid);
             //This part of the code depends on the order in which the fields of the dialogs are defined
             fillFields(suggestion);
         },
@@ -722,6 +722,12 @@ function fixDate(date) {
         return "";
     }
     var dateString = date.raw;
+    var exampledate = "24-12-1992";
+    var exampledate2 = "24.12.1992";
+    exampledate = exampledate.replace("-","/");
+    exampledate2 = exampledate2.replace(".","/");
+    console.log(exampledate);
+    console.log(exampledate2);
     var replacePattern = /[0-9]+\//;
     //The result of the askQuery always returns an american date starting with *number*/, for example 1/
     //The date is of the fomat n/yyyy/mm/dd
