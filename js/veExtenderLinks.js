@@ -105,7 +105,12 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
     dialogue.static.name = dialogueName;
     dialogue.static.title = dialogueMessage;
     dialogue.static.actions = [
-        {action: "insert", label: OO.ui.deferMsg("visualeditor-emm-insert"), flags: "primary"},
+        {
+            action: "insert",
+            label: OO.ui.deferMsg("visualeditor-emm-insert"),
+            flags: ["primary", "constructive"],
+            disabled: true
+        },
         {action: "cancel", label: OO.ui.deferMsg("visualeditor-emm-cancel"), flags: "safe"}
     ];
 
@@ -215,6 +220,12 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                     selected: true
                 });
 
+                titleField.validation = [checkIfEmpty];
+                linkField.validation = [checkIfEmpty, checkIfWebsite];
+                presentationTitleField.validation = [checkIfEmpty];
+                creatorField.validation = [checkIfEmpty];
+                dateField.validation = [checkIfEmpty, checkIfDate];
+
                 fieldset.addItems([
                     new OO.ui.FieldLayout(titleField, {
                         label: OO.ui.deferMsg("visualeditor-emm-link-title"),
@@ -266,6 +277,35 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
             .addClass("oo-ui-windowManager")
             .toggleClass("oo-ui-windowManager-modal", true);
         this.$body.append(this.content.$element);
+
+        var validator = new Validator(
+            fieldset,
+            null,
+            function (object, message) {
+                object.$element.addClass("oo-ui-flaggedElement-invalid");
+                var el = $("<p>" + message + "</p>").css({
+                    "margin": "0px 0px 0px",
+                    "color": "red"
+                });
+                object.$element.after(el);
+                object.$element.parent().parent().parent().css("margin-bottom", "-6px");
+
+                dialogueInstance.actions.forEach({actions: "insert"}, function (action) {
+                    action.setDisabled(true);
+                });
+            },
+            function () {
+                dialogueInstance.actions.forEach({actions: "insert"}, function (action) {
+                    action.setDisabled(false);
+                });
+            },
+            null,
+            function (object) {
+                object.$element.removeClass("oo-ui-flaggedElement-invalid");
+                object.$element.parent().find("p").remove();
+                object.$element.parent().parent().parent().css("margin-bottom", "1em");
+            }
+        );
 
         //  Add event-handling logic to okButton
         var insertButtonHandler = function () {
@@ -407,7 +447,9 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
             }
 
             //Clear the input fields and close the dialogue
+            validator.disable();
             clearInputFields(fieldset);
+            validator.enable();
             dialogueInstance.pageid = "";
             dialogueInstance.close();
         };
@@ -416,7 +458,9 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
         // Add event handling logic to cancelButton
         var cancelButtonHandler = function () {
             //Clear the dialog and close it
+            validator.disable();
             clearInputFields(fieldset);
+            validator.enable();
             dialogueInstance.close();
         };
 
@@ -717,15 +761,14 @@ function initAutoComplete(data, inputObject, dialogueInstance, fillFields) {
 }
 
 function fixDate(date) {
-    if(date == null)
-    {
+    if (date == null) {
         return "";
     }
     var dateString = date.raw;
-    var exampledate = "24-12-1992";
-    var exampledate2 = "24.12.1992";
-    exampledate = exampledate.replace("-","/");
-    exampledate2 = exampledate2.replace(".","/");
+    var exampledate = "12-1992";
+    var exampledate2 = "..7886877868.7.7.7.7.7.24.12.1992";
+    exampledate = exampledate.replace(/-/g, "/");
+    exampledate2 = exampledate2.replace(/\./g, "/");
     console.log(exampledate);
     console.log(exampledate2);
     var replacePattern = /[0-9]+\//;

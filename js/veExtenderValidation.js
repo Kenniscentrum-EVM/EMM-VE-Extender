@@ -102,5 +102,5 @@ function checkIfNoSpecialCharacters(value) {
 function checkIfDate(value) {
     var expr = /((0[1-9]|[12]\d)\/(0[1-9]|1[012])|30-(0[13-9]|1[012])|(31-(0[13578]|1[02])))\/(19|20)\d\d/
     if(expr.test(value)) return "";
-    else return "De datum moet als volgt geschreven worden: dd/mm/yyyy";
+    else return "De datum moet als volgt geschreven worden: dd/mm/yyyy, dd-mm-yyyy of dd.mm.yyyy";
 }
