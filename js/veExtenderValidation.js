@@ -16,7 +16,7 @@ var Validator = function (fieldset, inputSuccess, inputFail, validationSuccess, 
     this.fieldset = fieldset;
     function onInputChange(value) {
         if(this.onChangeFunctions != null) {
-            for(var i = 0; i < this.onChangeFunctions; i++) {
+            for(var i = 0; i < this.onChangeFunctions.length; i++) {
                 this.onChangeFunctions[i]();
             }
         }

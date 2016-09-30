@@ -125,6 +125,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
         dialogueInstance.queryResult = "";
         dialogueInstance.topContext = "";
         dialogueInstance.pageid = "";
+        dialogueInstance.autoCompleteWasSelected = false;
 
         //  create the fieldset, which is responsible for the layout of the dialogue
         var fieldset = new OO.ui.FieldsetLayout({
@@ -225,6 +226,15 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                 presentationTitleField.validation = [checkIfEmpty];
                 creatorField.validation = [checkIfEmpty];
                 dateField.validation = [checkIfEmpty, checkIfDate];
+
+                titleField.onChangeFunctions = [function () {
+                    if (dialogueInstance.autoCompleteWasSelected) {
+                        dialogueInstance.autoCompleteWasSelected = false;
+                    }
+                    else {
+                        dialogueInstance.pageid = "";
+                    }
+                }];
 
                 fieldset.addItems([
                     new OO.ui.FieldLayout(titleField, {
@@ -751,7 +761,7 @@ function initAutoComplete(data, inputObject, dialogueInstance, fillFields) {
         lookup: data,
         onSelect: function (suggestion) {
             dialogueInstance.pageid = suggestion.data;
-            console.log(dialogueInstance.pageid);
+            dialogueInstance.autoCompleteWasSelected = true;
             //This part of the code depends on the order in which the fields of the dialogs are defined
             fillFields(suggestion);
         },
@@ -765,12 +775,7 @@ function fixDate(date) {
         return "";
     }
     var dateString = date.raw;
-    var exampledate = "12-1992";
-    var exampledate2 = "..7886877868.7.7.7.7.7.24.12.1992";
-    exampledate = exampledate.replace(/-/g, "/");
-    exampledate2 = exampledate2.replace(/\./g, "/");
-    console.log(exampledate);
-    console.log(exampledate2);
+    dateString.replace(/-/g, "/").replace(/\./g, "/");
     var replacePattern = /[0-9]+\//;
     //The result of the askQuery always returns an american date starting with *number*/, for example 1/
     //The date is of the fomat n/yyyy/mm/dd
