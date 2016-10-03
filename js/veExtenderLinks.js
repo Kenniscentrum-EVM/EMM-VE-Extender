@@ -226,6 +226,8 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                 creatorField.validation = [checkIfEmpty];
                 dateField.validation = [checkIfEmpty, checkIfDate];
 
+                //todo validation property verplaatsen.
+
                 fieldset.addItems([
                     new OO.ui.FieldLayout(titleField, {
                         label: OO.ui.deferMsg("visualeditor-emm-link-title"),
@@ -282,13 +284,15 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
             fieldset,
             null,
             function (object, message) {
+                //todo positie absoluut?
                 object.$element.addClass("oo-ui-flaggedElement-invalid");
                 var el = $("<p>" + message + "</p>").css({
                     "margin": "0px 0px 0px",
-                    "color": "red"
+                    "color": "red",
+                    "position" : "absolute"
                 });
                 object.$element.after(el);
-                object.$element.parent().parent().parent().css("margin-bottom", "-6px");
+               // object.$element.parent().parent().parent().css("margin-bottom", "-6px");
 
                 dialogueInstance.actions.forEach({actions: "insert"}, function (action) {
                     action.setDisabled(true);
@@ -303,7 +307,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
             function (object) {
                 object.$element.removeClass("oo-ui-flaggedElement-invalid");
                 object.$element.parent().find("p").remove();
-                object.$element.parent().parent().parent().css("margin-bottom", "1em");
+                //object.$element.parent().parent().parent().css("margin-bottom", "1em");
             }
         );
 
@@ -512,6 +516,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                         dialogueInstance.getFieldset().getItems()[4].getField().setValue(fixDate(suggestion.date));
                         dialogueInstance.getFieldset().getItems()[5].getField().setValue(suggestion.organization);
                         dialogueInstance.getFieldset().getItems()[6].getField().setValue(suggestion.subjects);
+                        validator.validateAll();
                     };
                     initAutoComplete(queryResults, titleField, dialogueInstance, fillFields);
                     break;
@@ -538,6 +543,8 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
         //Beyong that this is also the place where the size of the dialog is set.
         dialogue.prototype.setDimensions = function (dim) {
             grabSelectedText(presentationTitleField);
+            if(presentationTitleField.value.length > 0)
+                validator.validateWidget(presentationTitleField);
             fieldset.$element.css({width: this.content.$element.outerWidth(true) - 50});
             //Inline css cause, adding classes doesn't overwrite existing css
             for (var i = 0; i < fieldset.getItems().length; i++) {
@@ -754,6 +761,7 @@ function initAutoComplete(data, inputObject, dialogueInstance, fillFields) {
             console.log(dialogueInstance.pageid);
             //This part of the code depends on the order in which the fields of the dialogs are defined
             fillFields(suggestion);
+
         },
         appendTo: inputField.parentElement,
         maxHeight: 300
