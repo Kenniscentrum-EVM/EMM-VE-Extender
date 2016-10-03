@@ -227,6 +227,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                 creatorField.validation = [checkIfEmpty];
                 dateField.validation = [checkIfEmpty, checkIfDate];
 
+                // todo validation property verplaatsen.
                 titleField.onChangeFunctions = [function () {
                     if (dialogueInstance.autoCompleteWasSelected) {
                         dialogueInstance.autoCompleteWasSelected = false;
@@ -296,10 +297,10 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                 object.$element.addClass("oo-ui-flaggedElement-invalid");
                 var el = $("<p>" + message + "</p>").css({
                     "margin": "0px 0px 0px",
-                    "color": "red"
+                    "color": "red",
+                    "position" : "absolute"
                 });
                 object.$element.after(el);
-                object.$element.parent().parent().parent().css("margin-bottom", "-6px");
 
                 dialogueInstance.actions.forEach({actions: "insert"}, function (action) {
                     action.setDisabled(true);
@@ -314,7 +315,6 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
             function (object) {
                 object.$element.removeClass("oo-ui-flaggedElement-invalid");
                 object.$element.parent().find("p").remove();
-                object.$element.parent().parent().parent().css("margin-bottom", "1em");
             }
         );
 
@@ -418,8 +418,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                     }
                     break;
                 case
-                "External link"
-                :
+                "External link":
                     //Build the sfautoedit query
                     query += "Resource Description[created in page]=" + currentPageID +
                         "&Resource Description[hyperlink]=" + linkField.getValue() +
@@ -522,12 +521,14 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                         dialogueInstance.getFieldset().getItems()[4].getField().setValue(fixDate(suggestion.date));
                         dialogueInstance.getFieldset().getItems()[5].getField().setValue(suggestion.organization);
                         dialogueInstance.getFieldset().getItems()[6].getField().setValue(suggestion.subjects);
+                        validator.validateAll();
                     };
                     initAutoComplete(queryResults, titleField, dialogueInstance, fillFields);
                     break;
                 case "Internal link":
                     var fillFields = function (suggestion) {
                         //Nothing to fill, no editable fields beyond presentationtitle and title
+                        validator.validateAll();
                     };
                     initAutoComplete(queryResults, pageNameField, dialogueInstance, fillFields);
                     break;
@@ -539,6 +540,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                         dialogueInstance.getFieldset().getItems()[4].getField().setValue(fixDate(suggestion.date));
                         dialogueInstance.getFieldset().getItems()[5].getField().setValue(suggestion.organization);
                         dialogueInstance.getFieldset().getItems()[6].getField().setValue(suggestion.subjects);
+                        validator.validateAll();
                     };
                     initAutoComplete(queryResults, titleField, dialogueInstance, fillFields);
                     break;
@@ -561,6 +563,8 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
         //Beyong that this is also the place where the size of the dialog is set.
         dialogue.prototype.setDimensions = function (dim) {
             grabSelectedText(presentationTitleField);
+            if(presentationTitleField.value.length > 0)
+                validator.validateWidget(presentationTitleField);
             fieldset.$element.css({width: this.content.$element.outerWidth(true) - 50});
             //Inline css cause, adding classes doesn't overwrite existing css
             for (var i = 0; i < fieldset.getItems().length; i++) {

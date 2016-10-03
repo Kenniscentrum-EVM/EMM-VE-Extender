@@ -1,3 +1,4 @@
+"use strict"
 /***
  * Validator class
  * @param fieldset fieldset to add validation to
@@ -10,35 +11,50 @@
  */
 var Validator = function (fieldset, inputSuccess, inputFail, validationSuccess, validationFail, cleanUp) {
     var validator = this;
-    var inputStates = {};
+    this.inputStates = [];
     this.enabled = true;
     this.cleanUp = cleanUp;
     this.fieldset = fieldset;
     function onInputChange(value) {
+        // is the onChangeFunctions property set?
         if(this.onChangeFunctions != null) {
+            // if so, execute functions in the onChangeFunctions array.
             for(var i = 0; i < this.onChangeFunctions.length; i++) {
                 this.onChangeFunctions[i]();
             }
         }
         // is the validator enabled?
         if(validator.enabled == true) {
+            // does the widget have the validation property?
             if (this.validation != null) {
+                // was a cleanUp function provided?
                 if (cleanUp != null)
+                    // execute the cleanUp method.
                     cleanUp(this);
+                // Loop through the validation functions.
                 for (var i = 0; i < this.validation.length; i++) {
                     if (this.validation[i](value).length > 0) {
+                        // execute inputFail if the widget fails to pass validation
                         if (inputFail != null)
                             inputFail(this, this.validation[i](value));
-                        inputStates[this.fieldId] = false;
+                        // set the widget to false in the input States map.
+                        validator.inputStates[this.fieldId] = false;
+                        // terminate the function.
                         return false;
                     }
                 }
             }
+
+            //console.log(inputStates)
+
+            // execute inputSuccess because the input passed validation
             if (inputSuccess != null)
                 inputSuccess();
-            inputStates[this.fieldId] = true;
+            // set the inputState of the widget to true
+            validator.inputStates[this.fieldId] = true;
+            //This awkward way of iterating is implemented because of the restrictions
             var isValidated = true;
-            $.each(inputStates, function (key, val) {
+            $.each(validator.inputStates, function (key, val) {
                 if (!val) {
                     isValidated = false;
                     if (validationFail != null)
@@ -46,61 +62,97 @@ var Validator = function (fieldset, inputSuccess, inputFail, validationSuccess, 
                     return false;
                 }
             });
+            //Are we completely validated? if not, return.
             if (!isValidated) return;
+
+            //All elements are validated, execute validationSuccess
             if (validationSuccess != null)
                 validationSuccess();
+
         }
     }
 
+    //Add event handlers to the widget given by the fieldset.
     for (var i = 0; i < fieldset.items.length; i++) {
+        //uh....?
+        (function(){
+            var widget = fieldset.items[i].fieldWidget;
+            fieldset.items[i].fieldWidget.$element.find("input").blur(function(){
+                widget.emit("change", widget.value);
+            });
+        })();
+
         var widget = fieldset.items[i].fieldWidget;
         if (widget.validation != null) {
             widget.fieldId = i;
-            inputStates[i] = false;
+            validator.inputStates[i] = false;
             widget.change = onInputChange;
+            //widget.$element.find("input").blur(onInputChange(widget.value));
             widget.connect(widget, {change: "change"});
         }
-        else
-            inputStates[widget.fieldId] = true;
     }
+
 }
 
 Validator.prototype.enable = function(){
     this.enabled = true;
+
 }
 
 Validator.prototype.disable = function(){
     this.enabled = false;
     this.cleanUpForm();
+    this.resetInputStates();
+
+
 }
 
 Validator.prototype.cleanUpForm = function() {
     if(this.cleanUp != null){
-        for (var i = 0; i < this.fieldset.items.length; i++) {
-            this.cleanUp(this.fieldset.items[i].fieldWidget);
-        }
+        for (var i = 0; i < this.fieldset.items.length; i++)
+            if(this.fieldset.items[i].fieldWidget.validation != null)
+                this.cleanUp(this.fieldset.items[i].fieldWidget);
     }
+}
+
+Validator.prototype.resetInputStates = function (){
+        for(var i = 0; i < this.inputStates.length; i++ )
+            this.inputStates[i] = false;
+}
+
+
+Validator.prototype.validateAll = function() {
+    for(var i = 0; i < this.fieldset.items.length; i++) {
+        if(this.fieldset.items[i].fieldWidget.validation != null)
+            this.fieldset.items[i].fieldWidget.emit("change", this.fieldset.items[i].fieldWidget.value);
+            //this.fieldset.items[i].fieldWidget.change();
+    }
+}
+
+Validator.prototype.validateWidget = function(widget){
+    widget.emit("change", widget.value);
 }
 
 function checkIfWebsite(value) {
     var expr = /(https:\/\/|http:\/\/)?(www\.)?[[a-z0-9]{1,256}\.[a-z]{2,6}\b\/?([-a-z0-9@:%_\+.~#?&//=]*)/ig
     if (expr.test(value)) return "";
-    else return "In dit veld moet een geldige URL ingevoerd worden.";
+    else return OO.ui.deferMsg("visualeditor-emm-validation-website")();
 }
 
 function checkIfEmpty(value) {
     if (value.length > 0) return "";
-    else return "Dit veld mag niet leeg zijn."; //todo translations
+    else return OO.ui.deferMsg("visualeditor-emm-validation-required")(); //todo translations
 }
 
 function checkIfNoSpecialCharacters(value) {
     var expr = /[^A-z\s\d][\\\^]?/g
-    if(expr.test(value)) return "Er mogen geen speciale tekens (bijv: é©ß) in dit veld!";
+    if(expr.test(value)) return OO.ui.deferMsg("visualeditor-emm-validation-special")();
     else return "";
 }
 
 function checkIfDate(value) {
-    var expr = /((0[1-9]|[12]\d)\/(0[1-9]|1[012])|30-(0[13-9]|1[012])|(31-(0[13578]|1[02])))\/(19|20)\d\d/
+    //var expr = /((0[1-9]|[12]\d)\/(0[1-9]|1[012])|30-(0[13-9]|1[012])|(31-(0[13578]|1[02])))\/(19|20)\d\d/
+    var expr = /^([0-9]|#|\+|\*|\-|\/|\\)+$/igm
     if(expr.test(value)) return "";
-    else return "De datum moet als volgt geschreven worden: dd/mm/yyyy, dd-mm-yyyy of dd.mm.yyyy";
+    else return OO.ui.deferMsg("visualeditor-emm-validation-date")();
 }
