@@ -55,7 +55,11 @@ var Validator = function (fieldset, inputSuccess, inputFail, validationSuccess, 
             //This awkward way of iterating is implemented because of the restrictions
             var isValidated = true;
             $.each(validator.inputStates, function (key, val) {
+                console.log(validator.inputStates);
                 if (!val) {
+                    console.log("binnen de value check:");
+                    console.log(key);
+                    console.log(val);
                     isValidated = false;
                     if (validationFail != null)
                         validationFail();
@@ -63,7 +67,9 @@ var Validator = function (fieldset, inputSuccess, inputFail, validationSuccess, 
                 }
             });
             //Are we completely validated? if not, return.
+            console.log(isValidated);
             if (!isValidated) return;
+
 
             //All elements are validated, execute validationSuccess
             if (validationSuccess != null)
@@ -84,6 +90,7 @@ var Validator = function (fieldset, inputSuccess, inputFail, validationSuccess, 
 
         var widget = fieldset.items[i].fieldWidget;
         if (widget.validation != null) {
+            console.log(widget);
             widget.fieldId = i;
             validator.inputStates[i] = false;
             widget.change = onInputChange;
