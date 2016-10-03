@@ -123,8 +123,8 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
         var dialogueInstance = this;
         //Initialize fields for scoping and later use
         dialogueInstance.queryResult = "";
-        dialogueInstance.topContext = "";
         dialogueInstance.pageid = "";
+        dialogueInstance.autoCompleteWasSelected = false;
 
         //  create the fieldset, which is responsible for the layout of the dialogue
         var fieldset = new OO.ui.FieldsetLayout({
@@ -183,8 +183,6 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                     placeholder: OO.ui.deferMsg("visualeditor-emm-search")
                 });
                 var presentationTitleField = new OO.ui.TextInputWidget({});
-                var contextField = new OO.ui.TextInputWidget({value: mw.config.get('wgPageName')});
-                var contextTypeField = new OO.ui.TextInputWidget({});
 
                 fieldset.addItems([
                     new OO.ui.FieldLayout(pageNameField, {
@@ -193,14 +191,6 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                     }),
                     new OO.ui.FieldLayout(presentationTitleField, {
                         label: OO.ui.deferMsg("visualeditor-emm-page-presentationtitle"),
-                        align: "left"
-                    }),
-                    new OO.ui.FieldLayout(contextField, {
-                        label: OO.ui.deferMsg("visualeditor-emm-page-context"),
-                        align: "left"
-                    }),
-                    new OO.ui.FieldLayout(contextTypeField, {
-                        label: OO.ui.deferMsg("visualeditor-emm-page-contexttype"),
                         align: "left"
                     })
                 ]);
@@ -226,7 +216,15 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                 creatorField.validation = [checkIfEmpty];
                 dateField.validation = [checkIfEmpty, checkIfDate];
 
-                //todo validation property verplaatsen.
+                // todo validation property verplaatsen.
+                titleField.onChangeFunctions = [function () {
+                    if (dialogueInstance.autoCompleteWasSelected) {
+                        dialogueInstance.autoCompleteWasSelected = false;
+                    }
+                    else {
+                        dialogueInstance.pageid = "";
+                    }
+                }];
 
                 fieldset.addItems([
                     new OO.ui.FieldLayout(titleField, {
@@ -280,11 +278,11 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
             .toggleClass("oo-ui-windowManager-modal", true);
         this.$body.append(this.content.$element);
 
+        //add validation for the form
         var validator = new Validator(
             fieldset,
             null,
             function (object, message) {
-                //todo positie absoluut?
                 object.$element.addClass("oo-ui-flaggedElement-invalid");
                 var el = $("<p>" + message + "</p>").css({
                     "margin": "0px 0px 0px",
@@ -292,7 +290,6 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                     "position" : "absolute"
                 });
                 object.$element.after(el);
-               // object.$element.parent().parent().parent().css("margin-bottom", "-6px");
 
                 dialogueInstance.actions.forEach({actions: "insert"}, function (action) {
                     action.setDisabled(true);
@@ -307,7 +304,6 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
             function (object) {
                 object.$element.removeClass("oo-ui-flaggedElement-invalid");
                 object.$element.parent().find("p").remove();
-                //object.$element.parent().parent().parent().css("margin-bottom", "1em");
             }
         );
 
@@ -320,10 +316,15 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                 exists = false;
             }
 
+            /**
+             * Callback function to be called after creating a new resource or editing an existing one
+             * It is responsible for inserting a link or cite template in the text of your page that links to the resource
+             * @param linkTitle The internal name of the resource that should be linked to
+             */
             var insertCallback = function (linkTitle) {
                 linkdata = linkTitle;
                 var templateToUse = "";
-                //Use this because the template to insert file links is for some reason named Cite
+                //Use this in order to insert file links via the cite template
                 if (template == "File") {
                     templateToUse = "Cite";
                 }
@@ -384,29 +385,19 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                     if (subjectField.getValue().length > 0) query += "&Resource Description[subject]=" + subjectField.getValue();
                     break;
                 case "Internal link":
-                    //Build the sfautoedit query
-                    var superContext = "";
-                    if (contextField.getValue() == "") {
-                        superContext = currentPageID;
-                    }
-
-                    //Start building the query
-                    query += "Light Context[Supercontext]=" + superContext +
-                        "&Light Context[Heading]=" + pageNameField.getValue();
-                    if (contextTypeField.getValue().length > 0) query += "&Light Context[Context type]=" + contextTypeField.getValue();
-                    var target = "";
                     if (exists) {
-                        target = linkdata;
+                        insertCallback(linkdata);
                     }
-
-                    //If there's no topcontext, find the topcontext
-                    if (dialogueInstance.topContext == null) {
+                    else {
+                        //Start building the sfautoedit query
+                        query += "Light Context[Supercontext]=" + currentPageID +
+                            "&Light Context[Heading]=" + pageNameField.getValue();
+                        //Find the topcontext of the current page
                         var api = new mw.Api();
-                        //Store the name of the page to be linked, mostly for asynchronous use
                         api.get({
                             action: 'ask',
                             parameters: 'limit:10000',//check how to increase limit of ask-result; done in LocalSettings.php
-                            query: "[[" + superContext + "]]|?Topcontext|limit=10000"//
+                            query: "[[" + currentPageID + "]]|?Topcontext|limit=10000"//
                         }).done(function (data) {
                             var res = data.query.results;
                             var topContext = res[superContext].printouts["Topcontext"][0].fulltext;
@@ -414,12 +405,9 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                             semanticCreateWithFormQuery(query, insertCallback, target, "Light Context");
                         });
                     }
-                    else {
-                        query += "&Light Context[Topcontext]=" + dialogueInstance.topContext;
-                        semanticCreateWithFormQuery(query, insertCallback, target, "Light Context");
-                    }
                     break;
-                case "External link":
+                case
+                "External link":
                     //Build the sfautoedit query
                     query += "Resource Description[created in page]=" + currentPageID +
                         "&Resource Description[hyperlink]=" + linkField.getValue() +
@@ -441,7 +429,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                     semanticCreateWithFormQuery(query, insertCallback, target, "Resource Light")
                     break;
                 case "Internal link":
-                    //done after getting the topcontext
+                    //Executed by asynchronous function after getting information about the topcontext of the page
                     break;
                 case "External link":
                     semanticCreateWithFormQuery(query, insertCallback, target, "Resource Hyperlink");
@@ -496,15 +484,14 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                         dialogueInstance.getFieldset().getItems()[4].getField().setValue(fixDate(suggestion.date));
                         dialogueInstance.getFieldset().getItems()[5].getField().setValue(suggestion.organization);
                         dialogueInstance.getFieldset().getItems()[6].getField().setValue(suggestion.subjects);
+                        validator.validateAll();
                     };
                     initAutoComplete(queryResults, titleField, dialogueInstance, fillFields);
                     break;
                 case "Internal link":
                     var fillFields = function (suggestion) {
-                        //fixme make this independent of order
-                        dialogueInstance.getFieldset().getItems()[2].getField().setValue(suggestion.supercontext);
-                        dialogueInstance.getFieldset().getItems()[3].getField().setValue(suggestion.contexttype);
-                        dialogueInstance.setTopContext(suggestion.topcontext);
+                        //Nothing to fill, no editable fields beyond presentationtitle and title
+                        validator.validateAll();
                     };
                     initAutoComplete(queryResults, pageNameField, dialogueInstance, fillFields);
                     break;
@@ -533,10 +520,6 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
             return fieldset;
         };
 
-        dialogue.prototype.setTopContext = function (context) {
-            dialogueInstance.topContext = context;
-        };
-
         //fixme dirty hack
         //todo in plaats van deze hack een eigen event afvuren en opvangen?
         //Selected text is gathered here and put inside the input field
@@ -559,9 +542,6 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
         };
     }
     ;
-
-    //dialogue.$frame.css({width: 800 || ''});
-    //  registers the dialogue to the window factory, from this point on the dialogue can be accessed calling the window factory
     ve.ui.windowFactory.register(dialogue);
 }
 
@@ -638,18 +618,9 @@ function semanticAskQuery(query, callback, template) {
                     });
                     break;
                 case "Internal link":
-                    var supercontext = "";
-                    if (res[prop].printouts["Supercontext"].length > 0) {
-                        supercontext = res[prop].printouts["Supercontext"][0].fulltext;
-                    }
-                    var topcontext = res[prop].printouts["Topcontext"][0];
-                    var contexttype = res[prop].printouts["Context type"][0];
                     arr.push({
                         value: title,
-                        data: pagename,
-                        supercontext: supercontext,
-                        topcontext: topcontext,
-                        contexttype: contexttype
+                        data: pagename
                     });
                     break;
                 case "External link":
@@ -758,10 +729,9 @@ function initAutoComplete(data, inputObject, dialogueInstance, fillFields) {
         lookup: data,
         onSelect: function (suggestion) {
             dialogueInstance.pageid = suggestion.data;
-            console.log(dialogueInstance.pageid);
+            dialogueInstance.autoCompleteWasSelected = true;
             //This part of the code depends on the order in which the fields of the dialogs are defined
             fillFields(suggestion);
-
         },
         appendTo: inputField.parentElement,
         maxHeight: 300
@@ -773,12 +743,7 @@ function fixDate(date) {
         return "";
     }
     var dateString = date.raw;
-    var exampledate = "12-1992";
-    var exampledate2 = "..7886877868.7.7.7.7.7.24.12.1992";
-    exampledate = exampledate.replace(/-/g, "/");
-    exampledate2 = exampledate2.replace(/\./g, "/");
-    console.log(exampledate);
-    console.log(exampledate2);
+    dateString.replace(/-/g, "/").replace(/\./g, "/");
     var replacePattern = /[0-9]+\//;
     //The result of the askQuery always returns an american date starting with *number*/, for example 1/
     //The date is of the fomat n/yyyy/mm/dd

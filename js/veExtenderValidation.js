@@ -18,7 +18,7 @@ var Validator = function (fieldset, inputSuccess, inputFail, validationSuccess, 
         // is the onChangeFunctions property set?
         if(this.onChangeFunctions != null) {
             // if so, execute functions in the onChangeFunctions array.
-            for(var i = 0; i < this.onChangeFunctions; i++) {
+            for(var i = 0; i < this.onChangeFunctions.length; i++) {
                 this.onChangeFunctions[i]();
             }
         }
