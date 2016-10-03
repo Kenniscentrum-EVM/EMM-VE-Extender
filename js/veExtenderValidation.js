@@ -1,3 +1,4 @@
+"use strict"
 /***
  * Validator class
  * @param fieldset fieldset to add validation to
@@ -73,11 +74,20 @@ var Validator = function (fieldset, inputSuccess, inputFail, validationSuccess, 
 
     //Add event handlers to the widget given by the fieldset.
     for (var i = 0; i < fieldset.items.length; i++) {
+        //uh....?
+        (function(){
+            var widget = fieldset.items[i].fieldWidget;
+            fieldset.items[i].fieldWidget.$element.find("input").blur(function(){
+                widget.emit("change", widget.value);
+            });
+        })();
+
         var widget = fieldset.items[i].fieldWidget;
         if (widget.validation != null) {
             widget.fieldId = i;
             validator.inputStates[i] = false;
             widget.change = onInputChange;
+            //widget.$element.find("input").blur(onInputChange(widget.value));
             widget.connect(widget, {change: "change"});
         }
     }
@@ -126,17 +136,17 @@ Validator.prototype.validateWidget = function(widget){
 function checkIfWebsite(value) {
     var expr = /(https:\/\/|http:\/\/)?(www\.)?[[a-z0-9]{1,256}\.[a-z]{2,6}\b\/?([-a-z0-9@:%_\+.~#?&//=]*)/ig
     if (expr.test(value)) return "";
-    else return "In dit veld moet een geldige URL ingevoerd worden.";
+    else return OO.ui.deferMsg("visualeditor-emm-validation-website")();
 }
 
 function checkIfEmpty(value) {
     if (value.length > 0) return "";
-    else return "Dit veld mag niet leeg zijn."; //todo translations
+    else return OO.ui.deferMsg("visualeditor-emm-validation-required")(); //todo translations
 }
 
 function checkIfNoSpecialCharacters(value) {
     var expr = /[^A-z\s\d][\\\^]?/g
-    if(expr.test(value)) return "Er mogen geen speciale tekens (bijv: é©ß) in dit veld!";
+    if(expr.test(value)) return OO.ui.deferMsg("visualeditor-emm-validation-special")();
     else return "";
 }
 
@@ -144,5 +154,5 @@ function checkIfDate(value) {
     //var expr = /((0[1-9]|[12]\d)\/(0[1-9]|1[012])|30-(0[13-9]|1[012])|(31-(0[13578]|1[02])))\/(19|20)\d\d/
     var expr = /^([0-9]|#|\+|\*|\-|\/|\\)+$/igm
     if(expr.test(value)) return "";
-    else return "De datum moet als volgt geschreven worden: dd/mm/yyyy.";
+    else return OO.ui.deferMsg("visualeditor-emm-validation-date")();
 }

@@ -53,7 +53,12 @@ function defineTranslations() {
             "visualeditor-emm-menuresourcemenuname": "Resources",
             "visualeditor-emm-search": "Search",
             "visualeditor-emm-select-existing-item": "Please select an existing item",
-            "visualeditor-mwtemplate-file-optional": "Optional text:"
+            "visualeditor-mwtemplate-file-optional": "Optional text:",
+
+            "visualeditor-emm-validation-required": "This field cannot be empty.",
+            "visualeditor-emm-validation-website": "This field must contain a valid URL.",
+            "visualeditor-emm-validation-special": "This field cannot contain special characters.",
+            "visualeditor-emm-validation-date": "This field must contain a valid date."
         },
         nl: {
             "visualeditor-emm-add-file": "Toevoegen bestand",
@@ -106,7 +111,12 @@ function defineTranslations() {
             "visualeditor-emm-menuresourcemenuname": "Bronnen",
             "visualeditor-emm-search": "Zoeken",
             "visualeditor-emm-select-existing-item": "Kies een bestaande bron",
-            "visualeditor-mwtemplate-file-optional": "Optionele tekst:"
+            "visualeditor-mwtemplate-file-optional": "Optionele tekst:",
+
+            "visualeditor-emm-validation-required": "Dit veld mag niet leeg zijn.",
+            "visualeditor-emm-validation-website": "Dit veld moet een geldige URL bevatten.",
+            "visualeditor-emm-validation-special": "Dit veld mag geen speciale tekens bevatten. (!@#. ect)",
+            "visualeditor-emm-validation-date": "Dit veld moet een geldige datum bevatten."
         }
     };
     var userLanguage = mw.config.get("wgUserLanguage");
