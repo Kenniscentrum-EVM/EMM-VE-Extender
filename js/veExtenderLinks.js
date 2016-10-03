@@ -125,6 +125,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
         dialogueInstance.queryResult = "";
         dialogueInstance.pageid = "";
         dialogueInstance.autoCompleteWasSelected = false;
+        dialogueInstance.upload = new mw.Upload();
 
         //  create the fieldset, which is responsible for the layout of the dialogue
         var fieldset = new OO.ui.FieldsetLayout({
@@ -138,20 +139,27 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                 var titleField = new OO.ui.TextInputWidget({
                     placeholder: OO.ui.deferMsg("visualeditor-emm-search")
                 });
-
-                var fileNameField = new OO.ui.TextInputWidget({});
+                var fileField = new OO.ui.SelectFileWidget({
+                    droppable: true,
+                    showDropTarget: true
+                });
                 var presentationTitleField = new OO.ui.TextInputWidget({});
                 var creatorField = new OO.ui.TextInputWidget({});
                 var dateField = new OO.ui.TextInputWidget({});
                 var organizationField = new OO.ui.TextInputWidget({});
                 var subjectField = new OO.ui.TextInputWidget({});
 
+                titleField.validation = [checkIfEmpty];
+                presentationTitleField.validation = [checkIfEmpty];
+                creatorField.validation = [checkIfEmpty];
+                dateField.validation = [checkIfEmpty, checkIfDate];
+
                 fieldset.addItems([
                     new OO.ui.FieldLayout(titleField, {
                         label: OO.ui.deferMsg("visualeditor-emm-file-title"),
                         align: "left"
                     }),
-                    new OO.ui.FieldLayout(fileNameField, {
+                    new OO.ui.FieldLayout(fileField, {
                         label: OO.ui.deferMsg("visualeditor-emm-file-filename"),
                         align: "left"
                     }),
@@ -183,6 +191,9 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                     placeholder: OO.ui.deferMsg("visualeditor-emm-search")
                 });
                 var presentationTitleField = new OO.ui.TextInputWidget({});
+
+                pageNameField.validation = [checkIfEmpty];
+                presentationTitleField.validation = [checkIfEmpty];
 
                 fieldset.addItems([
                     new OO.ui.FieldLayout(pageNameField, {
@@ -377,7 +388,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                 case "File":
                     //Build the sfautoedit query
                     query += "Resource Description[created in page]=" + currentPageID +
-                        "&Resource Description[file name]=" + fileNameField.getValue() +
+                        "&Resource Description[file name]=" + fileField.getValue().name +
                         "&Resource Description[title]=" + titleField.getValue() +
                         "&Resource Description[creator]=" + creatorField.getValue() +
                         "&Resource Description[date]=" + dateField.getValue();
@@ -400,7 +411,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                             query: "[[" + currentPageID + "]]|?Topcontext|limit=10000"//
                         }).done(function (data) {
                             var res = data.query.results;
-                            var topContext = res[superContext].printouts["Topcontext"][0].fulltext;
+                            var topContext = res[currentPageID].printouts["Topcontext"][0].fulltext;
                             query += "&Light Context[Topcontext]=" + topContext;
                             semanticCreateWithFormQuery(query, insertCallback, target, "Light Context");
                         });
@@ -425,8 +436,35 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
             if (exists) {
                 target = linkdata;
             }
+
+            //Call the sfqutoedit query to create or edit an existing resource
+            //This also happens when linking to an existing resource and not editing anything
+            //For internal links this logic is handled in the switch statement up above
             switch (template) {
                 case "File":
+                    console.log(dialogueInstance.upload.getState());
+                    dialogueInstance.upload.setFile(fileField.getValue());
+                    console.log(dialogueInstance.upload.getState());
+                    dialogueInstance.upload.setFilename(fileField.getValue().name);
+                    console.log(dialogueInstance.upload.getState());
+                    console.log(dialogueInstance.upload.getApi());
+                    dialogueInstance.upload.upload().fail(function (warnings, test, p3, p4, p5, p6, p7, p8, p9, p10) {
+                        console.log("Upload failed");
+                        console.log(warnings);
+                        console.log(test);
+                        console.log(p3);
+                        console.log(p4);
+                        console.log(p5);
+                        console.log(p6);
+                        console.log(p7);
+                        console.log(p8);
+                        console.log(p9);
+                        console.log(p10);
+                    }).done(function(){
+                        console.log("succes!");
+                    });
+                    console.log(dialogueInstance.upload.getState());
+                    console.log(dialogueInstance.upload.getApi());
                     semanticCreateWithFormQuery(query, insertCallback, target, "Resource Light")
                     break;
                 case "Internal link":
@@ -480,7 +518,6 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                 case "File":
                     var fillFields = function (suggestion) {
                         //fixme make this independent of order
-                        dialogueInstance.getFieldset().getItems()[1].getField().setValue(suggestion.filename);
                         dialogueInstance.getFieldset().getItems()[3].getField().setValue(suggestion.creator);
                         dialogueInstance.getFieldset().getItems()[4].getField().setValue(fixDate(suggestion.date));
                         dialogueInstance.getFieldset().getItems()[5].getField().setValue(suggestion.organization);
@@ -527,7 +564,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
             fieldset.$element.css({width: this.content.$element.outerWidth(true) - 50});
             //Inline css cause, adding classes doesn't overwrite existing css
             for (var i = 0; i < fieldset.getItems().length; i++) {
-                fieldset.getItems()[i].$element.find(".oo-ui-labelElement-label").css("margin-right", 0).css("float", "left").css("width", "30%");
+                fieldset.getItems()[i].$element.find(".oo-ui-labelElement-label").not(".oo-ui-selectFileWidget-label").css("margin-right", 0).css("float", "left").css("width", "30%");
                 fieldset.getItems()[i].$element.find(".oo-ui-fieldLayout-field").css("width", "70%");
                 fieldset.getItems()[i].$element.find(".oo-ui-fieldLayout-body").css("width", "100%").css("overflow", "hidden");
             }
@@ -588,8 +625,6 @@ function semanticAskQuery(query, callback, template) {
             }
             switch (template) {
                 case "File":
-                    var filename = res[prop].printouts["File name"][0];
-                    filename != null ? filename = filename.fulltext : filename = "";
                     var creator = res[prop].printouts["Dct:creator"][0];
                     var date = res[prop].printouts["Dct:date"][0];
                     var organization = res[prop].printouts["Organization"][0];
@@ -606,7 +641,6 @@ function semanticAskQuery(query, callback, template) {
                     arr.push({
                         value: title,
                         data: pagename,
-                        filename: filename,
                         creator: creator,
                         date: date,
                         organization: organization,

@@ -29,7 +29,7 @@ function defineTranslations() {
             "visualeditor-emm-page-contexttype": "Context type:",
 
             "visualeditor-emm-file-title": "Title*:",
-            "visualeditor-emm-file-filename": "Filename*:",
+            "visualeditor-emm-file-filename": "File*:",
             "visualeditor-emm-file-presentationtitle": "Presentation title*:",
             "visualeditor-emm-file-creator": "Author*:",
             "visualeditor-emm-file-date": "Date*:",
@@ -83,7 +83,7 @@ function defineTranslations() {
             "visualeditor-emm-page-contexttype": "Context type:",
 
             "visualeditor-emm-file-title": "Titel*:",
-            "visualeditor-emm-file-filename": "Bestandsnaam*:",
+            "visualeditor-emm-file-filename": "Bestand*:",
             "visualeditor-emm-file-presentationtitle": "Presentatietitel*:",
             "visualeditor-emm-file-creator": "Auteur*:",
             "visualeditor-emm-file-date": "Datum*:",
