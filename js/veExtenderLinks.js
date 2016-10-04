@@ -108,8 +108,8 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
         {
             action: "insert",
             label: OO.ui.deferMsg("visualeditor-emm-insert"),
-            flags: ["primary", "constructive"],
-            disabled: true
+            flags: ["primary", "constructive"]
+            //disabled: true
         },
         {action: "cancel", label: OO.ui.deferMsg("visualeditor-emm-cancel"), flags: "safe"}
     ];
@@ -123,7 +123,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
         var dialogueInstance = this;
         //Initialize fields for scoping and later use
         dialogueInstance.queryResult = "";
-        dialogueInstance.pageid = "";
+        dialogueInstance.existingpageid = "";
         dialogueInstance.autoCompleteWasSelected = false;
         dialogueInstance.upload = new mw.Upload();
 
@@ -221,19 +221,22 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                     selected: true
                 });
 
+                // todo validation property verplaatsen.
                 titleField.validation = [checkIfEmpty];
                 linkField.validation = [checkIfEmpty, checkIfWebsite];
                 presentationTitleField.validation = [checkIfEmpty];
                 creatorField.validation = [checkIfEmpty];
                 dateField.validation = [checkIfEmpty, checkIfDate];
 
-                // todo validation property verplaatsen.
+                //Things to do when the specified field changes
                 titleField.onChangeFunctions = [function () {
                     if (dialogueInstance.autoCompleteWasSelected) {
+                        //If something was just selected from the autocomplete list, reset this to false, but keep existingpageid
                         dialogueInstance.autoCompleteWasSelected = false;
                     }
+                    //If there was nothing selected from the automcplete list, set the existingpageid to 0
                     else {
-                        dialogueInstance.pageid = "";
+                        dialogueInstance.existingpageid = "";
                     }
                 }];
 
@@ -290,38 +293,39 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
         this.$body.append(this.content.$element);
 
         //add validation for the form
-        var validator = new Validator(
-            fieldset,
-            null,
-            function (object, message) {
-                object.$element.addClass("oo-ui-flaggedElement-invalid");
-                var el = $("<p>" + message + "</p>").css({
-                    "margin": "0px 0px 0px",
-                    "color": "red",
-                    "position" : "absolute"
-                });
-                object.$element.after(el);
+        /*var validator = new Validator(
+         fieldset,
+         null,
+         function (object, message) {
+         object.$element.addClass("oo-ui-flaggedElement-invalid");
+         var el = $("<p>" + message + "</p>").css({
+         "margin": "0px 0px 0px",
+         "color": "red",
+         "position" : "absolute"
+         });
+         object.$element.after(el);
 
-                dialogueInstance.actions.forEach({actions: "insert"}, function (action) {
-                    action.setDisabled(true);
-                });
-            },
-            function () {
-                dialogueInstance.actions.forEach({actions: "insert"}, function (action) {
-                    action.setDisabled(false);
-                });
-            },
-            null,
-            function (object) {
-                object.$element.removeClass("oo-ui-flaggedElement-invalid");
-                object.$element.parent().find("p").remove();
-            }
-        );
+         dialogueInstance.actions.forEach({actions: "insert"}, function (action) {
+         action.setDisabled(true);
+         });
+         },
+         function () {
+         dialogueInstance.actions.forEach({actions: "insert"}, function (action) {
+         action.setDisabled(false);
+         });
+         },
+         null,
+         function (object) {
+         object.$element.removeClass("oo-ui-flaggedElement-invalid");
+         object.$element.parent().find("p").remove();
+         }
+         )*/
+        ;
 
         //  Add event-handling logic to okButton
         var insertButtonHandler = function () {
             var namedata = presentationTitleField.getValue();
-            var linkdata = dialogueInstance.pageid.length > 0 ? dialogueInstance.pageid : "";
+            var linkdata = dialogueInstance.existingpageid.length > 0 ? dialogueInstance.existingpageid : "";
             var exists = true;
             if (linkdata.length == 0) {
                 exists = false;
@@ -441,30 +445,41 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
             //For internal links this logic is handled in the switch statement up above
             switch (template) {
                 case "File":
-                    console.log(dialogueInstance.upload.getState());
                     dialogueInstance.upload.setFile(fileField.getValue());
-                    console.log(dialogueInstance.upload.getState());
                     dialogueInstance.upload.setFilename(fileField.getValue().name);
-                    console.log(dialogueInstance.upload.getState());
-                    console.log(dialogueInstance.upload.getApi());
-                    dialogueInstance.upload.upload().fail(function (warnings, test, p3, p4, p5, p6, p7, p8, p9, p10) {
+                    dialogueInstance.upload.upload().fail(function (status, exceptionobject) {
                         console.log("Upload failed");
-                        console.log(warnings);
-                        console.log(test);
-                        console.log(p3);
-                        console.log(p4);
-                        console.log(p5);
-                        console.log(p6);
-                        console.log(p7);
-                        console.log(p8);
-                        console.log(p9);
-                        console.log(p10);
-                    }).done(function(){
-                        console.log("succes!");
+                        console.log(status);
+                        console.log(exceptionobject);
+                        switch (status) {
+                            case "duplicate":
+                                alert(OO.ui.deferMsg("visualeditor-emm-file-upload-duplicate")());
+                                break;
+                            case "exists":
+                                alert(OO.ui.deferMsg("visualeditor-emm-file-upload-exists")());
+                                break;
+                            case "verification-error":
+                                alert(OO.ui.deferMsg("visualeditor-emm-file-upload-verification-error")() + "\n" + exceptionobject.error.info);
+                                break;
+                            case "http":
+                                switch (exceptionobject.textStatus){
+                                    case "timeout":
+                                        alert(OO.ui.deferMsg("visualeditor-emm-file-upload-timeout")());
+                                        break;
+                                    case "parsererror":
+                                        alert(OO.ui.deferMsg("visualeditor-emm-file-upload-parsererror")());
+                                        break;
+                                    default:
+                                    //uknown eroror
+                                    alert("An unkown error of the type " + exceptionobject.exception + " has occured.");
+                                }
+                                break;
+                            default:
+                                alert("An unkown error of the type " + status + " has occured.");
+                        }
+                    }).done(function () {
+                        semanticCreateWithFormQuery(query, insertCallback, target, "Resource Light");
                     });
-                    console.log(dialogueInstance.upload.getState());
-                    console.log(dialogueInstance.upload.getApi());
-                    semanticCreateWithFormQuery(query, insertCallback, target, "Resource Light")
                     break;
                 case "Internal link":
                     //Executed by asynchronous function after getting information about the topcontext of the page
@@ -477,10 +492,10 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
             }
 
             //Clear the input fields and close the dialogue
-            validator.disable();
+            //validator.disable();
             clearInputFields(fieldset);
-            validator.enable();
-            dialogueInstance.pageid = "";
+            //validator.enable();
+            dialogueInstance.existingpageid = "";
             dialogueInstance.close();
         };
 
@@ -488,9 +503,9 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
         // Add event handling logic to cancelButton
         var cancelButtonHandler = function () {
             //Clear the dialog and close it
-            validator.disable();
+            //validator.disable();
             clearInputFields(fieldset);
-            validator.enable();
+            //validator.enable();
             dialogueInstance.close();
         };
 
@@ -521,14 +536,14 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                         dialogueInstance.getFieldset().getItems()[4].getField().setValue(fixDate(suggestion.date));
                         dialogueInstance.getFieldset().getItems()[5].getField().setValue(suggestion.organization);
                         dialogueInstance.getFieldset().getItems()[6].getField().setValue(suggestion.subjects);
-                        validator.validateAll();
+                        //validator.validateAll();
                     };
                     initAutoComplete(queryResults, titleField, dialogueInstance, fillFields);
                     break;
                 case "Internal link":
                     var fillFields = function (suggestion) {
                         //Nothing to fill, no editable fields beyond presentationtitle and title
-                        validator.validateAll();
+                        //validator.validateAll();
                     };
                     initAutoComplete(queryResults, pageNameField, dialogueInstance, fillFields);
                     break;
@@ -540,7 +555,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                         dialogueInstance.getFieldset().getItems()[4].getField().setValue(fixDate(suggestion.date));
                         dialogueInstance.getFieldset().getItems()[5].getField().setValue(suggestion.organization);
                         dialogueInstance.getFieldset().getItems()[6].getField().setValue(suggestion.subjects);
-                        validator.validateAll();
+                        //validator.validateAll();
                     };
                     initAutoComplete(queryResults, titleField, dialogueInstance, fillFields);
                     break;
@@ -563,9 +578,9 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
         //Beyong that this is also the place where the size of the dialog is set.
         dialogue.prototype.setDimensions = function (dim) {
             grabSelectedText(presentationTitleField);
-            if(presentationTitleField.value.length > 0)
-                validator.validateWidget(presentationTitleField);
-            fieldset.$element.css({width: this.content.$element.outerWidth(true) - 50});
+            if (presentationTitleField.value.length > 0)
+            //validator.validateWidget(presentationTitleField);
+                fieldset.$element.css({width: this.content.$element.outerWidth(true) - 50});
             //Inline css cause, adding classes doesn't overwrite existing css
             for (var i = 0; i < fieldset.getItems().length; i++) {
                 fieldset.getItems()[i].$element.find(".oo-ui-labelElement-label").not(".oo-ui-selectFileWidget-label").css("margin-right", 0).css("float", "left").css("width", "30%");
@@ -762,7 +777,7 @@ function initAutoComplete(data, inputObject, dialogueInstance, fillFields) {
     $(inputField).autocomplete({
         lookup: data,
         onSelect: function (suggestion) {
-            dialogueInstance.pageid = suggestion.data;
+            dialogueInstance.existingpageid = suggestion.data;
             dialogueInstance.autoCompleteWasSelected = true;
             //This part of the code depends on the order in which the fields of the dialogs are defined
             fillFields(suggestion);
