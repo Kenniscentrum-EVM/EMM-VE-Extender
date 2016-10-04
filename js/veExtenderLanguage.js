@@ -35,6 +35,14 @@ function defineTranslations() {
             "visualeditor-emm-file-date": "Date*:",
             "visualeditor-emm-file-organization": "Organization:",
             "visualeditor-emm-file-subject": "Subject:",
+            "visualeditor-emm-file-upload-timeout": "Your file upload request timed out. Please make sure the file isn't too large, check your connection and try again.",
+            "visualeditor-emm-file-upload-duplicate": "Another file with the same content already exists",
+            "visualeditor-emm-file-upload-exists": "Another file with the same name already exists",
+            "visualeditor-emm-file-upload-verification-error": "A verification error occured, the system returned this message:",
+            "visualeditor-emm-file-upload-parsererror": "The file extension is invalid, only the following extensions are allowed: \n" +
+            "svg, png, gif, jpg, jpeg, ppt, pptx, pdf, mp3, mp4, xls, xlsx, doc, docx, odt, odc, odp, odg, txt",
+            "visualeditor-emm-file-upload-file-too-large": "The file is too large. The maximum size of a file is 64MB",
+
 
             "visualeditor-emm-cancel": "Cancel",
             "visualeditor-emm-insert": "Insert",
@@ -94,6 +102,13 @@ function defineTranslations() {
             "visualeditor-emm-file-date": "Datum*:",
             "visualeditor-emm-file-organization": "Organisatie:",
             "visualeditor-emm-file-subject": "Onderwerp:",
+            "visualeditor-emm-file-upload-timeout": "Het verzoek om een bestand te uploaden is verlopen. Controleer of het bestand niet te groot is, controleer de verbinding en probeer opnieuw.",
+            "visualeditor-emm-file-upload-duplicate": "Er bestaat al een bestand met dezelfde inhoud",
+            "visualeditor-emm-file-upload-exists": "Er bestaat al een bestand met deze naam",
+            "visualeditor-emm-file-upload-verification-error": "Er is een verificatiefout opgetreden, het systeem gaf de volgende error:",
+            "visualeditor-emm-file-upload-parsererror": "Het bestandstype is ongeldig, enkel de volgende bestandstypen zijn toegestaan: \n" +
+            "svg, png, gif, jpg, jpeg, ppt, pptx, pdf, mp3, mp4, xls, xlsx, doc, docx, odt, odc, odp, odg, txt",
+            "visualeditor-emm-file-upload-file-too-large": "Het bestand is te groot. De maximale grootte van een bestand is 64MB",
 
             "visualeditor-emm-cancel": "Annuleer",
             "visualeditor-emm-insert": "Voeg in",

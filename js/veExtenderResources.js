@@ -45,7 +45,7 @@ function getContextOfCurrentPage() {
 
         //var contexttype='';
         //for all objects in result
-        for (prop in res) {
+        for (var prop in res) {
             if (!res.hasOwnProperty(prop)) {
                 //The current property is not a direct property of p
                 continue;
@@ -234,7 +234,7 @@ function createDialog(dialogName, askQuery, actionName, processResult, actionTit
 
             //array to store results
             var pagenames = [];
-            for (prop in res) {
+            for (var prop in res) {
                 if (!res.hasOwnProperty(prop)) {
                     //The current property is not a direct property of p
                     continue;
