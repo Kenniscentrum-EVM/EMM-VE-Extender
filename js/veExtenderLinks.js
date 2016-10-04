@@ -461,6 +461,9 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                             case "verification-error":
                                 alert(OO.ui.deferMsg("visualeditor-emm-file-upload-verification-error")() + "\n" + exceptionobject.error.info);
                                 break;
+                            case "file-too-large":
+                                alert(OO.ui.deferMsg("visualeditor-emm-file-upload-file-too-large")());
+                                break;
                             case "http":
                                 switch (exceptionobject.textStatus){
                                     case "timeout":
