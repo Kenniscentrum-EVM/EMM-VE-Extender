@@ -478,10 +478,11 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
 
             //Clear the input fields and close the dialogue
             validator.disable();
+            dialogueInstance.close()
             clearInputFields(fieldset);
             validator.enable();
             dialogueInstance.pageid = "";
-            dialogueInstance.close();
+            ;
         };
 
 
@@ -489,9 +490,10 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
         var cancelButtonHandler = function () {
             //Clear the dialog and close it
             validator.disable();
+            dialogueInstance.close();
             clearInputFields(fieldset);
             validator.enable();
-            dialogueInstance.close();
+
         };
 
         dialogue.prototype.getActionProcess = function (action) {
@@ -540,6 +542,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                         dialogueInstance.getFieldset().getItems()[4].getField().setValue(fixDate(suggestion.date));
                         dialogueInstance.getFieldset().getItems()[5].getField().setValue(suggestion.organization);
                         dialogueInstance.getFieldset().getItems()[6].getField().setValue(suggestion.subjects);
+                        console.log("de WAARDE IS! : " + dialogueInstance.getFieldset().getItems()[2].getField().value);
                         validator.validateAll();
                     };
                     initAutoComplete(queryResults, titleField, dialogueInstance, fillFields);
@@ -745,8 +748,11 @@ function grabSelectedText(inputObject) {
     }
 
     if (selected.length > 0) {
+        /*
         var inputField = $(inputObject.$element).find("input");
         inputField.val(selected);
+        */
+        inputObject.setValue(selected);
     }
 }
 
