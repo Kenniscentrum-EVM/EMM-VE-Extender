@@ -150,6 +150,31 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                 var subjectField = new OO.ui.TextInputWidget({});
 
                 titleField.validation = [checkIfEmpty];
+                fileField.validation = [function(value, sender){
+                    if(value == null) {
+                        return "";
+                    }
+                    else
+                    {
+                        if(dialogueInstance.autoCompleteWasSelected) {
+                            //fixme Very dependant on language
+                            var file = dialogueInstance.pageid.replace("Bestand:", "").replace("File:", "");
+                            console.log(file);
+                            console.log(sender);
+                            if (file != value) {
+                                sender.setValue(null);
+                                sender.$element.find('.oo-ui-selectFileWidget-dropLabel').text("Bestandsnaam: \"" + file + "\" vereist!").css("color", "red");
+                                //sender.setLabel("Voer een bestand met de bestandsnaam: " + file + " in!");
+                                //fixme this entire block executes multiple times!
+                                //return "Voer een bestand met de bestandsnaam: " + file + " in!";
+                                return "\t";
+
+
+                            }
+                        }
+                        return "";
+                    }
+                }];
                 presentationTitleField.validation = [checkIfEmpty];
                 creatorField.validation = [checkIfEmpty];
                 dateField.validation = [checkIfEmpty, checkIfDate];
@@ -294,6 +319,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
             fieldset,
             null,
             function (object, message) {
+
                 object.$element.addClass("oo-ui-flaggedElement-invalid");
                 var el = $("<p>" + message + "</p>").css({
                     "margin": "0px 0px 0px",
@@ -436,7 +462,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                 target = linkdata;
             }
 
-            //Call the sfqutoedit query to create or edit an existing resource
+            //Call the sfautoedit query to create or edit an existing resource
             //This also happens when linking to an existing resource and not editing anything
             //For internal links this logic is handled in the switch statement up above
             switch (template) {
