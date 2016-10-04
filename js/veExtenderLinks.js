@@ -108,8 +108,8 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
         {
             action: "insert",
             label: OO.ui.deferMsg("visualeditor-emm-insert"),
-            flags: ["primary", "constructive"]
-            //disabled: true
+            flags: ["primary", "constructive"],
+            disabled: true
         },
         {action: "cancel", label: OO.ui.deferMsg("visualeditor-emm-cancel"), flags: "safe"}
     ];
@@ -150,6 +150,31 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                 var subjectField = new OO.ui.TextInputWidget({});
 
                 titleField.validation = [checkIfEmpty];
+                fileField.validation = [function(value, sender){
+                    if(value == null) {
+                        return "";
+                    }
+                    else
+                    {
+                        if(dialogueInstance.autoCompleteWasSelected) {
+                            //fixme Very dependant on language
+                            var file = dialogueInstance.existingpageid.replace("Bestand:", "").replace("File:", "");
+                            console.log(file);
+                            console.log(sender);
+                            if (file != value) {
+                                sender.setValue(null);
+                                sender.$element.find('.oo-ui-selectFileWidget-dropLabel').text("Bestandsnaam: \"" + file + "\" vereist!").css("color", "red");
+                                //sender.setLabel("Voer een bestand met de bestandsnaam: " + file + " in!");
+                                //fixme this entire block executes multiple times!
+                                //return "Voer een bestand met de bestandsnaam: " + file + " in!";
+                                return "\t";
+
+
+                            }
+                        }
+                        return "";
+                    }
+                }];
                 presentationTitleField.validation = [checkIfEmpty];
                 creatorField.validation = [checkIfEmpty];
                 dateField.validation = [checkIfEmpty, checkIfDate];
@@ -325,14 +350,13 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
          fieldset,
          null,
          function (object, message) {
-         object.$element.addClass("oo-ui-flaggedElement-invalid");
-         var el = $("<p>" + message + "</p>").css({
-         "margin": "0px 0px 0px",
-         "color": "red",
-         "position" : "absolute"
-         });
-         object.$element.after(el);
-
+             object.$element.addClass("oo-ui-flaggedElement-invalid");
+             var el = $("<p>" + message + "</p>").css({
+                 "margin": "0px 0px 0px",
+                 "color": "red",
+                 "position": "absolute"
+             });
+             object.$element.after(el);
          dialogueInstance.actions.forEach({actions: "insert"}, function (action) {
          action.setDisabled(true);
          });
@@ -468,7 +492,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                 target = linkdata;
             }
 
-            //Call the sfqutoedit query to create or edit an existing resource
+            //Call the sfautoedit query to create or edit an existing resource
             //This also happens when linking to an existing resource and not editing anything
             //For internal links this logic is handled in the switch statement up above
             switch (template) {
@@ -524,10 +548,11 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
 
             //Clear the input fields and close the dialogue
             validator.disable();
+            dialogueInstance.close();
             clearInputFields(fieldset);
             validator.enable();
             dialogueInstance.existingpageid = "";
-            dialogueInstance.close();
+
         };
 
 
@@ -535,9 +560,10 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
         var cancelButtonHandler = function () {
             //Clear the dialog and close it
             validator.disable();
+            dialogueInstance.close();
             clearInputFields(fieldset);
             validator.enable();
-            dialogueInstance.close();
+
         };
 
         dialogue.prototype.getActionProcess = function (action) {
@@ -609,9 +635,9 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
         //Beyong that this is also the place where the size of the dialog is set.
         dialogue.prototype.setDimensions = function (dim) {
             grabSelectedText(presentationTitleField);
-            if (presentationTitleField.value.length > 0)
-            validator.validateWidget(presentationTitleField);
-                fieldset.$element.css({width: this.content.$element.outerWidth(true) - 50});
+            if(presentationTitleField.value.length > 0)
+                validator.validateWidget(presentationTitleField);
+            fieldset.$element.css({width: this.content.$element.outerWidth(true) - 50});
             //Inline css cause, adding classes doesn't overwrite existing css
             for (var i = 0; i < fieldset.getItems().length; i++) {
                 fieldset.getItems()[i].$element.find(".oo-ui-labelElement-label").not(".oo-ui-selectFileWidget-label").css("margin-right", 0).css("float", "left").css("width", "30%");
@@ -791,8 +817,7 @@ function grabSelectedText(inputObject) {
     }
 
     if (selected.length > 0) {
-        var inputField = $(inputObject.$element).find("input");
-        inputField.val(selected);
+        inputObject.setValue(selected);
     }
 }
 
@@ -809,9 +834,8 @@ function initAutoComplete(data, inputObject, dialogueInstance, fillFields) {
         lookup: data,
         onSelect: function (suggestion) {
             dialogueInstance.existingpageid = suggestion.data;
-            console.log("gaat naar true")
+            console.log("gaat naar true");
             dialogueInstance.autoCompleteWasSelected = true;
-            console.log(dialogueInstance.autoCompleteWasSelected);
             //This part of the code depends on the order in which the fields of the dialogs are defined
             fillFields(suggestion);
         },
