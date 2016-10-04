@@ -154,6 +154,22 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                 creatorField.validation = [checkIfEmpty];
                 dateField.validation = [checkIfEmpty, checkIfDate];
 
+                //Things to do when the specified field changes
+                titleField.onChangeFunctions = [function () {
+                    console.log("change");
+                    if (dialogueInstance.autoCompleteWasSelected) {
+                        //If something was just selected from the autocomplete list, reset this to false, but keep existingpageid
+                        console.log("autocomplete");
+                        fileField.setDisabled(true);
+                        dialogueInstance.autoCompleteWasSelected = false;
+                    }
+                    //If there was nothing selected from the automcplete list, set the existingpageid to 0
+                    else {
+                        fileField.setDisabled(false);
+                        dialogueInstance.existingpageid = "";
+                    }
+                }];
+
                 fieldset.addItems([
                     new OO.ui.FieldLayout(titleField, {
                         label: OO.ui.deferMsg("visualeditor-emm-file-title"),
@@ -194,6 +210,18 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
 
                 pageNameField.validation = [checkIfEmpty];
                 presentationTitleField.validation = [checkIfEmpty];
+
+                //Things to do when the specified field changes
+                pageNameField.onChangeFunctions = [function () {
+                    if (dialogueInstance.autoCompleteWasSelected) {
+                        //If something was just selected from the autocomplete list, reset this to false, but keep existingpageid
+                        dialogueInstance.autoCompleteWasSelected = false;
+                    }
+                    //If there was nothing selected from the automcplete list, set the existingpageid to 0
+                    else {
+                        dialogueInstance.existingpageid = "";
+                    }
+                }];
 
                 fieldset.addItems([
                     new OO.ui.FieldLayout(pageNameField, {
@@ -293,7 +321,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
         this.$body.append(this.content.$element);
 
         //add validation for the form
-        /*var validator = new Validator(
+        var validator = new Validator(
          fieldset,
          null,
          function (object, message) {
@@ -319,7 +347,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
          object.$element.removeClass("oo-ui-flaggedElement-invalid");
          object.$element.parent().find("p").remove();
          }
-         )*/
+         )
         ;
 
         //  Add event-handling logic to okButton
@@ -495,9 +523,9 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
             }
 
             //Clear the input fields and close the dialogue
-            //validator.disable();
+            validator.disable();
             clearInputFields(fieldset);
-            //validator.enable();
+            validator.enable();
             dialogueInstance.existingpageid = "";
             dialogueInstance.close();
         };
@@ -506,9 +534,9 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
         // Add event handling logic to cancelButton
         var cancelButtonHandler = function () {
             //Clear the dialog and close it
-            //validator.disable();
+            validator.disable();
             clearInputFields(fieldset);
-            //validator.enable();
+            validator.enable();
             dialogueInstance.close();
         };
 
@@ -539,14 +567,14 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                         dialogueInstance.getFieldset().getItems()[4].getField().setValue(fixDate(suggestion.date));
                         dialogueInstance.getFieldset().getItems()[5].getField().setValue(suggestion.organization);
                         dialogueInstance.getFieldset().getItems()[6].getField().setValue(suggestion.subjects);
-                        //validator.validateAll();
+                        validator.validateAll();
                     };
                     initAutoComplete(queryResults, titleField, dialogueInstance, fillFields);
                     break;
                 case "Internal link":
                     var fillFields = function (suggestion) {
                         //Nothing to fill, no editable fields beyond presentationtitle and title
-                        //validator.validateAll();
+                        validator.validateAll();
                     };
                     initAutoComplete(queryResults, pageNameField, dialogueInstance, fillFields);
                     break;
@@ -558,7 +586,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                         dialogueInstance.getFieldset().getItems()[4].getField().setValue(fixDate(suggestion.date));
                         dialogueInstance.getFieldset().getItems()[5].getField().setValue(suggestion.organization);
                         dialogueInstance.getFieldset().getItems()[6].getField().setValue(suggestion.subjects);
-                        //validator.validateAll();
+                        validator.validateAll();
                     };
                     initAutoComplete(queryResults, titleField, dialogueInstance, fillFields);
                     break;
@@ -582,7 +610,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
         dialogue.prototype.setDimensions = function (dim) {
             grabSelectedText(presentationTitleField);
             if (presentationTitleField.value.length > 0)
-            //validator.validateWidget(presentationTitleField);
+            validator.validateWidget(presentationTitleField);
                 fieldset.$element.css({width: this.content.$element.outerWidth(true) - 50});
             //Inline css cause, adding classes doesn't overwrite existing css
             for (var i = 0; i < fieldset.getItems().length; i++) {
@@ -781,7 +809,9 @@ function initAutoComplete(data, inputObject, dialogueInstance, fillFields) {
         lookup: data,
         onSelect: function (suggestion) {
             dialogueInstance.existingpageid = suggestion.data;
+            console.log("gaat naar true")
             dialogueInstance.autoCompleteWasSelected = true;
+            console.log(dialogueInstance.autoCompleteWasSelected);
             //This part of the code depends on the order in which the fields of the dialogs are defined
             fillFields(suggestion);
         },
