@@ -445,8 +445,9 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
             switch (template) {
                 case "File":
                     //Build the sfautoedit query
+                    console.log("exists: " + exists + " en filename in dialogueinstance = " + dialogueInstance.fileName);
                     var filename = "";
-                    if (!exists) {
+                    if (exists) {
                         filename = dialogueInstance.fileName;
                     } else if (fileField.getValue() != null) {
                         filename = fileField.getValue().name;
@@ -566,7 +567,6 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
             dialogueInstance.close();
             clearInputFields(fieldset);
             validator.enable();
-            console.log("komt ie hier ook nog tussen autocomplete en insert?");
             dialogueInstance.existingpageid = "";
         };
 
@@ -578,7 +578,6 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
             dialogueInstance.close();
             clearInputFields(fieldset);
             validator.enable();
-
         };
 
         dialogue.prototype.getActionProcess = function (action) {
