@@ -17,20 +17,19 @@ var Validator = function (fieldset, inputSuccess, inputFail, validationSuccess, 
     this.fieldset = fieldset;
     function onInputChange(value) {
         // is the onChangeFunctions property set?
-        if(this.onChangeFunctions != null) {
-            console.log("koek");
+        if (this.onChangeFunctions != null) {
             // if so, execute functions in the onChangeFunctions array.
-            for(var i = 0; i < this.onChangeFunctions.length; i++) {
+            for (var i = 0; i < this.onChangeFunctions.length; i++) {
                 this.onChangeFunctions[i]();
             }
         }
         // is the validator enabled?
-        if(validator.enabled == true) {
+        if (validator.enabled == true) {
             // does the widget have the validation property?
             if (this.validation != null) {
                 // was a cleanUp function provided?
                 if (cleanUp != null)
-                    // execute the cleanUp method.
+                // execute the cleanUp method.
                     cleanUp(this);
                 // Loop through the validation functions.
                 for (var i = 0; i < this.validation.length; i++) {
@@ -53,6 +52,7 @@ var Validator = function (fieldset, inputSuccess, inputFail, validationSuccess, 
             //This awkward way of iterating is implemented because of the restrictions
             var isValidated = true;
             $.each(validator.inputStates, function (key, val) {
+                console.log(validator.inputStates);
                 if (!val && val != null) {
                     isValidated = false;
                     if (validationFail != null)
@@ -74,9 +74,9 @@ var Validator = function (fieldset, inputSuccess, inputFail, validationSuccess, 
     //Add event handlers to the widget given by the fieldset.
     for (var i = 0; i < fieldset.items.length; i++) {
         //uh....?
-        (function(){
+        (function () {
             var widget = fieldset.items[i].fieldWidget;
-            fieldset.items[i].fieldWidget.$element.find("input").focusout(function(){
+            fieldset.items[i].fieldWidget.$element.find("input").focusout(function () {
                 widget.emit("change", validator.getWidgetValue(widget), widget);
             });
         })();
@@ -92,12 +92,12 @@ var Validator = function (fieldset, inputSuccess, inputFail, validationSuccess, 
 
 }
 
-Validator.prototype.enable = function(){
+Validator.prototype.enable = function () {
     this.enabled = true;
 
 }
 
-Validator.prototype.disable = function(){
+Validator.prototype.disable = function () {
     this.enabled = false;
     this.cleanUpForm();
     this.resetInputStates();
@@ -105,46 +105,45 @@ Validator.prototype.disable = function(){
 
 }
 
-Validator.prototype.softDisable = function()
-{
+Validator.prototype.softDisable = function () {
     this.enabled = false;
 }
 
-Validator.prototype.cleanUpForm = function() {
-    if(this.cleanUp != null){
+Validator.prototype.cleanUpForm = function () {
+    if (this.cleanUp != null) {
         for (var i = 0; i < this.fieldset.items.length; i++)
-            if(this.fieldset.items[i].fieldWidget.validation != null)
+            if (this.fieldset.items[i].fieldWidget.validation != null)
                 this.cleanUp(this.fieldset.items[i].fieldWidget);
     }
 }
 
-Validator.prototype.resetInputStates = function (){
-        for(var i = 0; i < this.inputStates.length; i++ )
-            this.inputStates[i] = false;
+Validator.prototype.resetInputStates = function () {
+    for (var i = 0; i < this.inputStates.length; i++)
+        this.inputStates[i] = false;
 }
 
 
-Validator.prototype.validateAll = function(exclude) {
-    for(var i = 0; i < this.fieldset.items.length; i++){
-        if(this.fieldset.items[i].fieldWidget.validation != null)
+Validator.prototype.validateAll = function (exclude) {
+    for (var i = 0; i < this.fieldset.items.length; i++) {
+        if (this.fieldset.items[i].fieldWidget.validation != null)
             this.fieldset.items[i].fieldWidget.emit("change", this.getWidgetValue(this.fieldset.items[i].fieldWidget), this.fieldset.items[i].fieldWidget);
     }
 }
 
-Validator.prototype.validateWidget = function(widget){
+Validator.prototype.validateWidget = function (widget) {
     widget.emit("change", this.getWidgetValue(widget), widget);
 }
 
-Validator.prototype.getWidgetValue = function(widget){
+Validator.prototype.getWidgetValue = function (widget) {
     //todo switch-case?
     //todo moet dit..?
-    if((widget instanceof OO.ui.TextInputWidget))
+    if ((widget instanceof OO.ui.TextInputWidget))
         return widget.value;
-    else if((widget instanceof OO.ui.SelectFileWidget)){
-        if(widget.getValue() != null)
+    else if ((widget instanceof OO.ui.SelectFileWidget)) {
+        if (widget.getValue() != null)
             return widget.getValue().name;
         else
-                return null;
+            return null;
     }
 
 }
@@ -162,13 +161,13 @@ function checkIfEmpty(value, sender) {
 
 function checkIfNoSpecialCharacters(value, sender) {
     var expr = /[^A-z\s\d][\\\^]?/g //todo fixme?
-    if(expr.test(value)) return OO.ui.deferMsg("visualeditor-emm-validation-special")();
+    if (expr.test(value)) return OO.ui.deferMsg("visualeditor-emm-validation-special")();
     else return "";
 }
 
 function checkIfDate(value, sender) {
     //var expr = /((0[1-9]|[12]\d)\/(0[1-9]|1[012])|30-(0[13-9]|1[012])|(31-(0[13578]|1[02])))\/(19|20)\d\d/
     var expr = /^([0-9]|#|\+|\*|\-|\/|\\)+$/igm //todo fimxme
-    if(expr.test(value)) return "";
+    if (expr.test(value)) return "";
     else return OO.ui.deferMsg("visualeditor-emm-validation-date")();
 }
