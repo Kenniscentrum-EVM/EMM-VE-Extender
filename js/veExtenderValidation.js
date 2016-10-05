@@ -72,6 +72,7 @@ var Validator = function (fieldset, inputSuccess, inputFail, validationSuccess, 
 
     //Add event handlers to the widget given by the fieldset.
     for (var i = 0; i < fieldset.items.length; i++) {
+
         //uh....?
         (function () {
             var widget = fieldset.items[i].fieldWidget;
@@ -117,8 +118,10 @@ Validator.prototype.cleanUpForm = function () {
 }
 
 Validator.prototype.resetInputStates = function () {
-    for (var i = 0; i < this.inputStates.length; i++)
-        this.inputStates[i] = false;
+    for (var i = 0; i < this.inputStates.length; i++) {
+        if(this.inputStates[i] != null)
+            this.inputStates[i] = false;
+    }
 }
 
 
