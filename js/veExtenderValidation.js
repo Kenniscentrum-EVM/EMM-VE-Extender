@@ -83,7 +83,6 @@ var Validator = function (fieldset, inputSuccess, inputFail, validationSuccess, 
 
         var widget = fieldset.items[i].fieldWidget;
         if (widget.validation != null) {
-            console.log(widget);
             widget.fieldId = i;
             validator.inputStates[i] = false;
             widget.change = onInputChange;
