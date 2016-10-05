@@ -125,7 +125,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
         //Initialize fields for scoping and later use
         dialogueInstance.queryResult = "";
         dialogueInstance.existingpageid = "";
-        dialogueInstance.autoCompleteWasSelected = 0;
+        dialogueInstance.autoCompleteWasSelected = 0; // property is set
         dialogueInstance.upload = new mw.Upload();
         //Filename to keep teh filename of a selected file
         dialogueInstance.fileName = "";
@@ -555,12 +555,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                 default:
                     alert(OO.ui.deferMsg("visualeditor-emm-dialog-error"));
             }
-
-            //Clear the input fields and close the dialogue
-            validator.disable();
-            dialogueInstance.close();
-            clearInputFields(fieldset);
-            validator.enable();
+            cleanUpDialogue();
             dialogueInstance.existingpageid = "";
         };
 
@@ -568,10 +563,8 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
         // Add event handling logic to cancelButton
         var cancelButtonHandler = function () {
             //Clear the dialog and close it
-            validator.disable();
-            dialogueInstance.close();
-            clearInputFields(fieldset);
-            validator.enable();
+            cleanUpDialogue();
+
         };
 
         dialogue.prototype.getActionProcess = function (action) {
@@ -580,14 +573,30 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                     insertButtonHandler();
                 });
             }
-            if (action === "cancel") {
+            else if (action === "cancel") {
                 return new OO.ui.Process(function () {
                     cancelButtonHandler();
                 });
             }
+            else
+            {
+                cleanUpDialogue();
+            }
+
+
+
+            console.log(action);
             //Use parent handler in case something goes wrong
             return dialogue.super.prototype.getActionProcess.call(this, action);
         };
+
+        function cleanUpDialogue()
+        {
+            validator.disable();
+            dialogueInstance.close();
+            clearInputFields(fieldset);
+            validator.enable();
+        }
 
         //Declare a function to be called after the askQuery has been processed
         //This function initiates the autocmplete library for the resource input field
