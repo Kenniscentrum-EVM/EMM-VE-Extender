@@ -54,6 +54,7 @@ function defineTranslations() {
             "visualeditor-emm-menuaddhyperlinktitle": "Link",
             "visualeditor-emm-menuaddinternaldocumenttitle": "File",
             "visualeditor-emm-menuaddpagetitle": "Page",
+            "visualeditor-emm-topcontext-error": "The topcontext of this page could not be found, please make sure your page contains a light context",
 
             "visualeditor-emm-menufiletitle": "File...",
             "visualeditor-emm-menuexternallinktitle": "Link (website)...",
@@ -120,6 +121,8 @@ function defineTranslations() {
             "visualeditor-emm-menuaddhyperlinktitle": "Link",
             "visualeditor-emm-menuaddinternaldocumenttitle": "Bestand",
             "visualeditor-emm-menuaddpagetitle": "Pagina",
+            "visualeditor-emm-topcontext-error": "Geen topcontext gevonden voor deze pagina. Zorg er voor dat deze pagina een light context bevat",
+
             "visualeditor-emm-menufiletitle": "Bestand...",
             "visualeditor-emm-menuexternallinktitle": "Koppeling (website)...",
             "visualeditor-emm-menuinternallinktitle": "Koppeling (pagina)...",
