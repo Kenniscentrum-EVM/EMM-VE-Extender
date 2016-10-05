@@ -43,13 +43,8 @@ function createExitDialog() {
 
 
     $('.oo-ui-toolbar-actions').children().first().after(cancelToolbar.$group);
-    /*
-    cancelToolbar.initialize();
-    cancelToolbar.emit('updateState');
-    */
 
-}
-/*
+
     //Unregister the default exit dialogue which is part of the visualextender library, we don't use it because the chameleon skin breaks it.
     ve.ui.windowFactory.unregister(ve.ui.MWCancelConfirmDialog);
 
@@ -134,4 +129,4 @@ function createExitDialog() {
     //register our new dialog in the factory
     ve.ui.windowFactory.register(cancelDialogue);
 }
-*/
+
