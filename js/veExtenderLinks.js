@@ -377,10 +377,8 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
         //  Add event-handling logic to okButton
         var insertButtonHandler = function () {
             var namedata = presentationTitleField.getValue();
-            console.log(dialogueInstance.existingpageid.length);
             var linkdata = dialogueInstance.existingpageid.length > 0 ? dialogueInstance.existingpageid : "";
             var exists = true;
-            console.log("linkdata: " + linkdata);
             if (linkdata.length == 0) {
                 exists = false;
             }
@@ -445,14 +443,12 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
             switch (template) {
                 case "File":
                     //Build the sfautoedit query
-                    console.log("exists: " + exists + " en filename in dialogueinstance = " + dialogueInstance.fileName);
                     var filename = "";
                     if (exists) {
                         filename = dialogueInstance.fileName;
                     } else if (fileField.getValue() != null) {
                         filename = fileField.getValue().name;
                     }
-                    console.log("filename binnen query builder gedeelte is: " + filename);
                     query += "Resource Description[created in page]=" + currentPageID +
                         "&Resource Description[file name]=" + filename +
                         "&Resource Description[title]=" + titleField.getValue() +
@@ -511,9 +507,6 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                         dialogueInstance.upload.setFile(fileField.getValue());
                         dialogueInstance.upload.setFilename(fileField.getValue().name);
                         dialogueInstance.upload.upload().fail(function (status, exceptionobject) {
-                            console.log("Upload failed");
-                            console.log(status);
-                            console.log(exceptionobject);
                             switch (status) {
                                 case "duplicate":
                                     alert(OO.ui.deferMsg("visualeditor-emm-file-upload-duplicate")());
@@ -608,7 +601,6 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                         dialogueInstance.getFieldset().getItems()[5].getField().setValue(suggestion.organization);
                         dialogueInstance.getFieldset().getItems()[6].getField().setValue(suggestion.subjects);
                         dialogueInstance.fileName = suggestion.data.replace("Bestand:","").replace("File:","");
-                        console.log(dialogueInstance.fileName);
                         validator.validateAll();
                     };
                     initAutoComplete(queryResults, titleField, dialogueInstance, fillFields);
@@ -850,8 +842,6 @@ function initAutoComplete(data, inputObject, dialogueInstance, fillFields) {
         lookup: data,
         onSelect: function (suggestion) {
             dialogueInstance.existingpageid = suggestion.data;
-            console.log("binnen autocomplete is existingpageid: " + dialogueInstance.existingpageid);
-            console.log("gaat naar true");
             dialogueInstance.autoCompleteWasSelected = 2;
             //This part of the code depends on the order in which the fields of the dialogs are defined
             fillFields(suggestion);
