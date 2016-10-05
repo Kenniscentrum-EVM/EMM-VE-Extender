@@ -52,7 +52,6 @@ var Validator = function (fieldset, inputSuccess, inputFail, validationSuccess, 
             //This awkward way of iterating is implemented because of the restrictions
             var isValidated = true;
             $.each(validator.inputStates, function (key, val) {
-                console.log(validator.inputStates);
                 if (!val && val != null) {
                     isValidated = false;
                     if (validationFail != null)
