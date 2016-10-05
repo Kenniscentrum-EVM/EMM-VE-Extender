@@ -23,7 +23,7 @@ $wgExtensionCredits['semantic'][] = array(
 );
 
 $wgResourceModules['ext.EMMVEExtension'] = array(
-	'scripts' =>  array('js/veExtenderValidation.js','js/veAutocomplete.js','js/veExtenderConstants.js','js/veExtenderLinks.js','js/veExtenderResources.js','js/veExtenderLanguage.js','js/veExtenderUI.js','js/veExtender.js'),
+	'scripts' =>  array('js/veExtenderValidation.js','js/veAutocomplete.js','js/veExtenderConstants.js','js/veExtenderLinks.js','js/veExtenderResources.js','js/veExtenderLanguage.js','js/veExtenderUI.js','js/veExtender.js','js/veExitDialog.js'),
 	'styles' => array ('css/veExtender.css'),
 	'position' => 'top',
 

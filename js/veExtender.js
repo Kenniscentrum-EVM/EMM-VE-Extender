@@ -28,12 +28,13 @@ function redefineMenu() {
             force.push(toadd[i]);
 }
 
-function loadEMMExtender() {
-    redefineMenu();
-    defineTranslations();
-    addEMMLinks();
-    addEMMResources();
-    loadExtenderUI();
+function loadEMMExtender(){
+  redefineMenu();
+  defineTranslations();
+  addEMMLinks();
+  addEMMResources();
+  loadExtenderUI();
+  createExitDialog();
 }
 
 mw.hook('ve.activationComplete').add(function () {

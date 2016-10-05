@@ -1,5 +1,4 @@
 //some helper functions
-
 function spacesToUnderscore(s) {
     return s.replace(/ /g, "_");
 }
@@ -151,7 +150,7 @@ function addEMMResources() {
         }
 
         if (pageProperties.topcontext.length == 0) {
-            alert(OO.ui.deferMsg('topcontexterror')());
+            alert(OO.ui.deferMsg("visualeditor-emm-topcontext-error")());
         } else {
             var cmd = 'Light_Context?Light_Context%5BSupercontext%5D=' + pageProperties.pagename + '&Light_Context%5BTopcontext%5D=' + pageProperties.topcontext + '&Light_Context%5BContext+type%5D=Situation';
             var uri = getStartAddress() + 'index.php/Special:FormEdit/' + cmd;
