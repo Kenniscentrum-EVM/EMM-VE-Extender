@@ -94,7 +94,7 @@ function createExitDialog() {
         buttonOk.$element.css("float", "right");
         buttonOk.onClick = function () {
             //Closes the visual editor
-            ve.init.target.cancel('navigate-read');
+            ve.init.target.deactivate();
         }
 
         buttonOk.connect(buttonOk, {
