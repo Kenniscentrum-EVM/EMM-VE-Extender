@@ -1,11 +1,9 @@
 /**
  * Creates a custom exit dialog which is shown when the user tries to close the visual editor when the user made unsaved changes.
  */
-function createExitDialog()
-{
-    /**
-     * Het annuleren knopje wordt hier aan de toolbar toegevoegd
-     */
+function createExitDialog() {
+
+
     var cancelToolFactory = new OO.ui.ToolFactory();
     var cancelToolGroupFactory = new OO.ui.ToolGroupFactory();
     var cancelToolbar = new OO.ui.Toolbar(cancelToolFactory, cancelToolGroupFactory);
@@ -17,6 +15,8 @@ function createExitDialog()
 
     cancelButton.static.name = 'cancelbutton';
     cancelButton.static.title = OO.ui.deferMsg('visualeditor-emm-cancel');
+    cancelButton.prototype.onUpdateState = function () {
+    };
     cancelButton.prototype.onSelect = function () {
 
         //Wanneer het document is aangepast...
@@ -25,8 +25,7 @@ function createExitDialog()
             ve.init.target.getSurface().execute("window", "open", "cancelconfirm", null);
         }
         else {
-
-            ve.init.target.cancel('navigate-read');
+            ve.init.target.deactivate();
             //ve.init.target.deactivate();
         }
     }
@@ -35,14 +34,22 @@ function createExitDialog()
     cancelToolbar.setup([
         {
             type: 'bar',
-            label: "Annuleren",
+            //label: "Annuleren", //todo translations
             include: ['cancelbutton']
         }
     ]);
 
+
+
+
     $('.oo-ui-toolbar-actions').children().first().after(cancelToolbar.$group);
+    /*
+    cancelToolbar.initialize();
+    cancelToolbar.emit('updateState');
+    */
 
-
+}
+/*
     //Unregister the default exit dialogue which is part of the visualextender library, we don't use it because the chameleon skin breaks it.
     ve.ui.windowFactory.unregister(ve.ui.MWCancelConfirmDialog);
 
@@ -127,3 +134,4 @@ function createExitDialog()
     //register our new dialog in the factory
     ve.ui.windowFactory.register(cancelDialogue);
 }
+*/
