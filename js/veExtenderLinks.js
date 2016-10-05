@@ -81,7 +81,8 @@ function loadEMMDialog(template, toolId, menuText, dialogText, askQuery, templat
     tool.static.dialog = dialogueName;
     tool.static.deactivateOnSelect = true;
     tool.prototype.onSelect = function () {
-        this.toolbar.getSurface().execute("window", "open", dialogueName, null);
+        //this.toolbar.getSurface().execute("window", "open", dialogueName, null);
+        ve.ui.actionFactory.create('window', this.toolbar.getSurface()).open(dialogueName, {target: ve.init.target});
         this.setActive(false);
     };
     ve.ui.toolFactory.register(tool);
@@ -585,7 +586,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                 });
             }
             //Use parent handler in case something goes wrong
-            return MyDialog.super.prototype.getActionProcess.call(this, action);
+            return dialogue.super.prototype.getActionProcess.call(this, action);
         };
 
         //Declare a function to be called after the askQuery has been processed
