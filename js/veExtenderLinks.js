@@ -579,13 +579,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                 });
             }
             else
-            {
                 cleanUpDialogue();
-            }
-
-
-
-            console.log(action);
             //Use parent handler in case something goes wrong
             return dialogue.super.prototype.getActionProcess.call(this, action);
         };
