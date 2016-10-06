@@ -32,7 +32,7 @@ function loadEMMExtender(){
   redefineMenu();
   defineTranslations();
   addEMMLinks();
-  addEMMResources();
+  //addEMMResources();
   loadExtenderUI();
   createExitDialog();
 }

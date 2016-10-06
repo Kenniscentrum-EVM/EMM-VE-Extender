@@ -95,6 +95,7 @@ function createExitDialog() {
         buttonOk.onClick = function () {
             //Closes the visual editor
             //ve.init.target.cancel('navigate-read');
+            diaInstance.close();
             ve.init.target.deactivate(true, 'navigate-read');
 
         }

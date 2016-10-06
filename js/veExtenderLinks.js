@@ -81,7 +81,7 @@ function loadEMMDialog(template, toolId, menuText, dialogText, askQuery, templat
     tool.static.dialog = dialogueName;
     tool.static.deactivateOnSelect = true;
     tool.prototype.onSelect = function () {
-        this.toolbar.getSurface().execute("window", "open", dialogueName, null);
+        ve.ui.actionFactory.create('window', this.toolbar.getSurface()).open(dialogueName, {target: ve.init.target});
         this.setActive(false);
     };
     ve.ui.toolFactory.register(tool);
@@ -123,8 +123,8 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
         var dialogueInstance = this;
         //Initialize fields for scoping and later use
         dialogueInstance.queryResult = "";
-        dialogueInstance.existingpageid = "";
-        dialogueInstance.autoCompleteWasSelected = 0;
+        dialogueInstance.suggestion = null;
+        dialogueInstance.isExistingResource = false;
         dialogueInstance.upload = new mw.Upload();
         //Filename to keep teh filename of a selected file
         dialogueInstance.fileName = "";
@@ -177,33 +177,32 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                  }
                  }];*/
 
+                var fileFieldLayout = new OO.ui.FieldLayout(fileField, {
+                    label: OO.ui.deferMsg("visualeditor-emm-file-filename"),
+                    align: "left"
+                });
+
                 presentationTitleField.validation = [checkIfEmpty];
                 creatorField.validation = [checkIfEmpty];
                 dateField.validation = [checkIfEmpty, checkIfDate];
 
                 //Things to do when the specified field changes
                 titleField.onChangeFunctions = [function () {
-                    if (dialogueInstance.autoCompleteWasSelected > 0) {
-                        //If something was just selected from the autocomplete list, reset this to false, but keep existingpageid
-                        fileField.$element.hide();
-                        dialogueInstance.autoCompleteWasSelected--;
-                    }
-                    //If there was nothing selected from the autocomplete list, set the existingpageid to 0
-                    else {
-                        dialogueInstance.existingpageid = "";
-                        fileField.$element.show();
-                    }
+                    if(dialogueInstance.isExistingResource)
+                        if(dialogueInstance.suggestion.value != titleField.value)
+                        {
+                            dialogueInstance.isExistingResource = false;
+                            fileFieldLayout.$element.show();
+                        }
+                        else
+                            fileFieldLayout.$element.hide();
                 }];
-
                 fieldset.addItems([
                     new OO.ui.FieldLayout(titleField, {
                         label: OO.ui.deferMsg("visualeditor-emm-file-title"),
                         align: "left"
                     }),
-                    new OO.ui.FieldLayout(fileField, {
-                        label: OO.ui.deferMsg("visualeditor-emm-file-filename"),
-                        align: "left"
-                    }),
+                    fileFieldLayout,
                     new OO.ui.FieldLayout(presentationTitleField, {
                         label: OO.ui.deferMsg("visualeditor-emm-file-presentationtitle"),
                         align: "left"
@@ -238,14 +237,9 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
 
                 //Things to do when the specified field changes
                 pageNameField.onChangeFunctions = [function () {
-                    if (dialogueInstance.autoCompleteWasSelected > 0) {
-                        //If something was just selected from the autocomplete list, reset this to false, but keep existingpageid
-                        dialogueInstance.autoCompleteWasSelected--;
-                    }
-                    //If there was nothing selected from the automcplete list, set the existingpageid to 0
-                    else {
-                        dialogueInstance.existingpageid = "";
-                    }
+                    if(dialogueInstance.isExistingResource)
+                        if(dialogueInstance.suggestion.value != pageNameField.value)
+                            dialogueInstance.isExistingResource = false;
                 }];
 
                 fieldset.addItems([
@@ -283,13 +277,12 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
 
                 //Things to do when the specified field changes
                 titleField.onChangeFunctions = [function () {
-                    if (dialogueInstance.autoCompleteWasSelected > 0) {
-                        //If something was just selected from the autocomplete list, reset this to false, but keep existingpageid
-                        dialogueInstance.autoCompleteWasSelected--;
-                    }
-                    //If there was nothing selected from the automcplete list, set the existingpageid to 0
-                    else {
-                        dialogueInstance.existingpageid = "";
+                    if(dialogueInstance.isExistingResource)
+                    {
+                        if(dialogueInstance.suggestion.value != titleField.value)
+                        {
+                            dialogueInstance.isExistingResource = false;
+                        }
                     }
                 }];
 
@@ -377,14 +370,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
         //  Add event-handling logic to okButton
         var insertButtonHandler = function () {
             var namedata = presentationTitleField.getValue();
-            //Handling linking to external files and/or webpages
-            //Special case: if a cite should refer to an external link to a file, linktitle needs to be manually set
-            //to the hyperlink corresponding to that file
-            var linkdata = dialogueInstance.existingpageid.length > 0 ? dialogueInstance.existingpageid : "";
-            var exists = true;
-            if (linkdata.length == 0) {
-                exists = false;
-            }
+            var linkdata = dialogueInstance.suggestion.data.length > 0 ? dialogueInstance.suggestion.data : "";
 
             /**
              * Callback function to be called after creating a new resource or editing an existing one
@@ -447,7 +433,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                 case "File":
                     //Build the sfautoedit query
                     var filename = "";
-                    if (exists) {
+                    if (dialogueInstance.isExistingResource) {
                         filename = dialogueInstance.fileName;
                     } else if (fileField.getValue() != null) {
                         filename = fileField.getValue().name;
@@ -461,7 +447,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                     if (subjectField.getValue().length > 0) query += "&Resource Description[subject]=" + subjectField.getValue();
                     break;
                 case "Internal link":
-                    if (exists) {
+                    if (dialogueInstance.isExistingResource) {
                         insertCallback(linkdata);
                     }
                     else {
@@ -497,7 +483,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                     alert(OO.ui.deferMsg("visualeditor-emm-dialog-error"));
             }
             var target = "";
-            if (exists) {
+            if (dialogueInstance.isExistingResource) {
                 target = linkdata;
             }
 
@@ -506,7 +492,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
             //For internal links this logic is handled in the switch statement up above
             switch (template) {
                 case "File":
-                    if (!exists) {
+                    if (!dialogueInstance.isExistingResource) {
                         dialogueInstance.upload.setFile(fileField.getValue());
                         dialogueInstance.upload.setFilename(fileField.getValue().name);
                         dialogueInstance.upload.upload().fail(function (status, exceptionobject) {
@@ -556,23 +542,14 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                 default:
                     alert(OO.ui.deferMsg("visualeditor-emm-dialog-error"));
             }
-
-            //Clear the input fields and close the dialogue
-            validator.disable();
-            dialogueInstance.close();
-            clearInputFields(fieldset);
-            validator.enable();
-            dialogueInstance.existingpageid = "";
+            cleanUpDialogue();
         };
 
 
         // Add event handling logic to cancelButton
         var cancelButtonHandler = function () {
             //Clear the dialog and close it
-            validator.disable();
-            dialogueInstance.close();
-            clearInputFields(fieldset);
-            validator.enable();
+            cleanUpDialogue();
         };
 
         dialogue.prototype.getActionProcess = function (action) {
@@ -581,17 +558,31 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                     insertButtonHandler();
                 });
             }
-            if (action === "cancel") {
+            else if (action === "cancel") {
                 return new OO.ui.Process(function () {
                     cancelButtonHandler();
                 });
             }
+            else {
+                cleanUpDialogue();
+            }
             //Use parent handler in case something goes wrong
-            return MyDialog.super.prototype.getActionProcess.call(this, action);
+            return dialogue.super.prototype.getActionProcess.call(this, action);
         };
 
+        function cleanUpDialogue()
+        {
+            dialogueInstance.close();
+            //todo check if closed and then clean the fields for a more elegant cleanup?
+            validator.disable();
+            clearInputFields(fieldset);
+            validator.enable();
+            dialogueInstance.isExistingResource = false;
+            dialogueInstance.suggestion = null;
+        }
+
         //Declare a function to be called after the askQuery has been processed
-        //This function initiates the autocmplete library for the resource input field
+        //This function initiates the autocomplete library for the resource input field
         //The user will be able to pick a resource from the list of all resources gathered by the askQuery
         var callback = function (queryResults) {
             switch (template) {
@@ -602,7 +593,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                         dialogueInstance.getFieldset().getItems()[4].getField().setValue(fixDate(suggestion.date));
                         dialogueInstance.getFieldset().getItems()[5].getField().setValue(suggestion.organization);
                         dialogueInstance.getFieldset().getItems()[6].getField().setValue(suggestion.subjects);
-                        dialogueInstance.fileName = suggestion.data.replace("Bestand:", "").replace("File:", "");
+                        dialogueInstance.fileName = suggestion.data.replace("Bestand:","").replace("File:","");
                         validator.validateAll();
                     };
                     initAutoComplete(queryResults, titleField, dialogueInstance, fillFields);
@@ -843,10 +834,13 @@ function initAutoComplete(data, inputObject, dialogueInstance, fillFields) {
     $(inputField).autocomplete({
         lookup: data,
         onSelect: function (suggestion) {
-            dialogueInstance.existingpageid = suggestion.data;
-            dialogueInstance.autoCompleteWasSelected = 2;
-            //This part of the code depends on the order in which the fields of the dialogs are defined
-            fillFields(suggestion);
+            if(dialogueInstance.isExistingResource == false)
+            {
+                dialogueInstance.suggestion = suggestion;
+                dialogueInstance.isExistingResource = true;
+                fillFields(suggestion);
+                return;
+            }
         },
         appendTo: inputField.parentElement,
         maxHeight: 300
