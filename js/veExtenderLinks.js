@@ -377,33 +377,10 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
         //  Add event-handling logic to okButton
         var insertButtonHandler = function () {
             var namedata = presentationTitleField.getValue();
-            console.log("insert handler pageid: " + dialogueInstance.existingpageid);
-            console.log("autocomplete was selected: " + dialogueInstance.autoCompleteWasSelected);
             //Handling linking to external files and/or webpages
             //Special case: if a cite should refer to an external link to a file, linktitle needs to be manually set
             //to the hyperlink corresponding to that file
-            var linkdata = "";
-            if (template == "External link") {
-                console.log(dialogueInstance.existingpageid.length);
-                if (dialogueInstance.existingpageid.length > 0) {
-                    console.log(dialogueInstance.existingpageid);
-                    console.log("existingpageid: " + dialogueInstance.existingpageid);
-                    console.log("Toevoegen aan referentielijst: " + addToResourcesField.isSelected());
-                    //if its either an actual hyperlink resource, or the template to be used is not a cite, insert the normal way
-                    if (/Hyperlink/g.test(dialogueInstance.existingpageid) || !addToResourcesField.isSelected()) {
-                        linkdata = dialogueInstance.existingpageid;
-                    }
-                    else {
-                        linkdata = linkField.getValue();
-                    }
-                }
-                else {
-                    linkdata = "";
-                }
-            }
-            else {
-                linkdata = dialogueInstance.existingpageid.length > 0 ? dialogueInstance.existingpageid : "";
-            }
+            var linkdata = dialogueInstance.existingpageid.length > 0 ? dialogueInstance.existingpageid : "";
             var exists = true;
             if (linkdata.length == 0) {
                 exists = false;
@@ -868,7 +845,6 @@ function initAutoComplete(data, inputObject, dialogueInstance, fillFields) {
         onSelect: function (suggestion) {
             dialogueInstance.existingpageid = suggestion.data;
             dialogueInstance.autoCompleteWasSelected = 2;
-            console.log(dialogueInstance.existingpageid);
             //This part of the code depends on the order in which the fields of the dialogs are defined
             fillFields(suggestion);
         },
