@@ -124,8 +124,9 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
         var dialogueInstance = this;
         //Initialize fields for scoping and later use
         dialogueInstance.queryResult = "";
-        dialogueInstance.existingpageid = "";
-        dialogueInstance.autoCompleteWasSelected = 0; // property is set
+        dialogueInstance.suggestedFile = null;
+        dialogueInstance.isExistingFile = false;
+        //dialogueInstance.autoCompleteWasSelected = false; // property is set
         dialogueInstance.upload = new mw.Upload();
         //Filename to keep teh filename of a selected file
         dialogueInstance.fileName = "";
@@ -178,33 +179,38 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                  }
                  }];*/
 
+                var fileFieldLayout = new OO.ui.FieldLayout(fileField, {
+                    label: OO.ui.deferMsg("visualeditor-emm-file-filename"),
+                    align: "left"
+                });
+
                 presentationTitleField.validation = [checkIfEmpty];
                 creatorField.validation = [checkIfEmpty];
                 dateField.validation = [checkIfEmpty, checkIfDate];
 
                 //Things to do when the specified field changes
                 titleField.onChangeFunctions = [function () {
-                    if (dialogueInstance.autoCompleteWasSelected > 0) {
-                        //If something was just selected from the autocomplete list, reset this to false, but keep existingpageid
-                        fileField.$element.hide();
-                        dialogueInstance.autoCompleteWasSelected--;
-                    }
-                    //If there was nothing selected from the automcplete list, set the existingpageid to 0
-                    else {
-                        dialogueInstance.existingpageid = "";
-                        fileField.$element.show();
-                    }
+
+                    console.log(dialogueInstance.suggestedFile);
+
+                    if(dialogueInstance.isExistingFile)
+                        if(dialogueInstance.suggestedFile.value != titleField.value)
+                        {
+                            dialogueInstance.isExistingFile = false;
+                            fileFieldLayout.$element.show();
+                        }
+                        else
+                            fileFieldLayout.$element.hide();
                 }];
+
+
 
                 fieldset.addItems([
                     new OO.ui.FieldLayout(titleField, {
                         label: OO.ui.deferMsg("visualeditor-emm-file-title"),
                         align: "left"
                     }),
-                    new OO.ui.FieldLayout(fileField, {
-                        label: OO.ui.deferMsg("visualeditor-emm-file-filename"),
-                        align: "left"
-                    }),
+                    fileFieldLayout,
                     new OO.ui.FieldLayout(presentationTitleField, {
                         label: OO.ui.deferMsg("visualeditor-emm-file-presentationtitle"),
                         align: "left"
@@ -239,14 +245,9 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
 
                 //Things to do when the specified field changes
                 pageNameField.onChangeFunctions = [function () {
-                    if (dialogueInstance.autoCompleteWasSelected == 0) {
-                        //If something was just selected from the autocomplete list, reset this to false, but keep existingpageid
-                        dialogueInstance.autoCompleteWasSelected--;
-                    }
-                    //If there was nothing selected from the automcplete list, set the existingpageid to 0
-                    else {
-                        dialogueInstance.existingpageid = "";
-                    }
+                    if(dialogueInstance.isExistingFile)
+                        if(dialogueInstance.suggestedFile.value != pageNameField.value)
+                            dialogueInstance.isExistingFile = false;
                 }];
 
                 fieldset.addItems([
@@ -284,13 +285,12 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
 
                 //Things to do when the specified field changes
                 titleField.onChangeFunctions = [function () {
-                    if (dialogueInstance.autoCompleteWasSelected == 0) {
-                        //If something was just selected from the autocomplete list, reset this to false, but keep existingpageid
-                        dialogueInstance.autoCompleteWasSelected--;
-                    }
-                    //If there was nothing selected from the automcplete list, set the existingpageid to 0
-                    else {
-                        dialogueInstance.existingpageid = "";
+                    if(dialogueInstance.isExistingFile)
+                    {
+                        if(dialogueInstance.suggestedFile.value != titleField.value)
+                        {
+                            dialogueInstance.isExistingFile = false;
+                        }
                     }
                 }];
 
@@ -378,11 +378,13 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
         //  Add event-handling logic to okButton
         var insertButtonHandler = function () {
             var namedata = presentationTitleField.getValue();
-            var linkdata = dialogueInstance.existingpageid.length > 0 ? dialogueInstance.existingpageid : "";
+            var linkdata = dialogueInstance.suggestedFile.data.length > 0 ? dialogueInstance.suggestedFile.data : "";
+            /*
             var exists = true;
             if (linkdata.length == 0) {
                 exists = false;
             }
+            */
 
             /**
              * Callback function to be called after creating a new resource or editing an existing one
@@ -445,7 +447,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                 case "File":
                     //Build the sfautoedit query
                     var filename = "";
-                    if (exists) {
+                    if (dialogueInstance.isExistingFile) {
                         filename = dialogueInstance.fileName;
                     } else if (fileField.getValue() != null) {
                         filename = fileField.getValue().name;
@@ -459,7 +461,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                     if (subjectField.getValue().length > 0) query += "&Resource Description[subject]=" + subjectField.getValue();
                     break;
                 case "Internal link":
-                    if (exists) {
+                    if (dialogueInstance.isExistingFile) {
                         insertCallback(linkdata);
                     }
                     else {
@@ -495,7 +497,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                     alert(OO.ui.deferMsg("visualeditor-emm-dialog-error"));
             }
             var target = "";
-            if (exists) {
+            if (dialogueInstance.isExistingFile) {
                 target = linkdata;
             }
 
@@ -504,7 +506,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
             //For internal links this logic is handled in the switch statement up above
             switch (template) {
                 case "File":
-                    if (!exists) {
+                    if (!dialogueInstance.isExistingFile) {
                         dialogueInstance.upload.setFile(fileField.getValue());
                         dialogueInstance.upload.setFilename(fileField.getValue().name);
                         dialogueInstance.upload.upload().fail(function (status, exceptionobject) {
@@ -556,7 +558,8 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                     alert(OO.ui.deferMsg("visualeditor-emm-dialog-error"));
             }
             cleanUpDialogue();
-            dialogueInstance.existingpageid = "";
+            dialogueInstance.isExistingFile = false;
+            dialogueInstance.suggestedFile = null;
         };
 
 
@@ -586,14 +589,15 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
 
         function cleanUpDialogue()
         {
-            validator.disable();
             dialogueInstance.close();
+            //todo check if closed and then clean the fields for a more elegant cleanup?
+            validator.disable();
             clearInputFields(fieldset);
             validator.enable();
         }
 
         //Declare a function to be called after the askQuery has been processed
-        //This function initiates the autocmplete library for the resource input field
+        //This function initiates the autocomplete library for the resource input field
         //The user will be able to pick a resource from the list of all resources gathered by the askQuery
         var callback = function (queryResults) {
             switch (template) {
@@ -845,10 +849,28 @@ function initAutoComplete(data, inputObject, dialogueInstance, fillFields) {
     $(inputField).autocomplete({
         lookup: data,
         onSelect: function (suggestion) {
-            dialogueInstance.existingpageid = suggestion.data;
-            dialogueInstance.autoCompleteWasSelected = 2;
+
+            if(dialogueInstance.isExistingFile == false)
+            {
+                dialogueInstance.suggestedFile = suggestion;
+                dialogueInstance.isExistingFile = true;
+                fillFields(suggestion);
+                return;
+            }
+
+
+
+            /*
+            if(dialogueInstance.existingPageId != null)
+                if(dialogueInstance.existingPageId.data == suggestion.data)
+                {
+                    dialogueInstance.existingPageId = suggestion;
+                    dialogueInstance.existingFile = true;
+                    fillFields(suggestion);
+                }
+            */
             //This part of the code depends on the order in which the fields of the dialogs are defined
-            fillFields(suggestion);
+
         },
         appendTo: inputField.parentElement,
         maxHeight: 300
