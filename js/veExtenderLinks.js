@@ -428,7 +428,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                 fragment.insertContent(mytemplate);
             };
 
-            var currentPageID = mw.config.get('wgPageName');
+            var currentPageID = mw.config.get('wgPageName').replace(/_/g," ");
             var query = "";
             switch (template) {
                 case "File":
@@ -463,6 +463,8 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                             query: "[[" + currentPageID + "]]|?Topcontext|limit=10000"//
                         }).done(function (data) {
                             var res = data.query.results;
+                            console.log(res);
+                            console.log(currentPageID);
                             var topContext = res[currentPageID].printouts["Topcontext"][0].fulltext;
                             query += "&Light Context[Topcontext]=" + topContext;
                             semanticCreateWithFormQuery(query, insertCallback, target, "Light Context");
