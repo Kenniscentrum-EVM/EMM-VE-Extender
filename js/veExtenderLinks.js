@@ -188,9 +188,8 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
 
                 //Things to do when the specified field changes
                 titleField.onChangeFunctions = [function () {
-                    if(dialogueInstance.isExistingResource)
-                        if(dialogueInstance.suggestion.value != titleField.value)
-                        {
+                    if (dialogueInstance.isExistingResource)
+                        if (dialogueInstance.suggestion.value != titleField.value) {
                             dialogueInstance.isExistingResource = false;
                             fileFieldLayout.$element.show();
                         }
@@ -237,8 +236,8 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
 
                 //Things to do when the specified field changes
                 pageNameField.onChangeFunctions = [function () {
-                    if(dialogueInstance.isExistingResource)
-                        if(dialogueInstance.suggestion.value != pageNameField.value)
+                    if (dialogueInstance.isExistingResource)
+                        if (dialogueInstance.suggestion.value != pageNameField.value)
                             dialogueInstance.isExistingResource = false;
                 }];
 
@@ -277,10 +276,8 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
 
                 //Things to do when the specified field changes
                 titleField.onChangeFunctions = [function () {
-                    if(dialogueInstance.isExistingResource)
-                    {
-                        if(dialogueInstance.suggestion.value != titleField.value)
-                        {
+                    if (dialogueInstance.isExistingResource) {
+                        if (dialogueInstance.suggestion.value != titleField.value) {
                             dialogueInstance.isExistingResource = false;
                         }
                     }
@@ -370,8 +367,12 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
         //  Add event-handling logic to okButton
         var insertButtonHandler = function () {
             var namedata = presentationTitleField.getValue();
-            var linkdata = dialogueInstance.suggestion.data.length > 0 ? dialogueInstance.suggestion.data : "";
-
+            if (dialogueInstance.suggestion != null) {
+                var linkdata = dialogueInstance.suggestion.data.length > 0 ? dialogueInstance.suggestion.data : "";
+            }
+            else {
+                linkdata = "";
+            }
             /**
              * Callback function to be called after creating a new resource or editing an existing one
              * It is responsible for inserting a link or cite template in the text of your page that links to the resource
@@ -570,8 +571,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
             return dialogue.super.prototype.getActionProcess.call(this, action);
         };
 
-        function cleanUpDialogue()
-        {
+        function cleanUpDialogue() {
             dialogueInstance.close();
             //todo check if closed and then clean the fields for a more elegant cleanup?
             validator.disable();
@@ -593,7 +593,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                         dialogueInstance.getFieldset().getItems()[4].getField().setValue(fixDate(suggestion.date));
                         dialogueInstance.getFieldset().getItems()[5].getField().setValue(suggestion.organization);
                         dialogueInstance.getFieldset().getItems()[6].getField().setValue(suggestion.subjects);
-                        dialogueInstance.fileName = suggestion.data.replace("Bestand:","").replace("File:","");
+                        dialogueInstance.fileName = suggestion.data.replace("Bestand:", "").replace("File:", "");
                         validator.validateAll();
                     };
                     initAutoComplete(queryResults, titleField, dialogueInstance, fillFields);
@@ -834,8 +834,7 @@ function initAutoComplete(data, inputObject, dialogueInstance, fillFields) {
     $(inputField).autocomplete({
         lookup: data,
         onSelect: function (suggestion) {
-            if(dialogueInstance.isExistingResource == false)
-            {
+            if (dialogueInstance.isExistingResource == false) {
                 dialogueInstance.suggestion = suggestion;
                 dialogueInstance.isExistingResource = true;
                 fillFields(suggestion);
