@@ -69,6 +69,11 @@ function defineTranslations() {
             "visualeditor-emm-validation-website": "This field must contain a valid URL.",
             "visualeditor-emm-validation-special": "This field cannot contain special characters.",
             "visualeditor-emm-validation-date": "This field must contain a valid date.",
+
+            "visualeditor-emm-exlinkdialog-title-expage": "Insert file",
+            "visualeditor-emm-exlinkdialog-title-npage": "Insert new file.",
+            "visualeditor-emm-filedialog-titlefield-placeholder-dev": "Search for file",
+            "visualeditor-emm-filedialog-titlefield-placeholder-new": "Title of new file",
             "visualeditor-emm-required": "*Required"
         },
         nl: {
@@ -115,7 +120,6 @@ function defineTranslations() {
             "visualeditor-emm-file-upload-file-too-large": "Het bestand is te groot. De maximale grootte van een bestand is 64MB",
             "visualeditor-emm-file-upload-empty-file": "Het opgegeven bestand is leeg.",
 
-
             "visualeditor-emm-cancel": "Annuleer",
             "visualeditor-emm-insert": "Voeg in",
 
@@ -140,6 +144,11 @@ function defineTranslations() {
             "visualeditor-emm-validation-website": "Dit veld moet een geldige URL bevatten.",
             "visualeditor-emm-validation-special": "Dit veld mag geen speciale tekens bevatten. (!@#. ect)",
             "visualeditor-emm-validation-date": "Dit veld moet een geldige datum bevatten.",
+
+            "visualeditor-emm-linkdialog-title-npage": "Invoegen nieuwe koppeling naar website",
+            "visualeditor-emm-filedialog-title-npage": "Invoegen nieuw bestand",
+            "visualeditor-emm-filedialog-titlefield-placeholder-dev": "Zoeken naar bestand",
+            "visualeditor-emm-filedialog-titlefield-placeholder-new": "Titel nieuw bestand",
             "visualeditor-emm-required": "*Vereist"
         }
     };

@@ -94,6 +94,8 @@ Validator.prototype.bindEvents = function(fieldset, eventFunction) {
 
 Validator.prototype.enable = function () {
     this.enabled = true;
+    this.cleanUpForm();
+    this.resetInputStates();
 }
 
 Validator.prototype.disable = function () {
