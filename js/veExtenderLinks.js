@@ -197,7 +197,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                             toggleAutoComplete(dialogueInstance, titleField);
                             var input = titleField.$element.find('input');
                             input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-filedialog-titlefield-placeholder-dev")());
-                            clearInputFields(fieldset, [1, 2]);
+                            clearInputFields(fieldset, [1, 2], ["OoUiLabelWidget"]);
                             validator.cleanUpForm();
                         }
                     }
