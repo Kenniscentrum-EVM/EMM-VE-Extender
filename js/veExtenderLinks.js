@@ -322,6 +322,10 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
             default:
                 alert(OO.ui.deferMsg("visualeditor-emm-dialog-error"));
         }
+        var requiredLabel = new OO.ui.LabelWidget({
+            label: OO.ui.deferMsg("visualeditor-emm-required")
+        });
+        fieldset.addItems([new OO.ui.FieldLayout(requiredLabel)]);
 
         //Add the created items to the dialogue
         dialogue.super.prototype.initialize.call(this);
@@ -669,7 +673,10 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
  */
 function clearInputFields(fieldset) {
     for (var i = 0; i < fieldset.getItems().length; i++) {
-        (fieldset.getItems()[i]).getField().setValue("");
+        //Make sure the fieldlayout doens't contain just a label field that can't be cleared
+        if(!fieldset.getItems()[i].getField().constructor.name == "OoUiLabelWidget"){
+            fieldset.getItems()[i].getField().setValue("");
+        }
     }
 }
 

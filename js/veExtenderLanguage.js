@@ -68,7 +68,8 @@ function defineTranslations() {
             "visualeditor-emm-validation-required": "This field cannot be empty.",
             "visualeditor-emm-validation-website": "This field must contain a valid URL.",
             "visualeditor-emm-validation-special": "This field cannot contain special characters.",
-            "visualeditor-emm-validation-date": "This field must contain a valid date."
+            "visualeditor-emm-validation-date": "This field must contain a valid date.",
+            "visualeditor-emm-required": "*Required"
         },
         nl: {
             "visualeditor-emm-add-file": "Toevoegen bestand",
@@ -114,6 +115,7 @@ function defineTranslations() {
             "visualeditor-emm-file-upload-file-too-large": "Het bestand is te groot. De maximale grootte van een bestand is 64MB",
             "visualeditor-emm-file-upload-empty-file": "Het opgegeven bestand is leeg.",
 
+
             "visualeditor-emm-cancel": "Annuleer",
             "visualeditor-emm-insert": "Voeg in",
 
@@ -137,7 +139,8 @@ function defineTranslations() {
             "visualeditor-emm-validation-required": "Dit veld mag niet leeg zijn.",
             "visualeditor-emm-validation-website": "Dit veld moet een geldige URL bevatten.",
             "visualeditor-emm-validation-special": "Dit veld mag geen speciale tekens bevatten. (!@#. ect)",
-            "visualeditor-emm-validation-date": "Dit veld moet een geldige datum bevatten."
+            "visualeditor-emm-validation-date": "Dit veld moet een geldige datum bevatten.",
+            "visualeditor-emm-required": "*Vereist"
         }
     };
     var userLanguage = mw.config.get("wgUserLanguage");
