@@ -439,13 +439,13 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                     } else if (fileField.getValue() != null) {
                         filename = fileField.getValue().name;
                     }
-                    query += "Resource Description[created in page]=" + currentPageID +
-                        "&Resource Description[file name]=" + filename +
+                    query += "Resource Description[file name]=" + filename +
                         "&Resource Description[title]=" + titleField.getValue() +
                         "&Resource Description[creator]=" + creatorField.getValue() +
                         "&Resource Description[date]=" + dateField.getValue();
                     if (organizationField.getValue().length > 0) query += "&Resource Description[organization]=" + organizationField.getValue();
                     if (subjectField.getValue().length > 0) query += "&Resource Description[subject]=" + subjectField.getValue();
+                    if (!dialogueInstance.isExistingResource) query += "&Resource Description[created in page]=" + currentPageID;
                     break;
                 case "Internal link":
                     if (dialogueInstance.isExistingResource) {
@@ -477,13 +477,13 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                 case
                 "External link":
                     //Build the sfautoedit query
-                    query += "Resource Description[created in page]=" + currentPageID +
-                        "&Resource Description[hyperlink]=" + linkField.getValue() +
+                    query += "Resource Description[hyperlink]=" + linkField.getValue() +
                         "&Resource Description[title]=" + titleField.getValue() +
                         "&Resource Description[creator]=" + creatorField.getValue() +
                         "&Resource Description[date]=" + dateField.getValue();
                     if (organizationField.getValue().length > 0) query += "&Resource Description[organization]=" + organizationField.getValue();
                     if (subjectField.getValue().length > 0) query += "&Resource Description[subject]=" + subjectField.getValue();
+                    if (!dialogueInstance.isExistingResource) query += "&Resource Description[created in page]=" + currentPageID;
                     break;
                 default:
                     alert(OO.ui.deferMsg("visualeditor-emm-dialog-error"));
