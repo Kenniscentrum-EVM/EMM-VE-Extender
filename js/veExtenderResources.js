@@ -1,3 +1,5 @@
+//todo is this file still required?
+
 //some helper functions
 function spacesToUnderscore(s) {
     return s.replace(/ /g, "_");
@@ -63,6 +65,7 @@ function getContextOfCurrentPage() {
  * main function
  */
 function addEMMResources() {
+
     var toolFactory = new OO.ui.ToolFactory();
     var toolGroupFactory = new OO.ui.ToolGroupFactory();
     var toolbar = new OO.ui.Toolbar(toolFactory, toolGroupFactory);
@@ -101,9 +104,6 @@ function addEMMResources() {
     };
     AddHyperlinkTool.prototype.onSelect = function () {
         ve.init.target.getSurface().execute('window', 'open', 'addhyperlinkdialog', null);//addlocallinkdialog
-
-        /*var address=getStartAddress()+'index.php/Special:FormEdit/Resource_Hyperlink?Resource_Description%5Bcreated+in+page%5D='+pageProperties.pagename;
-         doOpen(address);*/
         this.setActive(false);
     };
     toolFactory.register(AddHyperlinkTool);
@@ -125,6 +125,7 @@ function addEMMResources() {
     };
     toolFactory.register(AddInternalDocumentTool);
 
+
     toolbar.setup([
         {
             // 'list' tool groups display both the titles and icons, in a dropdown list.
@@ -139,6 +140,7 @@ function addEMMResources() {
     //console.log(toolbar);
     $('.ve-test-toolbar-insert').after(
         toolbar.$group);
+
 
     function processResult() {
         //console.log('save!');
