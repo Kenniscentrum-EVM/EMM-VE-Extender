@@ -428,7 +428,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                 fragment.insertContent(mytemplate);
             };
 
-            var currentPageID = mw.config.get('wgPageName').replace(/_/g," ");
+            var currentPageID = mw.config.get('wgPageName').replace(/_/g, " ");
             var query = "";
             switch (template) {
                 case "File":
@@ -463,7 +463,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                             query: "[[" + currentPageID + "]]|?Topcontext|limit=10000"//
                         }).done(function (data) {
                             var res = data.query.results;
-                            if(res[currentPageID].printouts["Topcontext"][0]!=null) {
+                            if (res[currentPageID].printouts["Topcontext"][0] != null) {
                                 var topContext = res[currentPageID].printouts["Topcontext"][0].fulltext;
                                 query += "&Light Context[Topcontext]=" + topContext;
                                 semanticCreateWithFormQuery(query, insertCallback, target, "Light Context");
@@ -514,6 +514,9 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                                     break;
                                 case "file-too-large":
                                     alert(OO.ui.deferMsg("visualeditor-emm-file-upload-file-too-large")());
+                                    break;
+                                case "empty-file":
+                                    alert(OO.ui.deferMsg("visualeditor-emm-file-upload-empty-file")());
                                     break;
                                 case "http":
                                     switch (exceptionobject.textStatus) {

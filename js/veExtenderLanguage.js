@@ -42,6 +42,7 @@ function defineTranslations() {
             "visualeditor-emm-file-upload-parsererror": "The file extension is invalid, only the following extensions are allowed: \n" +
             "svg, png, gif, jpg, jpeg, ppt, pptx, pdf, mp3, mp4, xls, xlsx, doc, docx, odt, odc, odp, odg, txt",
             "visualeditor-emm-file-upload-file-too-large": "The file is too large. The maximum size of a file is 64MB",
+            "visualeditor-emm-file-upload-empty-file": "The file that was uploaded is empty",
 
 
             "visualeditor-emm-cancel": "Cancel",
@@ -54,7 +55,7 @@ function defineTranslations() {
             "visualeditor-emm-menuaddhyperlinktitle": "Link",
             "visualeditor-emm-menuaddinternaldocumenttitle": "File",
             "visualeditor-emm-menuaddpagetitle": "Page",
-            "visualeditor-emm-topcontext-error": "The topcontext of this page could not be found. Please make sure the current page contains a light context",
+            "visualeditor-emm-topcontext-error": "The topcontext of this page could not be found. Please make sure the current page has a context or try again on another page",
 
             "visualeditor-emm-menufiletitle": "File...",
             "visualeditor-emm-menuexternallinktitle": "Link (website)...",
@@ -111,6 +112,7 @@ function defineTranslations() {
             "visualeditor-emm-file-upload-parsererror": "Het bestandstype is ongeldig, enkel de volgende bestandstypen zijn toegestaan: \n" +
             "svg, png, gif, jpg, jpeg, ppt, pptx, pdf, mp3, mp4, xls, xlsx, doc, docx, odt, odc, odp, odg, txt",
             "visualeditor-emm-file-upload-file-too-large": "Het bestand is te groot. De maximale grootte van een bestand is 64MB",
+            "visualeditor-emm-file-upload-empty-file": "Het opgegeven bestand is leeg.",
 
             "visualeditor-emm-cancel": "Annuleer",
             "visualeditor-emm-insert": "Voeg in",
@@ -122,7 +124,7 @@ function defineTranslations() {
             "visualeditor-emm-menuaddhyperlinktitle": "Link",
             "visualeditor-emm-menuaddinternaldocumenttitle": "Bestand",
             "visualeditor-emm-menuaddpagetitle": "Pagina",
-            "visualeditor-emm-topcontext-error": "Er is geen topcontext gevonden voor deze pagina. Zorg er voor dat de huidige pagina een light context bevat",
+            "visualeditor-emm-topcontext-error": "Er is geen topcontext gevonden voor deze pagina. Zorg er voor dat de huidige pagina een context bevat of probeer het opnieuw op een andere pagina",
 
             "visualeditor-emm-menufiletitle": "Bestand...",
             "visualeditor-emm-menuexternallinktitle": "Koppeling (website)...",
