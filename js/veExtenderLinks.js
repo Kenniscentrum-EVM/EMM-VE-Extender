@@ -126,10 +126,13 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
         dialogueInstance.queryResult = "";
         dialogueInstance.suggestedFile = null;
         dialogueInstance.isExistingFile = false;
+        dialogueInstance.dialogMode = 0; //0 = existing 1 = new
         //dialogueInstance.autoCompleteWasSelected = false; // property is set
         dialogueInstance.upload = new mw.Upload();
         //Filename to keep teh filename of a selected file
         dialogueInstance.fileName = "";
+
+        var dialogReset;
 
         //  create the fieldset, which is responsible for the layout of the dialogue
         var fieldset = new OO.ui.FieldsetLayout({
@@ -154,7 +157,10 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                 var subjectField = new OO.ui.TextInputWidget({});
 
                 titleField.validation = [checkIfEmpty];
-                /*fileField.validation = [function (value, sender) {
+                fileField.validation = [function (value, sender) {
+                    return "";
+
+                    /*
                  if (value == null) {
                  return "";
                  }
@@ -177,12 +183,71 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                  }
                  return "";
                  }
-                 }];*/
+                 */
+                 }];
 
                 var fileFieldLayout = new OO.ui.FieldLayout(fileField, {
                     label: OO.ui.deferMsg("visualeditor-emm-file-filename"),
                     align: "left"
                 });
+
+                var testDialogMode = function()
+                {
+                    console.log(fileField);
+                    if(dialogueInstance.dialogMode == 0) {
+
+
+                        if (!dialogueInstance.isExistingFile && fileField.getValue() != null) { //nullcheck for getValue() may be required
+
+                            dialogueInstance.$element.find('.oo-ui-processDialog-title').text("Invoegen nieuw bestand");
+                            dialogueInstance.dialogMode = 1;
+
+                            /*
+                            if(dialogueInstance.suggestedFile != null) {
+                                if (dialogueInstance.suggestedFile.hyperlink == linkField.value) {
+                                    clearInputFields(fieldset);
+                                    validator.cleanUpForm();
+                                    return;
+                                }
+                                else
+                                    clearInputFields(fieldset, 1);
+                            }
+                            else {
+                                clearInputFields(fieldset, 1);
+                            }
+                            */
+
+                            /*
+                            dialogueInstance.$element.find('.oo-ui-processDialog-title').text("Invoegen nieuwe koppeling naar website");
+                            var input = titleField.$element.find('input');
+                            linkField.$element.find('input').prop("placeholder", "Voer een titel in voor de nieuwe koppeling");
+                            input.prop("placeholder", "Voer een titel in voor de nieuwe link");
+                            //todo temporary
+                            toggleAutoComplete(dialogueInstance, input);
+                            dialogueInstance.dialogMode = 1;
+                            validator.cleanUpForm();
+                            */
+                        }
+                    }
+                    else {
+                        if (fileField.getValue().value) {
+
+                            dialogueInstance.$element.find('.oo-ui-processDialog-title').text("Invoegen bestand");
+                            dialogueInstance.dialogMode = 0;
+                            /*
+                            dialogueInstance.$element.find('.oo-ui-processDialog-title').text("Invoegen koppeling naar website");
+                            var input = titleField.$element.find('input');
+                            linkField.$element.find('input').prop("placeholder", "Voer een nieuwe koppeling in");
+                            input.prop("placeholder", "Zoeken naar een bestaande link");
+                            toggleAutoComplete(dialogueInstance, input);
+                            clearInputFields(fieldset);
+                            validator.cleanUpForm();
+                            dialogueInstance.dialogMode = 0;
+                            */
+                        }
+                    }
+                }
+
 
                 presentationTitleField.validation = [checkIfEmpty];
                 creatorField.validation = [checkIfEmpty];
@@ -190,18 +255,20 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
 
                 //Things to do when the specified field changes
                 titleField.onChangeFunctions = [function () {
-
-                    console.log(dialogueInstance.suggestedFile);
-
                     if(dialogueInstance.isExistingFile)
                         if(dialogueInstance.suggestedFile.value != titleField.value)
                         {
                             dialogueInstance.isExistingFile = false;
                             fileFieldLayout.$element.show();
+                            //dialogueInstance.updateSize();
                         }
-                        else
+                        else {
                             fileFieldLayout.$element.hide();
-                }];
+                            //dialogueInstance.updateSize();
+                        }
+                }]; // ,testDialogMode
+
+                //fileField.onChangeFunctions = [testDialogMode];
 
 
 
@@ -264,9 +331,11 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
             case "External link": {
                 //Create input fields in case we're dealing with an external link
                 var titleField = new OO.ui.TextInputWidget({
-                    placeholder: OO.ui.deferMsg("visualeditor-emm-search")
+                    placeholder: "Zoeken naar een bestaande link"//OO.ui.deferMsg("visualeditor-emm-search")
                 });
-                var linkField = new OO.ui.TextInputWidget({});
+                var linkField = new OO.ui.TextInputWidget({
+                    placeholder: "Voer een nieuwe koppeling in"
+                });
                 var presentationTitleField = new OO.ui.TextInputWidget({});
                 var creatorField = new OO.ui.TextInputWidget({});
                 var dateField = new OO.ui.TextInputWidget({});
@@ -282,17 +351,75 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                 presentationTitleField.validation = [checkIfEmpty];
                 creatorField.validation = [checkIfEmpty];
                 dateField.validation = [checkIfEmpty, checkIfDate];
-
-                //Things to do when the specified field changes
-                titleField.onChangeFunctions = [function () {
+                var testSuggestedFile = function()
+                {
                     if(dialogueInstance.isExistingFile)
-                    {
                         if(dialogueInstance.suggestedFile.value != titleField.value)
-                        {
                             dialogueInstance.isExistingFile = false;
+                }
+                var testDialogMode = function()
+                {
+
+                    //console.log("Dialog mode: " + dialogueInstance.dialogMode + " Existing file: " + dialogueInstance.isExistingFile);
+                    //console.log("titleField length: " + titleField.value.length + " linkField length: " + linkField.value.length);
+                    if(dialogueInstance.dialogMode == 0) {
+                        if (!dialogueInstance.isExistingFile && linkField.value.length != 0) {
+                            if(dialogueInstance.suggestedFile != null) {
+                                if (dialogueInstance.suggestedFile.hyperlink == linkField.value) {
+                                    clearInputFields(fieldset);
+                                    validator.cleanUpForm();
+                                    return;
+                                }
+                                else
+                                    clearInputFields(fieldset, [0, 1]);
+                            }
+                            else {
+
+                                clearInputFields(fieldset, [0, 1]);
+                            }
+
+                            dialogueInstance.$element.find('.oo-ui-processDialog-title').text("Invoegen nieuwe koppeling naar website");
+                            var input = titleField.$element.find('input');
+                            linkField.$element.find('input').prop("placeholder", "Voer een titel in voor de nieuwe koppeling");
+                            input.prop("placeholder", "Voer een titel in voor de nieuwe link");
+                            //todo temporary
+                            toggleAutoComplete(dialogueInstance, titleField);
+                            dialogueInstance.dialogMode = 1;
+                            validator.cleanUpForm();
                         }
                     }
-                }];
+                    else {
+                        if (linkField.value.length == 0) {
+                            dialogueInstance.$element.find('.oo-ui-processDialog-title').text("Invoegen koppeling naar website");
+                            var input = titleField.$element.find('input');
+                            linkField.$element.find('input').prop("placeholder", "Voer een nieuwe koppeling in");
+                            input.prop("placeholder", "Zoeken naar een bestaande link");
+                            toggleAutoComplete(dialogueInstance, titleField);
+                            clearInputFields(fieldset);
+                            //validator.validateWidget(linkField);
+                            validator.cleanUpForm();
+                            dialogueInstance.dialogMode = 0;
+                        }
+                    }
+                }
+
+                var cleanup = function()
+                {
+                    dialogueInstance.$element.find('.oo-ui-processDialog-title').text("Invoegen koppeling naar website");
+                    var input = titleField.$element.find('input');
+                    linkField.$element.find('input').prop("placeholder", "Voer een nieuwe koppeling in");
+                    input.prop("placeholder", "Zoeken naar een bestaande link");
+                    toggleAutoComplete(dialogueInstance, titleField);
+                }
+
+                dialogReset = cleanup;
+
+
+
+                //Things to do when the specified field changes
+                titleField.onChangeFunctions = [testSuggestedFile, testDialogMode, function(){toggleAutoComplete(dialogueInstance, titleField)}]; //fixme temporary method toggle autocomple
+                linkField.onChangeFunctions = [testDialogMode, function(){toggleAutoComplete(dialogueInstance, titleField)}]; //fixme temporary method toggle autocomplete
+
 
                 fieldset.addItems([
                     new OO.ui.FieldLayout(titleField, {
@@ -333,6 +460,8 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
             default:
                 alert(OO.ui.deferMsg("visualeditor-emm-dialog-error"));
         }
+
+
 
         //Add the created items to the dialogue
         dialogue.super.prototype.initialize.call(this);
@@ -558,8 +687,6 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                     alert(OO.ui.deferMsg("visualeditor-emm-dialog-error"));
             }
             cleanUpDialogue();
-            dialogueInstance.isExistingFile = false;
-            dialogueInstance.suggestedFile = null;
         };
 
 
@@ -592,8 +719,12 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
             dialogueInstance.close();
             //todo check if closed and then clean the fields for a more elegant cleanup?
             validator.disable();
+            //dialogReset();
             clearInputFields(fieldset);
             validator.enable();
+            dialogueInstance.dialogMode = 0;
+            dialogueInstance.isExistingFile = false;
+            dialogueInstance.suggestedFile = null;
         }
 
         //Declare a function to be called after the askQuery has been processed
@@ -674,10 +805,19 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
  * Clears the input fields of a given fieldset
  * @param fieldset the fieldset whose input fields should be cleared
  */
-function clearInputFields(fieldset) {
-    for (var i = 0; i < fieldset.getItems().length; i++) {
-        (fieldset.getItems()[i]).getField().setValue("");
+function clearInputFields(fieldset, exclude) {
+    if(exclude != null) {
+        for (var i = 0; i < fieldset.getItems().length; i++) {
+            var ex = false;
+            for (var x = 0; x < exclude.length; x++)
+                if (i == exclude[x])
+                    ex = true;
+            if(!ex) (fieldset.getItems()[i]).getField().setValue("");
+        }
     }
+    else
+        for (var i = 0; i < fieldset.getItems().length; i++)
+            (fieldset.getItems()[i]).getField().setValue("");
 }
 
 /*  semanticAskQuery
@@ -845,11 +985,9 @@ function grabSelectedText(inputObject) {
  */
 function initAutoComplete(data, inputObject, dialogueInstance, fillFields) {
     var inputField = $(inputObject.$element).find("input");
-
     $(inputField).autocomplete({
         lookup: data,
         onSelect: function (suggestion) {
-
             if(dialogueInstance.isExistingFile == false)
             {
                 dialogueInstance.suggestedFile = suggestion;
@@ -857,25 +995,25 @@ function initAutoComplete(data, inputObject, dialogueInstance, fillFields) {
                 fillFields(suggestion);
                 return;
             }
-
-
-
-            /*
-            if(dialogueInstance.existingPageId != null)
-                if(dialogueInstance.existingPageId.data == suggestion.data)
-                {
-                    dialogueInstance.existingPageId = suggestion;
-                    dialogueInstance.existingFile = true;
-                    fillFields(suggestion);
-                }
-            */
-            //This part of the code depends on the order in which the fields of the dialogs are defined
-
         },
         appendTo: inputField.parentElement,
         maxHeight: 300
     });
 }
+
+//fixme this may not be the most efficient way
+function toggleAutoComplete(dialogInstance, input)
+{
+    var element = input.$element.find('input');
+
+    if(element.autocomplete() == null)
+        return;
+    if(dialogInstance.dialogMode == 1)
+        element.autocomplete().disable();
+    else
+        element.autocomplete().enable();
+}
+
 
 function fixDate(date) {
     if (date == null) {
