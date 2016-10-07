@@ -190,7 +190,6 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                 });
 
                 var testDialogMode = function () {
-                    console.log(fileField);
                     if (dialogueInstance.dialogMode == 0) {
 
 
@@ -251,16 +250,17 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                 dateField.validation = [checkIfEmpty, checkIfDate];
 
                 //Things to do when the specified field changes
-                /*titleField.onChangeFunctions = [function () {
-                 if (dialogueInstance.isExistingResource)
-                 if (dialogueInstance.suggestion.value != titleField.value) {
-                 dialogueInstance.isExistingResource = false;
-                 fileFieldLayout.$element.show();
-                 }
-                 else {
-                 fileFieldLayout.$element.hide();
-                 }
-                 }];*/
+                titleField.onChangeFunctions = [function () {
+                    if (dialogueInstance.isExistingResource)
+                        if (dialogueInstance.suggestion.value != titleField.value) {
+                            dialogueInstance.isExistingResource = false;
+                            fileFieldLayout.$element.show();
+                        }
+                        else {
+                            fileFieldLayout.$element.hide();
+                        }
+                }];
+
                 fieldset.addItems([
                     new OO.ui.FieldLayout(titleField, {
                         label: OO.ui.deferMsg("visualeditor-emm-file-title"),
@@ -818,7 +818,7 @@ function clearInputFields(fieldset, exclude, inputTypeExclude) {
     else
         for (var i = 0; i < fieldset.getItems().length; i++) {
             //Make sure the fieldlayout doens't contain just a label field that can't be cleared
-            if (!$.inArray(fieldset.getItems()[i].getField().constructor.name, inputTypeExclude) == -1) {
+            if ($.inArray(fieldset.getItems()[i].getField().constructor.name, inputTypeExclude) == -1) {
                 fieldset.getItems()[i].getField().setValue("");
             }
         }
