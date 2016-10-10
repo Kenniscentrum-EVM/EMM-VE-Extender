@@ -604,7 +604,6 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                     if (!dialogueInstance.isExistingResource) {
                         dialogueInstance.upload.setFile(fileField.getValue());
                         dialogueInstance.upload.setFilename(fileField.getValue().name);
-                        console.log(dialogueInstance.upload.getApi());
                         dialogueInstance.upload.upload().fail(function (status, exceptionobject) {
                             switch (status) {
                                 case "duplicate":
