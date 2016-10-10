@@ -175,7 +175,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                             dialogueInstance.dialogMode = 1;
                             toggleAutoComplete(dialogueInstance, titleField);
                             var input = titleField.$element.find('input');
-                            input.prop("placeholder", "Voer een titel in voor het nieuwe bestand");
+                            input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-filedialog-titlefield-placeholder-new")());
 
                             if(dialogueInstance.suggestion != null)
                             {
@@ -300,10 +300,10 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
             case "External link": {
                 //Create input fields in case we're dealing with an external link
                 var titleField = new OO.ui.TextInputWidget({
-                    placeholder: "Zoeken naar een bestaande link"//OO.ui.deferMsg("visualeditor-emm-search")
+                    placeholder: OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-dev")()//OO.ui.deferMsg("visualeditor-emm-search")
                 });
                 var linkField = new OO.ui.TextInputWidget({
-                    placeholder: "Voer een nieuwe koppeling in"
+                    placeholder: OO.ui.deferMsg("visualeditor-emm-linkdialog-linkfield-placeholder-dev")() //OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-new")()
                 });
                 var presentationTitleField = new OO.ui.TextInputWidget({});
                 var creatorField = new OO.ui.TextInputWidget({});
@@ -335,8 +335,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                             clearInputFields(fieldset, [0, 1, 2], ["OoUiLabelWidget"]);
                             dialogueInstance.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-linkdialog-title-npage")());
                             var input = titleField.$element.find('input');
-                            linkField.$element.find('input').prop("placeholder", "Voer een titel in voor de nieuwe koppeling");
-                            input.prop("placeholder", "Voer een titel in voor de nieuwe link");
+                            input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-new")());
                             //todo temporary
                             dialogueInstance.dialogMode = 1;
                             toggleAutoComplete(dialogueInstance, titleField);
@@ -347,8 +346,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                         if (linkField.value.length == 0) {
                             dialogueInstance.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-dialogexternallinktitle")());
                             var input = titleField.$element.find('input');
-                            linkField.$element.find('input').prop("placeholder", "Voer een nieuwe koppeling in");
-                            input.prop("placeholder", "Zoeken naar een bestaande link");
+                            input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-dev")());
                             dialogueInstance.dialogMode = 0;
                             toggleAutoComplete(dialogueInstance, titleField);
                             clearInputFields(fieldset, null, ["OoUiLabelWidget"]);
@@ -362,8 +360,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                 {
                     dialogueInstance.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-dialogexternallinktitle")());
                     var input = titleField.$element.find('input');
-                    linkField.$element.find('input').prop("placeholder", "Voer een nieuwe koppeling in");
-                    input.prop("placeholder", "Zoeken naar een bestaande link");
+                    input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-dev")());
                     toggleAutoComplete(dialogueInstance, titleField);
                 }
 

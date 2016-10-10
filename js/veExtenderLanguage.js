@@ -70,8 +70,10 @@ function defineTranslations() {
             "visualeditor-emm-validation-special": "This field cannot contain special characters.",
             "visualeditor-emm-validation-date": "This field must contain a valid date.",
 
-            "visualeditor-emm-exlinkdialog-title-expage": "Insert file",
-            "visualeditor-emm-exlinkdialog-title-npage": "Insert new file.",
+            "visualeditor-emm-linkdialog-title-npage": "Insert new link",
+            "visualeditor-emm-linkdialog-titlefield-placeholder-dev": "Search for link",
+            "visualeditor-emm-linkdialog-titlefield-placeholder-new": "Title new link",
+            "visualeditor-emm-filedialog-title-npage": "Insert new file",
             "visualeditor-emm-filedialog-titlefield-placeholder-dev": "Search for file",
             "visualeditor-emm-filedialog-titlefield-placeholder-new": "Title of new file",
             "visualeditor-emm-required": "*Required"
@@ -146,8 +148,11 @@ function defineTranslations() {
             "visualeditor-emm-validation-date": "Dit veld moet een geldige datum bevatten.",
 
             "visualeditor-emm-linkdialog-title-npage": "Invoegen nieuwe koppeling naar website",
+            "visualeditor-emm-linkdialog-titlefield-placeholder-dev": "Zoeken naar een koppeling",
+            "visualeditor-emm-linkdialog-titlefield-placeholder-new": "Titel nieuwe koppeling",
+            "visualeditor-emm-linkdialog-linkfield-placeholder-dev": "Invoegen nieuwe koppeling",
             "visualeditor-emm-filedialog-title-npage": "Invoegen nieuw bestand",
-            "visualeditor-emm-filedialog-titlefield-placeholder-dev": "Zoeken naar bestand",
+            "visualeditor-emm-filedialog-titlefield-placeholder-dev": "Zoeken naar een bestand",
             "visualeditor-emm-filedialog-titlefield-placeholder-new": "Titel nieuw bestand",
             "visualeditor-emm-required": "*Vereist"
         }
