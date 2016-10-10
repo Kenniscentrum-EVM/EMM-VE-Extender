@@ -686,7 +686,8 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
             dialogueInstance.close();
             //todo check if closed and then clean the fields for a more elegant cleanup?
             validator.disable();
-            dialogReset();
+            if(dialogReset != null)
+                dialogReset();
             clearInputFields(fieldset, null, ["OoUiLabelWidget"]);
             validator.enable();
             dialogueInstance.isExistingResource = false;
