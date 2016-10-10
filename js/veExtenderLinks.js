@@ -2,7 +2,7 @@
 
 
 /*  addEMMLinks
- *  This method is executed when the extention is loaded and is responsible for passing the correct information to the loadEMMDialog methods
+ *  This method is executed when the extention is loaded and is responsible for passing the correct information to the loadEMMDialog method
  */
 function addEMMLinks() {
     var queries = veExtenderQueries();
@@ -49,20 +49,21 @@ function addEMMLinks() {
 }
 
 
-/*  loadEMMDialog
- *  This function is responsible for creating different menu options in the selection menu and their respective dialogues
- *  @param template a string containing the name of the template
- *  @param toolid a string containing the tool id
- *  @param menutext a string that displays the text that is displayed in the menu
- *  @param dialogText a string that displays the text that is displayed at the top of the dialogue
- *  @param askQuery a string which contains the query that should be executed in order to gather all the relevant resources
- *  @param templateresult a function that contains what is to be returned by the dialog when the user presses "ok"
+/**
+ * This function creates all the insert dialogs for internal links, external links and files.
+ * It also creates menu buttons that allow access to these dialogs
+ * @param resourceType The type of resource that should be linked to
+ * @param toolId The id the tool should have in the top menu of the visual editor
+ * @param menuText The text to be displayed at the button in the top-menu
+ * @param dialogText The text to be displayed at the top of the dialog
+ * @param askQuery The ask query that needs to be executed in order to get all existing resources
+ * @param templateResult A function that transforms the inserted data into a relevant format for inserting the links as a template
  */
-function loadEMMDialog(template, toolId, menuText, dialogText, askQuery, templateResult) {
+function loadEMMDialog(resourceType, toolId, menuText, dialogText, askQuery, templateResult) {
     var dialogueName = "process-" + toolId + " dialogue";
 
     // create the dialogue
-    createDialogue(dialogueName, OO.ui.deferMsg(dialogText), askQuery, template, templateResult);
+    createDialogue(dialogueName, OO.ui.deferMsg(dialogText), askQuery, resourceType, templateResult);
 
     // Add a menu-item that opens the dialog
     var tool = function (toolGroup, config) {
@@ -72,6 +73,7 @@ function loadEMMDialog(template, toolId, menuText, dialogText, askQuery, templat
         this.$element.addClass("oo-ui-tool-name-extratemplate");
     };
 
+    //More configuration for the menu-items
     OO.inheritClass(tool, ve.ui.Tool);
     tool.static.name = toolId;
     tool.static.title = OO.ui.deferMsg(menuText);
@@ -95,7 +97,16 @@ function loadEMMDialog(template, toolId, menuText, dialogText, askQuery, templat
  *  @param template a string containing the name of the template
  *  @param templateResult a function that contains what is to be returned by the dialog when the user presses "ok"
  */
-function createDialogue(dialogueName, dialogueMessage, askQuery, template, templateResult) {
+
+/**
+ * This method creates a dialogue that helps the user with inserting several types of links
+ * @param dialogueName A name that servers as the unique identifier of the dialogue
+ * @param dialogueMessage The text that will be displayed at the top of the dialog
+ * @param askQuery The ask query that needs to be executed in order to get all existing resources
+ * @param resourceType The type of resource that should be linked to
+ * @param templateResult A function that transforms the inserted data into a relevant format for inserting the links as a template
+ */
+function createDialogue(dialogueName, dialogueMessage, askQuery, resourceType, templateResult) {
     var dialogue = function (surface, config) {
         OO.ui.ProcessDialog.call(this, surface, config);
     };
@@ -127,10 +138,9 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
         dialogueInstance.isExistingResource = false;
         dialogueInstance.dialogMode = 0;
         dialogueInstance.hasChangedTitle = false;
-        dialogueInstance.upload = new mw.Upload({parameters:{ignorewarnings: true}});
-        //Filename to keep teh filename of a selected file
+        dialogueInstance.upload = new mw.Upload({parameters: {ignorewarnings: true}});
+        //Filename to keep the filename of a selected file
         dialogueInstance.fileName = "";
-
         var dialogReset;
 
         //  create the fieldset, which is responsible for the layout of the dialogue
@@ -139,7 +149,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
         });
 
         //Create all the buttons and input fields depending on what kind of dialog we need to create
-        switch (template) {
+        switch (resourceType) {
             case "File":
                 //Create input fields in case we're dealing with a dialogue to add a file
                 var titleField = new OO.ui.TextInputWidget({
@@ -156,19 +166,20 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                 var subjectField = new OO.ui.TextInputWidget({});
 
                 titleField.validation = [checkIfEmpty];
-                fileField.validation = [function (value, sender) {return "";}];
+                fileField.validation = [function (value, sender) {
+                    return "";
+                }];
 
                 var fileFieldLayout = new OO.ui.FieldLayout(fileField, {
                     label: OO.ui.deferMsg("visualeditor-emm-file-filename"),
                     align: "left"
                 });
 
-                var testDialogMode = function()
-                {
-                    if(dialogueInstance.dialogMode == 0) {
+                var testDialogMode = function () {
+                    if (dialogueInstance.dialogMode == 0) {
                         //console.log(fileField);
                         //fixme dirty hack
-                        if(fileField.currentFile == "")
+                        if (fileField.currentFile == "")
                             return;
                         if ((!dialogueInstance.isExistingResource && fileField.currentFile != null)) {
                             dialogueInstance.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-filedialog-title-npage")());
@@ -177,9 +188,8 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                             var input = titleField.$element.find('input');
                             input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-filedialog-titlefield-placeholder-new")());
 
-                            if(dialogueInstance.suggestion != null)
-                            {
-                                if(dialogueInstance.suggestion.value != titleField.value) {
+                            if (dialogueInstance.suggestion != null) {
+                                if (dialogueInstance.suggestion.value != titleField.value) {
                                     clearInputFields(fieldset, [0, 1, 2], ["OoUiLabelWidget"]);
                                 }
                                 else
@@ -203,8 +213,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                     }
                 }
 
-                var cleanup2 = function()
-                {
+                var cleanup2 = function () {
                     var input = titleField.$element.find('input');
                     input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-filedialog-titlefield-placeholder-dev")());
                     dialogueInstance.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-dialogfiletitle")());
@@ -224,20 +233,20 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                 //Things to do when the specified field changes
                 titleField.onChangeFunctions = [function () {
                     //console.log(dialogueInstance.isExistingFile);
-                        //todo replace this temporary thing with something better.
-                        if(dialogueInstance.isExistingResource) {
-                            fileFieldLayout.$element.hide();
-                            if (dialogueInstance.suggestion.value != titleField.value)
-                                dialogueInstance.hasChangedTitle = true;
-                            else
-                                dialogueInstance.hasChangedTitle = false;
-                            if (titleField.value.length == 0) {
-                                dialogueInstance.hasChangedTitle = false;
-                                dialogueInstance.isExistingResource = false;
-                                fileFieldLayout.$element.show();
-                            }
+                    //todo replace this temporary thing with something better.
+                    if (dialogueInstance.isExistingResource) {
+                        fileFieldLayout.$element.hide();
+                        if (dialogueInstance.suggestion.value != titleField.value)
+                            dialogueInstance.hasChangedTitle = true;
+                        else
+                            dialogueInstance.hasChangedTitle = false;
+                        if (titleField.value.length == 0) {
+                            dialogueInstance.hasChangedTitle = false;
+                            dialogueInstance.isExistingResource = false;
+                            fileFieldLayout.$element.show();
                         }
-                },testDialogMode]; // ,testDialogMode
+                    }
+                }, testDialogMode]; // ,testDialogMode
 
                 fileField.onChangeFunctions = [testDialogMode];
 
@@ -314,23 +323,21 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                     selected: true
                 });
 
-                var testSuggestedLink = function()
-                {
-                    if(dialogueInstance.isExistingResource) {
+                var testSuggestedLink = function () {
+                    if (dialogueInstance.isExistingResource) {
                         if (dialogueInstance.suggestion.value != titleField.value)
                             dialogueInstance.hasChangedTitle = true;
                         else
                             dialogueInstance.hasChangedTitle = false;
-                        if (titleField.value.length == 0){
+                        if (titleField.value.length == 0) {
                             dialogueInstance.hasChangedTitle = false;
                             dialogueInstance.isExistingResource = false;
                         }
                     }
 
                 }
-                var testDialogMode = function()
-                {
-                    if(dialogueInstance.dialogMode == 0) {
+                var testDialogMode = function () {
+                    if (dialogueInstance.dialogMode == 0) {
                         if (!dialogueInstance.isExistingResource && linkField.value.length != 0) {
                             clearInputFields(fieldset, [0, 1, 2], ["OoUiLabelWidget"]);
                             dialogueInstance.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-linkdialog-title-npage")());
@@ -356,8 +363,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                     }
                 }
 
-                var cleanup = function()
-                {
+                var cleanup = function () {
                     dialogueInstance.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-dialogexternallinktitle")());
                     var input = titleField.$element.find('input');
                     input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-dev")());
@@ -375,8 +381,12 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
                 dateField.validation = [checkIfEmpty, checkIfDate];
 
                 //Things to do when the specified field changes
-                titleField.onChangeFunctions = [testSuggestedLink, testDialogMode, function(){toggleAutoComplete(dialogueInstance, titleField)}]; //fixme temporary method toggle autocomple
-                linkField.onChangeFunctions = [testDialogMode, function(){toggleAutoComplete(dialogueInstance, titleField)}]; //fixme temporary method toggle autocomplete
+                titleField.onChangeFunctions = [testSuggestedLink, testDialogMode, function () {
+                    toggleAutoComplete(dialogueInstance, titleField)
+                }]; //fixme temporary method toggle autocomple
+                linkField.onChangeFunctions = [testDialogMode, function () {
+                    toggleAutoComplete(dialogueInstance, titleField)
+                }]; //fixme temporary method toggle autocomplete
 
                 fieldset.addItems([
                     new OO.ui.FieldLayout(titleField, {
@@ -475,28 +485,28 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
             }
             /**
              * Callback function to be called after creating a new resource or editing an existing one
-             * It is responsible for inserting a link or cite template in the text of your page that links to the resource
+             * It is responsible for inserting a link or cite resourceType in the text of your page that links to the resource
              * @param linkTitle The internal name of the resource that should be linked to
              */
             var insertCallback = function (linkTitle) {
                 linkdata = linkTitle;
                 var templateToUse = "";
-                //Use this in order to insert file links via the cite template
-                if (template == "File") {
+                //Use this in order to insert file links via the cite resourceType
+                if (resourceType == "File") {
                     templateToUse = "Cite";
                 }
                 //In case of an external link we need to check if the user wants to include this link in the
                 //references list
-                else if (template === "External link") {
+                else if (resourceType === "External link") {
                     if (addToResourcesField.isSelected()) {
                         templateToUse = "Cite";
                     }
                     else {
-                        templateToUse = template;
+                        templateToUse = resourceType;
                     }
                 }
                 else {
-                    templateToUse = template;
+                    templateToUse = resourceType;
                 }
                 var mytemplate = [
                         {
@@ -530,7 +540,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
 
             var currentPageID = mw.config.get('wgPageName').replace(/_/g, " ");
             var query = "";
-            switch (template) {
+            switch (resourceType) {
                 case "File":
                     //Build the sfautoedit query
                     var filename = "";
@@ -596,7 +606,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
             //Call the sfautoedit query to create or edit an existing resource
             //This also happens when linking to an existing resource and not editing anything
             //For internal links this logic is handled in the switch statement up above
-            switch (template) {
+            switch (resourceType) {
                 case "File":
                     if (!dialogueInstance.isExistingResource) {
                         dialogueInstance.upload.setFile(fileField.getValue());
@@ -683,7 +693,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
             dialogueInstance.close();
             //todo check if closed and then clean the fields for a more elegant cleanup?
             validator.disable();
-            if(dialogReset != null)
+            if (dialogReset != null)
                 dialogReset();
             clearInputFields(fieldset, null, ["OoUiLabelWidget"]);
             validator.enable();
@@ -696,7 +706,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
         //This function initiates the autocomplete library for the resource input field
         //The user will be able to pick a resource from the list of all resources gathered by the askQuery
         var callback = function (queryResults) {
-            switch (template) {
+            switch (resourceType) {
                 case "File":
                     var fillFields = function (suggestion) {
                         //fixme make this independent of order
@@ -735,7 +745,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, template, templ
         };
 
         //Execute the askQuery in order to gather all resources
-        semanticAskQuery(askQuery, callback, template);
+        semanticAskQuery(askQuery, callback, resourceType);
 
         dialogue.prototype.getFieldset = function () {
             return fieldset;
