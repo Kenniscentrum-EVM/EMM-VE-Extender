@@ -89,15 +89,6 @@ function loadEMMDialog(resourceType, toolId, menuText, dialogText, askQuery, tem
     ve.ui.toolFactory.register(tool);
 }
 
-/*  createDialogue
- *  This methods creates a dialogue that helps the user with inserting several types of links
- *  @param dialogueName a string that serves as the handle for the selection menu to access the dialogue
- *  @param dialogueMessage a string that will be displayed at the top of the dialogue
- *  @param askQuery a string which contains the query that should be executed in order to gather all the relevant resources
- *  @param template a string containing the name of the template
- *  @param templateResult a function that contains what is to be returned by the dialog when the user presses "ok"
- */
-
 /**
  * This method creates a dialogue that helps the user with inserting several types of links
  * @param dialogueName A name that servers as the unique identifier of the dialogue
