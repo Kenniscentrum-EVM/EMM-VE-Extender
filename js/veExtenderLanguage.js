@@ -13,6 +13,7 @@ function defineTranslations() {
             "visualeditor-emm-existing-hyperlink": "Existing link",
             "visualeditor-emm-existing-page": "Existing page",
             "visualeditor-emm-dialog-error": "Error: dialog not found.",
+            "visualeditor-emm-overloaded-function-error": "Error: The following overloaded function could not be found: ",
 
             "visualeditor-emm-link": "Link*:",
             "visualeditor-emm-link-title": "Resource title*:",
@@ -71,10 +72,10 @@ function defineTranslations() {
             "visualeditor-emm-validation-date": "This field must contain a valid date.",
 
             "visualeditor-emm-linkdialog-title-npage": "Insert new link",
-            "visualeditor-emm-linkdialog-titlefield-placeholder-dev": "Search for link",
+            "visualeditor-emm-linkdialog-titlefield-placeholder-def": "Search for link",
             "visualeditor-emm-linkdialog-titlefield-placeholder-new": "Title new link",
             "visualeditor-emm-filedialog-title-npage": "Insert new file",
-            "visualeditor-emm-filedialog-titlefield-placeholder-dev": "Search for file",
+            "visualeditor-emm-filedialog-titlefield-placeholder-def": "Search for file",
             "visualeditor-emm-filedialog-titlefield-placeholder-new": "Title of new file",
             "visualeditor-emm-required": "*Required"
         },
@@ -90,6 +91,7 @@ function defineTranslations() {
             "visualeditor-emm-existing-hyperlink": "Bestaande link",
             "visualeditor-emm-existing-page": "Bestaande pagina",
             "visualeditor-emm-dialog-error": "Error: dialoog niet gevonden.",
+            "visualeditor-emm-overloaded-function-error": "Fout: De volgende overloaded functie kon niet gevonden worden: ",
 
             "visualeditor-emm-link": "Koppeling*:",
             "visualeditor-emm-link-title": "Brontitel*:",
@@ -148,11 +150,11 @@ function defineTranslations() {
             "visualeditor-emm-validation-date": "Dit veld moet een geldige datum bevatten.",
 
             "visualeditor-emm-linkdialog-title-npage": "Invoegen nieuwe koppeling naar website",
-            "visualeditor-emm-linkdialog-titlefield-placeholder-dev": "Zoeken naar een koppeling",
+            "visualeditor-emm-linkdialog-titlefield-placeholder-def": "Zoeken naar een koppeling",
             "visualeditor-emm-linkdialog-titlefield-placeholder-new": "Titel nieuwe koppeling",
-            "visualeditor-emm-linkdialog-linkfield-placeholder-dev": "Invoegen nieuwe koppeling",
+            "visualeditor-emm-linkdialog-linkfield-placeholder-def": "Invoegen nieuwe koppeling",
             "visualeditor-emm-filedialog-title-npage": "Invoegen nieuw bestand",
-            "visualeditor-emm-filedialog-titlefield-placeholder-dev": "Zoeken naar een bestand",
+            "visualeditor-emm-filedialog-titlefield-placeholder-def": "Zoeken naar een bestand",
             "visualeditor-emm-filedialog-titlefield-placeholder-new": "Titel nieuw bestand",
             "visualeditor-emm-required": "*Vereist"
         }

@@ -98,21 +98,22 @@ function loadEMMDialog(resourceType, toolId, menuText, dialogText, askQuery, tem
  * @param templateResult A function that transforms the inserted data into a relevant format for inserting the links as a template
  */
 function createDialogue(dialogueName, dialogueMessage, askQuery, resourceType, templateResult) {
-    var dialogue = function (surface, config) {
+    //Constructor for Dialogue
+    var Dialogue = function (surface, config) {
         OO.ui.ProcessDialog.call(this, surface, config);
         this.suggestion = null;
         this.isExistingResource = false;
         this.dialogMode = 0;
         this.upload = new mw.Upload({parameters: {ignorewarnings: true}});
-        //Filename to keep the filename of a selected file
         this.fileName = "";
+        this.fieldset = null;
     };
-    OO.inheritClass(dialogue, OO.ui.ProcessDialog);
+    OO.inheritClass(Dialogue, OO.ui.ProcessDialog);
 
     //Set properties of the dialogue
-    dialogue.static.name = dialogueName;
-    dialogue.static.title = dialogueMessage;
-    dialogue.static.actions = [
+    Dialogue.static.name = dialogueName;
+    Dialogue.static.title = dialogueMessage;
+    Dialogue.static.actions = [
         {
             action: "insert",
             label: OO.ui.deferMsg("visualeditor-emm-insert"),
@@ -123,301 +124,65 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, resourceType, t
     ];
 
     /**
+     * Displays an error message for when a specific overloaded function isn't present
+     * @param functionName The name of the function that has no overloaded equivalent
+     */
+    function displayOverloadError(functionName){
+        alert(OO.ui.deferMsg("visualeditor-emm-overloaded-function-error")() + functionName);
+    }
+
+    //Define basic versions of functions that need to be overloaded.
+    //These functions display an error message to indicate that a dialogue-specific overloaded function is missing.
+    Dialogue.prototype.displayOverloadedMessage = function(){ displayOverloadError("displayOverloadedMessage")};
+    var dialogue = null;
+
+    switch(resourceType){
+        case "File":
+            dialogue = createNewFileDialogue(Dialogue);
+            break;
+        case "Internal link":
+            dialogue = createNewInternalLinkDialogue(Dialogue);
+            break;
+        case "External link":
+            dialogue = createNewExternalLinkDialogue(Dialogue);
+
+            break;
+        default:
+            alert(OO.ui.deferMsg("visualeditor-emm-dialog-error"));
+    }
+    ve.ui.windowFactory.register(dialogue);
+
+    /**
      * Initializes the dialog.
      * Creates all visual items inside the dialog and adds the necessary logic to it
      */
-    dialogue.prototype.initialize = function () {
-        //put the dialogue in a variable for easier and more clear access
+    Dialogue.prototype.initialize = function () {
+        //Put the dialogue in a variable for easier use
+        //This is also necessary because in certain cases the meaning of this changes, even though you want to be able
+        //to keep accessing the dialogueInstance
         var dialogueInstance = this;
-        var dialogReset;
 
         //  create the fieldset, which is responsible for the layout of the dialogue
-        var fieldset = new OO.ui.FieldsetLayout({
+        dialogueInstance.fieldset = new OO.ui.FieldsetLayout({
             classes: ["container"]
         });
 
         //Create all the buttons and input fields depending on what kind of dialog we need to create
-        switch (resourceType) {
-            case "File":
-                //Create input fields in case we're dealing with a dialogue to add a file
-                var titleField = new OO.ui.TextInputWidget({
-                    placeholder: OO.ui.deferMsg("visualeditor-emm-filedialog-titlefield-placeholder-dev")
-                });
-                var fileField = new OO.ui.SelectFileWidget({
-                    droppable: true,
-                    showDropTarget: true
-                });
-                var presentationTitleField = new OO.ui.TextInputWidget({});
-                var creatorField = new OO.ui.TextInputWidget({});
-                var dateField = new OO.ui.TextInputWidget({});
-                var organizationField = new OO.ui.TextInputWidget({});
-                var subjectField = new OO.ui.TextInputWidget({});
+        dialogueInstance.createDialogueLayout();
 
-                titleField.validation = [checkIfEmpty];
-                fileField.validation = [function (value, sender) {
-                    return "";
-                }];
-
-                var fileFieldLayout = new OO.ui.FieldLayout(fileField, {
-                    label: OO.ui.deferMsg("visualeditor-emm-file-filename"),
-                    align: "left"
-                });
-
-                var testDialogMode = function () {
-                    if (dialogueInstance.dialogMode == 0) {
-                        //console.log(fileField);
-                        //fixme dirty hack
-                        if (fileField.currentFile == "")
-                            return;
-                        if ((!dialogueInstance.isExistingResource && fileField.currentFile != null)) {
-                            dialogueInstance.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-filedialog-title-npage")());
-                            dialogueInstance.dialogMode = 1;
-                            toggleAutoComplete(dialogueInstance, titleField);
-                            var input = titleField.$element.find('input');
-                            input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-filedialog-titlefield-placeholder-new")());
-
-                            if (dialogueInstance.suggestion != null) {
-                                if (dialogueInstance.suggestion.value != titleField.value) {
-                                    clearInputFields(fieldset, [0, 1, 2], ["OoUiLabelWidget"]);
-                                }
-                                else
-                                    clearInputFields(fieldset, [1, 2], ["OoUiLabelWidget"]);
-                            }
-                            else
-                                clearInputFields(fieldset, [1, 2], ["OoUiLabelWidget"]);
-                            validator.cleanUpForm();
-                        }
-                    }
-                    else {
-                        if (fileField.currentFile == null) {
-                            dialogueInstance.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-dialogfiletitle")());
-                            dialogueInstance.dialogMode = 0;
-                            toggleAutoComplete(dialogueInstance, titleField);
-                            var input = titleField.$element.find('input');
-                            input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-filedialog-titlefield-placeholder-dev")());
-                            clearInputFields(fieldset, [1, 2], ["OoUiLabelWidget"]);
-                            validator.cleanUpForm();
-                        }
-                    }
-                }
-
-                var cleanup2 = function () {
-                    var input = titleField.$element.find('input');
-                    input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-filedialog-titlefield-placeholder-dev")());
-                    dialogueInstance.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-dialogfiletitle")());
-                    fileFieldLayout.$element.show();
-                    dialogueInstance.dialogMode = 0;
-                    toggleAutoComplete(dialogueInstance, titleField);
-                    titleField.currentFile = null;
-                }
-
-                dialogReset = cleanup2;
-
-
-                presentationTitleField.validation = [checkIfEmpty];
-                creatorField.validation = [checkIfEmpty];
-                dateField.validation = [checkIfEmpty, checkIfDate];
-
-                //Things to do when the specified field changes
-                titleField.onChangeFunctions = [function () {
-                    //console.log(dialogueInstance.isExistingFile);
-                    //todo replace this temporary thing with something better.
-                    if (dialogueInstance.isExistingResource) {
-                        fileFieldLayout.$element.hide();
-                        if (titleField.value.length == 0) {
-                            dialogueInstance.isExistingResource = false;
-                            fileFieldLayout.$element.show();
-                        }
-                    }
-                }, testDialogMode]; // ,testDialogMode
-
-                fileField.onChangeFunctions = [testDialogMode];
-
-                fieldset.addItems([
-                    new OO.ui.FieldLayout(titleField, {
-                        label: OO.ui.deferMsg("visualeditor-emm-file-title"),
-                        align: "left"
-                    }),
-                    fileFieldLayout,
-                    new OO.ui.FieldLayout(presentationTitleField, {
-                        label: OO.ui.deferMsg("visualeditor-emm-file-presentationtitle"),
-                        align: "left"
-                    }),
-                    new OO.ui.FieldLayout(creatorField, {
-                        label: OO.ui.deferMsg("visualeditor-emm-file-creator"),
-                        align: "left"
-                    }),
-                    new OO.ui.FieldLayout(dateField, {
-                        label: OO.ui.deferMsg("visualeditor-emm-file-date"),
-                        align: "left"
-                    }),
-                    new OO.ui.FieldLayout(organizationField, {
-                        label: OO.ui.deferMsg("visualeditor-emm-file-organization"),
-                        align: "left"
-                    }),
-                    new OO.ui.FieldLayout(subjectField, {
-                        label: OO.ui.deferMsg("visualeditor-emm-file-subject"),
-                        align: "left"
-                    })
-                ]);
-                break;
-            case "Internal link":
-                //Create input fields in case we're dealing with an internal link
-                var pageNameField = new OO.ui.TextInputWidget({
-                    placeholder: OO.ui.deferMsg("visualeditor-emm-search")
-                });
-                var presentationTitleField = new OO.ui.TextInputWidget({});
-
-                pageNameField.validation = [checkIfEmpty];
-                presentationTitleField.validation = [checkIfEmpty];
-
-                //Things to do when the specified field changes
-                pageNameField.onChangeFunctions = [function () {
-                    if (dialogueInstance.isExistingResource)
-                        if (dialogueInstance.suggestion.value != pageNameField.value)
-                            dialogueInstance.isExistingResource = false;
-                }];
-
-                fieldset.addItems([
-                    new OO.ui.FieldLayout(pageNameField, {
-                        label: OO.ui.deferMsg("visualeditor-emm-page"),
-                        align: "left"
-                    }),
-                    new OO.ui.FieldLayout(presentationTitleField, {
-                        label: OO.ui.deferMsg("visualeditor-emm-page-presentationtitle"),
-                        align: "left"
-                    })
-                ]);
-                break;
-            case "External link": {
-                //Create input fields in case we're dealing with an external link
-                var titleField = new OO.ui.TextInputWidget({
-                    placeholder: OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-dev")()//OO.ui.deferMsg("visualeditor-emm-search")
-                });
-                var linkField = new OO.ui.TextInputWidget({
-                    placeholder: OO.ui.deferMsg("visualeditor-emm-linkdialog-linkfield-placeholder-dev")() //OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-new")()
-                });
-                var presentationTitleField = new OO.ui.TextInputWidget({});
-                var creatorField = new OO.ui.TextInputWidget({});
-                var dateField = new OO.ui.TextInputWidget({});
-                var organizationField = new OO.ui.TextInputWidget({});
-                var subjectField = new OO.ui.TextInputWidget({});
-                var addToResourcesField = new OO.ui.CheckboxInputWidget({
-                    selected: true
-                });
-
-                var testSuggestedLink = function () {
-                    if (dialogueInstance.isExistingResource) {
-                        if (titleField.value.length == 0) {
-                            dialogueInstance.isExistingResource = false;
-                        }
-                    }
-
-                }
-                var testDialogMode = function () {
-                    if (dialogueInstance.dialogMode == 0) {
-                        if (!dialogueInstance.isExistingResource && linkField.value.length != 0) {
-                            clearInputFields(fieldset, [0, 1, 2], ["OoUiLabelWidget"]);
-                            dialogueInstance.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-linkdialog-title-npage")());
-                            var input = titleField.$element.find('input');
-                            input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-new")());
-                            //todo temporary
-                            dialogueInstance.dialogMode = 1;
-                            toggleAutoComplete(dialogueInstance, titleField);
-                            validator.cleanUpForm();
-                        }
-                    }
-                    else {
-                        if (linkField.value.length == 0) {
-                            dialogueInstance.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-dialogexternallinktitle")());
-                            var input = titleField.$element.find('input');
-                            input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-dev")());
-                            dialogueInstance.dialogMode = 0;
-                            toggleAutoComplete(dialogueInstance, titleField);
-                            clearInputFields(fieldset, null, ["OoUiLabelWidget"]);
-                            //validator.validateWidget(linkField);
-                            validator.cleanUpForm();
-                        }
-                    }
-                }
-
-                var cleanup = function () {
-                    dialogueInstance.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-dialogexternallinktitle")());
-                    var input = titleField.$element.find('input');
-                    input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-dev")());
-                    toggleAutoComplete(dialogueInstance, titleField);
-                }
-
-                dialogReset = cleanup;
-
-
-                // todo validation property verplaatsen.
-                titleField.validation = [checkIfEmpty];
-                linkField.validation = [checkIfEmpty, checkIfWebsite];
-                presentationTitleField.validation = [checkIfEmpty];
-                creatorField.validation = [checkIfEmpty];
-                dateField.validation = [checkIfEmpty, checkIfDate];
-
-                //Things to do when the specified field changes
-                titleField.onChangeFunctions = [testSuggestedLink, testDialogMode, function () {
-                    toggleAutoComplete(dialogueInstance, titleField)
-                }]; //fixme temporary method toggle autocomple
-                linkField.onChangeFunctions = [testDialogMode, function () {
-                    toggleAutoComplete(dialogueInstance, titleField)
-                }]; //fixme temporary method toggle autocomplete
-
-                fieldset.addItems([
-                    new OO.ui.FieldLayout(titleField, {
-                        label: OO.ui.deferMsg("visualeditor-emm-link-title"),
-                        align: "left"
-                    }),
-                    new OO.ui.FieldLayout(linkField, {
-                        label: OO.ui.deferMsg("visualeditor-emm-link"),
-                        align: "left"
-                    }),
-                    new OO.ui.FieldLayout(presentationTitleField, {
-                        label: OO.ui.deferMsg("viualeditor-emm-link-presentationtitle"),
-                        align: "left"
-                    }),
-                    new OO.ui.FieldLayout(creatorField, {
-                        label: OO.ui.deferMsg("visualeditor-emm-link-creator"),
-                        align: "left"
-                    }),
-                    new OO.ui.FieldLayout(dateField, {
-                        label: OO.ui.deferMsg("visualeditor-emm-link-date"),
-                        align: "left"
-                    }),
-                    new OO.ui.FieldLayout(organizationField, {
-                        label: OO.ui.deferMsg("visualeditor-emm-link-organization"),
-                        align: "left"
-                    }),
-                    new OO.ui.FieldLayout(subjectField, {
-                        label: OO.ui.deferMsg("visualeditor-emm-link-subject"),
-                        align: "left"
-                    }),
-                    new OO.ui.FieldLayout(addToResourcesField, {
-                        label: OO.ui.deferMsg("visualeditor-emm-link-add-resource"),
-                        align: "left"
-                    })
-                ]);
-                break;
-            }
-            default:
-                alert(OO.ui.deferMsg("visualeditor-emm-dialog-error"));
-        }
         //Add a label that displays the meaning of the * next to form values
         var requiredLabel = new OO.ui.LabelWidget({
             label: OO.ui.deferMsg("visualeditor-emm-required")
         });
-        fieldset.addItems([new OO.ui.FieldLayout(requiredLabel)]);
+        dialogueInstance.fieldset.addItems([new OO.ui.FieldLayout(requiredLabel)]);
 
         //Add the created items to the dialogue
-        dialogue.super.prototype.initialize.call(this);
+        Dialogue.super.prototype.initialize.call(this);
         this.content = new OO.ui.PanelLayout({
             padded: true,
             expanded: false
         });
-        this.content.$element.append(fieldset.$element);
+        this.content.$element.append(dialogueInstance.fieldset.$element);
         this.$element
             .addClass("oo-ui-windowManager")
             .toggleClass("oo-ui-windowManager-modal", true);
@@ -425,7 +190,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, resourceType, t
 
         //add validation for the form
         var validator = new Validator(
-            fieldset,
+            dialogueInstance.fieldset,
             null,
             function (object, message) {
                 object.$element.addClass("oo-ui-flaggedElement-invalid");
@@ -649,7 +414,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, resourceType, t
             cleanUpDialogue();
         };
 
-        dialogue.prototype.getActionProcess = function (action) {
+        Dialogue.prototype.getActionProcess = function (action) {
             if (action === "insert") {
                 return new OO.ui.Process(function () {
                     insertButtonHandler();
@@ -664,16 +429,15 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, resourceType, t
                 cleanUpDialogue();
             }
             //Use parent handler in case something goes wrong
-            return dialogue.super.prototype.getActionProcess.call(this, action);
+            return Dialogue.super.prototype.getActionProcess.call(this, action);
         };
 
         function cleanUpDialogue() {
             dialogueInstance.close();
             //todo check if closed and then clean the fields for a more elegant cleanup?
             validator.disable();
-            if (dialogReset != null)
-                dialogReset();
-            clearInputFields(fieldset, null, ["OoUiLabelWidget"]);
+            resetMode();
+            clearInputFields(dialogueInstance.fieldset, null, ["OoUiLabelWidget"]);
             validator.enable();
             dialogueInstance.isExistingResource = false;
             dialogueInstance.suggestion = null;
@@ -724,33 +488,31 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, resourceType, t
         //Execute the askQuery in order to gather all resources
         semanticAskQuery(askQuery, callback, resourceType);
 
-        dialogue.prototype.getFieldset = function () {
-            return fieldset;
+        Dialogue.prototype.getFieldset = function () {
+            return dialogueInstance.fieldset;
         };
 
         //fixme dirty hack
         //todo in plaats van deze hack een eigen event afvuren en opvangen?
         //Selected text is gathered here and put inside the input field
         //Beyong that this is also the place where the size of the dialog is set.
-        dialogue.prototype.setDimensions = function (dim) {
+        Dialogue.prototype.setDimensions = function (dim) {
             grabSelectedText(presentationTitleField);
             if (presentationTitleField.value.length > 0)
                 validator.validateWidget(presentationTitleField);
-            fieldset.$element.css({width: this.content.$element.outerWidth(true) - 50});
+            dialogueInstance.fieldset.$element.css({width: this.content.$element.outerWidth(true) - 50});
             //Inline css cause, adding classes doesn't overwrite existing css
-            for (var i = 0; i < fieldset.getItems().length; i++) {
-                fieldset.getItems()[i].$element.find(".oo-ui-labelElement-label").not(".oo-ui-selectFileWidget-label").css("margin-right", 0).css("float", "left").css("width", "30%");
-                fieldset.getItems()[i].$element.find(".oo-ui-fieldLayout-field").css("width", "70%");
-                fieldset.getItems()[i].$element.find(".oo-ui-fieldLayout-body").css("width", "100%").css("overflow", "hidden");
+            for (var i = 0; i < dialogueInstance.fieldset.getItems().length; i++) {
+                dialogueInstance.fieldset.getItems()[i].$element.find(".oo-ui-labelElement-label").not(".oo-ui-selectFileWidget-label").css("margin-right", 0).css("float", "left").css("width", "30%");
+                dialogueInstance.fieldset.getItems()[i].$element.find(".oo-ui-fieldLayout-field").css("width", "70%");
+                dialogueInstance.fieldset.getItems()[i].$element.find(".oo-ui-fieldLayout-body").css("width", "100%").css("overflow", "hidden");
             }
             this.$frame.css({
                 width: this.content.$element.outerWidth(true) || "",
                 height: this.content.$element.outerHeight(true) + 50 || ""
             });
         };
-    }
-    ;
-    ve.ui.windowFactory.register(dialogue);
+    };
 }
 
 /**
