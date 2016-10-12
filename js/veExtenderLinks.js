@@ -100,6 +100,12 @@ function loadEMMDialog(resourceType, toolId, menuText, dialogText, askQuery, tem
 function createDialogue(dialogueName, dialogueMessage, askQuery, resourceType, templateResult) {
     var dialogue = function (surface, config) {
         OO.ui.ProcessDialog.call(this, surface, config);
+        this.suggestion = null;
+        this.isExistingResource = false;
+        this.dialogMode = 0;
+        this.upload = new mw.Upload({parameters: {ignorewarnings: true}});
+        //Filename to keep the filename of a selected file
+        this.fileName = "";
     };
     OO.inheritClass(dialogue, OO.ui.ProcessDialog);
 
@@ -123,15 +129,6 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, resourceType, t
     dialogue.prototype.initialize = function () {
         //put the dialogue in a variable for easier and more clear access
         var dialogueInstance = this;
-        //Initialize fields for scoping and later use
-        dialogueInstance.queryResult = "";
-        dialogueInstance.suggestion = null;
-        dialogueInstance.isExistingResource = false;
-        dialogueInstance.dialogMode = 0;
-        dialogueInstance.hasChangedTitle = false;
-        dialogueInstance.upload = new mw.Upload({parameters: {ignorewarnings: true}});
-        //Filename to keep the filename of a selected file
-        dialogueInstance.fileName = "";
         var dialogReset;
 
         //  create the fieldset, which is responsible for the layout of the dialogue
@@ -227,12 +224,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, resourceType, t
                     //todo replace this temporary thing with something better.
                     if (dialogueInstance.isExistingResource) {
                         fileFieldLayout.$element.hide();
-                        if (dialogueInstance.suggestion.value != titleField.value)
-                            dialogueInstance.hasChangedTitle = true;
-                        else
-                            dialogueInstance.hasChangedTitle = false;
                         if (titleField.value.length == 0) {
-                            dialogueInstance.hasChangedTitle = false;
                             dialogueInstance.isExistingResource = false;
                             fileFieldLayout.$element.show();
                         }
@@ -316,12 +308,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, resourceType, t
 
                 var testSuggestedLink = function () {
                     if (dialogueInstance.isExistingResource) {
-                        if (dialogueInstance.suggestion.value != titleField.value)
-                            dialogueInstance.hasChangedTitle = true;
-                        else
-                            dialogueInstance.hasChangedTitle = false;
                         if (titleField.value.length == 0) {
-                            dialogueInstance.hasChangedTitle = false;
                             dialogueInstance.isExistingResource = false;
                         }
                     }
@@ -732,7 +719,6 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, resourceType, t
                 default:
                     alert(OO.ui.deferMsg("visualeditor-emm-dialog-error"));
             }
-            dialogueInstance.queryResult = queryResults;
         };
 
         //Execute the askQuery in order to gather all resources
