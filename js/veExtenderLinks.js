@@ -316,8 +316,23 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, resourceType, t
                 }
                 var testDialogMode = function () {
                     if (dialogueInstance.dialogMode == 0) {
+                        console.log(dialogueInstance.suggestion);
                         if (!dialogueInstance.isExistingResource && linkField.value.length != 0) {
-                            clearInputFields(fieldset, [0, 1, 2], ["OoUiLabelWidget"]);
+                            if(dialogueInstance.suggestion != null){
+                                if(dialogueInstance.suggestion.hyperlink == linkField.value)
+                                {
+                                    clearInputFields(fieldset, [0, 2], ["OoUiLabelWidget"]);
+                                }
+                                else
+                                {
+                                    clearInputFields(fieldset, [0, 1, 2], ["OoUiLabelWidget"]);
+                                }
+                            }
+                            else
+                            {
+                                clearInputFields(fieldset, [0, 1, 2], ["OoUiLabelWidget"]);
+                            }
+
                             dialogueInstance.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-linkdialog-title-npage")());
                             var input = titleField.$element.find('input');
                             input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-new")());
