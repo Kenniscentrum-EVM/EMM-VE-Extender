@@ -149,7 +149,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, resourceType, t
                 });
                 var presentationTitleField = new OO.ui.TextInputWidget({});
                 var creatorField = new OO.ui.TextInputWidget({});
-                var dateField = new OO.ui.TextInputWidget({});
+                var dateField = new OO.ui.TextInputWidget({ type: "date"});
                 var organizationField = new OO.ui.TextInputWidget({});
                 var subjectField = new OO.ui.TextInputWidget({});
 
@@ -165,7 +165,6 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, resourceType, t
 
                 var testDialogMode = function () {
                     if (dialogueInstance.dialogMode == 0) {
-                        //console.log(fileField);
                         //fixme dirty hack
                         if (fileField.currentFile == "")
                             return;
@@ -220,7 +219,6 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, resourceType, t
 
                 //Things to do when the specified field changes
                 titleField.onChangeFunctions = [function () {
-                    //console.log(dialogueInstance.isExistingFile);
                     //todo replace this temporary thing with something better.
                     if (dialogueInstance.isExistingResource) {
                         fileFieldLayout.$element.hide();
@@ -299,7 +297,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, resourceType, t
                 });
                 var presentationTitleField = new OO.ui.TextInputWidget({});
                 var creatorField = new OO.ui.TextInputWidget({});
-                var dateField = new OO.ui.TextInputWidget({});
+                var dateField = new OO.ui.TextInputWidget({ type: "date" });
                 var organizationField = new OO.ui.TextInputWidget({});
                 var subjectField = new OO.ui.TextInputWidget({});
                 var addToResourcesField = new OO.ui.CheckboxInputWidget({
@@ -316,7 +314,6 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, resourceType, t
                 }
                 var testDialogMode = function () {
                     if (dialogueInstance.dialogMode == 0) {
-                        console.log(dialogueInstance.suggestion);
                         if (!dialogueInstance.isExistingResource && linkField.value.length != 0) {
                             if(dialogueInstance.suggestion != null){
                                 if(dialogueInstance.suggestion.hyperlink == linkField.value)
@@ -988,19 +985,17 @@ function toggleAutoComplete(dialogInstance, input) {
         element.autocomplete().enable();
 }
 
-
+/**
+ * The datepicker requires a yyyy/mm/dd value when it's being set remotely.
+ * @param date
+ * @returns {*}
+ */
 function fixDate(date) {
-    if (date == null) {
+    if (date == null)
         return "";
-    }
-    var dateString = date.raw;
-    dateString.replace(/-/g, "/").replace(/\./g, "/");
-    var replacePattern = /[0-9]+\//;
-    //The result of the askQuery always returns an american date starting with *number*/, for example 1/
-    //The date is of the fomat n/yyyy/mm/dd
-    //Remove the first number and slash from the date and then reverse the date to change it to the european format
-    dateString = dateString.replace(replacePattern, "");
-    dateString = dateString.split("/");
-    dateString = dateString.reverse().join("/");
-    return dateString;
+    var d = new Date(date.timestamp * 1000);
+    var mm = ("0" + (d.getMonth() + 1)).slice(-2);
+    var dd = ("0" + d.getDate()).slice(-2);
+    var yy = d.getFullYear();
+    return  yy + '-' + mm + '-' + dd; //(US)
 }
