@@ -748,20 +748,18 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, resourceType, t
             grabSelectedText(presentationTitleField);
             if (presentationTitleField.value.length > 0)
                 validator.validateWidget(presentationTitleField);
-            fieldset.$element.css({width: this.content.$element.outerWidth(true) - 50});
-            //Inline css cause, adding classes doesn't overwrite existing css
+            fieldset.$element.css({width:  dim.width - 10});
             for (var i = 0; i < fieldset.getItems().length; i++) {
                 fieldset.getItems()[i].$element.find(".oo-ui-labelElement-label").not(".oo-ui-selectFileWidget-label").css("margin-right", 0).css("float", "left").css("width", "30%");
                 fieldset.getItems()[i].$element.find(".oo-ui-fieldLayout-field").css("width", "70%");
                 fieldset.getItems()[i].$element.find(".oo-ui-fieldLayout-body").css("width", "100%").css("overflow", "hidden");
             }
             this.$frame.css({
-                width: this.content.$element.outerWidth(true) || "",
-                height: this.content.$element.outerHeight(true) + 50 || ""
+                width:  dim.width + 30|| "",
+                height: this.getContentHeight() + 20|| ""
             });
         };
-    }
-    ;
+    };
     ve.ui.windowFactory.register(dialogue);
 }
 
