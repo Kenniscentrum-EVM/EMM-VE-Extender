@@ -933,28 +933,33 @@ function semanticCreateWithFormQuery(query, callback, target, form) {
 function grabSelectedText(inputObject) {
     var surfaceModel = ve.init.target.getSurface().getModel();
     var selected = "";
-
     if (surfaceModel.getFragment().selection.range) {
-        var i;
-
-        for (i = surfaceModel.getFragment().selection.range.start; i < surfaceModel.getFragment().selection.range.end; i++) {
-            var element = surfaceModel.getFragment().document.data.data[i];
-            var toAdd = element;
-            if (element[0]) {
-                toAdd = element[0];//
+        //fixme misschien moet er een apart selectieobject gemaakt worden waarin dit soort dingen netjes afgehandeld worden..
+        for (var i = surfaceModel.getFragment().selection.range.start; i < surfaceModel.getFragment().selection.range.end; i++) {
+            var node = ve.init.target.getSurface().getModel().getDocument().getDocumentNode().getNodeFromOffset(i);
+            if(node.getType() == "mwTransclusionInline")
+            {
+                //fixme hier moet nog geverifieerd worden of het om een cite gaat?
+                var nodeName = node.element.attributes.mw.parts[0].template.params.name.wt;
+                selected += nodeName;
+                continue;
             }
+            var element = surfaceModel.getFragment().document.data.data[i];
+            if(typeof element[0] === 'undefined')
+                continue;
+            //todo moet dit?
+            var toAdd = element;
+            if (element[0])
+                toAdd = element[0];
             selected += toAdd;
         }
-        if (selected.length > 0) {
+        if (selected.length > 0)
             inputObject.setValue(selected);
-        }
         return new ve.Range(surfaceModel.getFragment().selection.range.start, surfaceModel.getFragment().selection.range.end);
     }
     else{
         return new ve.Range(0, 0);
     }
-
-
 }
 
 /**
