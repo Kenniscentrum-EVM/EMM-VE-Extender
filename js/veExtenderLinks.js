@@ -106,6 +106,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, resourceType, t
         this.upload = new mw.Upload({parameters: {ignorewarnings: true}});
         //Filename to keep the filename of a selected file
         this.fileName = "";
+        this.selectionRange = null;
     };
     OO.inheritClass(dialogue, OO.ui.ProcessDialog);
 
@@ -517,15 +518,18 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, resourceType, t
                                 }
                             }
                         }
-                    ]
-                    ;
-
+                    ];
                 //insert result in text
                 var surfaceModel = ve.init.target.getSurface().getModel();
-                var range = surfaceModel.getFragment().selection.range;
-                var rangeToRemove = new ve.Range(range.start, range.end);
-                var fragment = surfaceModel.getLinearFragment(rangeToRemove);
-                fragment.insertContent(mytemplate);
+                if(dialogueInstance.selectionRange.start < 0 || dialogueInstance.selectionRange.start > surfaceModel.getDocument().getLength()) {
+                    surfaceModel.getLinearFragment(new ve.Range(0, 0)).insertContent(mytemplate);
+                    return;
+                }
+                if(dialogueInstance.selectionRange.end < 0 || dialogueInstance.selectionRange.end > surfaceModel.getDocument().getLength()) {
+                    surfaceModel.getLinearFragment(new ve.Range(0, 0)).insertContent(mytemplate);
+                    return;
+                }
+                surfaceModel.getLinearFragment(dialogueInstance.selectionRange).insertContent(mytemplate);
             };
 
             var currentPageID = mw.config.get('wgPageName').replace(/_/g, " ");
@@ -745,7 +749,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, resourceType, t
         //Selected text is gathered here and put inside the input field
         //Beyong that this is also the place where the size of the dialog is set.
         dialogue.prototype.setDimensions = function (dim) {
-            grabSelectedText(presentationTitleField);
+            dialogueInstance.selectionRange = grabSelectedText(presentationTitleField);
             if (presentationTitleField.value.length > 0)
                 validator.validateWidget(presentationTitleField);
             fieldset.$element.css({width:  dim.width - 10});
@@ -941,11 +945,16 @@ function grabSelectedText(inputObject) {
             }
             selected += toAdd;
         }
+        if (selected.length > 0) {
+            inputObject.setValue(selected);
+        }
+        return new ve.Range(surfaceModel.getFragment().selection.range.start, surfaceModel.getFragment().selection.range.end);
+    }
+    else{
+        return new ve.Range(0, 0);
     }
 
-    if (selected.length > 0) {
-        inputObject.setValue(selected);
-    }
+
 }
 
 /**
