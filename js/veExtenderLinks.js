@@ -60,10 +60,10 @@ function addEMMLinks() {
  * @param templateResult A function that transforms the inserted data into a relevant format for inserting the links as a template
  */
 function loadEMMDialog(resourceType, toolId, menuText, dialogText, askQuery, templateResult) {
-    var dialogueName = "process-" + toolId + " dialogue";
+    var dialogName = "process-" + toolId + " dialog";
 
-    // create the dialogue
-    createDialogue(dialogueName, OO.ui.deferMsg(dialogText), askQuery, resourceType, templateResult);
+    // create the dialog
+    createDialog(dialogName, OO.ui.deferMsg(dialogText), askQuery, resourceType, templateResult);
 
     // Add a menu-item that opens the dialog
     var tool = function (toolGroup, config) {
@@ -80,26 +80,26 @@ function loadEMMDialog(resourceType, toolId, menuText, dialogText, askQuery, tem
     tool.static.group = "tools";
     tool.static.icon = "link";
     tool.static.allowCollapse = null;
-    tool.static.dialog = dialogueName;
+    tool.static.dialog = dialogName;
     tool.static.deactivateOnSelect = true;
     tool.prototype.onSelect = function () {
-        ve.ui.actionFactory.create('window', this.toolbar.getSurface()).open(dialogueName, {target: ve.init.target});
+        ve.ui.actionFactory.create('window', this.toolbar.getSurface()).open(dialogName, {target: ve.init.target});
         this.setActive(false);
     };
     ve.ui.toolFactory.register(tool);
 }
 
 /**
- * This method creates a dialogue that helps the user with inserting several types of links
- * @param dialogueName A name that servers as the unique identifier of the dialogue
- * @param dialogueMessage The text that will be displayed at the top of the dialog
+ * This method creates a dialog that helps the user with inserting several types of links
+ * @param dialogName A name that servers as the unique identifier of the dialog
+ * @param dialogMessage The text that will be displayed at the top of the dialog
  * @param askQuery The ask query that needs to be executed in order to get all existing resources
  * @param resourceType The type of resource that should be linked to
  * @param templateResult A function that transforms the inserted data into a relevant format for inserting the links as a template
  */
-function createDialogue(dialogueName, dialogueMessage, askQuery, resourceType, templateResult) {
-    //Constructor for Dialogue
-    var Dialogue = function (surface, config) {
+function createDialog(dialogName, dialogMessage, askQuery, resourceType, templateResult) {
+    //Constructor for Dialog
+    var Dialog = function (surface, config) {
         OO.ui.ProcessDialog.call(this, surface, config);
         this.suggestion = null;
         this.isExistingResource = false;
@@ -107,13 +107,14 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, resourceType, t
         this.upload = new mw.Upload({parameters: {ignorewarnings: true}});
         this.fileName = "";
         this.fieldset = null;
+        this.presentationTitleField = new OO.ui.TextInputWidget({});
     };
-    OO.inheritClass(Dialogue, OO.ui.ProcessDialog);
+    OO.inheritClass(Dialog, OO.ui.ProcessDialog);
 
-    //Set properties of the dialogue
-    Dialogue.static.name = dialogueName;
-    Dialogue.static.title = dialogueMessage;
-    Dialogue.static.actions = [
+    //Set static properties of the dialog
+    Dialog.static.name = dialogName;
+    Dialog.static.title = dialogMessage;
+    Dialog.static.actions = [
         {
             action: "insert",
             label: OO.ui.deferMsg("visualeditor-emm-insert"),
@@ -127,62 +128,64 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, resourceType, t
      * Displays an error message for when a specific overloaded function isn't present
      * @param functionName The name of the function that has no overloaded equivalent
      */
-    function displayOverloadError(functionName){
+    function displayOverloadError(functionName) {
         alert(OO.ui.deferMsg("visualeditor-emm-overloaded-function-error")() + functionName);
     }
 
     //Define basic versions of functions that need to be overloaded.
-    //These functions display an error message to indicate that a dialogue-specific overloaded function is missing.
-    Dialogue.prototype.displayOverloadedMessage = function(){ displayOverloadError("displayOverloadedMessage")};
-    var dialogue = null;
+    //These functions display an error message to indicate that a dialog-specific overloaded function is missing.
+    Dialog.prototype.displayOverloadedMessage = function () {
+        displayOverloadError("displayOverloadedMessage")
+    };
+    var dialog = null;
 
-    switch(resourceType){
+    switch (resourceType) {
         case "File":
-            dialogue = createNewFileDialogue(Dialogue);
+            dialog = createNewFileDialog(Dialog);
             break;
         case "Internal link":
-            dialogue = createNewInternalLinkDialogue(Dialogue);
+            dialog = createNewInternalLinkDialog(Dialog);
             break;
         case "External link":
-            dialogue = createNewExternalLinkDialogue(Dialogue);
+            dialog = createNewExternalLinkDialog(Dialog);
 
             break;
         default:
             alert(OO.ui.deferMsg("visualeditor-emm-dialog-error"));
     }
-    ve.ui.windowFactory.register(dialogue);
+    ve.ui.windowFactory.register(dialog);
 
     /**
      * Initializes the dialog.
      * Creates all visual items inside the dialog and adds the necessary logic to it
      */
-    Dialogue.prototype.initialize = function () {
-        //Put the dialogue in a variable for easier use
+    Dialog.prototype.initialize = function () {
+        //Put the dialog in a variable for easier use
         //This is also necessary because in certain cases the meaning of this changes, even though you want to be able
-        //to keep accessing the dialogueInstance
-        var dialogueInstance = this;
+        //to keep accessing the dialogInstance
+        var dialogInstance = this;
 
-        //  create the fieldset, which is responsible for the layout of the dialogue
-        dialogueInstance.fieldset = new OO.ui.FieldsetLayout({
+        //  create the fieldset, which is responsible for the layout of the dialog
+        dialogInstance.fieldset = new OO.ui.FieldsetLayout({
             classes: ["container"]
         });
 
         //Create all the buttons and input fields depending on what kind of dialog we need to create
-        dialogueInstance.createDialogueLayout();
+        dialogInstance.createDialogLayout();
 
         //Add a label that displays the meaning of the * next to form values
         var requiredLabel = new OO.ui.LabelWidget({
             label: OO.ui.deferMsg("visualeditor-emm-required")
         });
-        dialogueInstance.fieldset.addItems([new OO.ui.FieldLayout(requiredLabel)]);
+        dialogInstance.fieldset.addItems([new OO.ui.FieldLayout(requiredLabel)]);
 
-        //Add the created items to the dialogue
-        Dialogue.super.prototype.initialize.call(this);
+        //Add the created items to the dialog
+        Dialog.super.prototype.initialize.call(this);
         this.content = new OO.ui.PanelLayout({
             padded: true,
             expanded: false
         });
-        this.content.$element.append(dialogueInstance.fieldset.$element);
+        this.content.$element.append(dialogInstance.fieldset.$element);
         this.$element
             .addClass("oo-ui-windowManager")
             .toggleClass("oo-ui-windowManager-modal", true);
@@ -190,7 +193,7 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, resourceType, t
 
         //add validation for the form
         var validator = new Validator(
-            dialogueInstance.fieldset,
+            dialogInstance.fieldset,
             null,
             function (object, message) {
                 object.$element.addClass("oo-ui-flaggedElement-invalid");
@@ -200,12 +203,12 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, resourceType, t
                     "position": "absolute"
                 });
                 object.$element.after(el);
-                dialogueInstance.actions.forEach({actions: "insert"}, function (action) {
+                dialogInstance.actions.forEach({actions: "insert"}, function (action) {
                     action.setDisabled(true);
                 });
             },
             function () {
-                dialogueInstance.actions.forEach({actions: "insert"}, function (action) {
+                dialogInstance.actions.forEach({actions: "insert"}, function (action) {
                     action.setDisabled(false);
                 });
             },
@@ -219,9 +222,9 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, resourceType, t
 
         //  Add event-handling logic to okButton
         var insertButtonHandler = function () {
-            var namedata = presentationTitleField.getValue();
-            if (dialogueInstance.suggestion != null) {
-                var linkdata = dialogueInstance.suggestion.data.length > 0 ? dialogueInstance.suggestion.data : "";
+            var namedata = dialogInstance.presentationTitleField.getValue();
+            if (dialogInstance.suggestion != null) {
+                var linkdata = dialogInstance.suggestion.data.length > 0 ? dialogInstance.suggestion.data : "";
             }
             else {
                 linkdata = "";
@@ -282,50 +285,10 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, resourceType, t
             };
 
             var currentPageID = mw.config.get('wgPageName').replace(/_/g, " ");
-            var query = "";
+            var query = dialogInstance.buildQuery(currentPageID);
             switch (resourceType) {
-                case "File":
-                    //Build the sfautoedit query
-                    var filename = "";
-                    if (dialogueInstance.isExistingResource) {
-                        filename = dialogueInstance.fileName;
-                    } else if (fileField.getValue() != null) {
-                        filename = fileField.getValue().name;
-                    }
-                    query += "Resource Description[file name]=" + filename +
-                        "&Resource Description[title]=" + titleField.getValue() +
-                        "&Resource Description[creator]=" + creatorField.getValue() +
-                        "&Resource Description[date]=" + dateField.getValue();
-                    if (organizationField.getValue().length > 0) query += "&Resource Description[organization]=" + organizationField.getValue();
-                    if (subjectField.getValue().length > 0) query += "&Resource Description[subject]=" + subjectField.getValue();
-                    if (!dialogueInstance.isExistingResource) query += "&Resource Description[created in page]=" + currentPageID;
-                    break;
                 case "Internal link":
-                    if (dialogueInstance.isExistingResource) {
-                        insertCallback(linkdata);
-                    }
-                    else {
-                        //Start building the sfautoedit query
-                        query += "Light Context[Supercontext]=" + currentPageID +
-                            "&Light Context[Heading]=" + pageNameField.getValue();
-                        //Find the topcontext of the current page
-                        var api = new mw.Api();
-                        api.get({
-                            action: 'ask',
-                            parameters: 'limit:10000',//check how to increase limit of ask-result; done in LocalSettings.php
-                            query: "[[" + currentPageID + "]]|?Topcontext|limit=10000"//
-                        }).done(function (data) {
-                            var res = data.query.results;
-                            if (res[currentPageID].printouts["Topcontext"][0] != null) {
-                                var topContext = res[currentPageID].printouts["Topcontext"][0].fulltext;
-                                query += "&Light Context[Topcontext]=" + topContext;
-                                semanticCreateWithFormQuery(query, insertCallback, target, "Light Context");
-                            }
-                            else {
-                                alert(OO.ui.deferMsg("visualeditor-emm-topcontext-error")());
-                            }
-                        });
-                    }
+
                     break;
                 case
                 "External link":
@@ -336,85 +299,87 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, resourceType, t
                         "&Resource Description[date]=" + dateField.getValue();
                     if (organizationField.getValue().length > 0) query += "&Resource Description[organization]=" + organizationField.getValue();
                     if (subjectField.getValue().length > 0) query += "&Resource Description[subject]=" + subjectField.getValue();
-                    if (!dialogueInstance.isExistingResource) query += "&Resource Description[created in page]=" + currentPageID;
+                    if (!dialogInstance.isExistingResource) query += "&Resource Description[created in page]=" + currentPageID;
                     break;
                 default:
                     alert(OO.ui.deferMsg("visualeditor-emm-dialog-error"));
-            }
-            var target = "";
-            if (dialogueInstance.isExistingResource) {
-                target = linkdata;
             }
 
-            //Call the sfautoedit query to create or edit an existing resource
-            //This also happens when linking to an existing resource and not editing anything
-            //For internal links this logic is handled in the switch statement up above
-            switch (resourceType) {
-                case "File":
-                    if (!dialogueInstance.isExistingResource) {
-                        dialogueInstance.upload.setFile(fileField.getValue());
-                        dialogueInstance.upload.setFilename(fileField.getValue().name);
-                        dialogueInstance.upload.upload().fail(function (status, exceptionobject) {
-                            switch (status) {
-                                case "duplicate":
-                                    alert(OO.ui.deferMsg("visualeditor-emm-file-upload-duplicate")());
-                                    break;
-                                case "exists":
-                                    alert(OO.ui.deferMsg("visualeditor-emm-file-upload-exists")());
-                                    break;
-                                case "verification-error":
-                                    alert(OO.ui.deferMsg("visualeditor-emm-file-upload-verification-error")() + "\n" + exceptionobject.error.info);
-                                    break;
-                                case "file-too-large":
-                                    alert(OO.ui.deferMsg("visualeditor-emm-file-upload-file-too-large")());
-                                    break;
-                                case "empty-file":
-                                    alert(OO.ui.deferMsg("visualeditor-emm-file-upload-empty-file")());
-                                    break;
-                                case "http":
-                                    switch (exceptionobject.textStatus) {
-                                        case "timeout":
-                                            alert(OO.ui.deferMsg("visualeditor-emm-file-upload-timeout")());
-                                            break;
-                                        case "parsererror":
-                                            alert(OO.ui.deferMsg("visualeditor-emm-file-upload-parsererror")());
-                                            break;
-                                        default:
-                                            //uknown eroror
-                                            alert("An unkown error of the type " + exceptionobject.exception + " has occured.");
-                                    }
-                                    break;
-                                default:
-                                    alert("An unkown error of the type " + status + " has occured.");
-                            }
-                        }).done(function () {
+            //If there is no query defined, just insert the link into the page and skip changing the resource
+                var target = "";
+                if (dialogInstance.isExistingResource) {
+                    target = linkdata;
+                }
+
+                //Call the sfautoedit query to create or edit an existing resource
+                //This also happens when linking to an existing resource and not editing anything
+                //For internal links this logic is handled in the switch statement up above
+                switch (resourceType) {
+                    case "File":
+                        if (!dialogInstance.isExistingResource) {
+                            dialogInstance.upload.setFile(fileField.getValue());
+                            dialogInstance.upload.setFilename(fileField.getValue().name);
+                            dialogInstance.upload.upload().fail(function (status, exceptionobject) {
+                                switch (status) {
+                                    case "duplicate":
+                                        alert(OO.ui.deferMsg("visualeditor-emm-file-upload-duplicate")());
+                                        break;
+                                    case "exists":
+                                        alert(OO.ui.deferMsg("visualeditor-emm-file-upload-exists")());
+                                        break;
+                                    case "verification-error":
+                                        alert(OO.ui.deferMsg("visualeditor-emm-file-upload-verification-error")() + "\n" + exceptionobject.error.info);
+                                        break;
+                                    case "file-too-large":
+                                        alert(OO.ui.deferMsg("visualeditor-emm-file-upload-file-too-large")());
+                                        break;
+                                    case "empty-file":
+                                        alert(OO.ui.deferMsg("visualeditor-emm-file-upload-empty-file")());
+                                        break;
+                                    case "http":
+                                        switch (exceptionobject.textStatus) {
+                                            case "timeout":
+                                                alert(OO.ui.deferMsg("visualeditor-emm-file-upload-timeout")());
+                                                break;
+                                            case "parsererror":
+                                                alert(OO.ui.deferMsg("visualeditor-emm-file-upload-parsererror")());
+                                                break;
+                                            default:
+                                                //uknown eroror
+                                                alert("An unkown error of the type " + exceptionobject.exception + " has occured.");
+                                        }
+                                        break;
+                                    default:
+                                        alert("An unkown error of the type " + status + " has occured.");
+                                }
+                            }).done(function () {
+                                semanticCreateWithFormQuery(query, insertCallback, target, "Resource Light");
+                            });
+                        }
+                        else {
                             semanticCreateWithFormQuery(query, insertCallback, target, "Resource Light");
-                        });
-                    }
-                    else {
-                        semanticCreateWithFormQuery(query, insertCallback, target, "Resource Light");
-                    }
-                    break;
-                case "Internal link":
-                    //Executed by asynchronous function after getting information about the topcontext of the page
-                    break;
-                case "External link":
-                    semanticCreateWithFormQuery(query, insertCallback, target, "Resource Hyperlink");
-                    break;
-                default:
-                    alert(OO.ui.deferMsg("visualeditor-emm-dialog-error"));
-            }
-            cleanUpDialogue();
+                        }
+                        break;
+                    case "Internal link":
+                        //Executed by asynchronous function after getting information about the topcontext of the page
+                        break;
+                    case "External link":
+                        semanticCreateWithFormQuery(query, insertCallback, target, "Resource Hyperlink");
+                        break;
+                    default:
+                        alert(OO.ui.deferMsg("visualeditor-emm-dialog-error"));
+                };
+            cleanUpDialog();
         };
 
 
         // Add event handling logic to cancelButton
         var cancelButtonHandler = function () {
             //Clear the dialog and close it
-            cleanUpDialogue();
+            cleanUpDialog();
         };
 
-        Dialogue.prototype.getActionProcess = function (action) {
+        Dialog.prototype.getActionProcess = function (action) {
             if (action === "insert") {
                 return new OO.ui.Process(function () {
                     insertButtonHandler();
@@ -426,22 +391,22 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, resourceType, t
                 });
             }
             else {
-                cleanUpDialogue();
+                cleanUpDialog();
             }
             //Use parent handler in case something goes wrong
-            return Dialogue.super.prototype.getActionProcess.call(this, action);
+            return Dialog.super.prototype.getActionProcess.call(this, action);
         };
 
-        function cleanUpDialogue() {
-            dialogueInstance.close();
+        function cleanUpDialog() {
+            dialogInstance.close();
             //todo check if closed and then clean the fields for a more elegant cleanup?
             validator.disable();
             resetMode();
-            clearInputFields(dialogueInstance.fieldset, null, ["OoUiLabelWidget"]);
+            clearInputFields(dialogInstance.fieldset, null, ["OoUiLabelWidget"]);
             validator.enable();
-            dialogueInstance.isExistingResource = false;
-            dialogueInstance.suggestion = null;
-            dialogueInstance.dialogMode = 0;
+            dialogInstance.isExistingResource = false;
+            dialogInstance.suggestion = null;
+            dialogInstance.dialogMode = 0;
         }
 
         //Declare a function to be called after the askQuery has been processed
@@ -452,33 +417,33 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, resourceType, t
                 case "File":
                     var fillFields = function (suggestion) {
                         //fixme make this independent of order
-                        dialogueInstance.getFieldset().getItems()[3].getField().setValue(suggestion.creator);
-                        dialogueInstance.getFieldset().getItems()[4].getField().setValue(fixDate(suggestion.date));
-                        dialogueInstance.getFieldset().getItems()[5].getField().setValue(suggestion.organization);
-                        dialogueInstance.getFieldset().getItems()[6].getField().setValue(suggestion.subjects);
-                        dialogueInstance.fileName = suggestion.data.replace("Bestand:", "").replace("File:", "");
+                        dialogInstance.getFieldset().getItems()[3].getField().setValue(suggestion.creator);
+                        dialogInstance.getFieldset().getItems()[4].getField().setValue(fixDate(suggestion.date));
+                        dialogInstance.getFieldset().getItems()[5].getField().setValue(suggestion.organization);
+                        dialogInstance.getFieldset().getItems()[6].getField().setValue(suggestion.subjects);
+                        dialogInstance.fileName = suggestion.data.replace("Bestand:", "").replace("File:", "");
                         validator.validateAll();
                     };
-                    initAutoComplete(queryResults, titleField, dialogueInstance, fillFields);
+                    initAutoComplete(queryResults, titleField, dialogInstance, fillFields);
                     break;
                 case "Internal link":
                     var fillFields = function (suggestion) {
                         //Nothing to fill, no editable fields beyond presentationtitle and title
                         validator.validateAll();
                     };
-                    initAutoComplete(queryResults, pageNameField, dialogueInstance, fillFields);
+                    initAutoComplete(queryResults, pageNameField, dialogInstance, fillFields);
                     break;
                 case "External link":
                     var fillFields = function (suggestion) {
                         //fixme make this independent of order
-                        dialogueInstance.getFieldset().getItems()[1].getField().setValue(suggestion.hyperlink);
-                        dialogueInstance.getFieldset().getItems()[3].getField().setValue(suggestion.creator);
-                        dialogueInstance.getFieldset().getItems()[4].getField().setValue(fixDate(suggestion.date));
-                        dialogueInstance.getFieldset().getItems()[5].getField().setValue(suggestion.organization);
-                        dialogueInstance.getFieldset().getItems()[6].getField().setValue(suggestion.subjects);
+                        dialogInstance.getFieldset().getItems()[1].getField().setValue(suggestion.hyperlink);
+                        dialogInstance.getFieldset().getItems()[3].getField().setValue(suggestion.creator);
+                        dialogInstance.getFieldset().getItems()[4].getField().setValue(fixDate(suggestion.date));
+                        dialogInstance.getFieldset().getItems()[5].getField().setValue(suggestion.organization);
+                        dialogInstance.getFieldset().getItems()[6].getField().setValue(suggestion.subjects);
                         validator.validateAll();
                     };
-                    initAutoComplete(queryResults, titleField, dialogueInstance, fillFields);
+                    initAutoComplete(queryResults, titleField, dialogInstance, fillFields);
                     break;
                 default:
                     alert(OO.ui.deferMsg("visualeditor-emm-dialog-error"));
@@ -488,24 +453,24 @@ function createDialogue(dialogueName, dialogueMessage, askQuery, resourceType, t
         //Execute the askQuery in order to gather all resources
         semanticAskQuery(askQuery, callback, resourceType);
 
-        Dialogue.prototype.getFieldset = function () {
-            return dialogueInstance.fieldset;
+        Dialog.prototype.getFieldset = function () {
+            return dialogInstance.fieldset;
         };
 
         //fixme dirty hack
         //todo in plaats van deze hack een eigen event afvuren en opvangen?
         //Selected text is gathered here and put inside the input field
         //Beyong that this is also the place where the size of the dialog is set.
-        Dialogue.prototype.setDimensions = function (dim) {
-            grabSelectedText(presentationTitleField);
-            if (presentationTitleField.value.length > 0)
-                validator.validateWidget(presentationTitleField);
-            dialogueInstance.fieldset.$element.css({width: this.content.$element.outerWidth(true) - 50});
+        Dialog.prototype.setDimensions = function (dim) {
+            grabSelectedText(dialogInstance.presentationTitleField);
+            if (dialogInstance.presentationTitleField.value.length > 0)
+                validator.validateWidget(dialogInstance.presentationTitleField);
+            dialogInstance.fieldset.$element.css({width: this.content.$element.outerWidth(true) - 50});
             //Inline css cause, adding classes doesn't overwrite existing css
-            for (var i = 0; i < dialogueInstance.fieldset.getItems().length; i++) {
-                dialogueInstance.fieldset.getItems()[i].$element.find(".oo-ui-labelElement-label").not(".oo-ui-selectFileWidget-label").css("margin-right", 0).css("float", "left").css("width", "30%");
-                dialogueInstance.fieldset.getItems()[i].$element.find(".oo-ui-fieldLayout-field").css("width", "70%");
-                dialogueInstance.fieldset.getItems()[i].$element.find(".oo-ui-fieldLayout-body").css("width", "100%").css("overflow", "hidden");
+            for (var i = 0; i < dialogInstance.fieldset.getItems().length; i++) {
+                dialogInstance.fieldset.getItems()[i].$element.find(".oo-ui-labelElement-label").not(".oo-ui-selectFileWidget-label").css("margin-right", 0).css("float", "left").css("width", "30%");
+                dialogInstance.fieldset.getItems()[i].$element.find(".oo-ui-fieldLayout-field").css("width", "70%");
+                dialogInstance.fieldset.getItems()[i].$element.find(".oo-ui-fieldLayout-body").css("width", "100%").css("overflow", "hidden");
             }
             this.$frame.css({
                 width: this.content.$element.outerWidth(true) || "",
@@ -675,7 +640,7 @@ function semanticCreateWithFormQuery(query, callback, target, form) {
 }
 
 /**
- * Grabs the text that is selected (outside the dialogue) and insert its into the resource input inside the dialogue
+ * Grabs the text that is selected (outside the dialog) and insert its into the resource input inside the dialog
  * @param inputObject the input field in which the selected text should be inserted
  */
 function grabSelectedText(inputObject) {
@@ -704,16 +669,16 @@ function grabSelectedText(inputObject) {
  * Initalizes the autocomplete library
  * @param data A collection of all the items that can be searched in
  * @param inputObject The object in which the input field exists where the autocomplete function should be enabled
- * @param dialogueInstance The dialogue whose page-id should be edited in order to succesfully insert the link later on
+ * @param dialogInstance The dialog whose page-id should be edited in order to succesfully insert the link later on
  */
-function initAutoComplete(data, inputObject, dialogueInstance, fillFields) {
+function initAutoComplete(data, inputObject, dialogInstance, fillFields) {
     var inputField = $(inputObject.$element).find("input");
     $(inputField).autocomplete({
         lookup: data,
         onSelect: function (suggestion) {
-            if (dialogueInstance.isExistingResource == false) {
-                dialogueInstance.suggestion = suggestion;
-                dialogueInstance.isExistingResource = true;
+            if (dialogInstance.isExistingResource == false) {
+                dialogInstance.suggestion = suggestion;
+                dialogInstance.isExistingResource = true;
                 fillFields(suggestion);
                 return;
             }

@@ -45,20 +45,20 @@ function createExitDialog() {
     $('.oo-ui-toolbar-actions').children().first().after(cancelToolbar.$group);
 
 
-    //Unregister the default exit dialogue which is part of the visualextender library, we don't use it because the chameleon skin breaks it.
+    //Unregister the default exit dialog which is part of the visualextender library, we don't use it because the chameleon skin breaks it.
     ve.ui.windowFactory.unregister(ve.ui.MWCancelConfirmDialog);
 
     //Dialog creation happens like usual.
-    var cancelDialogue = function (surface, config) {
+    var cancelDialog = function (surface, config) {
         OO.ui.ProcessDialog.call(this, surface, config);
     };
-    OO.inheritClass(cancelDialogue, OO.ui.ProcessDialog);
+    OO.inheritClass(cancelDialog, OO.ui.ProcessDialog);
 
     //This name is very important because the visualeditor uses it to open the dialog which we are going to overwrite
-    cancelDialogue.static.name = 'cancelconfirm';
-    cancelDialogue.static.title = OO.ui.deferMsg('visualeditor-viewpage-savewarning-title');
+    cancelDialog.static.name = 'cancelconfirm';
+    cancelDialog.static.title = OO.ui.deferMsg('visualeditor-viewpage-savewarning-title');
 
-    cancelDialogue.prototype.initialize = function () {
+    cancelDialog.prototype.initialize = function () {
 
         var diaInstance = this;
 
@@ -74,7 +74,7 @@ function createExitDialog() {
             label: OO.ui.deferMsg('visualeditor-viewpage-savewarning-keep')
         });
 
-        cancelDialogue.super.prototype.initialize.call(this);
+        cancelDialog.super.prototype.initialize.call(this);
         this.content = new OO.ui.PanelLayout({
             padded: true,
             expanded: false,
@@ -122,7 +122,7 @@ function createExitDialog() {
 
         // body height is slightly increased to make the dialog look a bit prettier
 
-        cancelDialogue.prototype.getBodyHeight = function () {
+        cancelDialog.prototype.getBodyHeight = function () {
             //Small bugfix for the menubutton.
             $(".oo-ui-tool-name-cancelbutton").removeClass("oo-ui-tool-active");
             return this.content.$element.outerHeight( true ) + this.footer.$element.outerHeight( true ) + 30;
@@ -130,6 +130,6 @@ function createExitDialog() {
 
     }
     //register our new dialog in the factory
-    ve.ui.windowFactory.register(cancelDialogue);
+    ve.ui.windowFactory.register(cancelDialog);
 }
 

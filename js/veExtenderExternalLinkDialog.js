@@ -3,53 +3,52 @@
  */
 "use strict";
 
-function createNewExternalLinkDialogue(Dialogue) {
-    console.log("External Link Dialogue");
+function createNewExternalLinkDialog(Dialog) {
+    console.log("External Link Dialog");
 
-    var ExternalLinkDialogue = function (surface, config) {
-        Dialogue.call(this, surface, config);
+    var ExternalLinkDialog = function (surface, config) {
+        Dialog.call(this, surface, config);
         //Create input fields in case we're dealing with an external link
         this.titleField = new OO.ui.TextInputWidget({placeholder: OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-def")()});
         this.linkField = new OO.ui.TextInputWidget({placeholder: OO.ui.deferMsg("visualeditor-emm-linkdialog-linkfield-placeholder-def")()});
-        this.presentationTitleField = new OO.ui.TextInputWidget({});
         this.creatorField = new OO.ui.TextInputWidget({});
         this.dateField = new OO.ui.TextInputWidget({});
         this.organizationField = new OO.ui.TextInputWidget({});
         this.subjectField = new OO.ui.TextInputWidget({});
         this.addToResourcesField = new OO.ui.CheckboxInputWidget({selected: true});
     };
-    OO.inheritClass(ExternalLinkDialogue, Dialogue);
+    OO.inheritClass(ExternalLinkDialog, Dialog);
 
-    ExternalLinkDialogue.prototype.createDialogueLayout = function () {
+    ExternalLinkDialog.prototype.createDialogLayout = function () {
         var testSuggestedLink = function () {
-            if (dialogueInstance.isExistingResource) {
+            if (dialogInstance.isExistingResource) {
                 if (titleField.value.length == 0) {
-                    dialogueInstance.isExistingResource = false;
+                    dialogInstance.isExistingResource = false;
                 }
             }
         };
 
         var input = null;
         var testDialogMode = function () {
-            if (dialogueInstance.dialogMode == 0) {
-                if (!dialogueInstance.isExistingResource && linkField.value.length != 0) {
+            if (dialogInstance.dialogMode == 0) {
+                if (!dialogInstance.isExistingResource && linkField.value.length != 0) {
                     clearInputFields(this.fieldset, [0, 1, 2], ["OoUiLabelWidget"]);
-                    dialogueInstance.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-linkdialog-title-npage")());
-                    input = titleField.$element.find('input');
+                    dialogInstance.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-linkdialog-title-npage")());
+                    input = this.titleField.$element.find('input');
                     input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-new")());
                     //todo temporary
-                    dialogueInstance.dialogMode = 1;
-                    toggleAutoComplete(dialogueInstance, titleField);
+                    dialogInstance.dialogMode = 1;
+                    toggleAutoComplete(dialogInstance, this.titleField);
                     validator.cleanUpForm();
                 }
             }
             else {
                 if (linkField.value.length == 0) {
-                    dialogueInstance.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-dialogexternallinktitle")());
-                    input = titleField.$element.find('input');
+                    dialogInstance.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-dialogexternallinktitle")());
+                    input = this.titleField.$element.find('input');
                     input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-def")());
-                    dialogueInstance.dialogMode = 0;
-                    toggleAutoComplete(dialogueInstance, titleField);
+                    dialogInstance.dialogMode = 0;
+                    toggleAutoComplete(dialogInstance, titleField);
                     clearInputFields(this.fieldset, null, ["OoUiLabelWidget"]);
                     //validator.validateWidget(linkField);
                     validator.cleanUpForm();
@@ -58,50 +57,50 @@ function createNewExternalLinkDialogue(Dialogue) {
         };
 
         // todo validation property verplaatsen.
-        titleField.validation = [checkIfEmpty];
-        linkField.validation = [checkIfEmpty, checkIfWebsite];
-        presentationTitleField.validation = [checkIfEmpty];
-        creatorField.validation = [checkIfEmpty];
-        dateField.validation = [checkIfEmpty, checkIfDate];
+        this.titleField.validation = [checkIfEmpty];
+        this.linkField.validation = [checkIfEmpty, checkIfWebsite];
+        this.presentationTitleField.validation = [checkIfEmpty];
+        this.creatorField.validation = [checkIfEmpty];
+        this.dateField.validation = [checkIfEmpty, checkIfDate];
 
         //Things to do when the specified field changes
-        titleField.onChangeFunctions = [testSuggestedLink, testDialogMode, function () {
-            toggleAutoComplete(dialogueInstance, titleField)
+        this.titleField.onChangeFunctions = [testSuggestedLink, testDialogMode, function () {
+            toggleAutoComplete(dialogInstance, titleField)
         }]; //fixme temporary method toggle autocomple
-        linkField.onChangeFunctions = [testDialogMode, function () {
-            toggleAutoComplete(dialogueInstance, titleField)
+        this.linkField.onChangeFunctions = [testDialogMode, function () {
+            toggleAutoComplete(dialogInstance, titleField)
         }]; //fixme temporary method toggle autocomplete
 
         this.fieldset.addItems([
-            new OO.ui.FieldLayout(titleField, {
+            new OO.ui.FieldLayout(this.titleField, {
                 label: OO.ui.deferMsg("visualeditor-emm-link-title"),
                 align: "left"
             }),
-            new OO.ui.FieldLayout(linkField, {
+            new OO.ui.FieldLayout(this.linkField, {
                 label: OO.ui.deferMsg("visualeditor-emm-link"),
                 align: "left"
             }),
-            new OO.ui.FieldLayout(presentationTitleField, {
+            new OO.ui.FieldLayout(this.presentationTitleField, {
                 label: OO.ui.deferMsg("viualeditor-emm-link-presentationtitle"),
                 align: "left"
             }),
-            new OO.ui.FieldLayout(creatorField, {
+            new OO.ui.FieldLayout(this.creatorField, {
                 label: OO.ui.deferMsg("visualeditor-emm-link-creator"),
                 align: "left"
             }),
-            new OO.ui.FieldLayout(dateField, {
+            new OO.ui.FieldLayout(this.dateField, {
                 label: OO.ui.deferMsg("visualeditor-emm-link-date"),
                 align: "left"
             }),
-            new OO.ui.FieldLayout(organizationField, {
+            new OO.ui.FieldLayout(this.organizationField, {
                 label: OO.ui.deferMsg("visualeditor-emm-link-organization"),
                 align: "left"
             }),
-            new OO.ui.FieldLayout(subjectField, {
+            new OO.ui.FieldLayout(this.subjectField, {
                 label: OO.ui.deferMsg("visualeditor-emm-link-subject"),
                 align: "left"
             }),
-            new OO.ui.FieldLayout(addToResourcesField, {
+            new OO.ui.FieldLayout(this.addToResourcesField, {
                 label: OO.ui.deferMsg("visualeditor-emm-link-add-resource"),
                 align: "left"
             })
@@ -109,12 +108,12 @@ function createNewExternalLinkDialogue(Dialogue) {
     };
 
 
-    ExternalLinkDialogue.prototype.resetMode = function () {
-        dialogueInstance.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-dialogexternallinktitle")());
+    ExternalLinkDialog.prototype.resetMode = function () {
+        dialogInstance.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-dialogexternallinktitle")());
         var input = titleField.$element.find('input');
         input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-def")());
-        toggleAutoComplete(dialogueInstance, titleField);
+        toggleAutoComplete(dialogInstance, titleField);
     };
 
-    return ExternalLinkDialogue;
+    return ExternalLinkDialog;
 }
