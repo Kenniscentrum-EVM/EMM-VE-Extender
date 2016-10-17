@@ -16,26 +16,39 @@ var VEETemplateForclosure = function(protectedTypes) {
         // x is de offset van het punt in het document waar iets verwijdert moet worden.
         for(x = removeStart; x < removeEnd; x++){
             // heeft het document op deze offset een element met een type? zo ja, dan is het een node. Zo niet, dan is het gewoon tekst.
-            if(doc.data.getType(x) != null)
-            {
+            if(doc.data.getType(x) != null) {
                 // verkrijg het node object vanuit de offset.
-                var node = doc.getDocumentNode().getNodeFromOffset(x)
-                console.log(node.type);
+                var node = doc.getDocumentNode().getNodeFromOffset(x);
+                //console.log(node.type);
                 // loop door de array met beschermde types
-                for(var i = 0; i < protectedTypes.length; i++)
+                for (var i = 0; i < protectedTypes.length; i++){
                     // is het type gelijk aan een type in de lijst
-                    if(node.type == protectedTypes[i]) {
+                    if (node.type == protectedTypes[i]) {
                         // maak het element niet meer deletebaar.
-                        ve.dm.nodeFactory.registry[doc.data.getType(x)].static.isDeletable = false;
-                        // tijdelijke feedback.
-                        alert('waarschuwing, u probeert een systeemtemplate te verwijderen, dit is niet toegestaan!');
+                        mw.loader.using('mediawiki.api', function () {
+                                (new mw.Api()).get({
+                                    action: 'templatedata',
+                                    titles: 'Template:Cite'
+                                }).done(function (data) {
+
+                                    console.log(data);
+                                    //this iteration method is required because the api returns a json object with a random(x) index
+                                    $.each(data.pages, function (k, v) {
+                                        if (v.params.protected != null) {
+                                            if (v.params.optional.protected) {
+                                                ve.dm.nodeFactory.registry[doc.data.getType(x)].static.isDeletable = false;
+                                            }
+                                        }
+                                    });
+                                });
+                            }
+
+                        );
                     }
+                }
             }
         }
-        //this.getDocumentNode().getNodeFromOffset( coveredOffset );
         return base.call(this, doc, removeStart, removeEnd, removeMetadata);
     }
-
-
-}
+};
 
