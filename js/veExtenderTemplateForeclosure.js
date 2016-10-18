@@ -16,9 +16,13 @@ var VEETemplateForclosure = function(protectedTypes) {
     {
 
         var hasTemplate = false;
+        var _lock = false;
+        var _id;
+        var ref = this;
 
         // x is de offset van het punt in het document waar iets verwijdert moet worden.
         for(x = removeStart; x < removeEnd; x++){
+            //console.log("begin: " + removeStart + " | " + x + " / " + removeEnd + " | end: " + removeEnd);
             // heeft het document op deze offset een element met een type? zo ja, dan is het een node. Zo niet, dan is het gewoon tekst.
             if(doc.data.getType(x) != null) {
                 // verkrijg het node object vanuit de offset.
@@ -26,33 +30,66 @@ var VEETemplateForclosure = function(protectedTypes) {
                 //console.log(node.type);
                 // loop door de array met beschermde types
                     // is het type gelijk aan een type in de lijst
-                    if (node.type == 'mwTransclusionInline') {
+               // console.log(node);
+
+                    if (node.type == 'mwTransclusionInline' || node.type == 'mwTransclusionBlock') {
+                        var target;
+                        if(node.type == 'mwTransclusionBlock')
+                        {
+                            for(var z = 0; node.element.attributes.mw.parts.length; z++)
+                                if(typeof node.element.attributes.mw.parts[z] === "object")
+                                {
+                                    //console.log(node.element.attributes.mw.parts[z]);
+                                    target = node.element.attributes.mw.parts[z].template.target.href.split("./").pop();
+                                    break;
+                                }
+                        }
+                        else
+                            target = node.element.attributes.mw.parts[0].template.target.href.split("./").pop();
+
+                        hasTemplate = true;
+                        _lock = true;
+                        _id = window.setInterval(poll_lock, 50);
+
                         // maak het element niet meer deletebaar.
                         mw.loader.using('mediawiki.api', function () {
-                            var api = new mw.Api();
-                            api.defaults.ajax.async = false;
-                            console.log(api);
-                                (api).get({
+                                (new mw.Api()).get({
                                     action: 'query',
                                     prop: "categories",
-                                    titles: "GF_Beoordelen_vergunningaanvraag",
+                                    titles: target,
                                     formatversion: 2
                                     //titles: 'Template:Cite'
                                 }).done(function (data) {
                                     console.log(data);
-                                    //this iteration method is required because the api returns a json object with a random(x) index
-                                        $.each(data.pages, function (key, value) {
-                                            for(var x = 0; x < value.categories.length; x++) {
-                                                console.log(value.categories[x].title.split(value.categories[x].title.indexOf(":")));
-                                            }
-                                    });
+                                    var page = data.query.pages[0]; // we're only asking for a single page.
+                                    for(var y = 0; y < page.categories.length; y++)
+                                        if(page.categories[y].title.split(":").pop() == "System") {
+                                            console.log("we're going to protect this template!");
+                                            ve.dm.nodeFactory.registry[doc.data.getType(x)].static.isDeletable = false;
+                                        }
+                                        else
+                                        {
+                                            console.log("we're going to delete this thing!");
+                                        }
+                                    _lock = false;
                                 });
                             }
                         );
                     }
             }
         }
-        return base.call(this, doc, removeStart, removeEnd, removeMetadata);
+        if(!hasTemplate)
+            return base.call(ref, doc, removeStart, removeEnd, removeMetadata);
+        function poll_lock()
+        {
+            //console.log(_lock);
+            if(_lock == false)
+            {
+                window.clearInterval(_id);
+                console.log("we're going to destroy");
+                return base.call(ref, doc, removeStart, removeEnd, removeMetadata);
+            }
+        }
     }
 };
 
