@@ -14,6 +14,9 @@ var VEETemplateForclosure = function(protectedTypes) {
     var base = ve.dm.Transaction.prototype.addSafeRemoveOps;
     ve.dm.Transaction.prototype.addSafeRemoveOps = function(doc, removeStart, removeEnd, removeMetadata)
     {
+
+        var hasTemplate = false;
+
         // x is de offset van het punt in het document waar iets verwijdert moet worden.
         for(x = removeStart; x < removeEnd; x++){
             // heeft het document op deze offset een element met een type? zo ja, dan is het een node. Zo niet, dan is het gewoon tekst.
@@ -22,49 +25,31 @@ var VEETemplateForclosure = function(protectedTypes) {
                 var node = doc.getDocumentNode().getNodeFromOffset(x);
                 //console.log(node.type);
                 // loop door de array met beschermde types
-                for (var i = 0; i < protectedTypes.length; i++){
                     // is het type gelijk aan een type in de lijst
-                    if (node.type == protectedTypes[i]) {
+                    if (node.type == 'mwTransclusionInline') {
                         // maak het element niet meer deletebaar.
                         mw.loader.using('mediawiki.api', function () {
-                                (new mw.Api()).get({
+                            var api = new mw.Api();
+                            api.defaults.ajax.async = false;
+                            console.log(api);
+                                (api).get({
                                     action: 'query',
                                     prop: "categories",
-                                    titles: "GF_Beoordelen_vergunningaanvraag"
+                                    titles: "GF_Beoordelen_vergunningaanvraag",
+                                    formatversion: 2
                                     //titles: 'Template:Cite'
                                 }).done(function (data) {
                                     console.log(data);
                                     //this iteration method is required because the api returns a json object with a random(x) index
-                                    if(typeof data == "object" && data.pages){
-
                                         $.each(data.pages, function (key, value) {
-                                            for(var x = 0; x < value.categories.length; x++)
-                                            {
-
+                                            for(var x = 0; x < value.categories.length; x++) {
                                                 console.log(value.categories[x].title.split(value.categories[x].title.indexOf(":")));
-                                                /*
-                                                 if(v.categories[x].title.slice())
-                                                 {
-
-                                                 }
-                                                 */
                                             }
-                                    }
-
-
-                                        /*
-                                        if (v.params.protected != null) {
-                                            if (v.params.optional.protected) {
-                                                ve.dm.nodeFactory.registry[doc.data.getType(x)].static.isDeletable = false;
-                                            }
-                                        }
-                                        */
                                     });
                                 });
                             }
                         );
                     }
-                }
             }
         }
         return base.call(this, doc, removeStart, removeEnd, removeMetadata);
