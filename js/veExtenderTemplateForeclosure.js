@@ -7,7 +7,8 @@
  * onderscheid wil maken tussen verschillende templates. Denk aan systeem templates en reguliere templates.
  */
 var VEETemplateForclosure = function(protectedTypes) {
-    this.protectedTypes = protectedTypes;
+
+    var deleteJobs = [];
 
     //de methode die over de verwijdering van elmenten gaat (terug te vinden in \mediawiki\extensions\VisualEditor\lib\ve\src\dm\ve.dm.Transaction.js)
     var base = ve.dm.Transaction.prototype.addSafeRemoveOps;
@@ -28,19 +29,36 @@ var VEETemplateForclosure = function(protectedTypes) {
                         mw.loader.using('mediawiki.api', function () {
                                 (new mw.Api()).get({
                                     action: 'query',
-                                    prop: "catagories",
-                                    titles: "Template:Cite"
+                                    prop: "categories",
+                                    titles: "GF_Beoordelen_vergunningaanvraag"
                                     //titles: 'Template:Cite'
                                 }).done(function (data) {
-
                                     console.log(data);
                                     //this iteration method is required because the api returns a json object with a random(x) index
-                                    $.each(data.pages, function (k, v) {
+                                    if(typeof data == "object" && data.pages){
+
+                                        $.each(data.pages, function (key, value) {
+                                            for(var x = 0; x < value.categories.length; x++)
+                                            {
+
+                                                console.log(value.categories[x].title.split(value.categories[x].title.indexOf(":")));
+                                                /*
+                                                 if(v.categories[x].title.slice())
+                                                 {
+
+                                                 }
+                                                 */
+                                            }
+                                    }
+
+
+                                        /*
                                         if (v.params.protected != null) {
                                             if (v.params.optional.protected) {
                                                 ve.dm.nodeFactory.registry[doc.data.getType(x)].static.isDeletable = false;
                                             }
                                         }
+                                        */
                                     });
                                 });
                             }
