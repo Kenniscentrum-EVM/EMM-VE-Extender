@@ -17,6 +17,7 @@ var VEETemplateForclosure = function(protectedTypes) {
 
         var hasTemplate = false;
         var _lock = false;
+        var deferred = $.Deferred();
         var _id;
         var ref = this;
 
@@ -67,11 +68,8 @@ var VEETemplateForclosure = function(protectedTypes) {
                                             console.log("we're going to protect this template!");
                                             ve.dm.nodeFactory.registry[doc.data.getType(x)].static.isDeletable = false;
                                         }
-                                        else
-                                        {
-                                            console.log("we're going to delete this thing!");
-                                        }
                                     _lock = false;
+
                                 });
                             }
                         );
@@ -79,7 +77,8 @@ var VEETemplateForclosure = function(protectedTypes) {
             }
         }
         if(!hasTemplate)
-            return base.call(ref, doc, removeStart, removeEnd, removeMetadata);
+            return base.call(this, doc, removeStart, removeEnd, removeMetadata);
+
         function poll_lock()
         {
             //console.log(_lock);
@@ -87,9 +86,10 @@ var VEETemplateForclosure = function(protectedTypes) {
             {
                 window.clearInterval(_id);
                 console.log("we're going to destroy");
-                return base.call(ref, doc, removeStart, removeEnd, removeMetadata);
+                //return base.call(this, doc, removeStart, removeEnd, removeMetadata);
             }
         }
+
     }
 };
 
