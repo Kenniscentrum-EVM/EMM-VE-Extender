@@ -118,7 +118,7 @@ function defineTranslations() {
             "visualeditor-emm-file-upload-timeout": "Het verzoek om een bestand te uploaden is verlopen. Controleer of het bestand niet te groot is, controleer de verbinding en probeer opnieuw.",
             "visualeditor-emm-file-upload-duplicate": "Er bestaat al een bestand met dezelfde inhoud",
             "visualeditor-emm-file-upload-exists": "Er bestaat al een bestand met deze naam",
-            "visualeditor-emm-file-upload-verification-error": "Er is een verificatiefout opgetreden, het systeem gaf de volgende error:",
+            "visualeditor-emm-file-upload-verification-error": "Er is een verificatiefout opgetreden, het systeem gaf de volgende foutmelding:",
             "visualeditor-emm-file-upload-parsererror": "Het bestandstype is ongeldig, enkel de volgende bestandstypen zijn toegestaan: \n" +
             "svg, png, gif, jpg, jpeg, ppt, pptx, pdf, mp3, mp4, xls, xlsx, doc, docx, odt, odc, odp, odg, txt",
             "visualeditor-emm-file-upload-file-too-large": "Het bestand is te groot. De maximale grootte van een bestand is 64MB",

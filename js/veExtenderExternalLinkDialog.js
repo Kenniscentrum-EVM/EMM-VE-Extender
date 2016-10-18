@@ -3,11 +3,15 @@
  */
 "use strict";
 
-function createNewExternalLinkDialog(Dialog) {
+function createExternalLinkDialog(Dialog) {
     console.log("External Link Dialog");
 
     var ExternalLinkDialog = function (surface, config) {
         Dialog.call(this, surface, config);
+    };
+    OO.inheritClass(ExternalLinkDialog, Dialog);
+
+    ExternalLinkDialog.prototype.createFields = function () {
         //Create input fields in case we're dealing with an external link
         this.titleField = new OO.ui.TextInputWidget({placeholder: OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-def")()});
         this.linkField = new OO.ui.TextInputWidget({placeholder: OO.ui.deferMsg("visualeditor-emm-linkdialog-linkfield-placeholder-def")()});
@@ -17,41 +21,39 @@ function createNewExternalLinkDialog(Dialog) {
         this.subjectField = new OO.ui.TextInputWidget({});
         this.addToResourcesField = new OO.ui.CheckboxInputWidget({selected: true});
     };
-    OO.inheritClass(ExternalLinkDialog, Dialog);
 
     ExternalLinkDialog.prototype.createDialogLayout = function () {
         var testSuggestedLink = function () {
-            if (dialogInstance.isExistingResource) {
-                if (titleField.value.length == 0) {
-                    dialogInstance.isExistingResource = false;
+            if (this.isExistingResource) {
+                if (this.titleField.value.length == 0) {
+                    this.isExistingResource = false;
                 }
             }
         };
 
         var input = null;
         var testDialogMode = function () {
-            if (dialogInstance.dialogMode == 0) {
-                if (!dialogInstance.isExistingResource && linkField.value.length != 0) {
+            if (this.dialogMode == 0) {
+                if (!this.isExistingResource && this.linkField.value.length != 0) {
                     clearInputFields(this.fieldset, [0, 1, 2], ["OoUiLabelWidget"]);
-                    dialogInstance.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-linkdialog-title-npage")());
+                    this.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-linkdialog-title-npage")());
                     input = this.titleField.$element.find('input');
                     input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-new")());
                     //todo temporary
-                    dialogInstance.dialogMode = 1;
-                    toggleAutoComplete(dialogInstance, this.titleField);
-                    validator.cleanUpForm();
+                    this.dialogMode = 1;
+                    toggleAutoComplete(this, this.titleField);
+                    this.validator.cleanUpForm();
                 }
             }
             else {
-                if (linkField.value.length == 0) {
-                    dialogInstance.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-dialogexternallinktitle")());
+                if (this.linkField.value.length == 0) {
+                    this.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-dialogexternallinktitle")());
                     input = this.titleField.$element.find('input');
                     input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-def")());
-                    dialogInstance.dialogMode = 0;
-                    toggleAutoComplete(dialogInstance, titleField);
+                    this.dialogMode = 0;
+                    toggleAutoComplete(this, this.titleField);
                     clearInputFields(this.fieldset, null, ["OoUiLabelWidget"]);
-                    //validator.validateWidget(linkField);
-                    validator.cleanUpForm();
+                    this.validator.cleanUpForm();
                 }
             }
         };
@@ -65,10 +67,10 @@ function createNewExternalLinkDialog(Dialog) {
 
         //Things to do when the specified field changes
         this.titleField.onChangeFunctions = [testSuggestedLink, testDialogMode, function () {
-            toggleAutoComplete(dialogInstance, titleField)
+            toggleAutoComplete(this, this.titleField)
         }]; //fixme temporary method toggle autocomple
         this.linkField.onChangeFunctions = [testDialogMode, function () {
-            toggleAutoComplete(dialogInstance, titleField)
+            toggleAutoComplete(this, this.titleField)
         }]; //fixme temporary method toggle autocomplete
 
         this.fieldset.addItems([
@@ -108,30 +110,32 @@ function createNewExternalLinkDialog(Dialog) {
     };
 
     ExternalLinkDialog.prototype.resetMode = function () {
-        dialogInstance.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-dialogexternallinktitle")());
-        var input = titleField.$element.find('input');
+        this.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-dialogexternallinktitle")());
+        this.dialogMode = 0; //TODO: check if this is still necessary
+        toggleAutoComplete(this, this.titleField);
+        var input = this.titleField.$element.find('input');
         input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-def")());
-        toggleAutoComplete(dialogInstance, titleField);
+        this.validator.cleanUpForm();
     };
 
-    ExternalLinkDialog.prototype.buildAndExecuteQuery = function (currentPageID, insertCallback) {
+    ExternalLinkDialog.prototype.buildAndExecuteQuery = function (currentPageID, insertCallback, linkdata) {
         var query = "";
         //Build the sfautoedit query
-        query += "Resource Description[hyperlink]=" + linkField.getValue() +
-            "&Resource Description[title]=" + titleField.getValue() +
-            "&Resource Description[creator]=" + creatorField.getValue() +
-            "&Resource Description[date]=" + dateField.getValue();
-        if (organizationField.getValue().length > 0) query += "&Resource Description[organization]=" + organizationField.getValue();
-        if (subjectField.getValue().length > 0) query += "&Resource Description[subject]=" + subjectField.getValue();
-        if (!dialogInstance.isExistingResource) query += "&Resource Description[created in page]=" + currentPageID;
-        this.executeQuery(query, insertCallback);
+        query += "Resource Description[hyperlink]=" + this.linkField.getValue() +
+            "&Resource Description[title]=" + this.titleField.getValue() +
+            "&Resource Description[creator]=" + this.creatorField.getValue() +
+            "&Resource Description[date]=" + this.dateField.getValue();
+        if (this.organizationField.getValue().length > 0) query += "&Resource Description[organization]=" + this.organizationField.getValue();
+        if (this.subjectField.getValue().length > 0) query += "&Resource Description[subject]=" + this.subjectField.getValue();
+        if (!this.isExistingResource) query += "&Resource Description[created in page]=" + currentPageID;
+        this.executeQuery(query, insertCallback, linkdata);
     };
 
     //Call the sfautoedit query to create or edit an existing resource
     //This also happens when linking to an existing resource and not editing anything
-    ExternalLinkDialog.prototype.executeQuery = function (query, insertCallback) {
+    ExternalLinkDialog.prototype.executeQuery = function (query, insertCallback, linkdata) {
         var target = "";
-        if (dialogInstance.isExistingResource) {
+        if (this.isExistingResource) {
             target = linkdata;
         }
         semanticCreateWithFormQuery(query, insertCallback, target, "Resource Hyperlink");

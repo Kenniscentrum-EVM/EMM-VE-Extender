@@ -106,8 +106,43 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
         this.dialogMode = 0;
         this.upload = new mw.Upload({parameters: {ignorewarnings: true}});
         this.fileName = "";
-        this.fieldset = null;
         this.presentationTitleField = new OO.ui.TextInputWidget({});
+        //  create the fieldset, which is responsible for the layout of the dialog
+        this.fieldset = new OO.ui.FieldsetLayout({
+            classes: ["container"]
+        });
+        //Create all the fields for te dialog.
+        this.createFields();
+        //Add the fields created above to a fieldsetlayout that makes sure the fields and labels are in the correct place
+        this.createDialogLayout();
+        //add validation for the form
+        var dialogInstance = this;
+        this.validator = new Validator(
+            this,
+            null,
+            function (object, message) {
+                object.$element.addClass("oo-ui-flaggedElement-invalid");
+                var el = $("<p>" + message + "</p>").css({
+                    "margin": "0px 0px 0px",
+                    "color": "red",
+                    "position": "absolute"
+                });
+                object.$element.after(el);
+                dialogInstance.actions.forEach({actions: "insert"}, function (action) {
+                    action.setDisabled(true);
+                });
+            },
+            function () {
+                dialogInstance.actions.forEach({actions: "insert"}, function (action) {
+                    action.setDisabled(false);
+                });
+            },
+            null,
+            function (object) {
+                object.$element.removeClass("oo-ui-flaggedElement-invalid");
+                object.$element.parent().find("p").remove();
+            }
+        );
     };
     OO.inheritClass(Dialog, OO.ui.ProcessDialog);
 
@@ -134,6 +169,10 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
 
     //Define basic versions of functions that need to be overloaded.
     //These functions display an error message to indicate that a dialog-specific overloaded function is missing.
+    Dialog.prototype.createFields = function () {
+        displayOverloadError("createFields");
+    };
+
     Dialog.prototype.createDialogLayout = function () {
         displayOverloadError("createDialogLayout");
     };
@@ -159,14 +198,13 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
 
     switch (resourceType) {
         case "File":
-            dialog = createNewFileDialog(Dialog);
+            dialog = createFileDialog(Dialog);
             break;
         case "Internal link":
-            dialog = createNewInternalLinkDialog(Dialog);
+            dialog = createInternalLinkDialog(Dialog);
             break;
         case "External link":
-            dialog = createNewExternalLinkDialog(Dialog);
-
+            dialog = createExternalLinkDialog(Dialog);
             break;
         default:
             alert(OO.ui.deferMsg("visualeditor-emm-dialog-error"));
@@ -182,14 +220,6 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
         //This is also necessary because in certain cases the meaning of this changes, even though you want to be able
         //to keep accessing the dialogInstance
         var dialogInstance = this;
-
-        //  create the fieldset, which is responsible for the layout of the dialog
-        dialogInstance.fieldset = new OO.ui.FieldsetLayout({
-            classes: ["container"]
-        });
-
-        //Create all the buttons and input fields depending on what kind of dialog we need to create
-        dialogInstance.createDialogLayout();
 
         //Add a label that displays the meaning of the * next to form values
         var requiredLabel = new OO.ui.LabelWidget({
@@ -208,34 +238,6 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
             .addClass("oo-ui-windowManager")
             .toggleClass("oo-ui-windowManager-modal", true);
         this.$body.append(this.content.$element);
-
-        //add validation for the form
-        var validator = new Validator(
-            dialogInstance,
-            null,
-            function (object, message) {
-                object.$element.addClass("oo-ui-flaggedElement-invalid");
-                var el = $("<p>" + message + "</p>").css({
-                    "margin": "0px 0px 0px",
-                    "color": "red",
-                    "position": "absolute"
-                });
-                object.$element.after(el);
-                dialogInstance.actions.forEach({actions: "insert"}, function (action) {
-                    action.setDisabled(true);
-                });
-            },
-            function () {
-                dialogInstance.actions.forEach({actions: "insert"}, function (action) {
-                    action.setDisabled(false);
-                });
-            },
-            null,
-            function (object) {
-                object.$element.removeClass("oo-ui-flaggedElement-invalid");
-                object.$element.parent().find("p").remove();
-            }
-        );
 
         //  Add event-handling logic to okButton
         var insertButtonHandler = function () {
@@ -261,7 +263,7 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
                 //In case of an external link we need to check if the user wants to include this link in the
                 //references list
                 else if (resourceType === "External link") {
-                    if (addToResourcesField.isSelected()) {
+                    if (dialogInstance.addToResourcesField.isSelected()) {
                         templateToUse = "Cite";
                     }
                     else {
@@ -335,10 +337,10 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
         function cleanUpDialog() {
             dialogInstance.close();
             //todo check if closed and then clean the fields for a more elegant cleanup?
-            validator.disable();
-            dialogInstance.resetMode();
+            dialogInstance.validator.disable();
             clearInputFields(dialogInstance.fieldset, null, ["OoUiLabelWidget"]);
-            validator.enable();
+            dialogInstance.resetMode();
+            dialogInstance.validator.enable();
             dialogInstance.isExistingResource = false;
             dialogInstance.suggestion = null;
             dialogInstance.dialogMode = 0;
@@ -357,14 +359,14 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
                         dialogInstance.getFieldset().getItems()[5].getField().setValue(suggestion.organization);
                         dialogInstance.getFieldset().getItems()[6].getField().setValue(suggestion.subjects);
                         dialogInstance.fileName = suggestion.data.replace("Bestand:", "").replace("File:", "");
-                        validator.validateAll();
+                        dialogInstance.validator.validateAll();
                     };
                     initAutoComplete(queryResults, dialogInstance.titleField, dialogInstance, fillFields);
                     break;
                 case "Internal link":
                     var fillFields = function (suggestion) {
                         //Nothing to fill, no editable fields beyond presentationtitle and title
-                        validator.validateAll();
+                        dialogInstance.validator.validateAll();
                     };
                     initAutoComplete(queryResults, dialogInstance.pageNameField, dialogInstance, fillFields);
                     break;
@@ -376,7 +378,7 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
                         dialogInstance.getFieldset().getItems()[4].getField().setValue(fixDate(suggestion.date));
                         dialogInstance.getFieldset().getItems()[5].getField().setValue(suggestion.organization);
                         dialogInstance.getFieldset().getItems()[6].getField().setValue(suggestion.subjects);
-                        validator.validateAll();
+                        dialogInstance.validator.validateAll();
                     };
                     initAutoComplete(queryResults, dialogInstance.titleField, dialogInstance, fillFields);
                     break;
@@ -399,7 +401,7 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
         Dialog.prototype.setDimensions = function (dim) {
             grabSelectedText(dialogInstance.presentationTitleField);
             if (dialogInstance.presentationTitleField.value.length > 0)
-                validator.validateWidget(dialogInstance.presentationTitleField);
+                dialogInstance.validator.validateWidget(dialogInstance.presentationTitleField);
             dialogInstance.fieldset.$element.css({width: this.content.$element.outerWidth(true) - 50});
             //Inline css cause, adding classes doesn't overwrite existing css
             for (var i = 0; i < dialogInstance.fieldset.getItems().length; i++) {

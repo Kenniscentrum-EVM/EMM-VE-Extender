@@ -3,7 +3,7 @@
  */
 "use strict";
 
-function createNewInternalLinkDialog(Dialog) {
+function createInternalLinkDialog(Dialog) {
     console.log("Internal Link Dialog");
 
     var InternalLinkDialog = function (surface, config) {

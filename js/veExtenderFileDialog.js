@@ -3,11 +3,15 @@
  */
 "use strict";
 
-function createNewFileDialog(Dialog) {
+function createFileDialog(Dialog) {
     console.log("File Dialog");
 
     var FileDialog = function (surface, config) {
         Dialog.call(this, surface, config);
+    };
+    OO.inheritClass(FileDialog, Dialog);
+
+    FileDialog.prototype.createFields = function () {
         //Create input fields in case we're dealing with a dialog to add a file
         this.titleField = new OO.ui.TextInputWidget({
             placeholder: OO.ui.deferMsg("visualeditor-emm-filedialog-titlefield-placeholder-def")
@@ -21,7 +25,6 @@ function createNewFileDialog(Dialog) {
         this.organizationField = new OO.ui.TextInputWidget({});
         this.subjectField = new OO.ui.TextInputWidget({});
     };
-    OO.inheritClass(FileDialog, Dialog);
 
     FileDialog.prototype.createDialogLayout = function () {
         this.titleField.validation = [checkIfEmpty];
@@ -44,7 +47,7 @@ function createNewFileDialog(Dialog) {
             //todo replace this temporary thing with something better.
             if (this.isExistingResource) {
                 fileFieldLayout.$element.hide();
-                if (titleField.value.length == 0) {
+                if (this.titleField.value.length == 0) {
                     this.isExistingResource = false;
                     fileFieldLayout.$element.show();
                 }
@@ -83,13 +86,14 @@ function createNewFileDialog(Dialog) {
     };
 
     FileDialog.prototype.resetMode = function () {
-        var input = this.titleField.$element.find('input');
-        input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-filedialog-titlefield-placeholder-def")());
         this.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-dialogfiletitle")());
-        this.fieldset.getItems()[1].$element.show();
         this.dialogMode = 0;
         toggleAutoComplete(this, this.titleField);
+        var input = this.titleField.$element.find('input');
+        input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-filedialog-titlefield-placeholder-def")());
+        this.fieldset.getItems()[1].$element.show();
         this.titleField.currentFile = null;
+        this.validator.cleanUpForm();
     };
 
     FileDialog.prototype.testDialogMode = function () {
@@ -100,7 +104,7 @@ function createNewFileDialog(Dialog) {
             if ((!this.isExistingResource && this.fileField.currentFile != null)) {
                 this.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-filedialog-title-npage")());
                 this.dialogMode = 1;
-                toggleAutoComplete(this, titleField);
+                toggleAutoComplete(this, this.titleField);
                 var input = this.titleField.$element.find('input');
                 input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-filedialog-titlefield-placeholder-new")());
 
@@ -113,7 +117,7 @@ function createNewFileDialog(Dialog) {
                 }
                 else
                     clearInputFields(this.fieldset, [1, 2], ["OoUiLabelWidget"]);
-                validator.cleanUpForm();
+                this.validator.cleanUpForm();
             }
         }
         else {
@@ -124,12 +128,12 @@ function createNewFileDialog(Dialog) {
                 var input = this.titleField.$element.find('input');
                 input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-filedialog-titlefield-placeholder-def")());
                 clearInputFields(this.fieldset, [1, 2], ["OoUiLabelWidget"]);
-                validator.cleanUpForm();
+                this.validator.cleanUpForm();
             }
         }
     };
 
-    FileDialog.prototype.buildAndExecuteQuery = function (currentPageID, insertCallback) {
+    FileDialog.prototype.buildAndExecuteQuery = function (currentPageID, insertCallback, linkdata) {
         //Build the sfautoedit query
         var filename = "";
         var query = "";
@@ -145,7 +149,7 @@ function createNewFileDialog(Dialog) {
         if (this.organizationField.getValue().length > 0) query += "&Resource Description[organization]=" + this.organizationField.getValue();
         if (this.subjectField.getValue().length > 0) query += "&Resource Description[subject]=" + this.subjectField.getValue();
         if (!this.isExistingResource) query += "&Resource Description[created in page]=" + currentPageID;
-        this.executeQuery(query, insertCallback);
+        this.executeQuery(query, insertCallback, linkdata);
     };
 
     //Call the sfautoedit query to create or edit an existing resource
@@ -156,8 +160,8 @@ function createNewFileDialog(Dialog) {
             target = linkdata;
         }
         if (!this.isExistingResource) {
-            this.upload.setFile(fileField.getValue());
-            this.upload.setFilename(fileField.getValue().name);
+            this.upload.setFile(this.fileField.getValue());
+            this.upload.setFilename(this.fileField.getValue().name);
             this.upload.upload().fail(function (status, exceptionobject) {
                 switch (status) {
                     case "duplicate":
