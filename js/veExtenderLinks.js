@@ -134,9 +134,27 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
 
     //Define basic versions of functions that need to be overloaded.
     //These functions display an error message to indicate that a dialog-specific overloaded function is missing.
-    Dialog.prototype.displayOverloadedMessage = function () {
-        displayOverloadError("displayOverloadedMessage")
+    Dialog.prototype.createDialogLayout = function () {
+        displayOverloadError("createDialogLayout");
     };
+
+    Dialog.prototype.resetMode = function () {
+        displayOverloadError("resetMode");
+    };
+
+    Dialog.prototype.buildAndExecuteQuery = function () {
+        displayOverloadError("buildAndExecuteQuery");
+    };
+
+    Dialog.prototype.executeQuery = function () {
+        displayOverloadError("executeQuery");
+    };
+
+    Dialog.prototype.testDialogMode = function () {
+        displayOverloadError("testDialogMode");
+    };
+
+
     var dialog = null;
 
     switch (resourceType) {
@@ -193,7 +211,7 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
 
         //add validation for the form
         var validator = new Validator(
-            dialogInstance.fieldset,
+            dialogInstance,
             null,
             function (object, message) {
                 object.$element.addClass("oo-ui-flaggedElement-invalid");
@@ -217,8 +235,7 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
                 object.$element.removeClass("oo-ui-flaggedElement-invalid");
                 object.$element.parent().find("p").remove();
             }
-            )
-            ;
+        );
 
         //  Add event-handling logic to okButton
         var insertButtonHandler = function () {
@@ -248,7 +265,7 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
                         templateToUse = "Cite";
                     }
                     else {
-                        templateToUse = resourceType;
+                        templateToUse = "External link";
                     }
                 }
                 else {
@@ -285,90 +302,8 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
             };
 
             var currentPageID = mw.config.get('wgPageName').replace(/_/g, " ");
-            var query = dialogInstance.buildQuery(currentPageID);
-            switch (resourceType) {
-                case "Internal link":
-
-                    break;
-                case
-                "External link":
-                    //Build the sfautoedit query
-                    query += "Resource Description[hyperlink]=" + linkField.getValue() +
-                        "&Resource Description[title]=" + titleField.getValue() +
-                        "&Resource Description[creator]=" + creatorField.getValue() +
-                        "&Resource Description[date]=" + dateField.getValue();
-                    if (organizationField.getValue().length > 0) query += "&Resource Description[organization]=" + organizationField.getValue();
-                    if (subjectField.getValue().length > 0) query += "&Resource Description[subject]=" + subjectField.getValue();
-                    if (!dialogInstance.isExistingResource) query += "&Resource Description[created in page]=" + currentPageID;
-                    break;
-                default:
-                    alert(OO.ui.deferMsg("visualeditor-emm-dialog-error"));
-            }
-
-            //If there is no query defined, just insert the link into the page and skip changing the resource
-                var target = "";
-                if (dialogInstance.isExistingResource) {
-                    target = linkdata;
-                }
-
-                //Call the sfautoedit query to create or edit an existing resource
-                //This also happens when linking to an existing resource and not editing anything
-                //For internal links this logic is handled in the switch statement up above
-                switch (resourceType) {
-                    case "File":
-                        if (!dialogInstance.isExistingResource) {
-                            dialogInstance.upload.setFile(fileField.getValue());
-                            dialogInstance.upload.setFilename(fileField.getValue().name);
-                            dialogInstance.upload.upload().fail(function (status, exceptionobject) {
-                                switch (status) {
-                                    case "duplicate":
-                                        alert(OO.ui.deferMsg("visualeditor-emm-file-upload-duplicate")());
-                                        break;
-                                    case "exists":
-                                        alert(OO.ui.deferMsg("visualeditor-emm-file-upload-exists")());
-                                        break;
-                                    case "verification-error":
-                                        alert(OO.ui.deferMsg("visualeditor-emm-file-upload-verification-error")() + "\n" + exceptionobject.error.info);
-                                        break;
-                                    case "file-too-large":
-                                        alert(OO.ui.deferMsg("visualeditor-emm-file-upload-file-too-large")());
-                                        break;
-                                    case "empty-file":
-                                        alert(OO.ui.deferMsg("visualeditor-emm-file-upload-empty-file")());
-                                        break;
-                                    case "http":
-                                        switch (exceptionobject.textStatus) {
-                                            case "timeout":
-                                                alert(OO.ui.deferMsg("visualeditor-emm-file-upload-timeout")());
-                                                break;
-                                            case "parsererror":
-                                                alert(OO.ui.deferMsg("visualeditor-emm-file-upload-parsererror")());
-                                                break;
-                                            default:
-                                                //uknown eroror
-                                                alert("An unkown error of the type " + exceptionobject.exception + " has occured.");
-                                        }
-                                        break;
-                                    default:
-                                        alert("An unkown error of the type " + status + " has occured.");
-                                }
-                            }).done(function () {
-                                semanticCreateWithFormQuery(query, insertCallback, target, "Resource Light");
-                            });
-                        }
-                        else {
-                            semanticCreateWithFormQuery(query, insertCallback, target, "Resource Light");
-                        }
-                        break;
-                    case "Internal link":
-                        //Executed by asynchronous function after getting information about the topcontext of the page
-                        break;
-                    case "External link":
-                        semanticCreateWithFormQuery(query, insertCallback, target, "Resource Hyperlink");
-                        break;
-                    default:
-                        alert(OO.ui.deferMsg("visualeditor-emm-dialog-error"));
-                };
+            dialogInstance.buildAndExecuteQuery(currentPageID, insertCallback, linkdata);
+            //For internal links this logic is handled in the switch statement up above
             cleanUpDialog();
         };
 
@@ -401,7 +336,7 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
             dialogInstance.close();
             //todo check if closed and then clean the fields for a more elegant cleanup?
             validator.disable();
-            resetMode();
+            dialogInstance.resetMode();
             clearInputFields(dialogInstance.fieldset, null, ["OoUiLabelWidget"]);
             validator.enable();
             dialogInstance.isExistingResource = false;
@@ -424,14 +359,14 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
                         dialogInstance.fileName = suggestion.data.replace("Bestand:", "").replace("File:", "");
                         validator.validateAll();
                     };
-                    initAutoComplete(queryResults, titleField, dialogInstance, fillFields);
+                    initAutoComplete(queryResults, dialogInstance.titleField, dialogInstance, fillFields);
                     break;
                 case "Internal link":
                     var fillFields = function (suggestion) {
                         //Nothing to fill, no editable fields beyond presentationtitle and title
                         validator.validateAll();
                     };
-                    initAutoComplete(queryResults, pageNameField, dialogInstance, fillFields);
+                    initAutoComplete(queryResults, dialogInstance.pageNameField, dialogInstance, fillFields);
                     break;
                 case "External link":
                     var fillFields = function (suggestion) {
@@ -443,7 +378,7 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
                         dialogInstance.getFieldset().getItems()[6].getField().setValue(suggestion.subjects);
                         validator.validateAll();
                     };
-                    initAutoComplete(queryResults, titleField, dialogInstance, fillFields);
+                    initAutoComplete(queryResults, dialogInstance.titleField, dialogInstance, fillFields);
                     break;
                 default:
                     alert(OO.ui.deferMsg("visualeditor-emm-dialog-error"));
@@ -499,13 +434,14 @@ function clearInputFields(fieldset, exclude, inputTypeExclude) {
             }
         }
     }
-    else
+    else {
         for (var i = 0; i < fieldset.getItems().length; i++) {
             //Make sure the fieldlayout doens't contain just a label field that can't be cleared
             if ($.inArray(fieldset.getItems()[i].getField().constructor.name, inputTypeExclude) == -1) {
                 fieldset.getItems()[i].getField().setValue("");
             }
         }
+    }
 }
 
 /*  semanticAskQuery
@@ -676,7 +612,7 @@ function initAutoComplete(data, inputObject, dialogInstance, fillFields) {
     $(inputField).autocomplete({
         lookup: data,
         onSelect: function (suggestion) {
-            if (dialogInstance.isExistingResource == false) {
+            if (!dialogInstance.isExistingResource) {
                 dialogInstance.suggestion = suggestion;
                 dialogInstance.isExistingResource = true;
                 fillFields(suggestion);

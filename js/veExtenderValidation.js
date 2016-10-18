@@ -7,71 +7,72 @@
  * @param validationSuccess function that is called when all widgets have acceptable values
  * @param validationFail function that is called when one or more widgets have values that didn't pass validation
  * @param cleanUp(widgetObject) function that can cleanup the validation feedback created by the input methods
- * @constructor
+ * @constructor dialogInstance.fieldset
  */
-var Validator = function (fieldset, inputSuccess, inputFail, validationSuccess, validationFail, cleanUp) {
+var Validator = function (dialogInstance, inputSuccess, inputFail, validationSuccess, validationFail, cleanUp) {
     var validator = this;
     this.inputStates = [];
     this.enabled = true;
     this.cleanUp = cleanUp;
-    this.fieldset = fieldset;
+    this.dialogInstance = dialogInstance;
+    this.fieldset = dialogInstance.fieldset;
 
-    this.bindEvents(fieldset, eventWrapper);
+    this.bindEvents(this.fieldset, eventWrapper);
 
-    function eventWrapper(value){
+    function eventWrapper(value) {
         //console.log(this);
-       (function (widget) {
-           // is the validator enabled?
-           if (validator.enabled == true) {
-               // does the widget have the validation property?
-               if (widget.validation != null) {
-                   // was a cleanUp function provided?
-                   if (cleanUp != null)
-                   // execute the cleanUp method.
-                       cleanUp(widget);
-                   // Loop through the validation functions.
-                   for (var i = 0; i < widget.validation.length; i++) {
-                       if (widget.validation[i](validator.getWidgetValue(widget), widget).length > 0) {
-                           // execute inputFail if the widget fails to pass validation
-                           if (inputFail != null)
-                               inputFail(widget, widget.validation[i](validator.getWidgetValue(widget), widget));
-                           // set the widget to false in the input States map.
-                           validator.inputStates[widget.fieldId] = false;
-                           // terminate the function.
-                           return false;
-                       }
-                   }
-               }
-               // execute inputSuccess because the input passed validation
-               if (inputSuccess != null)
-                   inputSuccess();
-               // set the inputState of the widget to true
-               validator.inputStates[widget.fieldId] = true;
-               //This awkward way of iterating is implemented because of the restrictions
-               var isValidated = true;
-               $.each(validator.inputStates, function (key, val) {
-                   if (!val && val != null) {
-                       isValidated = false;
-                       if (validationFail != null)
-                           validationFail();
-                       return false;
-                   }
-               });
-               //Are we completely validated? if not, return.
-               if (!isValidated) return;
-               //All elements are validated, execute validationSuccess
-               if (validationSuccess != null)
-                   validationSuccess();
-           }
-       })(this);
-        if(this.onChangeFunctions != null)
-            for(var i = 0; i < this.onChangeFunctions.length; i++)
-                this.onChangeFunctions[i]();
-   }
+        (function (widget) {
+            // is the validator enabled?
+            if (validator.enabled == true) {
+                // does the widget have the validation property?
+                if (widget.validation != null) {
+                    // was a cleanUp function provided?
+                    if (cleanUp != null)
+                    // execute the cleanUp method.
+                        cleanUp(widget);
+                    // Loop through the validation functions.
+                    for (var i = 0; i < widget.validation.length; i++) {
+                        if (widget.validation[i](validator.getWidgetValue(widget), widget).length > 0) {
+                            // execute inputFail if the widget fails to pass validation
+                            if (inputFail != null)
+                                inputFail(widget, widget.validation[i](validator.getWidgetValue(widget), widget));
+                            // set the widget to false in the input States map.
+                            validator.inputStates[widget.fieldId] = false;
+                            // terminate the function.
+                            return false;
+                        }
+                    }
+                }
+                // execute inputSuccess because the input passed validation
+                if (inputSuccess != null)
+                    inputSuccess();
+                // set the inputState of the widget to true
+                validator.inputStates[widget.fieldId] = true;
+                //This awkward way of iterating is implemented because of the restrictions
+                var isValidated = true;
+                $.each(validator.inputStates, function (key, val) {
+                    if (!val && val != null) {
+                        isValidated = false;
+                        if (validationFail != null)
+                            validationFail();
+                        return false;
+                    }
+                });
+                //Are we completely validated? if not, return.
+                if (!isValidated) return;
+                //All elements are validated, execute validationSuccess
+                if (validationSuccess != null)
+                    validationSuccess();
+            }
+        })(this);
+        if (this.onChangeFunctions != null)
+            for (var i = 0; i < this.onChangeFunctions.length; i++)
+                this.onChangeFunctions[i].call(validator.dialogInstance);
+    }
 }
 
 
-Validator.prototype.bindEvents = function(fieldset, eventFunction) {
+Validator.prototype.bindEvents = function (fieldset, eventFunction) {
     //Add event handlers to the widget given by the fieldset.
     var validator = this;
     for (var i = 0; i < fieldset.items.length; i++) {
@@ -118,7 +119,7 @@ Validator.prototype.cleanUpForm = function () {
 
 Validator.prototype.resetInputStates = function () {
     for (var i = 0; i < this.inputStates.length; i++) {
-        if(this.inputStates[i] != null)
+        if (this.inputStates[i] != null)
             this.inputStates[i] = false;
     }
 }

@@ -40,7 +40,7 @@ function createNewInternalLinkDialog(Dialog) {
         //Empty function, because the internal link dialog has no modes
     };
 
-    InternalLinkDialog.prototype.buildQuery = function (currentPageID) {
+    InternalLinkDialog.prototype.buildAndExecuteQuery = function (currentPageID, insertCallback) {
         var query = "";
         if (!dialogInstance.isExistingResource) {
             //Start building the sfautoedit query
@@ -57,15 +57,20 @@ function createNewInternalLinkDialog(Dialog) {
                 if (res[currentPageID].printouts["Topcontext"][0] != null) {
                     var topContext = res[currentPageID].printouts["Topcontext"][0].fulltext;
                     query += "&Light Context[Topcontext]=" + topContext;
-                    semanticCreateWithFormQuery(query, insertCallback, target, "Light Context");
-                }
-                else {
+                    this.executeQuery(query, insertCallback);
+                } else {
                     alert(OO.ui.deferMsg("visualeditor-emm-topcontext-error")());
                 }
             });
         }
-        return query;
-    }
+        else {
+            insertCallback();
+        }
+    };
+
+    InternalLinkDialog.prototype.executeQuery = function (query, insertCallback) {
+        semanticCreateWithFormQuery(query, insertCallback, null, "Light Context");
+    };
 
     return InternalLinkDialog;
 }

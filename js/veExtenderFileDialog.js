@@ -6,8 +6,8 @@
 function createNewFileDialog(Dialog) {
     console.log("File Dialog");
 
-    var FileDialog = function(surface, config) {
-        Dialog.call(this,surface,config);
+    var FileDialog = function (surface, config) {
+        Dialog.call(this, surface, config);
         //Create input fields in case we're dealing with a dialog to add a file
         this.titleField = new OO.ui.TextInputWidget({
             placeholder: OO.ui.deferMsg("visualeditor-emm-filedialog-titlefield-placeholder-def")
@@ -34,62 +34,24 @@ function createNewFileDialog(Dialog) {
             align: "left"
         });
 
-        var testDialogMode = function () {
-            if (dialogInstance.dialogMode == 0) {
-                //console.log(fileField);
-                //fixme dirty hack
-                if (this.fileField.currentFile == "")
-                    return;
-                if ((!dialogInstance.isExistingResource && this.fileField.currentFile != null)) {
-                    dialogInstance.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-filedialog-title-npage")());
-                    dialogInstance.dialogMode = 1;
-                    toggleAutoComplete(dialogInstance, titleField);
-                    var input = this.titleField.$element.find('input');
-                    input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-filedialog-titlefield-placeholder-new")());
-
-                    if (dialogInstance.suggestion != null) {
-                        if (dialogInstance.suggestion.value != this.titleField.value) {
-                            clearInputFields(this.fieldset, [0, 1, 2], ["OoUiLabelWidget"]);
-                        }
-                        else
-                            clearInputFields(this.fieldset, [1, 2], ["OoUiLabelWidget"]);
-                    }
-                    else
-                        clearInputFields(this.fieldset, [1, 2], ["OoUiLabelWidget"]);
-                    validator.cleanUpForm();
-                }
-            }
-            else {
-                if (this.fileField.currentFile == null) {
-                    dialogInstance.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-dialogfiletitle")());
-                    dialogInstance.dialogMode = 0;
-                    toggleAutoComplete(dialogInstance, this.titleField);
-                    var input = this.titleField.$element.find('input');
-                    input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-filedialog-titlefield-placeholder-def")());
-                    clearInputFields(this.fieldset, [1, 2], ["OoUiLabelWidget"]);
-                    validator.cleanUpForm();
-                }
-            }
-        };
-
         this.presentationTitleField.validation = [checkIfEmpty];
         this.creatorField.validation = [checkIfEmpty];
         this.dateField.validation = [checkIfEmpty, checkIfDate];
 
+
         //Things to do when the specified field changes
         this.titleField.onChangeFunctions = [function () {
-            //console.log(dialogInstance.isExistingFile);
             //todo replace this temporary thing with something better.
-            if (dialogInstance.isExistingResource) {
+            if (this.isExistingResource) {
                 fileFieldLayout.$element.hide();
                 if (titleField.value.length == 0) {
-                    dialogInstance.isExistingResource = false;
+                    this.isExistingResource = false;
                     fileFieldLayout.$element.show();
                 }
             }
-        }, testDialogMode]; // ,testDialogMode
+        }, this.testDialogMode]; // ,testDialogMode
 
-        this.fileField.onChangeFunctions = [testDialogMode];
+        this.fileField.onChangeFunctions = [this.testDialogMode];
 
         this.fieldset.addItems([
             new OO.ui.FieldLayout(this.titleField, {
@@ -123,18 +85,55 @@ function createNewFileDialog(Dialog) {
     FileDialog.prototype.resetMode = function () {
         var input = this.titleField.$element.find('input');
         input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-filedialog-titlefield-placeholder-def")());
-        dialogInstance.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-dialogfiletitle")());
-        this.fileFieldLayout.$element.show();
-        dialogInstance.dialogMode = 0;
-        toggleAutoComplete(dialogInstance, this.titleField);
-        titleField.currentFile = null;
+        this.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-dialogfiletitle")());
+        this.fieldset.getItems()[1].$element.show();
+        this.dialogMode = 0;
+        toggleAutoComplete(this, this.titleField);
+        this.titleField.currentFile = null;
     };
 
-    FileDialog.prototype.buildQuery = function (currentPageID) {
+    FileDialog.prototype.testDialogMode = function () {
+        if (this.dialogMode == 0) {
+            //fixme dirty hack
+            if (this.fileField.currentFile == "")
+                return;
+            if ((!this.isExistingResource && this.fileField.currentFile != null)) {
+                this.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-filedialog-title-npage")());
+                this.dialogMode = 1;
+                toggleAutoComplete(this, titleField);
+                var input = this.titleField.$element.find('input');
+                input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-filedialog-titlefield-placeholder-new")());
+
+                if (this.suggestion != null) {
+                    if (this.suggestion.value != this.titleField.value) {
+                        clearInputFields(this.fieldset, [0, 1, 2], ["OoUiLabelWidget"]);
+                    }
+                    else
+                        clearInputFields(this.fieldset, [1, 2], ["OoUiLabelWidget"]);
+                }
+                else
+                    clearInputFields(this.fieldset, [1, 2], ["OoUiLabelWidget"]);
+                validator.cleanUpForm();
+            }
+        }
+        else {
+            if (this.fileField.currentFile == null) {
+                this.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-dialogfiletitle")());
+                this.dialogMode = 0;
+                toggleAutoComplete(this, this.titleField);
+                var input = this.titleField.$element.find('input');
+                input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-filedialog-titlefield-placeholder-def")());
+                clearInputFields(this.fieldset, [1, 2], ["OoUiLabelWidget"]);
+                validator.cleanUpForm();
+            }
+        }
+    };
+
+    FileDialog.prototype.buildAndExecuteQuery = function (currentPageID, insertCallback) {
         //Build the sfautoedit query
         var filename = "";
         var query = "";
-        if (dialogInstance.isExistingResource) {
+        if (this.isExistingResource) {
             filename = this.fileName;
         } else if (this.fileField.getValue() != null) {
             filename = this.fileField.getValue().name;
@@ -145,8 +144,60 @@ function createNewFileDialog(Dialog) {
             "&Resource Description[date]=" + this.dateField.getValue();
         if (this.organizationField.getValue().length > 0) query += "&Resource Description[organization]=" + this.organizationField.getValue();
         if (this.subjectField.getValue().length > 0) query += "&Resource Description[subject]=" + this.subjectField.getValue();
-        if (!dialogInstance.isExistingResource) query += "&Resource Description[created in page]=" + currentPageID;
-        return query;
+        if (!this.isExistingResource) query += "&Resource Description[created in page]=" + currentPageID;
+        this.executeQuery(query, insertCallback);
+    };
+
+    //Call the sfautoedit query to create or edit an existing resource
+    //This also happens when linking to an existing resource and not editing anything
+    FileDialog.prototype.executeQuery = function (query, insertCallback, linkdata) {
+        var target = "";
+        if (this.isExistingResource) {
+            target = linkdata;
+        }
+        if (!this.isExistingResource) {
+            this.upload.setFile(fileField.getValue());
+            this.upload.setFilename(fileField.getValue().name);
+            this.upload.upload().fail(function (status, exceptionobject) {
+                switch (status) {
+                    case "duplicate":
+                        alert(OO.ui.deferMsg("visualeditor-emm-file-upload-duplicate")());
+                        break;
+                    case "exists":
+                        alert(OO.ui.deferMsg("visualeditor-emm-file-upload-exists")());
+                        break;
+                    case "verification-error":
+                        alert(OO.ui.deferMsg("visualeditor-emm-file-upload-verification-error")() + "\n" + exceptionobject.error.info);
+                        break;
+                    case "file-too-large":
+                        alert(OO.ui.deferMsg("visualeditor-emm-file-upload-file-too-large")());
+                        break;
+                    case "empty-file":
+                        alert(OO.ui.deferMsg("visualeditor-emm-file-upload-empty-file")());
+                        break;
+                    case "http":
+                        switch (exceptionobject.textStatus) {
+                            case "timeout":
+                                alert(OO.ui.deferMsg("visualeditor-emm-file-upload-timeout")());
+                                break;
+                            case "parsererror":
+                                alert(OO.ui.deferMsg("visualeditor-emm-file-upload-parsererror")());
+                                break;
+                            default:
+                                //uknown eroror
+                                alert("An unkown error of the type " + exceptionobject.exception + " has occured.");
+                        }
+                        break;
+                    default:
+                        alert("An unkown error of the type " + status + " has occured.");
+                }
+            }).done(function () {
+                semanticCreateWithFormQuery(query, insertCallback, target, "Resource Light");
+            });
+        }
+        else {
+            semanticCreateWithFormQuery(query, insertCallback, target, "Resource Light");
+        }
     };
 
     return FileDialog;

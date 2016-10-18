@@ -107,12 +107,34 @@ function createNewExternalLinkDialog(Dialog) {
         ]);
     };
 
-
     ExternalLinkDialog.prototype.resetMode = function () {
         dialogInstance.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-dialogexternallinktitle")());
         var input = titleField.$element.find('input');
         input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-def")());
         toggleAutoComplete(dialogInstance, titleField);
+    };
+
+    ExternalLinkDialog.prototype.buildAndExecuteQuery = function (currentPageID, insertCallback) {
+        var query = "";
+        //Build the sfautoedit query
+        query += "Resource Description[hyperlink]=" + linkField.getValue() +
+            "&Resource Description[title]=" + titleField.getValue() +
+            "&Resource Description[creator]=" + creatorField.getValue() +
+            "&Resource Description[date]=" + dateField.getValue();
+        if (organizationField.getValue().length > 0) query += "&Resource Description[organization]=" + organizationField.getValue();
+        if (subjectField.getValue().length > 0) query += "&Resource Description[subject]=" + subjectField.getValue();
+        if (!dialogInstance.isExistingResource) query += "&Resource Description[created in page]=" + currentPageID;
+        this.executeQuery(query, insertCallback);
+    };
+
+    //Call the sfautoedit query to create or edit an existing resource
+    //This also happens when linking to an existing resource and not editing anything
+    ExternalLinkDialog.prototype.executeQuery = function (query, insertCallback) {
+        var target = "";
+        if (dialogInstance.isExistingResource) {
+            target = linkdata;
+        }
+        semanticCreateWithFormQuery(query, insertCallback, target, "Resource Hyperlink");
     };
 
     return ExternalLinkDialog;
