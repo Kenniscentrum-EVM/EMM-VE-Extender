@@ -31,33 +31,6 @@ function createExternalLinkDialog(Dialog) {
             }
         };
 
-        var input = null;
-        var testDialogMode = function () {
-            if (this.dialogMode == 0) {
-                if (!this.isExistingResource && this.linkField.value.length != 0) {
-                    clearInputFields(this.fieldset, [0, 1, 2], ["OoUiLabelWidget"]);
-                    this.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-linkdialog-title-npage")());
-                    input = this.titleField.$element.find('input');
-                    input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-new")());
-                    //todo temporary
-                    this.dialogMode = 1;
-                    toggleAutoComplete(this, this.titleField);
-                    this.validator.cleanUpForm();
-                }
-            }
-            else {
-                if (this.linkField.value.length == 0) {
-                    this.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-dialogexternallinktitle")());
-                    input = this.titleField.$element.find('input');
-                    input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-def")());
-                    this.dialogMode = 0;
-                    toggleAutoComplete(this, this.titleField);
-                    clearInputFields(this.fieldset, null, ["OoUiLabelWidget"]);
-                    this.validator.cleanUpForm();
-                }
-            }
-        };
-
         // todo validation property verplaatsen.
         this.titleField.validation = [checkIfEmpty];
         this.linkField.validation = [checkIfEmpty, checkIfWebsite];
@@ -66,10 +39,10 @@ function createExternalLinkDialog(Dialog) {
         this.dateField.validation = [checkIfEmpty, checkIfDate];
 
         //Things to do when the specified field changes
-        this.titleField.onChangeFunctions = [testSuggestedLink, testDialogMode, function () {
+        this.titleField.onChangeFunctions = [testSuggestedLink, this.testDialogMode, function () {
             toggleAutoComplete(this, this.titleField)
         }]; //fixme temporary method toggle autocomple
-        this.linkField.onChangeFunctions = [testDialogMode, function () {
+        this.linkField.onChangeFunctions = [this.testDialogMode, function () {
             toggleAutoComplete(this, this.titleField)
         }]; //fixme temporary method toggle autocomplete
 
@@ -116,6 +89,33 @@ function createExternalLinkDialog(Dialog) {
         var input = this.titleField.$element.find('input');
         input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-def")());
         this.validator.cleanUpForm();
+    };
+
+    ExternalLinkDialog.prototype.testDialogMode = function () {
+        var input = null;
+        if (this.dialogMode == 0) {
+            if (!this.isExistingResource && this.linkField.value.length != 0) {
+                clearInputFields(this.fieldset, [0, 1, 2], ["OoUiLabelWidget"]);
+                this.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-linkdialog-title-npage")());
+                input = this.titleField.$element.find('input');
+                input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-new")());
+                //todo temporary
+                this.dialogMode = 1;
+                toggleAutoComplete(this, this.titleField);
+                this.validator.cleanUpForm();
+            }
+        }
+        else {
+            if (this.linkField.value.length == 0) {
+                this.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-dialogexternallinktitle")());
+                input = this.titleField.$element.find('input');
+                input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-def")());
+                this.dialogMode = 0;
+                toggleAutoComplete(this, this.titleField);
+                clearInputFields(this.fieldset, null, ["OoUiLabelWidget"]);
+                this.validator.cleanUpForm();
+            }
+        }
     };
 
     ExternalLinkDialog.prototype.buildAndExecuteQuery = function (currentPageID, insertCallback, linkdata) {

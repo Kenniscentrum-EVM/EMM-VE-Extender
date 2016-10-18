@@ -97,6 +97,7 @@ function createFileDialog(Dialog) {
     };
 
     FileDialog.prototype.testDialogMode = function () {
+        var input = null;
         if (this.dialogMode == 0) {
             //fixme dirty hack
             if (this.fileField.currentFile == "")
@@ -105,7 +106,7 @@ function createFileDialog(Dialog) {
                 this.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-filedialog-title-npage")());
                 this.dialogMode = 1;
                 toggleAutoComplete(this, this.titleField);
-                var input = this.titleField.$element.find('input');
+                input = this.titleField.$element.find('input');
                 input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-filedialog-titlefield-placeholder-new")());
 
                 if (this.suggestion != null) {
@@ -125,7 +126,7 @@ function createFileDialog(Dialog) {
                 this.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-dialogfiletitle")());
                 this.dialogMode = 0;
                 toggleAutoComplete(this, this.titleField);
-                var input = this.titleField.$element.find('input');
+                input = this.titleField.$element.find('input');
                 input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-filedialog-titlefield-placeholder-def")());
                 clearInputFields(this.fieldset, [1, 2], ["OoUiLabelWidget"]);
                 this.validator.cleanUpForm();

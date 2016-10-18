@@ -13,6 +13,21 @@ function createInternalLinkDialog(Dialog) {
     };
     OO.inheritClass(InternalLinkDialog, Dialog);
 
+    InternalLinkDialog.prototype.createFields = function () {
+        //Create input fields in case we're dealing with a dialog to add a file
+        this.titleField = new OO.ui.TextInputWidget({
+            placeholder: OO.ui.deferMsg("visualeditor-emm-filedialog-titlefield-placeholder-def")
+        });
+        this.fileField = new OO.ui.SelectFileWidget({
+            droppable: true,
+            showDropTarget: true
+        });
+        this.creatorField = new OO.ui.TextInputWidget({});
+        this.dateField = new OO.ui.TextInputWidget({});
+        this.organizationField = new OO.ui.TextInputWidget({});
+        this.subjectField = new OO.ui.TextInputWidget({});
+    };
+
     InternalLinkDialog.prototype.createDialogLayout = function () {
         this.pageNameField.validation = [checkIfEmpty];
         this.presentationTitleField.validation = [checkIfEmpty];
