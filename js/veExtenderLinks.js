@@ -177,6 +177,10 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
         displayOverloadError("createDialogLayout");
     };
 
+    Dialog.prototype.testDialogMode = function () {
+        displayOverloadError("testDialogMode");
+    };
+
     Dialog.prototype.resetMode = function () {
         displayOverloadError("resetMode");
     };
@@ -187,10 +191,6 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
 
     Dialog.prototype.executeQuery = function () {
         displayOverloadError("executeQuery");
-    };
-
-    Dialog.prototype.testDialogMode = function () {
-        displayOverloadError("testDialogMode");
     };
 
 

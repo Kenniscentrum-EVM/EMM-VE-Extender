@@ -8,24 +8,12 @@ function createInternalLinkDialog(Dialog) {
 
     var InternalLinkDialog = function (surface, config) {
         Dialog.call(this, surface, config);
-        //Create input fields in case we're dealing with an internal link
-        this.pageNameField = new OO.ui.TextInputWidget({placeholder: OO.ui.deferMsg("visualeditor-emm-search")});
     };
     OO.inheritClass(InternalLinkDialog, Dialog);
 
     InternalLinkDialog.prototype.createFields = function () {
-        //Create input fields in case we're dealing with a dialog to add a file
-        this.titleField = new OO.ui.TextInputWidget({
-            placeholder: OO.ui.deferMsg("visualeditor-emm-filedialog-titlefield-placeholder-def")
-        });
-        this.fileField = new OO.ui.SelectFileWidget({
-            droppable: true,
-            showDropTarget: true
-        });
-        this.creatorField = new OO.ui.TextInputWidget({});
-        this.dateField = new OO.ui.TextInputWidget({});
-        this.organizationField = new OO.ui.TextInputWidget({});
-        this.subjectField = new OO.ui.TextInputWidget({});
+        //Create input fields
+        this.pageNameField = new OO.ui.TextInputWidget({placeholder: OO.ui.deferMsg("visualeditor-emm-search")});
     };
 
     InternalLinkDialog.prototype.createDialogLayout = function () {
@@ -34,11 +22,10 @@ function createInternalLinkDialog(Dialog) {
 
         //Things to do when the specified field changes
         this.pageNameField.onChangeFunctions = [function () {
-            if (dialogInstance.isExistingResource)
-                if (dialogInstance.suggestion.value != pageNameField.value)
-                    dialogInstance.isExistingResource = false;
+            if (this.isExistingResource)
+                if (this.suggestion.value != this.pageNameField.value)
+                    this.isExistingResource = false;
         }];
-
         this.fieldset.addItems([
             new OO.ui.FieldLayout(this.pageNameField, {
                 label: OO.ui.deferMsg("visualeditor-emm-page"),
@@ -51,13 +38,17 @@ function createInternalLinkDialog(Dialog) {
         ]);
     };
 
+    InternalLinkDialog.prototype.testDialogMode = function () {
+        //Modes not implemented yet
+    };
+
     InternalLinkDialog.prototype.resetMode = function () {
-        //Empty function, because the internal link dialog has no modes
+        //Modes not implemented yet
     };
 
     InternalLinkDialog.prototype.buildAndExecuteQuery = function (currentPageID, insertCallback) {
         var query = "";
-        if (!dialogInstance.isExistingResource) {
+        if (!this.isExistingResource) {
             //Start building the sfautoedit query
             query += "Light Context[Supercontext]=" + currentPageID +
                 "&Light Context[Heading]=" + this.pageNameField.getValue();
@@ -79,7 +70,7 @@ function createInternalLinkDialog(Dialog) {
             });
         }
         else {
-            insertCallback();
+            insertCallback(this.suggestion.data);
         }
     };
 
