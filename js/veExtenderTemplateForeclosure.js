@@ -27,8 +27,10 @@ var VEETemplateForclosure = function(protectedTypes) {
                         // maak het element niet meer deletebaar.
                         mw.loader.using('mediawiki.api', function () {
                                 (new mw.Api()).get({
-                                    action: 'templatedata',
-                                    titles: 'Template:Cite'
+                                    action: 'query',
+                                    prop: "catagories",
+                                    titles: "Template:Cite"
+                                    //titles: 'Template:Cite'
                                 }).done(function (data) {
 
                                     console.log(data);
@@ -42,7 +44,6 @@ var VEETemplateForclosure = function(protectedTypes) {
                                     });
                                 });
                             }
-
                         );
                     }
                 }
