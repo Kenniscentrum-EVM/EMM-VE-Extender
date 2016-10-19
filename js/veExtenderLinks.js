@@ -98,6 +98,16 @@ function loadEMMDialog(resourceType, toolId, menuText, dialogText, askQuery, tem
  * @param templateResult A function that transforms the inserted data into a relevant format for inserting the links as a template
  */
 function createDialog(dialogName, dialogMessage, askQuery, resourceType, templateResult) {
+    var array = [];
+    array.push({
+        value: "nice",
+        data: "sweet"
+    });
+    console.log(array);
+    array.push({param: "args"});
+    console.log(array);
+
+
     //Constructor for Dialog
     var Dialog = function (surface, config) {
         OO.ui.ProcessDialog.call(this, surface, config);
@@ -106,11 +116,13 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
         this.dialogMode = 0;
         this.upload = new mw.Upload({parameters: {ignorewarnings: true}});
         this.fileName = "";
+        //Create some common fields, present in all dialogs
         this.presentationTitleField = new OO.ui.TextInputWidget({});
-        //  create the fieldset, which is responsible for the layout of the dialog
+        //Create the fieldset, which is responsible for the layout of the dialog
         this.fieldset = new OO.ui.FieldsetLayout({
             classes: ["container"]
         });
+        this.titleField = null; //Initialized later
         //Create all the fields for te dialog.
         this.createFields();
         //Add the fields created above to a fieldsetlayout that makes sure the fields and labels are in the correct place
@@ -172,30 +184,30 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
     Dialog.prototype.createFields = function () {
         displayOverloadError("createFields");
     };
-
     Dialog.prototype.createDialogLayout = function () {
         displayOverloadError("createDialogLayout");
     };
-
     Dialog.prototype.testDialogMode = function () {
         displayOverloadError("testDialogMode");
     };
-
     Dialog.prototype.resetMode = function () {
         displayOverloadError("resetMode");
     };
-
     Dialog.prototype.buildAndExecuteQuery = function () {
         displayOverloadError("buildAndExecuteQuery");
     };
-
     Dialog.prototype.executeQuery = function () {
         displayOverloadError("executeQuery");
+    };
+    Dialog.prototype.fillFields = function () {
+        displayOverloadError("fillFields");
+    };
+    Dialog.prototype.processDialogSpecificQueryResult = function () {
+        displayOverloadError("processQueryResult");
     };
 
 
     var dialog = null;
-
     switch (resourceType) {
         case "File":
             dialog = createFileDialog(Dialog);
@@ -305,7 +317,6 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
 
             var currentPageID = mw.config.get('wgPageName').replace(/_/g, " ");
             dialogInstance.buildAndExecuteQuery(currentPageID, insertCallback, linkdata);
-            //For internal links this logic is handled in the switch statement up above
             cleanUpDialog();
         };
 
@@ -349,50 +360,12 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
         //Declare a function to be called after the askQuery has been processed
         //This function initiates the autocomplete library for the resource input field
         //The user will be able to pick a resource from the list of all resources gathered by the askQuery
-        var callback = function (queryResults) {
-            switch (resourceType) {
-                case "File":
-                    var fillFields = function (suggestion) {
-                        //fixme make this independent of order
-                        dialogInstance.getFieldset().getItems()[3].getField().setValue(suggestion.creator);
-                        dialogInstance.getFieldset().getItems()[4].getField().setValue(fixDate(suggestion.date));
-                        dialogInstance.getFieldset().getItems()[5].getField().setValue(suggestion.organization);
-                        dialogInstance.getFieldset().getItems()[6].getField().setValue(suggestion.subjects);
-                        dialogInstance.fileName = suggestion.data.replace("Bestand:", "").replace("File:", "");
-                        dialogInstance.validator.validateAll();
-                    };
-                    initAutoComplete(queryResults, dialogInstance.titleField, dialogInstance, fillFields);
-                    break;
-                case "Internal link":
-                    var fillFields = function (suggestion) {
-                        //Nothing to fill, no editable fields beyond presentationtitle and title
-                        dialogInstance.validator.validateAll();
-                    };
-                    initAutoComplete(queryResults, dialogInstance.pageNameField, dialogInstance, fillFields);
-                    break;
-                case "External link":
-                    var fillFields = function (suggestion) {
-                        //fixme make this independent of order
-                        dialogInstance.getFieldset().getItems()[1].getField().setValue(suggestion.hyperlink);
-                        dialogInstance.getFieldset().getItems()[3].getField().setValue(suggestion.creator);
-                        dialogInstance.getFieldset().getItems()[4].getField().setValue(fixDate(suggestion.date));
-                        dialogInstance.getFieldset().getItems()[5].getField().setValue(suggestion.organization);
-                        dialogInstance.getFieldset().getItems()[6].getField().setValue(suggestion.subjects);
-                        dialogInstance.validator.validateAll();
-                    };
-                    initAutoComplete(queryResults, dialogInstance.titleField, dialogInstance, fillFields);
-                    break;
-                default:
-                    alert(OO.ui.deferMsg("visualeditor-emm-dialog-error"));
-            }
+        var autocompleteCallback = function (queryResults) {
+            initAutoComplete(queryResults, dialogInstance);
         };
 
         //Execute the askQuery in order to gather all resources
-        semanticAskQuery(askQuery, callback, resourceType);
-
-        Dialog.prototype.getFieldset = function () {
-            return dialogInstance.fieldset;
-        };
+        dialogInstance.semanticAskQuery(askQuery, autocompleteCallback, dialogInstance);
 
         //fixme dirty hack
         //todo in plaats van deze hack een eigen event afvuren en opvangen?
@@ -414,6 +387,78 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
                 height: this.content.$element.outerHeight(true) + 50 || ""
             });
         };
+    };
+
+    Dialog.prototype.getFieldset = function () {
+        return this.fieldset;
+    };
+
+    /*  semanticAskQuery
+     *  This method is responsible for executing a call to the mediawiki API
+     *  @param query (string) the query that is to be used in the API-call
+     *  @param callback (function) a function that will be executed after the api-call is finished
+     */
+    Dialog.prototype.semanticAskQuery = function (query, callback) {
+        var dialogInstance = this;
+        var api = new mw.Api();
+        api.get({
+            action: "ask",
+            parameters: "limit:10000",
+            query: query
+        }).done(function (data) {
+            var res = data.query.results;
+            var arr = []; //array to store the results
+            var prevTitle = "";
+            var numTitle = 0;
+
+            for (var prop in res) {
+                if (!res.hasOwnProperty(prop))
+                    continue;
+                var suggestionObject = {};
+                //The data field of this object needs to contain the internal pagename of the resource in order to
+                // work correctly with the atuomcplete library. This is the same for value which needs to contain the title
+                suggestionObject.data = res[prop].fulltext;
+                suggestionObject.value = "";
+                var semantictitle = res[prop].printouts["Semantic title"][0];
+                if (semantictitle)
+                    suggestionObject.value = semantictitle;
+                else
+                    suggestionObject.value = suggestionObject.data;
+                if (suggestionObject.value == prevTitle) {
+                    numTitle++;
+                    suggestionObject.value = suggestionObject.value + "(" + suggestionObject.data + ")";
+                }
+                else {
+                    prevTitle = suggestionObject.value;
+                    numTitle = 0;
+                }
+                dialogInstance.processDialogSpecificQueryResult(res, prop, suggestionObject);
+                arr.push(suggestionObject);
+            }
+            arr.sort(function (a, b) {
+                if (a.value > b.value) {
+                    return 1;
+                }
+                if (a.value < b.value) {
+                    return -1;
+                }
+                return 0;
+            });
+
+            prevTitle = "";
+            for (var i = 0; i < arr.length; i++) {
+                var item = arr[i];
+                suggestionObject.value = item.value;
+                if (suggestionObject.value == prevTitle) {
+                    arr[i].value = suggestionObject.value + "(" + suggestionObject.data + ")";
+                }
+                else {
+                    prevTitle = suggestionObject.value;
+                }
+            }
+            console.log(arr);
+            callback(arr);
+        });
     };
 }
 
@@ -444,125 +489,6 @@ function clearInputFields(fieldset, exclude, inputTypeExclude) {
             }
         }
     }
-}
-
-/*  semanticAskQuery
- *  This method is responsible for executing a call to the mediawiki API
- *  @param query (string) the query that is to be used in the API-call
- *  @param callback (function) a function that will be executed after the api-call is finished
- */
-function semanticAskQuery(query, callback, template) {
-    var api = new mw.Api();
-    api.get({
-        action: "ask",
-        parameters: "limit:10000",
-        query: query
-    }).done(function (data) {
-        var res = data.query.results;
-        var arr = []; //array to store the results
-        var prevTitle = "";
-        var numTitle = 0;
-
-        for (var prop in res) {
-            if (!res.hasOwnProperty(prop))
-                continue;
-            var pagename = res[prop].fulltext;
-            var semantictitle = res[prop].printouts["Semantic title"][0];
-            var title = "";
-            if (semantictitle)
-                title = semantictitle;
-            else
-                title = pagename;
-            if (title == prevTitle) {
-                numTitle++;
-                title = title + "(" + pagename + ")";
-            }
-            else {
-                prevTitle = title;
-                numTitle = 0;
-            }
-            switch (template) {
-                case "File":
-                    var creator = res[prop].printouts["Dct:creator"][0];
-                    var date = res[prop].printouts["Dct:date"][0];
-                    var organization = res[prop].printouts["Organization"][0];
-                    var subjects = "";
-                    var querySubjects = res[prop].printouts["Dct:subject"];
-                    //Gathers all subjects and creates a single string which contains the fulltext name of all the subjects,
-                    //seperated by a ,
-                    for (var j = 0; j < querySubjects.length; j++) {
-                        subjects = subjects + querySubjects[j].fulltext + ", ";
-                    }
-                    //Remove comma and space at the end of the subject list
-                    subjects = subjects.slice(0, -2);
-                    //Use value for the title in the associative array to ensure it works with the autocmoplete library
-                    arr.push({
-                        value: title,
-                        data: pagename,
-                        creator: creator,
-                        date: date,
-                        organization: organization,
-                        subjects: subjects
-                    });
-                    break;
-                case "Internal link":
-                    arr.push({
-                        value: title,
-                        data: pagename
-                    });
-                    break;
-                case "External link":
-                    var hyperlink = res[prop].printouts["Hyperlink"][0];
-                    var creator = res[prop].printouts["Dct:creator"][0];
-                    var date = res[prop].printouts["Dct:date"][0];
-                    var organization = res[prop].printouts["Organization"][0];
-                    var subjects = "";
-                    var querySubjects = res[prop].printouts["Dct:subject"];
-                    //Gathers all subjects and creates a single string which contains the fulltext name of all the subjects,
-                    //seperated by a ,
-                    for (var j = 0; j < querySubjects.length; j++) {
-                        subjects = subjects + querySubjects[j].fulltext + ", ";
-                    }
-                    //Remove comma and space at the end of the subject list
-                    subjects = subjects.slice(0, -2);
-                    //Use value for the title in the associative array to ensure it works with the autocmoplete library
-                    arr.push({
-                        value: title,
-                        data: pagename,
-                        hyperlink: hyperlink,
-                        creator: creator,
-                        date: date,
-                        organization: organization,
-                        subjects: subjects
-                    });
-                    break;
-                default:
-                    alert(OO.ui.deferMsg("visualeditor-emm-dialog-error"));
-            }
-        }
-        arr.sort(function (a, b) {
-            if (a.value > b.value) {
-                return 1;
-            }
-            if (a.value < b.value) {
-                return -1;
-            }
-            return 0;
-        });
-
-        prevTitle = "";
-        for (var i = 0; i < arr.length; i++) {
-            var item = arr[i];
-            title = item.value;
-            if (title == prevTitle) {
-                arr[i].value = title + "(" + pagename + ")";
-            }
-            else {
-                prevTitle = title;
-            }
-        }
-        callback(arr);
-    });
 }
 
 function semanticCreateWithFormQuery(query, callback, target, form) {
@@ -609,15 +535,15 @@ function grabSelectedText(inputObject) {
  * @param inputObject The object in which the input field exists where the autocomplete function should be enabled
  * @param dialogInstance The dialog whose page-id should be edited in order to succesfully insert the link later on
  */
-function initAutoComplete(data, inputObject, dialogInstance, fillFields) {
-    var inputField = $(inputObject.$element).find("input");
+function initAutoComplete(data, dialogInstance) {
+    var inputField = $(dialogInstance.titleField.$element).find("input");
     $(inputField).autocomplete({
         lookup: data,
         onSelect: function (suggestion) {
             if (!dialogInstance.isExistingResource) {
                 dialogInstance.suggestion = suggestion;
                 dialogInstance.isExistingResource = true;
-                fillFields(suggestion);
+                dialogInstance.fillFields(suggestion);
                 return;
             }
         },

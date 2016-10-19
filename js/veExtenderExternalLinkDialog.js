@@ -12,7 +12,7 @@ function createExternalLinkDialog(Dialog) {
     OO.inheritClass(ExternalLinkDialog, Dialog);
 
     ExternalLinkDialog.prototype.createFields = function () {
-        //Create input fields in case we're dealing with an external link
+        //Create input fields for an external link dialog
         this.titleField = new OO.ui.TextInputWidget({placeholder: OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-def")()});
         this.linkField = new OO.ui.TextInputWidget({placeholder: OO.ui.deferMsg("visualeditor-emm-linkdialog-linkfield-placeholder-def")()});
         this.creatorField = new OO.ui.TextInputWidget({});
@@ -139,6 +139,31 @@ function createExternalLinkDialog(Dialog) {
             target = linkdata;
         }
         semanticCreateWithFormQuery(query, insertCallback, target, "Resource Hyperlink");
+    };
+
+    ExternalLinkDialog.prototype.fillFields = function (suggestion) {
+        this.linkField.setValue(suggestion.hyperlink);
+        this.creatorField.setValue(suggestion.creator);
+        this.dateField.setValue(fixDate(suggestion.date));
+        this.organizationField.setValue(suggestion.organization);
+        this.subjectField.setValue(suggestion.subjects);
+        this.validator.validateAll();
+    };
+
+    ExternalLinkDialog.prototype.processDialogSpecificQueryResult = function (res, prop, suggestionObject) {
+        suggestionObject.hyperlink = res[prop].printouts["Hyperlink"][0];
+        suggestionObject.creator = res[prop].printouts["Dct:creator"][0];
+        suggestionObject.date = res[prop].printouts["Dct:date"][0];
+        suggestionObject.organization = res[prop].printouts["Organization"][0];
+        suggestionObject.subjects = "";
+        var querySubjects = res[prop].printouts["Dct:subject"];
+        //Gathers all subjects and creates a single string which contains the fulltext name of all the subjects,
+        //seperated by a ,
+        for (var j = 0; j < querySubjects.length; j++) {
+            suggestionObject.subjects += querySubjects[j].fulltext + ", ";
+        }
+        //Remove comma and space at the end of the subject list
+        suggestionObject.subjects = suggestionObject.subjects.slice(0, -2);
     };
 
     return ExternalLinkDialog;

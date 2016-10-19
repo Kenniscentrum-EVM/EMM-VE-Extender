@@ -12,22 +12,23 @@ function createInternalLinkDialog(Dialog) {
     OO.inheritClass(InternalLinkDialog, Dialog);
 
     InternalLinkDialog.prototype.createFields = function () {
-        //Create input fields
-        this.pageNameField = new OO.ui.TextInputWidget({placeholder: OO.ui.deferMsg("visualeditor-emm-search")});
+        //Create input fields for an internal link dialog
+        this.titleField = new OO.ui.TextInputWidget({placeholder: OO.ui.deferMsg("visualeditor-emm-search")});
     };
 
     InternalLinkDialog.prototype.createDialogLayout = function () {
-        this.pageNameField.validation = [checkIfEmpty];
+        this.titleField.validation = [checkIfEmpty];
         this.presentationTitleField.validation = [checkIfEmpty];
 
         //Things to do when the specified field changes
-        this.pageNameField.onChangeFunctions = [function () {
-            if (this.isExistingResource)
-                if (this.suggestion.value != this.pageNameField.value)
+        this.titleField.onChangeFunctions = [function () {
+            if (this.isExistingResource) {
+                if (this.suggestion.value != this.titleField.value)
                     this.isExistingResource = false;
+            }
         }];
         this.fieldset.addItems([
-            new OO.ui.FieldLayout(this.pageNameField, {
+            new OO.ui.FieldLayout(this.titleField, {
                 label: OO.ui.deferMsg("visualeditor-emm-page"),
                 align: "left"
             }),
@@ -51,7 +52,7 @@ function createInternalLinkDialog(Dialog) {
         if (!this.isExistingResource) {
             //Start building the sfautoedit query
             query += "Light Context[Supercontext]=" + currentPageID +
-                "&Light Context[Heading]=" + this.pageNameField.getValue();
+                "&Light Context[Heading]=" + this.titleField.getValue();
             //Find the topcontext of the current page
             var api = new mw.Api();
             api.get({
@@ -76,6 +77,15 @@ function createInternalLinkDialog(Dialog) {
 
     InternalLinkDialog.prototype.executeQuery = function (query, insertCallback) {
         semanticCreateWithFormQuery(query, insertCallback, null, "Light Context");
+    };
+
+    InternalLinkDialog.prototype.fillFields = function (suggestion) {
+        //Nothing to fill, no editable fields beyond presentationtitle and title
+        this.validator.validateAll();
+    };
+
+    InternalLinkDialog.prototype.processDialogSpecificQueryResult = function (res, prop, suggestionObject) {
+        //No additional behaviour on top of the default behaviour
     };
 
     return InternalLinkDialog;

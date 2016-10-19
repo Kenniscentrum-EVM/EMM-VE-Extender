@@ -12,7 +12,7 @@ function createFileDialog(Dialog) {
     OO.inheritClass(FileDialog, Dialog);
 
     FileDialog.prototype.createFields = function () {
-        //Create input fields in case we're dealing with a dialog to add a file
+        //Create input fields in for a file dialog
         this.titleField = new OO.ui.TextInputWidget({
             placeholder: OO.ui.deferMsg("visualeditor-emm-filedialog-titlefield-placeholder-def")
         });
@@ -203,6 +203,30 @@ function createFileDialog(Dialog) {
         else {
             semanticCreateWithFormQuery(query, insertCallback, target, "Resource Light");
         }
+    };
+
+    FileDialog.prototype.fillFields = function (suggestion) {
+        this.creatorField.setValue(suggestion.creator);
+        this.dateField.setValue(fixDate(suggestion.date));
+        this.organizationField.setValue(suggestion.organization);
+        this.subjectField.setValue(suggestion.subjects);
+        this.fileName = suggestion.data.replace("Bestand:", "").replace("File:", "");
+        this.validator.validateAll();
+    };
+
+    FileDialog.prototype.processDialogSpecificQueryResult = function (res, prop, suggestionObject) {
+        suggestionObject.creator = res[prop].printouts["Dct:creator"][0];
+        suggestionObject.date = res[prop].printouts["Dct:date"][0];
+        suggestionObject.organization = res[prop].printouts["Organization"][0];
+        suggestionObject.subjects = "";
+        var querySubjects = res[prop].printouts["Dct:subject"];
+        //Gathers all subjects and creates a single string which contains the fulltext name of all the subjects,
+        //seperated by a ,
+        for (var j = 0; j < querySubjects.length; j++) {
+            suggestionObject.subjects += querySubjects[j].fulltext + ", ";
+        }
+        //Remove comma and space at the end of the subject list
+        suggestionObject.subjects = suggestionObject.subjects.slice(0, -2);
     };
 
     return FileDialog;
