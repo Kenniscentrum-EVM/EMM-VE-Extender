@@ -3,31 +3,25 @@
  */
 "use strict";
 
-function createFileDialog(Dialog) {
+function createFileDialog(LightResourceDialog) {
     console.log("File Dialog");
 
     var FileDialog = function (surface, config) {
-        Dialog.call(this, surface, config);
+        LightResourceDialog.call(this, surface, config);
     };
-    OO.inheritClass(FileDialog, Dialog);
+    OO.inheritClass(FileDialog, LightResourceDialog);
 
     FileDialog.prototype.createFields = function () {
+        LightResourceDialog.prototype.createFields.call(this);
         //Create input fields in for a file dialog
-        this.titleField = new OO.ui.TextInputWidget({
-            placeholder: OO.ui.deferMsg("visualeditor-emm-filedialog-titlefield-placeholder-def")
-        });
         this.fileField = new OO.ui.SelectFileWidget({
             droppable: true,
             showDropTarget: true
         });
-        this.creatorField = new OO.ui.TextInputWidget({});
-        this.dateField = new OO.ui.TextInputWidget({});
-        this.organizationField = new OO.ui.TextInputWidget({});
-        this.subjectField = new OO.ui.TextInputWidget({});
     };
 
     FileDialog.prototype.createDialogLayout = function () {
-        this.titleField.validation = [checkIfEmpty];
+        LightResourceDialog.prototype.createDialogLayout.call(this);
         this.fileField.validation = [function (value, sender) {
             return "";
         }];
@@ -36,11 +30,6 @@ function createFileDialog(Dialog) {
             label: OO.ui.deferMsg("visualeditor-emm-file-filename"),
             align: "left"
         });
-
-        this.presentationTitleField.validation = [checkIfEmpty];
-        this.creatorField.validation = [checkIfEmpty];
-        this.dateField.validation = [checkIfEmpty, checkIfDate];
-
 
         //Things to do when the specified field changes
         this.titleField.onChangeFunctions = [function () {
@@ -53,7 +42,6 @@ function createFileDialog(Dialog) {
                 }
             }
         }, this.testDialogMode]; // ,testDialogMode
-
         this.fileField.onChangeFunctions = [this.testDialogMode];
 
         this.fieldset.addItems([
@@ -91,7 +79,7 @@ function createFileDialog(Dialog) {
         toggleAutoComplete(this, this.titleField);
         var input = this.titleField.$element.find('input');
         input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-filedialog-titlefield-placeholder-def")());
-        this.fieldset.getItems()[1].$element.show();
+        this.fileField.$element.show();
         this.titleField.currentFile = null;
         this.validator.cleanUpForm();
     };
@@ -136,20 +124,14 @@ function createFileDialog(Dialog) {
 
     FileDialog.prototype.buildAndExecuteQuery = function (currentPageID, insertCallback, linkdata) {
         //Build the sfautoedit query
+        var query = LightResourceDialog.prototype.buildQuery.call(this, currentPageID);
         var filename = "";
-        var query = "";
         if (this.isExistingResource) {
             filename = this.fileName;
         } else if (this.fileField.getValue() != null) {
             filename = this.fileField.getValue().name;
         }
-        query += "Resource Description[file name]=" + filename +
-            "&Resource Description[title]=" + this.titleField.getValue() +
-            "&Resource Description[creator]=" + this.creatorField.getValue() +
-            "&Resource Description[date]=" + this.dateField.getValue();
-        if (this.organizationField.getValue().length > 0) query += "&Resource Description[organization]=" + this.organizationField.getValue();
-        if (this.subjectField.getValue().length > 0) query += "&Resource Description[subject]=" + this.subjectField.getValue();
-        if (!this.isExistingResource) query += "&Resource Description[created in page]=" + currentPageID;
+        query += "&Resource Description[file name]=" + filename;
         this.executeQuery(query, insertCallback, linkdata);
     };
 
@@ -206,27 +188,13 @@ function createFileDialog(Dialog) {
     };
 
     FileDialog.prototype.fillFields = function (suggestion) {
-        this.creatorField.setValue(suggestion.creator);
-        this.dateField.setValue(fixDate(suggestion.date));
-        this.organizationField.setValue(suggestion.organization);
-        this.subjectField.setValue(suggestion.subjects);
+        LightResourceDialog.prototype.fillFields.call(this, suggestion);
         this.fileName = suggestion.data.replace("Bestand:", "").replace("File:", "");
         this.validator.validateAll();
     };
 
     FileDialog.prototype.processDialogSpecificQueryResult = function (res, prop, suggestionObject) {
-        suggestionObject.creator = res[prop].printouts["Dct:creator"][0];
-        suggestionObject.date = res[prop].printouts["Dct:date"][0];
-        suggestionObject.organization = res[prop].printouts["Organization"][0];
-        suggestionObject.subjects = "";
-        var querySubjects = res[prop].printouts["Dct:subject"];
-        //Gathers all subjects and creates a single string which contains the fulltext name of all the subjects,
-        //seperated by a ,
-        for (var j = 0; j < querySubjects.length; j++) {
-            suggestionObject.subjects += querySubjects[j].fulltext + ", ";
-        }
-        //Remove comma and space at the end of the subject list
-        suggestionObject.subjects = suggestionObject.subjects.slice(0, -2);
+        LightResourceDialog.prototype.processDialogSpecificQueryResult.call(this,res,prop,suggestionObject);
     };
 
     return FileDialog;

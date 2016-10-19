@@ -98,16 +98,6 @@ function loadEMMDialog(resourceType, toolId, menuText, dialogText, askQuery, tem
  * @param templateResult A function that transforms the inserted data into a relevant format for inserting the links as a template
  */
 function createDialog(dialogName, dialogMessage, askQuery, resourceType, templateResult) {
-    var array = [];
-    array.push({
-        value: "nice",
-        data: "sweet"
-    });
-    console.log(array);
-    array.push({param: "args"});
-    console.log(array);
-
-
     //Constructor for Dialog
     var Dialog = function (surface, config) {
         OO.ui.ProcessDialog.call(this, surface, config);
@@ -119,10 +109,10 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
         //Create some common fields, present in all dialogs
         this.presentationTitleField = new OO.ui.TextInputWidget({});
         //Create the fieldset, which is responsible for the layout of the dialog
+        this.titleField = null; //Initialized later
         this.fieldset = new OO.ui.FieldsetLayout({
             classes: ["container"]
         });
-        this.titleField = null; //Initialized later
         //Create all the fields for te dialog.
         this.createFields();
         //Add the fields created above to a fieldsetlayout that makes sure the fields and labels are in the correct place
@@ -210,13 +200,11 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
     var dialog = null;
     switch (resourceType) {
         case "File":
-            dialog = createFileDialog(Dialog);
+        case "External link":
+            dialog = createLightResourceDialog(Dialog, resourceType);
             break;
         case "Internal link":
             dialog = createInternalLinkDialog(Dialog);
-            break;
-        case "External link":
-            dialog = createExternalLinkDialog(Dialog);
             break;
         default:
             alert(OO.ui.deferMsg("visualeditor-emm-dialog-error"));
@@ -456,7 +444,6 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
                     prevTitle = suggestionObject.value;
                 }
             }
-            console.log(arr);
             callback(arr);
         });
     };

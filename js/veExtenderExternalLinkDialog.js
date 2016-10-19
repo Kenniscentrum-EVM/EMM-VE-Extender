@@ -3,26 +3,26 @@
  */
 "use strict";
 
-function createExternalLinkDialog(Dialog) {
+function createExternalLinkDialog(LightResourceDialog) {
     console.log("External Link Dialog");
 
     var ExternalLinkDialog = function (surface, config) {
-        Dialog.call(this, surface, config);
+        LightResourceDialog.call(this, surface, config);
     };
-    OO.inheritClass(ExternalLinkDialog, Dialog);
+    OO.inheritClass(ExternalLinkDialog, LightResourceDialog);
 
     ExternalLinkDialog.prototype.createFields = function () {
+        LightResourceDialog.prototype.createFields.call(this);
         //Create input fields for an external link dialog
-        this.titleField = new OO.ui.TextInputWidget({placeholder: OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-def")()});
         this.linkField = new OO.ui.TextInputWidget({placeholder: OO.ui.deferMsg("visualeditor-emm-linkdialog-linkfield-placeholder-def")()});
-        this.creatorField = new OO.ui.TextInputWidget({});
-        this.dateField = new OO.ui.TextInputWidget({});
-        this.organizationField = new OO.ui.TextInputWidget({});
-        this.subjectField = new OO.ui.TextInputWidget({});
         this.addToResourcesField = new OO.ui.CheckboxInputWidget({selected: true});
     };
 
     ExternalLinkDialog.prototype.createDialogLayout = function () {
+        LightResourceDialog.prototype.createDialogLayout.call(this);
+        // todo validation property verplaatsen.
+        this.linkField.validation = [checkIfEmpty, checkIfWebsite];
+
         var testSuggestedLink = function () {
             if (this.isExistingResource) {
                 if (this.titleField.value.length == 0) {
@@ -30,13 +30,6 @@ function createExternalLinkDialog(Dialog) {
                 }
             }
         };
-
-        // todo validation property verplaatsen.
-        this.titleField.validation = [checkIfEmpty];
-        this.linkField.validation = [checkIfEmpty, checkIfWebsite];
-        this.presentationTitleField.validation = [checkIfEmpty];
-        this.creatorField.validation = [checkIfEmpty];
-        this.dateField.validation = [checkIfEmpty, checkIfDate];
 
         //Things to do when the specified field changes
         this.titleField.onChangeFunctions = [testSuggestedLink, this.testDialogMode, function () {
@@ -119,15 +112,9 @@ function createExternalLinkDialog(Dialog) {
     };
 
     ExternalLinkDialog.prototype.buildAndExecuteQuery = function (currentPageID, insertCallback, linkdata) {
-        var query = "";
+        var query = LightResourceDialog.prototype.buildQuery.call(this, currentPageID);
         //Build the sfautoedit query
-        query += "Resource Description[hyperlink]=" + this.linkField.getValue() +
-            "&Resource Description[title]=" + this.titleField.getValue() +
-            "&Resource Description[creator]=" + this.creatorField.getValue() +
-            "&Resource Description[date]=" + this.dateField.getValue();
-        if (this.organizationField.getValue().length > 0) query += "&Resource Description[organization]=" + this.organizationField.getValue();
-        if (this.subjectField.getValue().length > 0) query += "&Resource Description[subject]=" + this.subjectField.getValue();
-        if (!this.isExistingResource) query += "&Resource Description[created in page]=" + currentPageID;
+        query += "&Resource Description[hyperlink]=" + this.linkField.getValue();
         this.executeQuery(query, insertCallback, linkdata);
     };
 
@@ -142,28 +129,14 @@ function createExternalLinkDialog(Dialog) {
     };
 
     ExternalLinkDialog.prototype.fillFields = function (suggestion) {
+        LightResourceDialog.prototype.fillFields.call(this, suggestion);
         this.linkField.setValue(suggestion.hyperlink);
-        this.creatorField.setValue(suggestion.creator);
-        this.dateField.setValue(fixDate(suggestion.date));
-        this.organizationField.setValue(suggestion.organization);
-        this.subjectField.setValue(suggestion.subjects);
         this.validator.validateAll();
     };
 
     ExternalLinkDialog.prototype.processDialogSpecificQueryResult = function (res, prop, suggestionObject) {
+        LightResourceDialog.prototype.processDialogSpecificQueryResult.call(this,res,prop,suggestionObject);
         suggestionObject.hyperlink = res[prop].printouts["Hyperlink"][0];
-        suggestionObject.creator = res[prop].printouts["Dct:creator"][0];
-        suggestionObject.date = res[prop].printouts["Dct:date"][0];
-        suggestionObject.organization = res[prop].printouts["Organization"][0];
-        suggestionObject.subjects = "";
-        var querySubjects = res[prop].printouts["Dct:subject"];
-        //Gathers all subjects and creates a single string which contains the fulltext name of all the subjects,
-        //seperated by a ,
-        for (var j = 0; j < querySubjects.length; j++) {
-            suggestionObject.subjects += querySubjects[j].fulltext + ", ";
-        }
-        //Remove comma and space at the end of the subject list
-        suggestionObject.subjects = suggestionObject.subjects.slice(0, -2);
     };
 
     return ExternalLinkDialog;
