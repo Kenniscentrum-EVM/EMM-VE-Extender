@@ -16,6 +16,8 @@ function createFileDialog(LightResourceDialog) {
             droppable: true,
             showDropTarget: true
         });
+        //Set the placeholder of titleField
+        this.titleField.$element.find('input').prop("placeholder", OO.ui.deferMsg("visualeditor-emm-filedialog-titlefield-placeholder-def")());
     };
 
     EMMFileDialog.prototype.createDialogLayout = function () {

@@ -108,7 +108,7 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
         //Create some common fields, present in all dialogs
         this.presentationTitleField = new OO.ui.TextInputWidget({});
         //Create the fieldset, which is responsible for the layout of the dialog
-        this.titleField = null; //Initialized later
+        this.titleField = new OO.ui.TextInputWidget();
         this.fieldset = new OO.ui.FieldsetLayout({
             classes: ["container"]
         });
@@ -160,6 +160,11 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
         {action: "cancel", label: OO.ui.deferMsg("visualeditor-emm-cancel"), flags: "safe"}
     ];
 
+    EMMDialog.prototype.createDialogLayout = function () {
+        this.titleField.validation = [checkIfEmpty];
+        this.presentationTitleField.validation = [checkIfEmpty];
+    };
+
     /**
      * Displays an error message for when a specific overloaded function isn't present
      * @param functionName The name of the function that has no overloaded equivalent
@@ -172,9 +177,6 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
     //These functions display an error message to indicate that a dialog-specific overloaded function is missing.
     EMMDialog.prototype.createFields = function () {
         displayOverloadError("createFields");
-    };
-    EMMDialog.prototype.createDialogLayout = function () {
-        displayOverloadError("createDialogLayout");
     };
     EMMDialog.prototype.testDialogMode = function () {
         displayOverloadError("testDialogMode");

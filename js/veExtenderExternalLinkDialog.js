@@ -14,6 +14,8 @@ function createExternalLinkDialog(LightResourceDialog) {
         //Create input fields for an external link dialog
         this.linkField = new OO.ui.TextInputWidget({placeholder: OO.ui.deferMsg("visualeditor-emm-linkdialog-linkfield-placeholder-def")()});
         this.addToResourcesField = new OO.ui.CheckboxInputWidget({selected: true});
+        //Set the placeholder of titleField
+        this.titleField.$element.find('input').prop("placeholder", OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-def")());
     };
 
     EMMExternalLinkDialog.prototype.createDialogLayout = function () {

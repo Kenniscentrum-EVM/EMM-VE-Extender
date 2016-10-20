@@ -10,14 +10,12 @@ function createInternalLinkDialog(Dialog) {
     OO.inheritClass(EMMInternalLinkDialog, Dialog);
 
     EMMInternalLinkDialog.prototype.createFields = function () {
-        //Create input fields for an internal link dialog
-        this.titleField = new OO.ui.TextInputWidget({placeholder: OO.ui.deferMsg("visualeditor-emm-search")});
+        //Set the placeholder of titleField
+        this.titleField.$element.find('input').prop("placeholder", OO.ui.deferMsg("visualeditor-emm-search")());
     };
 
     EMMInternalLinkDialog.prototype.createDialogLayout = function () {
-        this.titleField.validation = [checkIfEmpty];
-        this.presentationTitleField.validation = [checkIfEmpty];
-
+        Dialog.prototype.createDialogLayout.call(this);
         //Things to do when the specified field changes
         this.titleField.onChangeFunctions = [function () {
             if (this.isExistingResource) {
@@ -77,12 +75,11 @@ function createInternalLinkDialog(Dialog) {
         semanticCreateWithFormQuery(query, insertCallback, null, "Light Context");
     };
 
-    EMMInternalLinkDialog.prototype.fillFields = function (suggestion) {
+    EMMInternalLinkDialog.prototype.fillFields = function () {
         //Nothing to fill, no editable fields beyond presentationtitle and title
-        this.validator.validateAll();
     };
 
-    EMMInternalLinkDialog.prototype.processDialogSpecificQueryResult = function (res, prop, suggestionObject) {
+    EMMInternalLinkDialog.prototype.processDialogSpecificQueryResult = function () {
         //No additional behaviour on top of the default behaviour
     };
 
