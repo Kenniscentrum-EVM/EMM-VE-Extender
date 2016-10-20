@@ -297,15 +297,15 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
                 ];
                 //insert result in text
                 var surfaceModel = ve.init.target.getSurface().getModel();
-                if (dialogueInstance.selectionRange.start < 0 || dialogueInstance.selectionRange.start > surfaceModel.getDocument().getLength()) {
+                if (dialogInstance.selectionRange.start < 0 || dialogInstance.selectionRange.start > surfaceModel.getDocument().getLength()) {
                     surfaceModel.getLinearFragment(new ve.Range(0, 0)).insertContent(mytemplate);
                     return;
                 }
-                if (dialogueInstance.selectionRange.end < 0 || dialogueInstance.selectionRange.end > surfaceModel.getDocument().getLength()) {
+                if (dialogInstance.selectionRange.end < 0 || dialogInstance.selectionRange.end > surfaceModel.getDocument().getLength()) {
                     surfaceModel.getLinearFragment(new ve.Range(0, 0)).insertContent(mytemplate);
                     return;
                 }
-                surfaceModel.getLinearFragment(dialogueInstance.selectionRange).insertContent(mytemplate);
+                surfaceModel.getLinearFragment(dialogInstance.selectionRange).insertContent(mytemplate);
             };
 
             var currentPageID = mw.config.get('wgPageName').replace(/_/g, " ");
