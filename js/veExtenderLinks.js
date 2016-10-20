@@ -276,32 +276,32 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
                     templateToUse = resourceType;
                 }
                 var mytemplate = [
-                        {
-                            type: "mwTransclusionInline",
-                            attributes: {
-                                mw: {
-                                    parts: [
-                                        {
-                                            template: {
-                                                target: {
-                                                    href: "Template:" + templateToUse,
-                                                    wt: templateToUse
-                                                },
-                                                params: templateResult(namedata, linkdata)
-                                            }
+                    {
+                        type: "mwTransclusionInline",
+                        attributes: {
+                            mw: {
+                                parts: [
+                                    {
+                                        template: {
+                                            target: {
+                                                href: "Template:" + templateToUse,
+                                                wt: templateToUse
+                                            },
+                                            params: templateResult(namedata, linkdata)
                                         }
-                                    ]
-                                }
+                                    }
+                                ]
                             }
                         }
-                    ];
+                    }
+                ];
                 //insert result in text
                 var surfaceModel = ve.init.target.getSurface().getModel();
-                if(dialogueInstance.selectionRange.start < 0 || dialogueInstance.selectionRange.start > surfaceModel.getDocument().getLength()) {
+                if (dialogueInstance.selectionRange.start < 0 || dialogueInstance.selectionRange.start > surfaceModel.getDocument().getLength()) {
                     surfaceModel.getLinearFragment(new ve.Range(0, 0)).insertContent(mytemplate);
                     return;
                 }
-                if(dialogueInstance.selectionRange.end < 0 || dialogueInstance.selectionRange.end > surfaceModel.getDocument().getLength()) {
+                if (dialogueInstance.selectionRange.end < 0 || dialogueInstance.selectionRange.end > surfaceModel.getDocument().getLength()) {
                     surfaceModel.getLinearFragment(new ve.Range(0, 0)).insertContent(mytemplate);
                     return;
                 }
@@ -368,15 +368,15 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
             dialogInstance.selectionRange = grabSelectedText(dialogInstance.presentationTitleField);
             if (dialogInstance.presentationTitleField.value.length > 0)
                 dialogInstance.validator.validateWidget(dialogInstance.presentationTitleField);
-            dialogInstance.fieldset.$element.css({width:  dim.width - 10});
+            dialogInstance.fieldset.$element.css({width: dim.width - 10});
             for (var i = 0; i < dialogInstance.fieldset.getItems().length; i++) {
                 dialogInstance.fieldset.getItems()[i].$element.find(".oo-ui-labelElement-label").not(".oo-ui-selectFileWidget-label").css("margin-right", 0).css("float", "left").css("width", "30%");
                 dialogInstance.fieldset.getItems()[i].$element.find(".oo-ui-fieldLayout-field").css("width", "70%");
                 dialogInstance.fieldset.getItems()[i].$element.find(".oo-ui-fieldLayout-body").css("width", "100%").css("overflow", "hidden");
             }
             this.$frame.css({
-                width:  dim.width + 30|| "",
-                height: this.getContentHeight() + 20|| ""
+                width: dim.width + 30 || "",
+                height: this.getContentHeight() + 20 || ""
             });
         };
     };
@@ -506,15 +506,14 @@ function grabSelectedText(inputObject) {
         //fixme misschien moet er een apart selectieobject gemaakt worden waarin dit soort dingen netjes afgehandeld worden..
         for (var i = surfaceModel.getFragment().selection.range.start; i < surfaceModel.getFragment().selection.range.end; i++) {
             var node = ve.init.target.getSurface().getModel().getDocument().getDocumentNode().getNodeFromOffset(i);
-            if(node.getType() == "mwTransclusionInline")
-            {
+            if (node.getType() == "mwTransclusionInline") {
                 //fixme hier moet nog geverifieerd worden of het om een cite gaat?
                 var nodeName = node.element.attributes.mw.parts[0].template.params.name.wt;
                 selected += nodeName;
                 continue;
             }
             var element = surfaceModel.getFragment().document.data.data[i];
-            if(typeof element[0] === 'undefined')
+            if (typeof element[0] === 'undefined')
                 continue;
             //todo moet dit?
             var toAdd = element;
@@ -526,7 +525,7 @@ function grabSelectedText(inputObject) {
             inputObject.setValue(selected);
         return new ve.Range(surfaceModel.getFragment().selection.range.start, surfaceModel.getFragment().selection.range.end);
     }
-    else{
+    else {
         return new ve.Range(0, 0);
     }
 }
@@ -578,5 +577,5 @@ function fixDate(date) {
     var mm = ("0" + (d.getMonth() + 1)).slice(-2);
     var dd = ("0" + d.getDate()).slice(-2);
     var yy = d.getFullYear();
-    return  yy + '-' + mm + '-' + dd; //(US)
+    return yy + '-' + mm + '-' + dd; //(US)
 }

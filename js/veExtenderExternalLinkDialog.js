@@ -88,7 +88,17 @@ function createExternalLinkDialog(LightResourceDialog) {
         var input = null;
         if (this.dialogMode == 0) {
             if (!this.isExistingResource && this.linkField.value.length != 0) {
-                clearInputFields(this.fieldset, [0, 1, 2], ["OoUiLabelWidget"]);
+                if (dialogueInstance.suggestion != null) {
+                    if (dialogueInstance.suggestion.hyperlink == linkField.value) {
+                        clearInputFields(fieldset, [0, 2], ["OoUiLabelWidget"]);
+                    }
+                    else {
+                        clearInputFields(fieldset, [0, 1, 2], ["OoUiLabelWidget"]);
+                    }
+                }
+                else {
+                    clearInputFields(fieldset, [0, 1, 2], ["OoUiLabelWidget"]);
+                }
                 this.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-linkdialog-title-npage")());
                 input = this.titleField.$element.find('input');
                 input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-new")());
@@ -135,7 +145,7 @@ function createExternalLinkDialog(LightResourceDialog) {
     };
 
     EMMExternalLinkDialog.prototype.processDialogSpecificQueryResult = function (singleresult, suggestionObject) {
-        LightResourceDialog.prototype.processDialogSpecificQueryResult.call(this,singleresult,suggestionObject);
+        LightResourceDialog.prototype.processDialogSpecificQueryResult.call(this, singleresult, suggestionObject);
         suggestionObject.hyperlink = singleresult.printouts["Hyperlink"][0];
     };
 

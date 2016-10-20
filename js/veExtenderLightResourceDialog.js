@@ -12,7 +12,7 @@ function createLightResourceDialog(Dialog, resourceType) {
     EMMLightResourceDialog.prototype.createFields = function () {
         this.titleField = new OO.ui.TextInputWidget({placeholder: OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-def")()});
         this.creatorField = new OO.ui.TextInputWidget({});
-        this.dateField = new OO.ui.TextInputWidget({});
+        this.dateField = new OO.ui.TextInputWidget({type: "date"});
         this.organizationField = new OO.ui.TextInputWidget({});
         this.subjectField = new OO.ui.TextInputWidget({});
     };
@@ -58,7 +58,7 @@ function createLightResourceDialog(Dialog, resourceType) {
         suggestionObject.subjects = suggestionObject.subjects.slice(0, -2);
     };
 
-    switch(resourceType) {
+    switch (resourceType) {
         case "File":
             return createFileDialog(EMMLightResourceDialog);
             break;
