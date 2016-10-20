@@ -4,14 +4,12 @@
 "use strict";
 
 function createFileDialog(LightResourceDialog) {
-    console.log("File Dialog");
-
-    var FileDialog = function (surface, config) {
+    var EMMFileDialog = function (surface, config) {
         LightResourceDialog.call(this, surface, config);
     };
-    OO.inheritClass(FileDialog, LightResourceDialog);
+    OO.inheritClass(EMMFileDialog, LightResourceDialog);
 
-    FileDialog.prototype.createFields = function () {
+    EMMFileDialog.prototype.createFields = function () {
         LightResourceDialog.prototype.createFields.call(this);
         //Create input fields in for a file dialog
         this.fileField = new OO.ui.SelectFileWidget({
@@ -20,7 +18,7 @@ function createFileDialog(LightResourceDialog) {
         });
     };
 
-    FileDialog.prototype.createDialogLayout = function () {
+    EMMFileDialog.prototype.createDialogLayout = function () {
         LightResourceDialog.prototype.createDialogLayout.call(this);
         this.fileField.validation = [function (value, sender) {
             return "";
@@ -73,7 +71,7 @@ function createFileDialog(LightResourceDialog) {
         ]);
     };
 
-    FileDialog.prototype.resetMode = function () {
+    EMMFileDialog.prototype.resetMode = function () {
         this.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-dialogfiletitle")());
         this.dialogMode = 0;
         toggleAutoComplete(this, this.titleField);
@@ -84,7 +82,7 @@ function createFileDialog(LightResourceDialog) {
         this.validator.cleanUpForm();
     };
 
-    FileDialog.prototype.testDialogMode = function () {
+    EMMFileDialog.prototype.testDialogMode = function () {
         var input = null;
         if (this.dialogMode == 0) {
             //fixme dirty hack
@@ -122,12 +120,12 @@ function createFileDialog(LightResourceDialog) {
         }
     };
 
-    FileDialog.prototype.buildAndExecuteQuery = function (currentPageID, insertCallback, linkdata) {
+    EMMFileDialog.prototype.buildAndExecuteQuery = function (currentPageID, insertCallback, linkdata) {
         //Build the sfautoedit query
         var query = LightResourceDialog.prototype.buildQuery.call(this, currentPageID);
         var filename = "";
         if (this.isExistingResource) {
-            filename = this.fileName;
+            filename = this.suggestion.data.replace("Bestand:", "").replace("File:", "");
         } else if (this.fileField.getValue() != null) {
             filename = this.fileField.getValue().name;
         }
@@ -137,7 +135,7 @@ function createFileDialog(LightResourceDialog) {
 
     //Call the sfautoedit query to create or edit an existing resource
     //This also happens when linking to an existing resource and not editing anything
-    FileDialog.prototype.executeQuery = function (query, insertCallback, linkdata) {
+    EMMFileDialog.prototype.executeQuery = function (query, insertCallback, linkdata) {
         var target = "";
         if (this.isExistingResource) {
             target = linkdata;
@@ -187,15 +185,10 @@ function createFileDialog(LightResourceDialog) {
         }
     };
 
-    FileDialog.prototype.fillFields = function (suggestion) {
+    EMMFileDialog.prototype.fillFields = function (suggestion) {
         LightResourceDialog.prototype.fillFields.call(this, suggestion);
-        this.fileName = suggestion.data.replace("Bestand:", "").replace("File:", "");
         this.validator.validateAll();
     };
 
-    FileDialog.prototype.processDialogSpecificQueryResult = function (res, prop, suggestionObject) {
-        LightResourceDialog.prototype.processDialogSpecificQueryResult.call(this,res,prop,suggestionObject);
-    };
-
-    return FileDialog;
+    return EMMFileDialog;
 }

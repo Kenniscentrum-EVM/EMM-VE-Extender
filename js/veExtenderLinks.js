@@ -98,14 +98,13 @@ function loadEMMDialog(resourceType, toolId, menuText, dialogText, askQuery, tem
  * @param templateResult A function that transforms the inserted data into a relevant format for inserting the links as a template
  */
 function createDialog(dialogName, dialogMessage, askQuery, resourceType, templateResult) {
-    //Constructor for Dialog
-    var Dialog = function (surface, config) {
+    //Constructor for EMMDialog
+    var EMMDialog = function (surface, config) {
         OO.ui.ProcessDialog.call(this, surface, config);
         this.suggestion = null;
         this.isExistingResource = false;
         this.dialogMode = 0;
         this.upload = new mw.Upload({parameters: {ignorewarnings: true}});
-        this.fileName = "";
         //Create some common fields, present in all dialogs
         this.presentationTitleField = new OO.ui.TextInputWidget({});
         //Create the fieldset, which is responsible for the layout of the dialog
@@ -146,12 +145,12 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
             }
         );
     };
-    OO.inheritClass(Dialog, OO.ui.ProcessDialog);
+    OO.inheritClass(EMMDialog, OO.ui.ProcessDialog);
 
     //Set static properties of the dialog
-    Dialog.static.name = dialogName;
-    Dialog.static.title = dialogMessage;
-    Dialog.static.actions = [
+    EMMDialog.static.name = dialogName;
+    EMMDialog.static.title = dialogMessage;
+    EMMDialog.static.actions = [
         {
             action: "insert",
             label: OO.ui.deferMsg("visualeditor-emm-insert"),
@@ -171,28 +170,28 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
 
     //Define basic versions of functions that need to be overloaded.
     //These functions display an error message to indicate that a dialog-specific overloaded function is missing.
-    Dialog.prototype.createFields = function () {
+    EMMDialog.prototype.createFields = function () {
         displayOverloadError("createFields");
     };
-    Dialog.prototype.createDialogLayout = function () {
+    EMMDialog.prototype.createDialogLayout = function () {
         displayOverloadError("createDialogLayout");
     };
-    Dialog.prototype.testDialogMode = function () {
+    EMMDialog.prototype.testDialogMode = function () {
         displayOverloadError("testDialogMode");
     };
-    Dialog.prototype.resetMode = function () {
+    EMMDialog.prototype.resetMode = function () {
         displayOverloadError("resetMode");
     };
-    Dialog.prototype.buildAndExecuteQuery = function () {
+    EMMDialog.prototype.buildAndExecuteQuery = function () {
         displayOverloadError("buildAndExecuteQuery");
     };
-    Dialog.prototype.executeQuery = function () {
+    EMMDialog.prototype.executeQuery = function () {
         displayOverloadError("executeQuery");
     };
-    Dialog.prototype.fillFields = function () {
+    EMMDialog.prototype.fillFields = function () {
         displayOverloadError("fillFields");
     };
-    Dialog.prototype.processDialogSpecificQueryResult = function () {
+    EMMDialog.prototype.processDialogSpecificQueryResult = function () {
         displayOverloadError("processQueryResult");
     };
 
@@ -201,10 +200,10 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
     switch (resourceType) {
         case "File":
         case "External link":
-            dialog = createLightResourceDialog(Dialog, resourceType);
+            dialog = createLightResourceDialog(EMMDialog, resourceType);
             break;
         case "Internal link":
-            dialog = createInternalLinkDialog(Dialog);
+            dialog = createInternalLinkDialog(EMMDialog);
             break;
         default:
             alert(OO.ui.deferMsg("visualeditor-emm-dialog-error"));
@@ -215,7 +214,7 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
      * Initializes the dialog.
      * Creates all visual items inside the dialog and adds the necessary logic to it
      */
-    Dialog.prototype.initialize = function () {
+    EMMDialog.prototype.initialize = function () {
         //Put the dialog in a variable for easier use
         //This is also necessary because in certain cases the meaning of this changes, even though you want to be able
         //to keep accessing the dialogInstance
@@ -228,7 +227,7 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
         dialogInstance.fieldset.addItems([new OO.ui.FieldLayout(requiredLabel)]);
 
         //Add the created items to the dialog
-        Dialog.super.prototype.initialize.call(this);
+        EMMDialog.super.prototype.initialize.call(this);
         this.content = new OO.ui.PanelLayout({
             padded: true,
             expanded: false
@@ -315,7 +314,7 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
             cleanUpDialog();
         };
 
-        Dialog.prototype.getActionProcess = function (action) {
+        EMMDialog.prototype.getActionProcess = function (action) {
             if (action === "insert") {
                 return new OO.ui.Process(function () {
                     insertButtonHandler();
@@ -330,7 +329,7 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
                 cleanUpDialog();
             }
             //Use parent handler in case something goes wrong
-            return Dialog.super.prototype.getActionProcess.call(this, action);
+            return EMMDialog.super.prototype.getActionProcess.call(this, action);
         };
 
         function cleanUpDialog() {
@@ -359,7 +358,7 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
         //todo in plaats van deze hack een eigen event afvuren en opvangen?
         //Selected text is gathered here and put inside the input field
         //Beyong that this is also the place where the size of the dialog is set.
-        Dialog.prototype.setDimensions = function (dim) {
+        EMMDialog.prototype.setDimensions = function (dim) {
             grabSelectedText(dialogInstance.presentationTitleField);
             if (dialogInstance.presentationTitleField.value.length > 0)
                 dialogInstance.validator.validateWidget(dialogInstance.presentationTitleField);
@@ -377,7 +376,7 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
         };
     };
 
-    Dialog.prototype.getFieldset = function () {
+    EMMDialog.prototype.getFieldset = function () {
         return this.fieldset;
     };
 
@@ -386,7 +385,7 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
      *  @param query (string) the query that is to be used in the API-call
      *  @param callback (function) a function that will be executed after the api-call is finished
      */
-    Dialog.prototype.semanticAskQuery = function (query, callback) {
+    EMMDialog.prototype.semanticAskQuery = function (query, callback) {
         var dialogInstance = this;
         var api = new mw.Api();
         api.get({
@@ -403,11 +402,12 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
                 if (!res.hasOwnProperty(prop))
                     continue;
                 var suggestionObject = {};
+                var singleResultRow = res[prop]; //One row from the set of results
                 //The data field of this object needs to contain the internal pagename of the resource in order to
                 // work correctly with the atuomcplete library. This is the same for value which needs to contain the title
-                suggestionObject.data = res[prop].fulltext;
+                suggestionObject.data = singleResultRow.fulltext;
                 suggestionObject.value = "";
-                var semantictitle = res[prop].printouts["Semantic title"][0];
+                var semantictitle = singleResultRow.printouts["Semantic title"][0];
                 if (semantictitle)
                     suggestionObject.value = semantictitle;
                 else
@@ -420,7 +420,7 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
                     prevTitle = suggestionObject.value;
                     numTitle = 0;
                 }
-                dialogInstance.processDialogSpecificQueryResult(res, prop, suggestionObject);
+                dialogInstance.processDialogSpecificQueryResult(singleResultRow, suggestionObject);
                 arr.push(suggestionObject);
             }
             arr.sort(function (a, b) {

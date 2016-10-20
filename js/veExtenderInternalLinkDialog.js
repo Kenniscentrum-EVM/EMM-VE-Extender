@@ -4,19 +4,17 @@
 "use strict";
 
 function createInternalLinkDialog(Dialog) {
-    console.log("Internal Link Dialog");
-
-    var InternalLinkDialog = function (surface, config) {
+    var EMMInternalLinkDialog = function (surface, config) {
         Dialog.call(this, surface, config);
     };
-    OO.inheritClass(InternalLinkDialog, Dialog);
+    OO.inheritClass(EMMInternalLinkDialog, Dialog);
 
-    InternalLinkDialog.prototype.createFields = function () {
+    EMMInternalLinkDialog.prototype.createFields = function () {
         //Create input fields for an internal link dialog
         this.titleField = new OO.ui.TextInputWidget({placeholder: OO.ui.deferMsg("visualeditor-emm-search")});
     };
 
-    InternalLinkDialog.prototype.createDialogLayout = function () {
+    EMMInternalLinkDialog.prototype.createDialogLayout = function () {
         this.titleField.validation = [checkIfEmpty];
         this.presentationTitleField.validation = [checkIfEmpty];
 
@@ -39,15 +37,15 @@ function createInternalLinkDialog(Dialog) {
         ]);
     };
 
-    InternalLinkDialog.prototype.testDialogMode = function () {
+    EMMInternalLinkDialog.prototype.testDialogMode = function () {
         //Modes not implemented yet
     };
 
-    InternalLinkDialog.prototype.resetMode = function () {
+    EMMInternalLinkDialog.prototype.resetMode = function () {
         //Modes not implemented yet
     };
 
-    InternalLinkDialog.prototype.buildAndExecuteQuery = function (currentPageID, insertCallback) {
+    EMMInternalLinkDialog.prototype.buildAndExecuteQuery = function (currentPageID, insertCallback) {
         var query = "";
         if (!this.isExistingResource) {
             //Start building the sfautoedit query
@@ -75,18 +73,18 @@ function createInternalLinkDialog(Dialog) {
         }
     };
 
-    InternalLinkDialog.prototype.executeQuery = function (query, insertCallback) {
+    EMMInternalLinkDialog.prototype.executeQuery = function (query, insertCallback) {
         semanticCreateWithFormQuery(query, insertCallback, null, "Light Context");
     };
 
-    InternalLinkDialog.prototype.fillFields = function (suggestion) {
+    EMMInternalLinkDialog.prototype.fillFields = function (suggestion) {
         //Nothing to fill, no editable fields beyond presentationtitle and title
         this.validator.validateAll();
     };
 
-    InternalLinkDialog.prototype.processDialogSpecificQueryResult = function (res, prop, suggestionObject) {
+    EMMInternalLinkDialog.prototype.processDialogSpecificQueryResult = function (res, prop, suggestionObject) {
         //No additional behaviour on top of the default behaviour
     };
 
-    return InternalLinkDialog;
+    return EMMInternalLinkDialog;
 }

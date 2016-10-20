@@ -4,21 +4,19 @@
 "use strict";
 
 function createExternalLinkDialog(LightResourceDialog) {
-    console.log("External Link Dialog");
-
-    var ExternalLinkDialog = function (surface, config) {
+    var EMMExternalLinkDialog = function (surface, config) {
         LightResourceDialog.call(this, surface, config);
     };
-    OO.inheritClass(ExternalLinkDialog, LightResourceDialog);
+    OO.inheritClass(EMMExternalLinkDialog, LightResourceDialog);
 
-    ExternalLinkDialog.prototype.createFields = function () {
+    EMMExternalLinkDialog.prototype.createFields = function () {
         LightResourceDialog.prototype.createFields.call(this);
         //Create input fields for an external link dialog
         this.linkField = new OO.ui.TextInputWidget({placeholder: OO.ui.deferMsg("visualeditor-emm-linkdialog-linkfield-placeholder-def")()});
         this.addToResourcesField = new OO.ui.CheckboxInputWidget({selected: true});
     };
 
-    ExternalLinkDialog.prototype.createDialogLayout = function () {
+    EMMExternalLinkDialog.prototype.createDialogLayout = function () {
         LightResourceDialog.prototype.createDialogLayout.call(this);
         // todo validation property verplaatsen.
         this.linkField.validation = [checkIfEmpty, checkIfWebsite];
@@ -75,7 +73,7 @@ function createExternalLinkDialog(LightResourceDialog) {
         ]);
     };
 
-    ExternalLinkDialog.prototype.resetMode = function () {
+    EMMExternalLinkDialog.prototype.resetMode = function () {
         this.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-dialogexternallinktitle")());
         this.dialogMode = 0; //TODO: check if this is still necessary
         toggleAutoComplete(this, this.titleField);
@@ -84,7 +82,7 @@ function createExternalLinkDialog(LightResourceDialog) {
         this.validator.cleanUpForm();
     };
 
-    ExternalLinkDialog.prototype.testDialogMode = function () {
+    EMMExternalLinkDialog.prototype.testDialogMode = function () {
         var input = null;
         if (this.dialogMode == 0) {
             if (!this.isExistingResource && this.linkField.value.length != 0) {
@@ -111,7 +109,7 @@ function createExternalLinkDialog(LightResourceDialog) {
         }
     };
 
-    ExternalLinkDialog.prototype.buildAndExecuteQuery = function (currentPageID, insertCallback, linkdata) {
+    EMMExternalLinkDialog.prototype.buildAndExecuteQuery = function (currentPageID, insertCallback, linkdata) {
         var query = LightResourceDialog.prototype.buildQuery.call(this, currentPageID);
         //Build the sfautoedit query
         query += "&Resource Description[hyperlink]=" + this.linkField.getValue();
@@ -120,7 +118,7 @@ function createExternalLinkDialog(LightResourceDialog) {
 
     //Call the sfautoedit query to create or edit an existing resource
     //This also happens when linking to an existing resource and not editing anything
-    ExternalLinkDialog.prototype.executeQuery = function (query, insertCallback, linkdata) {
+    EMMExternalLinkDialog.prototype.executeQuery = function (query, insertCallback, linkdata) {
         var target = "";
         if (this.isExistingResource) {
             target = linkdata;
@@ -128,16 +126,16 @@ function createExternalLinkDialog(LightResourceDialog) {
         semanticCreateWithFormQuery(query, insertCallback, target, "Resource Hyperlink");
     };
 
-    ExternalLinkDialog.prototype.fillFields = function (suggestion) {
+    EMMExternalLinkDialog.prototype.fillFields = function (suggestion) {
         LightResourceDialog.prototype.fillFields.call(this, suggestion);
         this.linkField.setValue(suggestion.hyperlink);
         this.validator.validateAll();
     };
 
-    ExternalLinkDialog.prototype.processDialogSpecificQueryResult = function (res, prop, suggestionObject) {
-        LightResourceDialog.prototype.processDialogSpecificQueryResult.call(this,res,prop,suggestionObject);
-        suggestionObject.hyperlink = res[prop].printouts["Hyperlink"][0];
+    EMMExternalLinkDialog.prototype.processDialogSpecificQueryResult = function (singleresult, suggestionObject) {
+        LightResourceDialog.prototype.processDialogSpecificQueryResult.call(this,singleresult,suggestionObject);
+        suggestionObject.hyperlink = singleresult.printouts["Hyperlink"][0];
     };
 
-    return ExternalLinkDialog;
+    return EMMExternalLinkDialog;
 }
