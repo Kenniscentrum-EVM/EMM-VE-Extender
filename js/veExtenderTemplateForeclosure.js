@@ -18,7 +18,6 @@ var VEETemplateForclosure = function(protectedTypes) {
         return removeRange(doc, removeStart, removeEnd, removeMetadata, this);
     };
 
-
     function evaluateTransclusions() {
         var nodes = ve.init.target.getSurface().getModel().getDocument().getDocumentNode();
         var transclusions = getTransclusions(nodes);
@@ -46,34 +45,28 @@ var VEETemplateForclosure = function(protectedTypes) {
         }
     }
 
-
     function removeRange(doc, removeStart, removeEnd, removeMetadata, thisContext)
     {
         var x;
         var protect = false;
-        for(x = removeStart; x < removeEnd; x++){console.log("offset = " + x);
+        for(x = removeStart; x < removeEnd; x++){
             var node = doc.getDocumentNode().getNodeFromOffset(x);
-            console.log("node: ", node);
             if(node.type != null)
                 if(node.type == 'mwTransclusionBlock' && protectedTemplates[getTemplate(node)] != null)
                 {
-                    console.log("I'm going to protect this node.");
                     ve.dm.nodeFactory.registry[doc.data.getType(x)].static.isDeletable = false;
                     protect = true;
-                    //check if we're incremeting correctly?
                     removeRange(doc, x + 1, removeEnd, removeMetadata, thisContext);
                     break;
                 }
         }
         var returnValue; //todo range -1?
         if(protect) { //todo perhaps this isn't needed in a proper implementation
-            returnValue = base.call(thisContext, doc, removeStart, x, removeMetadata);
+            returnValue = base.call(thisContext, doc, removeStart, x - 1, removeMetadata);
             ve.dm.nodeFactory.registry[doc.data.getType(x)].static.isDeletable = true;
         }
         else
-        {
             returnValue = base.call(thisContext, doc, removeStart, x, removeMetadata);
-        }
         return returnValue;
     }
 
