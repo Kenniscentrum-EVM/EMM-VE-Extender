@@ -1,13 +1,15 @@
 "use strict";
 
 
-/*  addEMMLinks
- *  This method is executed when the extention is loaded and is responsible for passing the correct information to the loadEMMDialog method
+/**
+ * This method is executed when the extention is loaded and is responsible for passing the correct information to the loadEMMDialog method
+ * At the moment it calls loadEMMDialog to create three dialogs and menu items: File, Internal link and External link
  */
 function addEMMLinks() {
     var queries = veExtenderQueries();
 
-    loadEMMDialog("File", "file", "visualeditor-emm-menufiletitle", "visualeditor-emm-dialogfiletitle",
+    //Create a File-dialog and add a menu item for the dialog
+    loadEMMDialog("File", "file", OO.ui.deferMsg("visualeditor-emm-menufiletitle"), OO.ui.deferMsg("visualeditor-emm-dialogfiletitle"),
         queries.linkfiles,
         function (namedata, linkdata) {
             return {
@@ -20,7 +22,8 @@ function addEMMLinks() {
             };
         }
     );
-    loadEMMDialog("Internal link", "linkpage", "visualeditor-emm-menuinternallinktitle", "visualeditor-emm-dialoginternallinktitle",
+    //Create an internal-link-dialog and add a menu item for the dialog
+    loadEMMDialog("Internal link", "linkpage", OO.ui.deferMsg("visualeditor-emm-menuinternallinktitle"), OO.ui.deferMsg("visualeditor-emm-dialoginternallinktitle"),
         queries.linkpages,
         function (namedata, linkdata) {
             return {
@@ -33,7 +36,8 @@ function addEMMLinks() {
             };
         }
     );
-    loadEMMDialog("External link", "linkwebsite", "visualeditor-emm-menuexternallinktitle", "visualeditor-emm-dialogexternallinktitle",
+    //Create an external-link-dialog and add a menu item for the dialog
+    loadEMMDialog("External link", "linkwebsite", OO.ui.deferMsg("visualeditor-emm-menuexternallinktitle"), OO.ui.deferMsg("visualeditor-emm-dialogexternallinktitle"),
         queries.linkwebsites,
         function (namedata, linkdata) {
             return {
@@ -48,22 +52,21 @@ function addEMMLinks() {
     );
 }
 
-
 /**
- * This function creates all the insert dialogs for internal links, external links and files.
- * It also creates menu buttons that allow access to these dialogs
- * @param resourceType The type of resource that should be linked to
- * @param toolId The id the tool should have in the top menu of the visual editor
- * @param menuText The text to be displayed at the button in the top-menu
- * @param dialogText The text to be displayed at the top of the dialog
- * @param askQuery The ask query that needs to be executed in order to get all existing resources
- * @param templateResult A function that transforms the inserted data into a relevant format for inserting the links as a template
+ * This function creates a dialog of the specified type, it also adds a menu button to the insert-menu in order to access the dialog
+ * Currently available dialog types are: Internal link, External link and File
+ * @param {string} resourceType - The name of the resource type for which we want to create a dialog and manu-items
+ * @param {string} toolId - The internal name for the tool/button in the menu-bar
+ * @param {string} menuText - The text that should be displayed in the menu-bar
+ * @param {string} dialogText - The text that should be displayed at the top of the dialog
+ * @param {string} askQuery - A semantic ask-query that will be executed in order to gather all resources of the relevant type
+ * @param {function} templateResult - A function that transforms the inserted data into the required format for inserting the links as a template
  */
 function loadEMMDialog(resourceType, toolId, menuText, dialogText, askQuery, templateResult) {
     var dialogName = "process-" + toolId + " dialog";
 
     // create the dialog
-    createDialog(dialogName, OO.ui.deferMsg(dialogText), askQuery, resourceType, templateResult);
+    createDialog(dialogName, dialogText, askQuery, resourceType, templateResult);
 
     // Add a menu-item that opens the dialog
     var tool = function (toolGroup, config) {
@@ -76,7 +79,7 @@ function loadEMMDialog(resourceType, toolId, menuText, dialogText, askQuery, tem
     //More configuration for the menu-items
     OO.inheritClass(tool, ve.ui.Tool);
     tool.static.name = toolId;
-    tool.static.title = OO.ui.deferMsg(menuText);
+    tool.static.title = menuText;
     tool.static.group = "tools";
     tool.static.icon = "link";
     tool.static.allowCollapse = null;
@@ -90,12 +93,12 @@ function loadEMMDialog(resourceType, toolId, menuText, dialogText, askQuery, tem
 }
 
 /**
- * This method creates a dialog that helps the user with inserting several types of links
- * @param dialogName A name that servers as the unique identifier of the dialog
- * @param dialogMessage The text that will be displayed at the top of the dialog
- * @param askQuery The ask query that needs to be executed in order to get all existing resources
- * @param resourceType The type of resource that should be linked to
- * @param templateResult A function that transforms the inserted data into a relevant format for inserting the links as a template
+ * This method creates a dialog that helps the user with inserting a specific type of link
+ * @param {string} dialogName - The internal name of the dialog
+ * @param {string} dialogMessage - The text that will be displayed at the top of the dialog
+ * @param {string} askQuery - A semantic ask-query that will be executed in order to gather all resources of the relevant type
+ * @param {string} resourceType - For what type of resource the dialog should be created, currently available types: File, Internal link, External link
+ * @param {function} templateResult - A function that transforms the inserted data into the required format for inserting the links as a template
  */
 function createDialog(dialogName, dialogMessage, askQuery, resourceType, templateResult) {
     //Constructor for EMMDialog

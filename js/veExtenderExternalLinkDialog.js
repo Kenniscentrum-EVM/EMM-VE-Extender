@@ -3,6 +3,7 @@
  */
 "use strict";
 
+//TODO document factory-like construction
 function createExternalLinkDialog(LightResourceDialog) {
     var EMMExternalLinkDialog = function (surface, config) {
         LightResourceDialog.call(this, surface, config);
