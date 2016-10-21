@@ -375,7 +375,7 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
                 dialogInstance.fieldset.getItems()[i].$element.find(".oo-ui-fieldLayout-body").css("width", "100%").css("overflow", "hidden");
             }
             this.$frame.css({
-                width: dim.width + 50 || "",
+                width: dim.width + 30 || "",
                 height: this.getContentHeight() + 20 || ""
             });
         };
