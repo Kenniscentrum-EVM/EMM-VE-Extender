@@ -8,13 +8,13 @@
  */
 var VEETemplateForclosure = function(protectedTypes) {
 
+    evaluateTransclusions();
     var deleteJobs = [];
 
     //de methode die over de verwijdering van elmenten gaat (terug te vinden in \mediawiki\extensions\VisualEditor\lib\ve\src\dm\ve.dm.Transaction.js)
     var base = ve.dm.Transaction.prototype.addSafeRemoveOps;
     ve.dm.Transaction.prototype.addSafeRemoveOps = function(doc, removeStart, removeEnd, removeMetadata)
     {
-
         var hasTemplate = false;
         var _lock = false;
         var deferred = $.Deferred();
@@ -31,7 +31,7 @@ var VEETemplateForclosure = function(protectedTypes) {
                 //console.log(node.type);
                 // loop door de array met beschermde types
                     // is het type gelijk aan een type in de lijst
-               // console.log(node);
+                console.log(node);
 
                     if (node.type == 'mwTransclusionInline' || node.type == 'mwTransclusionBlock') {
                         var target;
@@ -78,6 +78,8 @@ var VEETemplateForclosure = function(protectedTypes) {
         }
         if(!hasTemplate)
             return base.call(this, doc, removeStart, removeEnd, removeMetadata);
+        else
+            return 0;
 
         function poll_lock()
         {
@@ -90,6 +92,40 @@ var VEETemplateForclosure = function(protectedTypes) {
             }
         }
 
+    }
+
+
+    function evaluateTransclusions()
+    {
+        var nodes = ve.init.target.getSurface().getModel().getDocument().getDocumentNode().children;
+        var transclusions = [];
+
+        console.log(getTransclusions(nodes));
+
+    }
+
+    function getTransclusions(node)
+    {
+
+        //we only need the transclusionnodes, they are always at the second level
+        console.log("hallo");
+        var leaves = [];
+        if(node.children == null)
+        {
+            leaves.push(node);
+            return leaves;
+        }
+        for(var i = 0; i < node.children.length; i++)
+        {
+            var childLeaves = getTransclusions(node.children[i]);
+            if(childLeaves.children != null)
+                leaves = leaves.concat(childLeaves[i]);
+            else
+                leaves.push(node.children[i]);
+        }
+        if(!leaves.length)
+            leaves.push(node);
+        return leaves;
     }
 };
 
