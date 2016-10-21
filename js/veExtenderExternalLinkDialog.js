@@ -149,5 +149,12 @@ function createExternalLinkDialog(LightResourceDialog) {
         suggestionObject.hyperlink = singleresult.printouts["Hyperlink"][0];
     };
 
+    EMMExternalLinkDialog.prototype.findTemplateToUse = function () {
+        if (this.addToResourcesField.isSelected()) {
+            return "Cite";
+        }
+        return "External link";
+    };
+
     return EMMExternalLinkDialog;
 }

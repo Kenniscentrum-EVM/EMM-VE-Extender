@@ -197,6 +197,9 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
     EMMDialog.prototype.processDialogSpecificQueryResult = function () {
         displayOverloadError("processQueryResult");
     };
+    EMMDialog.prototype.findTemplateToUse = function () {
+        displayOverloadError("findTemplateToUse");
+    }
 
 
     var dialog = null;
@@ -250,6 +253,7 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
             else {
                 linkdata = "";
             }
+
             /**
              * Callback function to be called after creating a new resource or editing an existing one
              * It is responsible for inserting a link or cite resourceType in the text of your page that links to the resource
@@ -257,24 +261,7 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
              */
             var insertCallback = function (linkTitle) {
                 linkdata = linkTitle;
-                var templateToUse = "";
-                //Use this in order to insert file links via the cite resourceType
-                if (resourceType == "File") {
-                    templateToUse = "Cite";
-                }
-                //In case of an external link we need to check if the user wants to include this link in the
-                //references list
-                else if (resourceType === "External link") {
-                    if (dialogInstance.addToResourcesField.isSelected()) {
-                        templateToUse = "Cite";
-                    }
-                    else {
-                        templateToUse = "External link";
-                    }
-                }
-                else {
-                    templateToUse = resourceType;
-                }
+                var templateToUse = dialogInstance.findTemplateToUse();
                 var mytemplate = [
                     {
                         type: "mwTransclusionInline",

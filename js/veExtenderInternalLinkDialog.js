@@ -83,5 +83,9 @@ function createInternalLinkDialog(Dialog) {
         //No additional behaviour on top of the default behaviour
     };
 
+    EMMInternalLinkDialog.prototype.findTemplateToUse = function () {
+        return "Internal link";
+    };
+
     return EMMInternalLinkDialog;
 }

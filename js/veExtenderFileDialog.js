@@ -31,8 +31,7 @@ function createFileDialog(LightResourceDialog) {
             align: "left"
         });
 
-        //Things to do when the specified field changes
-        this.titleField.onChangeFunctions = [function () {
+        var testSuggestedLink = function () {
             //todo replace this temporary thing with something better.
             if (this.isExistingResource) {
                 fileFieldLayout.$element.hide();
@@ -41,7 +40,10 @@ function createFileDialog(LightResourceDialog) {
                     fileFieldLayout.$element.show();
                 }
             }
-        }, this.testDialogMode]; // ,testDialogMode
+        };
+
+        //Things to do when the specified field changes
+        this.titleField.onChangeFunctions = [testSuggestedLink, this.testDialogMode]; // ,testDialogMode
         this.fileField.onChangeFunctions = [this.testDialogMode];
 
         this.fieldset.addItems([
@@ -190,6 +192,10 @@ function createFileDialog(LightResourceDialog) {
     EMMFileDialog.prototype.fillFields = function (suggestion) {
         LightResourceDialog.prototype.fillFields.call(this, suggestion);
         this.validator.validateAll();
+    };
+
+    EMMFileDialog.prototype.findTemplateToUse = function () {
+        return "Cite";
     };
 
     return EMMFileDialog;
