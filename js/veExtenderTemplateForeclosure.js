@@ -6,7 +6,7 @@
  * Dit werkt nu nog niet naar behoren, nu kunnen er namelijk alleen nodetypes worden beschermt wanneer je eigenlijk binnen die types nog
  * onderscheid wil maken tussen verschillende templates. Denk aan systeem templates en reguliere templates.
  */
-var VEETemplateForclosure = function(protectedTypes) {
+var VEETemplateForclosure = function() {
 
     evaluateTransclusions();
     var protectedTemplates = {};
