@@ -40,6 +40,5 @@ function loadEMMExtender(){
 
 mw.hook('ve.activationComplete').add(function () {
     // Register plugins to VE. will be loaded once the user opens the VE
-    console.log("koek");
     loadEMMExtender();
 });
