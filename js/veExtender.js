@@ -34,6 +34,7 @@ function loadEMMExtender(){
   addEMMLinks();
   loadExtenderUI();
   createExitDialog();
+  new VEETemplateForclosure();
 }
 
 mw.hook('ve.activationComplete').add(function () {
