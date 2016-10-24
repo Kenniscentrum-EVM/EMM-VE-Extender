@@ -101,7 +101,12 @@ function loadEMMDialog(resourceType, toolId, menuText, dialogText, askQuery, tem
  * @param {function} templateResult - A function that transforms the inserted data into the required format for inserting the links as a template
  */
 function createDialog(dialogName, dialogMessage, askQuery, resourceType, templateResult) {
-    //Constructor for EMMDialog
+    /**
+     * Constructor for EMMDialog, all relevant fields are initiated, mostly with default null or 0 values.
+     * @param surface
+     * @param config
+     * @constructor
+     */
     var EMMDialog = function (surface, config) {
         OO.ui.ProcessDialog.call(this, surface, config);
         this.suggestion = null;
@@ -359,15 +364,16 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
             if (dialogInstance.presentationTitleField.value.length > 0)
                 dialogInstance.validator.validateWidget(dialogInstance.presentationTitleField);
             dialogInstance.fieldset.$element.css({width: dim.width - 10});
+            this.$frame.css({
+                width: dim.width + 250 || "",
+                height: this.getContentHeight() + 20 || ""
+            });
+            dialogInstance.fieldset.$element.css("width","100%");
             for (var i = 0; i < dialogInstance.fieldset.getItems().length; i++) {
                 dialogInstance.fieldset.getItems()[i].$element.find(".oo-ui-labelElement-label").not(".oo-ui-selectFileWidget-label").css("margin-right", 0).css("float", "left").css("width", "30%");
                 dialogInstance.fieldset.getItems()[i].$element.find(".oo-ui-fieldLayout-field").css("width", "70%");
                 dialogInstance.fieldset.getItems()[i].$element.find(".oo-ui-fieldLayout-body").css("width", "100%").css("overflow", "hidden");
             }
-            this.$frame.css({
-                width: dim.width + 50 || "",
-                height: this.getContentHeight() + 20 || ""
-            });
         };
     };
 

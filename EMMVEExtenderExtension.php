@@ -11,7 +11,7 @@ $wgExtensionCredits['semantic'][] = array(
 
     // The version of the extension, which will appear on Special:Version.
     // This can be a number or a string.
-    'version' => '0.7.0',
+    'version' => '0.7.1',
 
     // Your name, which will appear on Special:Version.
     'author' => 'Anton Bil, Nick Pourquié, Carlo Geertse',
@@ -23,7 +23,8 @@ $wgExtensionCredits['semantic'][] = array(
 );
 
 $wgResourceModules['ext.EMMVEExtension'] = array(
-    'scripts' => array('js/veExtenderValidation.js', 'js/veAutocomplete.js', 'js/veExtenderConstants.js', 'js/veExtenderLinks.js',
+    'scripts' => array('js/veExtenderTemplateForeclosure.js','js/veExtenderValidation.js', 'js/veAutocomplete.js', 'js/veExtenderConstants.js',
+        'js/veExtenderLinks.js',
         'js/veExtenderLanguage.js', 'js/veExtenderUI.js', 'js/veExtender.js', 'js/veExitDialog.js', "js/veExtenderFileDialog.js",
         "js/veExtenderInternalLinkDialog.js", "js/veExtenderExternalLinkDialog.js", "js/veExtenderLightResourceDialog.js"),
     'styles' => array('css/veExtender.css'),
