@@ -4,8 +4,8 @@
 "use strict";
 
 function createFileDialog(LightResourceDialog) {
-    var EMMFileDialog = function (surface, config) {
-        LightResourceDialog.call(this, surface, config);
+    var EMMFileDialog = function (config) {
+        LightResourceDialog.call(this, config);
     };
     OO.inheritClass(EMMFileDialog, LightResourceDialog);
 

@@ -4,8 +4,8 @@
 "use strict";
 
 function createInternalLinkDialog(Dialog) {
-    var EMMInternalLinkDialog = function (surface, config) {
-        Dialog.call(this, surface, config);
+    var EMMInternalLinkDialog = function (config) {
+        Dialog.call(this, config);
     };
     OO.inheritClass(EMMInternalLinkDialog, Dialog);
 

@@ -5,8 +5,8 @@
 
 //TODO document factory-like construction
 function createExternalLinkDialog(LightResourceDialog) {
-    var EMMExternalLinkDialog = function (surface, config) {
-        LightResourceDialog.call(this, surface, config);
+    var EMMExternalLinkDialog = function (config) {
+        LightResourceDialog.call(this, config);
     };
     OO.inheritClass(EMMExternalLinkDialog, LightResourceDialog);
 

@@ -107,8 +107,8 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
      * @param config
      * @constructor
      */
-    var EMMDialog = function (surface, config) {
-        OO.ui.ProcessDialog.call(this, surface, config);
+    var EMMDialog = function (config) {
+        OO.ui.ProcessDialog.call(this, config);
         this.suggestion = null;
         this.isExistingResource = false;
         this.dialogMode = 0;
