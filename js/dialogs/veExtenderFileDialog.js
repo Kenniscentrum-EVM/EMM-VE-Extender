@@ -4,8 +4,8 @@
 "use strict";
 
 function createFileDialog(LightResourceDialog) {
-    var EMMFileDialog = function (config) {
-        LightResourceDialog.call(this, config);
+    var EMMFileDialog = function () {
+        LightResourceDialog.call(this);
     };
     OO.inheritClass(EMMFileDialog, LightResourceDialog);
 
@@ -18,6 +18,7 @@ function createFileDialog(LightResourceDialog) {
         });
         //Set the placeholder of titleField
         this.titleField.$element.find('input').prop("placeholder", OO.ui.deferMsg("visualeditor-emm-filedialog-titlefield-placeholder-def")());
+        this.upload = new mw.Upload({parameters: {ignorewarnings: true}}); //Define a new upload object to handle file uploads
     };
 
     EMMFileDialog.prototype.createDialogLayout = function () {
@@ -43,8 +44,8 @@ function createFileDialog(LightResourceDialog) {
         };
 
         //Things to do when the specified field changes
-        this.titleField.onChangeFunctions = [testSuggestedLink, this.testDialogMode]; // ,testDialogMode
-        this.fileField.onChangeFunctions = [this.testDialogMode];
+        this.titleField.onChangeFunctions = [testSuggestedLink, this.testAndChangeDialogMode]; // ,testAndChangeDialogMode
+        this.fileField.onChangeFunctions = [this.testAndChangeDialogMode];
 
         this.fieldset.addItems([
             new OO.ui.FieldLayout(this.titleField, {
@@ -75,18 +76,7 @@ function createFileDialog(LightResourceDialog) {
         ]);
     };
 
-    EMMFileDialog.prototype.resetMode = function () {
-        this.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-dialogfiletitle")());
-        this.dialogMode = 0;
-        toggleAutoComplete(this, this.titleField);
-        var input = this.titleField.$element.find('input');
-        input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-filedialog-titlefield-placeholder-def")());
-        this.fileField.$element.show();
-        this.titleField.currentFile = null;
-        this.validator.cleanUpForm();
-    };
-
-    EMMFileDialog.prototype.testDialogMode = function () {
+    EMMFileDialog.prototype.testAndChangeDialogMode = function () {
         var input = null;
         if (this.dialogMode == 0) {
             //fixme dirty hack
@@ -122,6 +112,17 @@ function createFileDialog(LightResourceDialog) {
                 this.validator.cleanUpForm();
             }
         }
+    };
+
+    EMMFileDialog.prototype.resetMode = function () {
+        this.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-dialogfiletitle")());
+        this.dialogMode = 0;
+        toggleAutoComplete(this, this.titleField);
+        var input = this.titleField.$element.find('input');
+        input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-filedialog-titlefield-placeholder-def")());
+        this.fileField.$element.show();
+        this.titleField.currentFile = null;
+        this.validator.cleanUpForm();
     };
 
     EMMFileDialog.prototype.buildAndExecuteQuery = function (currentPageID, insertCallback, linkdata) {

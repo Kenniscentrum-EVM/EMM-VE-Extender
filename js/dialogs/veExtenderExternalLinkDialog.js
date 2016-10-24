@@ -5,8 +5,8 @@
 
 //TODO document factory-like construction
 function createExternalLinkDialog(LightResourceDialog) {
-    var EMMExternalLinkDialog = function (config) {
-        LightResourceDialog.call(this, config);
+    var EMMExternalLinkDialog = function () {
+        LightResourceDialog.call(this);
     };
     OO.inheritClass(EMMExternalLinkDialog, LightResourceDialog);
 
@@ -33,10 +33,10 @@ function createExternalLinkDialog(LightResourceDialog) {
         };
 
         //Things to do when the specified field changes
-        this.titleField.onChangeFunctions = [testSuggestedLink, this.testDialogMode, function () {
+        this.titleField.onChangeFunctions = [testSuggestedLink, this.testAndChangeDialogMode, function () {
             toggleAutoComplete(this, this.titleField)
         }]; //fixme temporary method toggle autocomple
-        this.linkField.onChangeFunctions = [this.testDialogMode, function () {
+        this.linkField.onChangeFunctions = [this.testAndChangeDialogMode, function () {
             toggleAutoComplete(this, this.titleField)
         }]; //fixme temporary method toggle autocomplete
 
@@ -76,16 +76,7 @@ function createExternalLinkDialog(LightResourceDialog) {
         ]);
     };
 
-    EMMExternalLinkDialog.prototype.resetMode = function () {
-        this.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-dialogexternallinktitle")());
-        this.dialogMode = 0; //TODO: check if this is still necessary
-        toggleAutoComplete(this, this.titleField);
-        var input = this.titleField.$element.find('input');
-        input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-def")());
-        this.validator.cleanUpForm();
-    };
-
-    EMMExternalLinkDialog.prototype.testDialogMode = function () {
+    EMMExternalLinkDialog.prototype.testAndChangeDialogMode = function () {
         var input = null;
         if (this.dialogMode == 0) {
             if (!this.isExistingResource && this.linkField.value.length != 0) {
@@ -120,6 +111,15 @@ function createExternalLinkDialog(LightResourceDialog) {
                 this.validator.cleanUpForm();
             }
         }
+    };
+
+    EMMExternalLinkDialog.prototype.resetMode = function () {
+        this.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-dialogexternallinktitle")());
+        this.dialogMode = 0; //TODO: check if this is still necessary
+        toggleAutoComplete(this, this.titleField);
+        var input = this.titleField.$element.find('input');
+        input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-def")());
+        this.validator.cleanUpForm();
     };
 
     EMMExternalLinkDialog.prototype.buildAndExecuteQuery = function (currentPageID, insertCallback, linkdata) {

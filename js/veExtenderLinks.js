@@ -65,18 +65,18 @@ function addEMMLinks() {
 function loadEMMDialog(resourceType, toolId, menuText, dialogText, askQuery, templateResult) {
     var dialogName = "process-" + toolId + " dialog";
 
-    // create the dialog
+    // create the dialog of the given type
     createDialog(dialogName, dialogText, askQuery, resourceType, templateResult);
 
     // Add a menu-item that opens the dialog
-    var tool = function (toolGroup, config) {
-        ve.ui.Tool.call(this, toolGroup, config);
+    var tool = function (config) {
+        ve.ui.Tool.call(this, config);
         this.setDisabled(false);
         this.allowCollapse = null;
         this.$element.addClass("oo-ui-tool-name-extratemplate");
     };
 
-    //More configuration for the menu-items
+    //More configuration for the menu-item
     OO.inheritClass(tool, ve.ui.Tool);
     tool.static.name = toolId;
     tool.static.title = menuText;
@@ -86,6 +86,7 @@ function loadEMMDialog(resourceType, toolId, menuText, dialogText, askQuery, tem
     tool.static.dialog = dialogName;
     tool.static.deactivateOnSelect = true;
     tool.prototype.onSelect = function () {
+        //Target: ve.init.target is passed in order to enable closing the dialog with the escape key.
         ve.ui.actionFactory.create('window', this.toolbar.getSurface()).open(dialogName, {target: ve.init.target});
         this.setActive(false);
     };
@@ -103,27 +104,25 @@ function loadEMMDialog(resourceType, toolId, menuText, dialogText, askQuery, tem
 function createDialog(dialogName, dialogMessage, askQuery, resourceType, templateResult) {
     /**
      * Constructor for EMMDialog, all relevant fields are initiated, mostly with default null or 0 values.
-     * @param surface
-     * @param config
      * @constructor
      */
-    var EMMDialog = function (config) {
-        OO.ui.ProcessDialog.call(this, config);
+    var EMMDialog = function () {
+        OO.ui.ProcessDialog.call(this);
         this.suggestion = null;
         this.isExistingResource = false;
         this.dialogMode = 0;
         this.selectionRange = null;
-        this.upload = new mw.Upload({parameters: {ignorewarnings: true}});
         //Create some common fields, present in all dialogs
-        this.presentationTitleField = new OO.ui.TextInputWidget({});
-        //Create the fieldset, which is responsible for the layout of the dialog
+        this.presentationTitleField = new OO.ui.TextInputWidget();
         this.titleField = new OO.ui.TextInputWidget();
+        //Create an empty fieldset, which is responsible for the layout of the dialog
         this.fieldset = new OO.ui.FieldsetLayout({
             classes: ["container"]
         });
-        //Create all the fields for te dialog.
+        /*Create all the fields for te dialog. This method should be overwritten so all the fields required for a specific
+         type of dialog are created.*/
         this.createFields();
-        //Add the fields created above to a fieldsetlayout that makes sure the fields and labels are in the correct place
+        //Add the fields created above to a fieldsetlayout that makes sure the fields and labels are in the correct place.
         this.createDialogLayout();
         //add validation for the form
         var dialogInstance = this;
@@ -154,11 +153,13 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
             }
         );
     };
+    //Define EMMDialog as a subclass of OO.ui.ProcessDialog
     OO.inheritClass(EMMDialog, OO.ui.ProcessDialog);
 
     //Set static properties of the dialog
     EMMDialog.static.name = dialogName;
     EMMDialog.static.title = dialogMessage;
+    //Define what actions the dialog should have, these are represented as buttons on the top-side of the dialog.
     EMMDialog.static.actions = [
         {
             action: "insert",
@@ -169,6 +170,11 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
         {action: "cancel", label: OO.ui.deferMsg("visualeditor-emm-cancel"), flags: "safe"}
     ];
 
+    /**
+     * Behaviour for the function createDialogLayout which is present in all dialogs.
+     * Initiates validation for the common fields present in all dialogs.
+     * Needs to be expanded on for behavior for specific dialogs.
+     */
     EMMDialog.prototype.createDialogLayout = function () {
         this.titleField.validation = [checkIfEmpty];
         this.presentationTitleField.validation = [checkIfEmpty];
@@ -176,26 +182,59 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
 
     /**
      * Displays an error message for when a specific overloaded function isn't present
-     * @param functionName The name of the function that has no overloaded equivalent
+     * @param {String} functionName - The name of the function that has no overloaded equivalent
      */
     function displayOverloadError(functionName) {
         alert(OO.ui.deferMsg("visualeditor-emm-overloaded-function-error")() + functionName);
     }
 
-    //Define basic versions of functions that need to be overloaded.
-    //These functions display an error message to indicate that a dialog-specific overloaded function is missing.
+    /*Define basic versions of functions that need to be overloaded.
+     These functions display an error message to indicate that a dialog-specific overloaded function is missing.
+     These functions are an attempt to emulate the idea of an abstract method as seen in other Object Oriented languages*/
+
+    /**
+     * Abstract method that needs to be overridden, displays an error message if this is not the case.
+     * Expected behavior when overriding:
+     * Creates all the inputfields of a dialog that are not yet created in the constructor of the general EMMDialog.
+     */
     EMMDialog.prototype.createFields = function () {
         displayOverloadError("createFields");
     };
-    EMMDialog.prototype.testDialogMode = function () {
-        displayOverloadError("testDialogMode");
+
+    /**
+     * Abstract method that needs to be overridden, displays an error message if this is not the case.
+     * Expected behavior when overriding:
+     * Checks the status of the dialog and changes the dialogmode if necessary.
+     */
+    EMMDialog.prototype.testAndChangeDialogMode = function () {
+        displayOverloadError("testAndChangeDialogMode");
     };
+
+    /**
+     * Abstract method that needs to be overridden, displays an error message if this is not the case.
+     * Expected behavior when overriding:
+     * Resets the dialogmode and resets the properties of the dialog to the default values.
+     */
     EMMDialog.prototype.resetMode = function () {
         displayOverloadError("resetMode");
     };
-    EMMDialog.prototype.buildAndExecuteQuery = function () {
+
+    /**
+     * Abstract method that needs to be overridden, displays an error message if this is not the case.
+     * Expected behavior and parameters when overriding:
+     * Builds and executes a query that inserts the new resource or edits an existing one. After the new resource has
+     * been added, a link is then inserted into the page by executing the insertCallback.
+     * @param {String} currentPageId - The ID of the page that is currently being edited, can only contain alphanumeric
+     * characters an whitespace
+     * @param {function} insertCallback - The function that should be executed after a new resource has been added or
+     * an existing one was changed. This function handles inserting a link into the current page.
+     * @param {String} linkdata - In case of an existing resource, linkdata contains the internal name of the resource
+     * in order to let the api know what existing resource should be edited. Otherwise linkdata is just an empty string.
+     */
+    EMMDialog.prototype.buildAndExecuteQuery = function (currentPageId, insertCallback, linkdata) {
         displayOverloadError("buildAndExecuteQuery");
     };
+
     EMMDialog.prototype.executeQuery = function () {
         displayOverloadError("executeQuery");
     };
@@ -207,7 +246,7 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
     };
     EMMDialog.prototype.findTemplateToUse = function () {
         displayOverloadError("findTemplateToUse");
-    }
+    };
 
 
     var dialog = null;
@@ -268,7 +307,6 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
              * @param linkTitle The internal name of the resource that should be linked to
              */
             var insertCallback = function (linkTitle) {
-                linkdata = linkTitle;
                 var templateToUse = dialogInstance.findTemplateToUse();
                 var mytemplate = [
                     {
@@ -282,7 +320,7 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
                                                 href: "Template:" + templateToUse,
                                                 wt: templateToUse
                                             },
-                                            params: templateResult(namedata, linkdata)
+                                            params: templateResult(namedata, linkTitle)
                                         }
                                     }
                                 ]
@@ -368,7 +406,7 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
                 width: dim.width + 250 || "",
                 height: this.getContentHeight() + 20 || ""
             });
-            dialogInstance.fieldset.$element.css("width","100%");
+            dialogInstance.fieldset.$element.css("width", "100%");
             for (var i = 0; i < dialogInstance.fieldset.getItems().length; i++) {
                 dialogInstance.fieldset.getItems()[i].$element.find(".oo-ui-labelElement-label").not(".oo-ui-selectFileWidget-label").css("margin-right", 0).css("float", "left").css("width", "30%");
                 dialogInstance.fieldset.getItems()[i].$element.find(".oo-ui-fieldLayout-field").css("width", "70%");

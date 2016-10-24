@@ -4,8 +4,8 @@
 "use strict";
 
 function createInternalLinkDialog(Dialog) {
-    var EMMInternalLinkDialog = function (config) {
-        Dialog.call(this, config);
+    var EMMInternalLinkDialog = function () {
+        Dialog.call(this);
     };
     OO.inheritClass(EMMInternalLinkDialog, Dialog);
 
@@ -35,7 +35,7 @@ function createInternalLinkDialog(Dialog) {
         ]);
     };
 
-    EMMInternalLinkDialog.prototype.testDialogMode = function () {
+    EMMInternalLinkDialog.prototype.testAndChangeDialogMode = function () {
         //Modes not implemented yet
     };
 
@@ -43,7 +43,8 @@ function createInternalLinkDialog(Dialog) {
         //Modes not implemented yet
     };
 
-    EMMInternalLinkDialog.prototype.buildAndExecuteQuery = function (currentPageID, insertCallback) {
+    EMMInternalLinkDialog.prototype.buildAndExecuteQuery = function (currentPageID, insertCallback, linkdata) {
+        var dialogInstance = this;
         var query = "";
         if (!this.isExistingResource) {
             //Start building the sfautoedit query
@@ -60,7 +61,7 @@ function createInternalLinkDialog(Dialog) {
                 if (res[currentPageID].printouts["Topcontext"][0] != null) {
                     var topContext = res[currentPageID].printouts["Topcontext"][0].fulltext;
                     query += "&Light Context[Topcontext]=" + topContext;
-                    this.executeQuery(query, insertCallback);
+                    dialogInstance.executeQuery(query, insertCallback);
                 } else {
                     alert(OO.ui.deferMsg("visualeditor-emm-topcontext-error")());
                 }
