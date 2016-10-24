@@ -16,6 +16,9 @@ function addEMMLinks() {
                 },
                 name: {
                     wt: namedata
+                },
+                optional: {
+                    wt: "process-file-dialog"
                 }
             };
         }
@@ -29,6 +32,9 @@ function addEMMLinks() {
                 },
                 name: {
                     wt: namedata
+                },
+                optional: {
+                    wt: "process-linkpage-dialog"
                 }
             };
         }
@@ -42,6 +48,9 @@ function addEMMLinks() {
                 },
                 name: {
                     wt: namedata
+                },
+                optional: {
+                    wt: "process-linkwebsite-dialog"
                 }
             };
         }
@@ -60,7 +69,7 @@ function addEMMLinks() {
  * @param templateResult A function that transforms the inserted data into a relevant format for inserting the links as a template
  */
 function loadEMMDialog(resourceType, toolId, menuText, dialogText, askQuery, templateResult) {
-    var dialogName = "process-" + toolId + " dialog";
+    var dialogName = "process-" + toolId + "-dialog";
 
     // create the dialog
     createDialog(dialogName, OO.ui.deferMsg(dialogText), askQuery, resourceType, templateResult);
@@ -164,6 +173,32 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
     EMMDialog.prototype.createDialogLayout = function () {
         this.titleField.validation = [checkIfEmpty];
         this.presentationTitleField.validation = [checkIfEmpty];
+    };
+
+    EMMDialog.prototype.getReadyProcess = function( config ) {
+
+        var dialogInstance = this;
+        this.validator.disable();
+        //are we editing?
+        if(config.source != null)
+        {
+            config.source = config.source.replace(/ /g,"_");
+            console.log(data.source);
+            var api = new mw.Api();
+            var query = "[[Category:Resource Description]][[file name::" + config.source + "]]|?Semantic title|?Hyperlink|?Dct:creator|?Dct:date|?Organization|?Dct:subject";
+            api.get({
+                action: "ask",
+                query: query
+            }).done(function (queryData) {
+                var res = queryData.query.results;
+
+                for(var row in res) {
+                    dialogInstance.fillFields(dialogInstance.processSingleQueryResult(row, res));
+                }
+                dialogInstance.validator.enable();
+            });
+        }
+        return EMMDialog.super.prototype.getReadyProcess.call(this, config);
     };
 
     /**
@@ -390,6 +425,23 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
      *  @param query (string) the query that is to be used in the API-call
      *  @param callback (function) a function that will be executed after the api-call is finished
      */
+
+    EMMDialog.prototype.processSingleQueryResult = function(row, resultSet){
+        var suggestionObject = {};
+        var singleResultRow = resultSet[row]; //One row from the set of results
+        //The data field of this object needs to contain the internal pagename of the resource in order to
+        // work correctly with the atuomcplete library. This is the same for value which needs to contain the title
+        suggestionObject.data = singleResultRow.fulltext;
+        suggestionObject.value = "";
+        var semanticTitle = singleResultRow.printouts["Semantic title"][0];
+        if (semanticTitle)
+            suggestionObject.value = semanticTitle;
+        else
+            suggestionObject.value = suggestionObject.data;
+        this.processDialogSpecificQueryResult(singleResultRow, suggestionObject);
+        return suggestionObject;
+    };
+
     EMMDialog.prototype.semanticAskQuery = function (query, callback) {
         var dialogInstance = this;
         var api = new mw.Api();
@@ -400,33 +452,10 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
         }).done(function (data) {
             var res = data.query.results;
             var arr = []; //array to store the results
-            var prevTitle = "";
-            var numTitle = 0;
-
-            for (var prop in res) {
-                if (!res.hasOwnProperty(prop))
+            for (var row in res) {
+                if (!res.hasOwnProperty(row))
                     continue;
-                var suggestionObject = {};
-                var singleResultRow = res[prop]; //One row from the set of results
-                //The data field of this object needs to contain the internal pagename of the resource in order to
-                // work correctly with the atuomcplete library. This is the same for value which needs to contain the title
-                suggestionObject.data = singleResultRow.fulltext;
-                suggestionObject.value = "";
-                var semantictitle = singleResultRow.printouts["Semantic title"][0];
-                if (semantictitle)
-                    suggestionObject.value = semantictitle;
-                else
-                    suggestionObject.value = suggestionObject.data;
-                if (suggestionObject.value == prevTitle) {
-                    numTitle++;
-                    suggestionObject.value = suggestionObject.value + "(" + suggestionObject.data + ")";
-                }
-                else {
-                    prevTitle = suggestionObject.value;
-                    numTitle = 0;
-                }
-                dialogInstance.processDialogSpecificQueryResult(singleResultRow, suggestionObject);
-                arr.push(suggestionObject);
+                arr.push(dialogInstance.processSingleQueryResult(row, res));
             }
             arr.sort(function (a, b) {
                 if (a.value > b.value) {
@@ -437,18 +466,6 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
                 }
                 return 0;
             });
-
-            prevTitle = "";
-            for (var i = 0; i < arr.length; i++) {
-                var item = arr[i];
-                suggestionObject.value = item.value;
-                if (suggestionObject.value == prevTitle) {
-                    arr[i].value = suggestionObject.value + "(" + suggestionObject.data + ")";
-                }
-                else {
-                    prevTitle = suggestionObject.value;
-                }
-            }
             callback(arr);
         });
     };

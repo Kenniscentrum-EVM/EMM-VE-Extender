@@ -42,12 +42,13 @@ function createLightResourceDialog(Dialog, resourceType) {
         this.subjectField.setValue(suggestion.subjects);
     };
 
-    EMMLightResourceDialog.prototype.processDialogSpecificQueryResult = function (singleresult, suggestionObject) {
-        suggestionObject.creator = singleresult.printouts["Dct:creator"][0];
-        suggestionObject.date = singleresult.printouts["Dct:date"][0];
-        suggestionObject.organization = singleresult.printouts["Organization"][0];
+    EMMLightResourceDialog.prototype.processDialogSpecificQueryResult = function (singleResult, suggestionObject) {
+        console.log(suggestionObject);
+        suggestionObject.creator = singleResult.printouts["Dct:creator"][0];
+        suggestionObject.date = singleResult.printouts["Dct:date"][0];
+        suggestionObject.organization = singleResult.printouts["Organization"][0];
         suggestionObject.subjects = "";
-        var querySubjects = singleresult.printouts["Dct:subject"];
+        var querySubjects = singleResult.printouts["Dct:subject"];
         //Gathers all subjects and creates a single string which contains the fulltext name of all the subjects,
         //seperated by a ,
         for (var j = 0; j < querySubjects.length; j++) {

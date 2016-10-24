@@ -91,6 +91,8 @@ function createExternalLinkDialog(LightResourceDialog) {
                 if (this.suggestion != null) {
                     if (this.suggestion.hyperlink == this.linkField.value) {
                         clearInputFields(this.fieldset, [0, 2], ["OoUiLabelWidget"]);
+                        this.validator.cleanUpForm();
+                        return;
                     }
                     else {
                         clearInputFields(this.fieldset, [0, 1, 2], ["OoUiLabelWidget"]);
@@ -144,9 +146,9 @@ function createExternalLinkDialog(LightResourceDialog) {
         this.validator.validateAll();
     };
 
-    EMMExternalLinkDialog.prototype.processDialogSpecificQueryResult = function (singleresult, suggestionObject) {
-        LightResourceDialog.prototype.processDialogSpecificQueryResult.call(this, singleresult, suggestionObject);
-        suggestionObject.hyperlink = singleresult.printouts["Hyperlink"][0];
+    EMMExternalLinkDialog.prototype.processDialogSpecificQueryResult = function (singleResult, suggestionObject) {
+        LightResourceDialog.prototype.processDialogSpecificQueryResult.call(this, singleResult, suggestionObject);
+        suggestionObject.hyperlink = singleResult.printouts["Hyperlink"][0];
     };
 
     return EMMExternalLinkDialog;
