@@ -98,12 +98,7 @@ function loadEMMDialog(resourceType, toolId, menuText, dialogText, askQuery, tem
  * @param templateResult A function that transforms the inserted data into a relevant format for inserting the links as a template
  */
 function createDialog(dialogName, dialogMessage, askQuery, resourceType, templateResult) {
-    /**
-     * Constructor for EMMDialog, all relevant fields are initiated, mostly with default null or 0 values.
-     * @param surface
-     * @param config
-     * @constructor
-     */
+    //Constructor for EMMDialog
     var EMMDialog = function (surface, config) {
         OO.ui.ProcessDialog.call(this, surface, config);
         this.suggestion = null;
