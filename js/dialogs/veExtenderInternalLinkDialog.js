@@ -72,7 +72,7 @@ function createInternalLinkDialog(Dialog) {
         }
     };
 
-    EMMInternalLinkDialog.prototype.executeQuery = function (query, insertCallback) {
+    EMMInternalLinkDialog.prototype.executeQuery = function (query, insertCallback, linkdata) {
         semanticCreateWithFormQuery(query, insertCallback, null, "Light Context");
     };
 

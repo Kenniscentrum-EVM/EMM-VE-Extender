@@ -235,17 +235,55 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
         displayOverloadError("buildAndExecuteQuery");
     };
 
-    EMMDialog.prototype.executeQuery = function () {
+    /**
+     * Abstract method that needs to be overridden, displays an error message if this is not the case.
+     * Expected behavior and parameters when overriding:
+     * Executes a query by using the mediawiki api. This query either creates a new resource or updates an existing one
+     * @param {String} query - The query that should be executed. The query should be suitable for an sfautoedit api call.
+     * @param {function} insertCallback - A function that handles inserting a link to the newly created or edited resource
+     * into the current page. This is executed after the api has finished processing the request.
+     * @param {String} linkdata - The internal title of a resource. Should be set to the internal title of the resource
+     * you want to edit, or be empty when creating a new resource.
+     */
+    EMMDialog.prototype.executeQuery = function (query, insertCallback, linkdata) {
         displayOverloadError("executeQuery");
     };
-    EMMDialog.prototype.fillFields = function () {
+
+    /**
+     * Abstract method that needs to be overridden, displays an error message if this is not the case.
+     * Expected behavior and parameters when overriding:
+     * Fill the fields of the dialog based on a resource the user has selected from the autocomplete dropdown.
+     * @param {Object} suggestion - An object containing properties of the selected resource. This is first created when
+     * initiating the autocomplete library.
+     */
+    EMMDialog.prototype.fillFields = function (suggestion) {
         displayOverloadError("fillFields");
     };
-    EMMDialog.prototype.processDialogSpecificQueryResult = function () {
+
+    /**
+     * Abstract method that needs to be overridden, displays an error message if this is not the case.
+     * Expected behavior and parameters when overriding:
+     * Processes part of the result of a ask query. Expands an existing suggestionobject by adding dialog-specific
+     * data from the result to the suggestionObject.
+     * @param {Object} singleresult - A single row from the result of the api-call that contains all the information
+     * asked for in the query.
+     * @param {Object} suggestionObject - A single suggestion that should be expanded. Should already contain
+     * dialog-independent data.
+     */
+    EMMDialog.prototype.processDialogSpecificQueryResult = function (singleresult, suggestionObject) {
         displayOverloadError("processQueryResult");
     };
+
+    /**
+     * Abstract method that needs to be overridden, displays an error message if this is not the case.
+     * Expected behavior and parameters when overriding:
+     * Depending on the type of resource and choices made by the user in the dialog, links to diffrent types of resources
+     * are created in the current page with diffrent types of templates. This function returns what template type to use.
+     * @returns {String} - Null in the abastract case, but should be a String containing the type of template to use.
+     */
     EMMDialog.prototype.findTemplateToUse = function () {
         displayOverloadError("findTemplateToUse");
+        return null;
     };
 
 
@@ -263,14 +301,15 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
     }
     ve.ui.windowFactory.register(dialog);
 
+
     /**
      * Initializes the dialog.
      * Creates all visual items inside the dialog and adds the necessary logic to it
      */
     EMMDialog.prototype.initialize = function () {
-        //Put the dialog in a variable for easier use
-        //This is also necessary because in certain cases the meaning of this changes, even though you want to be able
-        //to keep accessing the dialogInstance
+        /*Put the dialog in a variable for easier use
+         This is also necessary because in certain cases the meaning of the this keyword changes, even though you want
+         to be able to keep accessing the dialogInstance*/
         var dialogInstance = this;
 
         //Add a label that displays the meaning of the * next to form values
@@ -279,7 +318,7 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
         });
         dialogInstance.fieldset.addItems([new OO.ui.FieldLayout(requiredLabel)]);
 
-        //Add the created items to the dialog
+        //Add the created fieldset to the dialog
         EMMDialog.super.prototype.initialize.call(this);
         this.content = new OO.ui.PanelLayout({
             padded: true,
@@ -291,7 +330,9 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
             .toggleClass("oo-ui-windowManager-modal", true);
         this.$body.append(this.content.$element);
 
-        //  Add event-handling logic to okButton
+        /**
+         * Define what should happen when the insert button is clicked.
+         */
         var insertButtonHandler = function () {
             var namedata = dialogInstance.presentationTitleField.getValue();
             if (dialogInstance.suggestion != null) {
@@ -303,7 +344,7 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
 
             /**
              * Callback function to be called after creating a new resource or editing an existing one
-             * It is responsible for inserting a link or cite resourceType in the text of your page that links to the resource
+             * It is responsible for inserting a template in the text of your page that links to the resource
              * @param linkTitle The internal name of the resource that should be linked to
              */
             var insertCallback = function (linkTitle) {
@@ -341,18 +382,26 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
                 surfaceModel.getLinearFragment(dialogInstance.selectionRange).insertContent(mytemplate);
             };
 
+            //Get the name of the current page and replace any underscores with whitespaces to prevent errors later on.
             var currentPageID = mw.config.get('wgPageName').replace(/_/g, " ");
             dialogInstance.buildAndExecuteQuery(currentPageID, insertCallback, linkdata);
             cleanUpDialog();
         };
 
 
-        // Add event handling logic to cancelButton
+        /**
+         * Define what should happen when the cancel button is clicked.
+         */
         var cancelButtonHandler = function () {
             //Clear the dialog and close it
             cleanUpDialog();
         };
 
+        /**
+         * Link event handling functions to the buttons of the dialog
+         * @param {String} action - The symbolic name of the action for which we need a process
+         * @returns {function} - Returns the parent function in case an action that isn't related to an EMMDialog happens
+         */
         EMMDialog.prototype.getActionProcess = function (action) {
             if (action === "insert") {
                 return new OO.ui.Process(function () {
@@ -364,6 +413,7 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
                     cancelButtonHandler();
                 });
             }
+            //Needed for escape?
             else {
                 cleanUpDialog();
             }
@@ -371,6 +421,9 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
             return EMMDialog.super.prototype.getActionProcess.call(this, action);
         };
 
+        /**
+         * Empties all the fields of the dialog and resets it to its default state.
+         */
         function cleanUpDialog() {
             dialogInstance.close();
             //todo check if closed and then clean the fields for a more elegant cleanup?
@@ -383,9 +436,12 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
             dialogInstance.dialogMode = 0;
         }
 
-        //Declare a function to be called after the askQuery has been processed
-        //This function initiates the autocomplete library for the resource input field
-        //The user will be able to pick a resource from the list of all resources gathered by the askQuery
+        /**
+         * A function that should be called after the askQuery is done gathering all available resources of a specified type
+         * This function initiates the autocomplete library for the resource input field
+         * The user will be able to pick a resource from the list of all resources gathered by the askQuery
+         * @param {Ojbect[]} queryResults - An array containing all the possible options for the autocomplete dropdown
+         */
         var autocompleteCallback = function (queryResults) {
             initAutoComplete(queryResults, dialogInstance);
         };
@@ -395,12 +451,16 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
 
         //fixme dirty hack
         //todo in plaats van deze hack een eigen event afvuren en opvangen?
-        //Selected text is gathered here and put inside the input field
-        //Beyong that this is also the place where the size of the dialog is set.
+        /**
+         * Selected text is gathered here and put inside the input field
+         * Beyond that this is also the place where the size of the dialog is set.
+         * @param dim
+         */
         EMMDialog.prototype.setDimensions = function (dim) {
             dialogInstance.selectionRange = grabSelectedText(dialogInstance.presentationTitleField);
-            if (dialogInstance.presentationTitleField.value.length > 0)
+            if (dialogInstance.presentationTitleField.value.length > 0) {
                 dialogInstance.validator.validateWidget(dialogInstance.presentationTitleField);
+            }
             dialogInstance.fieldset.$element.css({width: dim.width - 10});
             this.$frame.css({
                 width: dim.width + 250 || "",
@@ -415,14 +475,18 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
         };
     };
 
+    /**
+     * Getter function for the fieldset of the dialog
+     * @returns {OO.ui.FieldsetLayout} - The fieldset corresponding to this dialog
+     */
     EMMDialog.prototype.getFieldset = function () {
         return this.fieldset;
     };
 
     /*  semanticAskQuery
-     *  This method is responsible for executing a call to the mediawiki API
-     *  @param query (string) the query that is to be used in the API-call
-     *  @param callback (function) a function that will be executed after the api-call is finished
+     *  This method is responsible for executing a call to the mediawiki API of the type "ask"
+     *  @param query {String} the query that is to be used in the API-call
+     *  @param callback {function} a function that will be executed after the api-call is finished
      */
     EMMDialog.prototype.semanticAskQuery = function (query, callback) {
         var dialogInstance = this;
@@ -442,8 +506,8 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
                     continue;
                 var suggestionObject = {};
                 var singleResultRow = res[prop]; //One row from the set of results
-                //The data field of this object needs to contain the internal pagename of the resource in order to
-                // work correctly with the atuomcplete library. This is the same for value which needs to contain the title
+                /*The data field of this object needs to contain the internal pagename of the resource in order to
+                 work correctly with the atuomcplete library. This is the same for value which needs to contain the title*/
                 suggestionObject.data = singleResultRow.fulltext;
                 suggestionObject.value = "";
                 var semantictitle = singleResultRow.printouts["Semantic title"][0];
@@ -472,6 +536,7 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
                 return 0;
             });
 
+            //TODO find out what happens here
             prevTitle = "";
             for (var i = 0; i < arr.length; i++) {
                 var item = arr[i];
@@ -492,6 +557,13 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
  * Clears the input fields of a given fieldset
  * @param fieldset the fieldset whose input fields should be cleared
  */
+
+/**
+ * Clears the input fields of a given fieldset
+ * @param {OO.ui.fieldsetLayout} fieldset - The fieldset wose input fields should be emptied
+ * @param {int[]} exclude - The indices of the fields in the fieldset that should not be cleared
+ * @param {String[]} inputTypeExclude - An array of the names of types of fields that should not be cleared
+ */
 function clearInputFields(fieldset, exclude, inputTypeExclude) {
     if (exclude != null) {
         for (var i = 0; i < fieldset.getItems().length; i++) {
@@ -500,7 +572,7 @@ function clearInputFields(fieldset, exclude, inputTypeExclude) {
                 if (i == exclude[x])
                     ex = true;
             if (!ex) {
-                //Make sure the fieldlayout doens't contain just a label field that can't be cleared
+                //Make sure the fieldlayout doens't contain a field of the given types
                 if ($.inArray(fieldset.getItems()[i].getField().constructor.name, inputTypeExclude) == -1) {
                     fieldset.getItems()[i].getField().setValue("");
                 }
@@ -509,7 +581,7 @@ function clearInputFields(fieldset, exclude, inputTypeExclude) {
     }
     else {
         for (var i = 0; i < fieldset.getItems().length; i++) {
-            //Make sure the fieldlayout doens't contain just a label field that can't be cleared
+            //Make sure the fieldlayout doens't contain just a field of the given types
             if ($.inArray(fieldset.getItems()[i].getField().constructor.name, inputTypeExclude) == -1) {
                 fieldset.getItems()[i].getField().setValue("");
             }
@@ -517,6 +589,14 @@ function clearInputFields(fieldset, exclude, inputTypeExclude) {
     }
 }
 
+/**
+ * Creates a new resource or edits an existing one, depending on whether target is empty or not.
+ * @param {String} query - The query that should be executed for the given target.
+ * @param {function} callback - The callback function that will be executed after creating or updating a resource.
+ * @param {String} target - The internal title of the target of the query when editing an existing resource,
+ * or empty when creating a new resource.
+ * @param {String} form - The name of the semantic form that should be used to create or update the resource.
+ */
 function semanticCreateWithFormQuery(query, callback, target, form) {
     var api = new mw.Api();
     api.get({
@@ -530,8 +610,8 @@ function semanticCreateWithFormQuery(query, callback, target, form) {
 }
 
 /**
- * Grabs the text that is selected (outside the dialog) and insert its into the resource input inside the dialog
- * @param inputObject the input field in which the selected text should be inserted
+ * Grabs the text that is selected (outside the dialog) and inserts it into the presentationtitle field inside the dialog
+ * @param inputObject the field in which the selected text should be inserted
  */
 function grabSelectedText(inputObject) {
     var surfaceModel = ve.init.target.getSurface().getModel();
@@ -565,10 +645,9 @@ function grabSelectedText(inputObject) {
 }
 
 /**
- * Initalizes the autocomplete library
- * @param data A collection of all the items that can be searched in
- * @param inputObject The object in which the input field exists where the autocomplete function should be enabled
- * @param dialogInstance The dialog whose page-id should be edited in order to succesfully insert the link later on
+ * Initializes the autocomplete library
+ * @param data A collection fo all the items that can be searched through
+ * @param dialogInstance The dialog for which the autocomplete dropdown should be activated
  */
 function initAutoComplete(data, dialogInstance) {
     var inputField = $(dialogInstance.titleField.$element).find("input");
@@ -587,10 +666,15 @@ function initAutoComplete(data, dialogInstance) {
     });
 }
 
+
 //fixme this may not be the most efficient way
+/**
+ *
+ * @param dialogInstance
+ * @param input
+ */
 function toggleAutoComplete(dialogInstance, input) {
     var element = input.$element.find('input');
-
     if (element.autocomplete() == null)
         return;
     if (dialogInstance.dialogMode == 1)
@@ -605,8 +689,9 @@ function toggleAutoComplete(dialogInstance, input) {
  * @returns {*}
  */
 function fixDate(date) {
-    if (date == null)
+    if (date == null) {
         return "";
+    }
     var d = new Date(date.timestamp * 1000);
     var mm = ("0" + (d.getMonth() + 1)).slice(-2);
     var dd = ("0" + d.getDate()).slice(-2);
