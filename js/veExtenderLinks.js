@@ -196,7 +196,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
     EMMDialog.prototype.getEditQuery = function (internalPageName) {
         return this.editQuery.replace(/PAGENAMEPARAMETER/g, internalPageName);
     };
-    
+
     EMMDialog.prototype.getReadyProcess = function( config ) {
         var dialogInstance = this;
         //are we editing?
@@ -681,7 +681,6 @@ function initAutoComplete(data, dialogInstance) {
                 dialogInstance.suggestion = suggestion;
                 dialogInstance.isExistingResource = true;
                 dialogInstance.fillFields(suggestion);
-
             }
         },
         appendTo: inputField.parentElement,
