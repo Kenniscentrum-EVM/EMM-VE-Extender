@@ -36,6 +36,7 @@ function createLightResourceDialog(Dialog, resourceType) {
     };
 
     EMMLightResourceDialog.prototype.fillFields = function (suggestion) {
+        console.log(suggestion.creator);
         this.creatorField.setValue(suggestion.creator);
         this.dateField.setValue(fixDate(suggestion.date));
         this.organizationField.setValue(suggestion.organization);

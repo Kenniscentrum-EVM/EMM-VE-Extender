@@ -96,7 +96,6 @@ function createExternalLinkDialog(LightResourceDialog) {
 
     EMMExternalLinkDialog.prototype.testAndChangeDialogMode = function () {
         var input = null;
-        console.log("hello");
         if (this.dialogMode == 0) {
             if (!this.isExistingResource && this.linkField.value.length != 0) {
                 if (this.suggestion != null) {
@@ -163,7 +162,6 @@ function createExternalLinkDialog(LightResourceDialog) {
     EMMExternalLinkDialog.prototype.fillFields = function (suggestion) {
         LightResourceDialog.prototype.fillFields.call(this, suggestion);
         this.linkField.setValue(suggestion.hyperlink);
-        this.validator.validateAll();
     };
 
     EMMExternalLinkDialog.prototype.processDialogSpecificQueryResult = function (singleResult, suggestionObject) {

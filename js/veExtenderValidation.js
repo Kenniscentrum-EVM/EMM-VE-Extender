@@ -21,7 +21,6 @@ var Validator = function (dialogInstance, inputSuccess, inputFail, validationSuc
     this.bindEvents(this.fieldset, eventWrapper);
 
     function eventWrapper(value) {
-        //console.log(this);
         (function (widget) {
             // is the validator enabled?
             if (validator.enabled == true) {
@@ -73,7 +72,7 @@ var Validator = function (dialogInstance, inputSuccess, inputFail, validationSuc
         }
 
     }
-}
+};
 
 
 Validator.prototype.bindEvents = function (fieldset, eventFunction) {
@@ -99,21 +98,29 @@ Validator.prototype.bindEvents = function (fieldset, eventFunction) {
 
 Validator.prototype.enable = function () {
     this.enabled = true;
-    this.enabled = true;
     this.cleanUpForm();
     this.resetInputStates();
-}
+};
+
+Validator.prototype.enableOnChange = function()
+{
+  this.onChangeEnabled = true;
+};
+
+Validator.prototype.disableOnChange = function()
+{
+  this.onChangeEnabled = false;
+};
 
 Validator.prototype.disable = function () {
     this.enabled = false;
-    this.onChangeEnabled = false;
     this.cleanUpForm();
     this.resetInputStates();
-}
+};
 
 Validator.prototype.softDisable = function () {
     this.enabled = false;
-}
+};
 
 Validator.prototype.cleanUpForm = function () {
     if (this.cleanUp != null) {
@@ -121,14 +128,14 @@ Validator.prototype.cleanUpForm = function () {
             if (this.fieldset.items[i].fieldWidget.validation != null)
                 this.cleanUp(this.fieldset.items[i].fieldWidget);
     }
-}
+};
 
 Validator.prototype.resetInputStates = function () {
     for (var i = 0; i < this.inputStates.length; i++) {
         if (this.inputStates[i] != null)
             this.inputStates[i] = false;
     }
-}
+};
 
 
 Validator.prototype.validateAll = function (exclude) {
@@ -136,11 +143,11 @@ Validator.prototype.validateAll = function (exclude) {
         if (this.fieldset.items[i].fieldWidget.validation != null)
             this.fieldset.items[i].fieldWidget.emit("change", this.getWidgetValue(this.fieldset.items[i].fieldWidget), this.fieldset.items[i].fieldWidget);
     }
-}
+};
 
 Validator.prototype.validateWidget = function (widget) {
     widget.emit("change", this.getWidgetValue(widget), widget);
-}
+};
 
 Validator.prototype.getWidgetValue = function (widget) {
     //todo switch-case?
@@ -154,7 +161,7 @@ Validator.prototype.getWidgetValue = function (widget) {
             return null;
     }
 
-}
+};
 
 function checkIfWebsite(value, sender) {
     var expr = /(https:\/\/|http:\/\/)?(www\.)?[[a-z0-9]{1,256}\.[a-z]{2,6}\b\/?([-a-z0-9@:%_\+.~#?&//=]*)/ig

@@ -204,23 +204,28 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
         {
             config.source = config.source.replace(/ /g,"_");
             var api = new mw.Api();
-            var query = "[[Category:Resource Description]][[file name::" + config.source + "]]|?Semantic title|?Hyperlink|?Dct:creator|?Dct:date|?Organization|?Dct:subject"; //todo this is dialog dependant
+            console.log(config.source);
+            var query = this.getEditQuery(config.source);
             api.get({
                 action: "ask",
                 query: query
             }).done(function (queryData) {
+                console.log(queryData);
                 dialogInstance.validator.disable();
+                dialogInstance.validator.disableOnChange();
                 var res = queryData.query.results;
 
                 for(var row in res) {
                     var suggestion = dialogInstance.processSingleQueryResult(row, res);
-                    dialogInstance.titleField.setValue(suggestion.value);
-                    dialogInstance.fillFields(suggestion);
                     this.suggestion = suggestion;
+                    dialogInstance.titleField.setValue(suggestion.value);
+                    this.isExistingResource = true;
+                    dialogInstance.fillFields(suggestion);
                 }
                 dialogInstance.validator.enable();
                 dialogInstance.validator.validateAll();
-            });
+                dialogInstance.validator.enableOnChange();
+            }).fail(function(e){console.log("lol")});
         }
         return EMMDialog.super.prototype.getReadyProcess.call(this, config);
     };
