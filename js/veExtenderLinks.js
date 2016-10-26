@@ -294,16 +294,6 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
         return null;
     };
 
-    /**
-     * Abstract method that needs to be overridden, displays an error message if this is not the case.
-     * Expected behavior and parameters when overriding:
-     * Returns the query that is used to gather the information about a single resource.
-     * @param internalPageName - The internal name of the page where the resource is described.
-     */
-    EMMDialog.prototype.getEditQuery = function (internalPageName) {
-        displayOverloadError("getEditQuery");
-    };
-
 
     var dialog = null;
     switch (resourceType) {
@@ -570,11 +560,6 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
         });
     };
 }
-
-/**
- * Clears the input fields of a given fieldset
- * @param fieldset the fieldset whose input fields should be cleared
- */
 
 /**
  * Clears the input fields of a given fieldset
