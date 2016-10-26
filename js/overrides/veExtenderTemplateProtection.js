@@ -17,7 +17,6 @@ var VEETemplateForclosure = function() {
         // x is de offset van het punt in het document waar iets verwijdert moet worden.
         return removeRange(doc, removeStart, removeEnd, removeMetadata, this);
     };
-
     function evaluateTransclusions() {
         var nodes = ve.init.target.getSurface().getModel().getDocument().getDocumentNode();
         var transclusions = getTransclusions(nodes);
@@ -60,8 +59,8 @@ var VEETemplateForclosure = function() {
                     break;
                 }
         }
-        var returnValue; //todo range -1?
-        if(protect) { //todo perhaps this isn't needed in a proper implementation
+        var returnValue;
+        if(protect) {
             returnValue = base.call(thisContext, doc, removeStart, x - 1, removeMetadata);
             ve.dm.nodeFactory.registry[doc.data.getType(x)].static.isDeletable = true;
         }

@@ -35,6 +35,7 @@ function loadEMMExtender() {
     addEMMLinks();
     loadExtenderUI();
     createExitDialog();
+    overwriteEditBehaviour();
 }
 
 mw.hook('ve.activationComplete').add(function () {

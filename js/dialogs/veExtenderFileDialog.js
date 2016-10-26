@@ -37,7 +37,7 @@ function createFileDialog(LightResourceDialog) {
         var testSuggestedLink = function () {
             //todo replace this temporary thing with something better.
             if (this.isExistingResource) {
-                fileFieldLayout.$element.hide();
+                //fileFieldLayout.$element.hide();
                 if (this.titleField.value.length == 0) {
                     this.isExistingResource = false;
                     fileFieldLayout.$element.show();
@@ -193,6 +193,7 @@ function createFileDialog(LightResourceDialog) {
     };
 
     EMMFileDialog.prototype.fillFields = function (suggestion) {
+        this.fieldset.items[1].$element.hide();
         LightResourceDialog.prototype.fillFields.call(this, suggestion);
         this.validator.validateAll();
     };

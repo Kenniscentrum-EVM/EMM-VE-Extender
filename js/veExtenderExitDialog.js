@@ -28,7 +28,7 @@ function createExitDialog() {
             ve.init.target.deactivate();
             //ve.init.target.deactivate();
         }
-    }
+    };
 
     cancelToolFactory.register(cancelButton);
     cancelToolbar.setup([
@@ -83,7 +83,7 @@ function createExitDialog() {
 
         this.footer = new OO.ui.PanelLayout({
             padded: true,
-            expanded: false,
+            expanded: false
         });
 
         this.$body.append(this.content.$element);
@@ -128,7 +128,7 @@ function createExitDialog() {
             return this.content.$element.outerHeight( true ) + this.footer.$element.outerHeight( true ) + 30;
         };
 
-    }
+    };
     //register our new dialog in the factory
     ve.ui.windowFactory.register(cancelDialog);
 }

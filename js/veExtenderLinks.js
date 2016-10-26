@@ -15,6 +15,9 @@ function addEMMLinks() {
                 },
                 name: {
                     wt: namedata
+                },
+                dialog: {
+                    wt: "process-file-dialog"
                 }
             };
         }
@@ -28,6 +31,9 @@ function addEMMLinks() {
                 },
                 name: {
                     wt: namedata
+                },
+                dialog: {
+                    wt: "process-linkpage-dialog"
                 }
             };
         }
@@ -41,6 +47,9 @@ function addEMMLinks() {
                 },
                 name: {
                     wt: namedata
+                },
+                dialog: {
+                    wt: "process-linkwebsite-dialog"
                 }
             };
         }
@@ -57,7 +66,7 @@ function addEMMLinks() {
  * @param {function} templateResult - A function that transforms the inserted data into the required format for inserting the links as a template
  */
 function loadEMMDialog(resourceType, toolId, menuText, dialogText, templateResult) {
-    var dialogName = "process-" + toolId + " dialog";
+    var dialogName = "process-" + toolId + "-dialog";
 
     // create the dialog of the given type
     createDialog(dialogName, dialogText, resourceType, templateResult);
@@ -188,6 +197,37 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
         return this.editQuery.replace(/PAGENAMEPARAMETER/g, internalPageName);
     };
 
+    EMMDialog.prototype.getReadyProcess = function( config ) {
+        var dialogInstance = this;
+        //are we editing?
+        if(config.source != null)
+        {
+            config.source = config.source.replace(/ /g,"_");
+            var api = new mw.Api();
+            var query = this.getEditQuery(config.source);
+            api.get({
+                action: "ask",
+                query: query
+            }).done(function (queryData) {
+                dialogInstance.validator.disable();
+                dialogInstance.validator.disableOnChange();
+                var res = queryData.query.results;
+
+                for(var row in res) {
+                    var suggestion = dialogInstance.processSingleQueryResult(row, res);
+                    this.suggestion = suggestion;
+                    dialogInstance.titleField.setValue(suggestion.value);
+                    this.isExistingResource = true;
+                    dialogInstance.fillFields(suggestion);
+                }
+                dialogInstance.validator.enable();
+                dialogInstance.validator.validateAll();
+                dialogInstance.validator.enableOnChange();
+            });
+        }
+        return EMMDialog.super.prototype.getReadyProcess.call(this, config);
+    };
+
     /**
      * Displays an error message for when a specific overloaded function isn't present
      * @param {String} functionName - The name of the function that has no overloaded equivalent
@@ -293,7 +333,6 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
         displayOverloadError("findTemplateToUse");
         return null;
     };
-
 
     var dialog = null;
     switch (resourceType) {
@@ -452,6 +491,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
          */
         var autocompleteCallback = function (queryResults) {
             initAutoComplete(queryResults, dialogInstance);
+            toggleAutoComplete(dialogInstance);
         };
 
         //Execute the askQuery in order to gather all resources
@@ -496,6 +536,23 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
      *  @param query {String} the query that is to be used in the API-call
      *  @param callback {function} a function that will be executed after the api-call is finished
      */
+
+    EMMDialog.prototype.processSingleQueryResult = function(row, resultSet){
+        var suggestionObject = {};
+        var singleResultRow = resultSet[row]; //One row from the set of results
+        //The data field of this object needs to contain the internal pagename of the resource in order to
+        // work correctly with the atuomcplete library. This is the same for value which needs to contain the title
+        suggestionObject.data = singleResultRow.fulltext;
+        suggestionObject.value = "";
+        var semanticTitle = singleResultRow.printouts["Semantic title"][0];
+        if (semanticTitle)
+            suggestionObject.value = semanticTitle;
+        else
+            suggestionObject.value = suggestionObject.data;
+        this.processDialogSpecificQueryResult(singleResultRow, suggestionObject);
+        return suggestionObject;
+    };
+
     EMMDialog.prototype.semanticAskQuery = function (query, callback) {
         var dialogInstance = this;
         var api = new mw.Api();
@@ -506,33 +563,10 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
         }).done(function (data) {
             var res = data.query.results;
             var arr = []; //array to store the results
-            var prevTitle = "";
-            var numTitle = 0;
-
-            for (var prop in res) {
-                if (!res.hasOwnProperty(prop))
+            for (var row in res) {
+                if (!res.hasOwnProperty(row))
                     continue;
-                var suggestionObject = {};
-                var singleResultRow = res[prop]; //One row from the set of results
-                /*The data field of this object needs to contain the internal pagename of the resource in order to
-                 work correctly with the atuomcplete library. This is the same for value which needs to contain the title*/
-                suggestionObject.data = singleResultRow.fulltext;
-                suggestionObject.value = "";
-                var semantictitle = singleResultRow.printouts["Semantic title"][0];
-                if (semantictitle)
-                    suggestionObject.value = semantictitle;
-                else
-                    suggestionObject.value = suggestionObject.data;
-                if (suggestionObject.value == prevTitle) {
-                    numTitle++;
-                    suggestionObject.value = suggestionObject.value + "(" + suggestionObject.data + ")";
-                }
-                else {
-                    prevTitle = suggestionObject.value;
-                    numTitle = 0;
-                }
-                dialogInstance.processDialogSpecificQueryResult(singleResultRow, suggestionObject);
-                arr.push(suggestionObject);
+                arr.push(dialogInstance.processSingleQueryResult(row, res));
             }
             arr.sort(function (a, b) {
                 if (a.value > b.value) {
@@ -543,19 +577,6 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                 }
                 return 0;
             });
-
-            //TODO find out what happens here
-            prevTitle = "";
-            for (var i = 0; i < arr.length; i++) {
-                var item = arr[i];
-                suggestionObject.value = item.value;
-                if (suggestionObject.value == prevTitle) {
-                    arr[i].value = suggestionObject.value + "(" + suggestionObject.data + ")";
-                }
-                else {
-                    prevTitle = suggestionObject.value;
-                }
-            }
             callback(arr);
         });
     };
@@ -625,8 +646,7 @@ function grabSelectedText(inputObject) {
             var node = ve.init.target.getSurface().getModel().getDocument().getDocumentNode().getNodeFromOffset(i);
             if (node.getType() == "mwTransclusionInline") {
                 //fixme hier moet nog geverifieerd worden of het om een cite gaat?
-                var nodeName = node.element.attributes.mw.parts[0].template.params.name.wt;
-                selected += nodeName;
+                selected += node.element.attributes.mw.parts[0].template.params.name.wt;
                 continue;
             }
             var element = surfaceModel.getFragment().document.data.data[i];
@@ -661,7 +681,6 @@ function initAutoComplete(data, dialogInstance) {
                 dialogInstance.suggestion = suggestion;
                 dialogInstance.isExistingResource = true;
                 dialogInstance.fillFields(suggestion);
-                return;
             }
         },
         appendTo: inputField.parentElement,
@@ -669,15 +688,13 @@ function initAutoComplete(data, dialogInstance) {
     });
 }
 
-
-//fixme this may not be the most efficient way
 /**
  *
  * @param dialogInstance
  * @param input
  */
-function toggleAutoComplete(dialogInstance, input) {
-    var element = input.$element.find('input');
+function toggleAutoComplete(dialogInstance) {
+    var element = dialogInstance.titleField.$element.find('input');
     if (element.autocomplete() == null)
         return;
     if (dialogInstance.dialogMode == 1)
