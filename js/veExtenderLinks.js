@@ -17,7 +17,7 @@ function addEMMLinks() {
                 name: {
                     wt: namedata
                 },
-                optional: {
+                dialog: {
                     wt: "process-file-dialog"
                 }
             };
@@ -33,7 +33,7 @@ function addEMMLinks() {
                 name: {
                     wt: namedata
                 },
-                optional: {
+                dialog: {
                     wt: "process-linkpage-dialog"
                 }
             };
@@ -49,7 +49,7 @@ function addEMMLinks() {
                 name: {
                     wt: namedata
                 },
-                optional: {
+                dialog: {
                     wt: "process-linkwebsite-dialog"
                 }
             };
@@ -176,26 +176,28 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
     };
 
     EMMDialog.prototype.getReadyProcess = function( config ) {
-
         var dialogInstance = this;
-        this.validator.disable();
         //are we editing?
         if(config.source != null)
         {
             config.source = config.source.replace(/ /g,"_");
-            console.log(data.source);
             var api = new mw.Api();
-            var query = "[[Category:Resource Description]][[file name::" + config.source + "]]|?Semantic title|?Hyperlink|?Dct:creator|?Dct:date|?Organization|?Dct:subject";
+            var query = "[[Category:Resource Description]][[file name::" + config.source + "]]|?Semantic title|?Hyperlink|?Dct:creator|?Dct:date|?Organization|?Dct:subject"; //todo this is dialog dependant
             api.get({
                 action: "ask",
                 query: query
             }).done(function (queryData) {
+                dialogInstance.validator.disable();
                 var res = queryData.query.results;
 
                 for(var row in res) {
-                    dialogInstance.fillFields(dialogInstance.processSingleQueryResult(row, res));
+                    var suggestion = dialogInstance.processSingleQueryResult(row, res);
+                    dialogInstance.titleField.setValue(suggestion.value);
+                    dialogInstance.fillFields(suggestion);
+                    this.suggestion = suggestion;
                 }
                 dialogInstance.validator.enable();
+                dialogInstance.validator.validateAll();
             });
         }
         return EMMDialog.super.prototype.getReadyProcess.call(this, config);
@@ -525,8 +527,7 @@ function grabSelectedText(inputObject) {
             var node = ve.init.target.getSurface().getModel().getDocument().getDocumentNode().getNodeFromOffset(i);
             if (node.getType() == "mwTransclusionInline") {
                 //fixme hier moet nog geverifieerd worden of het om een cite gaat?
-                var nodeName = node.element.attributes.mw.parts[0].template.params.name.wt;
-                selected += nodeName;
+                selected += node.element.attributes.mw.parts[0].template.params.name.wt;;
                 continue;
             }
             var element = surfaceModel.getFragment().document.data.data[i];
@@ -562,7 +563,6 @@ function initAutoComplete(data, dialogInstance) {
                 dialogInstance.suggestion = suggestion;
                 dialogInstance.isExistingResource = true;
                 dialogInstance.fillFields(suggestion);
-                return;
             }
         },
         appendTo: inputField.parentElement,

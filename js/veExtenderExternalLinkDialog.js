@@ -86,6 +86,7 @@ function createExternalLinkDialog(LightResourceDialog) {
 
     EMMExternalLinkDialog.prototype.testDialogMode = function () {
         var input = null;
+        console.log("hello");
         if (this.dialogMode == 0) {
             if (!this.isExistingResource && this.linkField.value.length != 0) {
                 if (this.suggestion != null) {

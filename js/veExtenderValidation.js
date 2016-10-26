@@ -13,6 +13,7 @@ var Validator = function (dialogInstance, inputSuccess, inputFail, validationSuc
     var validator = this;
     this.inputStates = [];
     this.enabled = true;
+    this.onChangeEnabled = true;
     this.cleanUp = cleanUp;
     this.dialogInstance = dialogInstance;
     this.fieldset = dialogInstance.fieldset;
@@ -65,9 +66,12 @@ var Validator = function (dialogInstance, inputSuccess, inputFail, validationSuc
                     validationSuccess();
             }
         })(this);
-        if (this.onChangeFunctions != null)
-            for (var i = 0; i < this.onChangeFunctions.length; i++)
-                this.onChangeFunctions[i].call(validator.dialogInstance);
+        if(validator.onChangeEnabled) {
+            if (this.onChangeFunctions != null)
+                for (var i = 0; i < this.onChangeFunctions.length; i++)
+                    this.onChangeFunctions[i].call(validator.dialogInstance);
+        }
+
     }
 }
 
@@ -95,12 +99,14 @@ Validator.prototype.bindEvents = function (fieldset, eventFunction) {
 
 Validator.prototype.enable = function () {
     this.enabled = true;
+    this.enabled = true;
     this.cleanUpForm();
     this.resetInputStates();
 }
 
 Validator.prototype.disable = function () {
     this.enabled = false;
+    this.onChangeEnabled = false;
     this.cleanUpForm();
     this.resetInputStates();
 }

@@ -43,7 +43,7 @@ function createLightResourceDialog(Dialog, resourceType) {
     };
 
     EMMLightResourceDialog.prototype.processDialogSpecificQueryResult = function (singleResult, suggestionObject) {
-        console.log(suggestionObject);
+
         suggestionObject.creator = singleResult.printouts["Dct:creator"][0];
         suggestionObject.date = singleResult.printouts["Dct:date"][0];
         suggestionObject.organization = singleResult.printouts["Organization"][0];
@@ -57,6 +57,7 @@ function createLightResourceDialog(Dialog, resourceType) {
         //Remove comma and space at the end of the subject list
         //todo discuss with hans
         suggestionObject.subjects = suggestionObject.subjects.slice(0, -2);
+        //console.log(suggestionObject);
     };
 
     switch (resourceType) {
