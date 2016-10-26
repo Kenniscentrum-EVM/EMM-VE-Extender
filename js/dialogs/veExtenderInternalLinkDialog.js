@@ -6,6 +6,8 @@
 function createInternalLinkDialog(Dialog) {
     var EMMInternalLinkDialog = function () {
         Dialog.call(this);
+        this.autocompleteQuery = "[[Category:Light Context||Project]]|?Semantic title|limit=10000";
+        this.editQuery = "[[PAGENAMEPARAMETER]] |?Semantic title";
     };
     OO.inheritClass(EMMInternalLinkDialog, Dialog);
 
@@ -87,6 +89,7 @@ function createInternalLinkDialog(Dialog) {
     EMMInternalLinkDialog.prototype.findTemplateToUse = function () {
         return "Internal link";
     };
+
 
     return EMMInternalLinkDialog;
 }

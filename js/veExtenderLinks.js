@@ -10,7 +10,6 @@ function addEMMLinks() {
 
     //Create a File-dialog and add a menu item for the dialog
     loadEMMDialog("File", "file", OO.ui.deferMsg("visualeditor-emm-menufiletitle"), OO.ui.deferMsg("visualeditor-emm-dialogfiletitle"),
-        queries.linkfiles,
         function (namedata, linkdata) {
             return {
                 resource: {
@@ -24,7 +23,6 @@ function addEMMLinks() {
     );
     //Create an internal-link-dialog and add a menu item for the dialog
     loadEMMDialog("Internal link", "linkpage", OO.ui.deferMsg("visualeditor-emm-menuinternallinktitle"), OO.ui.deferMsg("visualeditor-emm-dialoginternallinktitle"),
-        queries.linkpages,
         function (namedata, linkdata) {
             return {
                 link: {
@@ -38,7 +36,6 @@ function addEMMLinks() {
     );
     //Create an external-link-dialog and add a menu item for the dialog
     loadEMMDialog("External link", "linkwebsite", OO.ui.deferMsg("visualeditor-emm-menuexternallinktitle"), OO.ui.deferMsg("visualeditor-emm-dialogexternallinktitle"),
-        queries.linkwebsites,
         function (namedata, linkdata) {
             return {
                 resource: {
@@ -59,14 +56,13 @@ function addEMMLinks() {
  * @param {string} toolId - The internal name for the tool/button in the menu-bar
  * @param {string} menuText - The text that should be displayed in the menu-bar
  * @param {string} dialogText - The text that should be displayed at the top of the dialog
- * @param {string} askQuery - A semantic ask-query that will be executed in order to gather all resources of the relevant type
  * @param {function} templateResult - A function that transforms the inserted data into the required format for inserting the links as a template
  */
-function loadEMMDialog(resourceType, toolId, menuText, dialogText, askQuery, templateResult) {
+function loadEMMDialog(resourceType, toolId, menuText, dialogText, templateResult) {
     var dialogName = "process-" + toolId + " dialog";
 
     // create the dialog of the given type
-    createDialog(dialogName, dialogText, askQuery, resourceType, templateResult);
+    createDialog(dialogName, dialogText, resourceType, templateResult);
 
     // Add a menu-item that opens the dialog
     var tool = function (config) {
@@ -97,11 +93,10 @@ function loadEMMDialog(resourceType, toolId, menuText, dialogText, askQuery, tem
  * This method creates a dialog that helps the user with inserting a specific type of link
  * @param {string} dialogName - The internal name of the dialog
  * @param {string} dialogMessage - The text that will be displayed at the top of the dialog
- * @param {string} askQuery - A semantic ask-query that will be executed in order to gather all resources of the relevant type
  * @param {string} resourceType - For what type of resource the dialog should be created, currently available types: File, Internal link, External link
  * @param {function} templateResult - A function that transforms the inserted data into the required format for inserting the links as a template
  */
-function createDialog(dialogName, dialogMessage, askQuery, resourceType, templateResult) {
+function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
     /**
      * Constructor for EMMDialog, all relevant fields are initiated, mostly with default null or 0 values.
      * @constructor
@@ -178,6 +173,21 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
     EMMDialog.prototype.createDialogLayout = function () {
         this.titleField.validation = [checkIfEmpty];
         this.presentationTitleField.validation = [checkIfEmpty];
+    };
+
+    /**
+     * Returns the query that is used to gather information for all existing resources of a certain type.
+     */
+    EMMFileDialog.prototype.getAutocompleteQuery = function () {
+        return this.autocompleteQuery;
+    };
+
+    /**
+     * Returns the query that is used to gather the information about a single resource.
+     * @param internalPageName - The internal name of the page where a certain resource is described.
+     */
+    EMMExternalLinkDialog.prototype.getEditQuery = function (internalPageName) {
+        return this.editQuery.replace(/PAGENAMEPARAMETER/g,internalPageName);
     };
 
     /**
@@ -284,6 +294,16 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
     EMMDialog.prototype.findTemplateToUse = function () {
         displayOverloadError("findTemplateToUse");
         return null;
+    };
+
+    /**
+     * Abstract method that needs to be overridden, displays an error message if this is not the case.
+     * Expected behavior and parameters when overriding:
+     * Returns the query that is used to gather the information about a single resource.
+     * @param internalPageName - The internal name of the page where the resource is described.
+     */
+    EMMDialog.prototype.getEditQuery = function (internalPageName) {
+        displayOverloadError("getEditQuery");
     };
 
 
@@ -413,7 +433,7 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
                     cancelButtonHandler();
                 });
             }
-            //Needed for escape?
+            //Needed to enable proper dialog-closing behavior when closing a dialog by pressing the escape-button.
             else {
                 cleanUpDialog();
             }
@@ -447,14 +467,14 @@ function createDialog(dialogName, dialogMessage, askQuery, resourceType, templat
         };
 
         //Execute the askQuery in order to gather all resources
-        dialogInstance.semanticAskQuery(askQuery, autocompleteCallback, dialogInstance);
+        dialogInstance.semanticAskQuery(dialogInstance.getAutocompleteQuery(), autocompleteCallback, dialogInstance);
 
         //fixme dirty hack
         //todo in plaats van deze hack een eigen event afvuren en opvangen?
         /**
          * Selected text is gathered here and put inside the input field
          * Beyond that this is also the place where the size of the dialog is set.
-         * @param dim
+         * @param {Object} dim - An object containing css properties for the dimensions of the dialog
          */
         EMMDialog.prototype.setDimensions = function (dim) {
             dialogInstance.selectionRange = grabSelectedText(dialogInstance.presentationTitleField);

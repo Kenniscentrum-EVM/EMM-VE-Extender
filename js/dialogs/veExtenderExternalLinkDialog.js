@@ -3,13 +3,27 @@
  */
 "use strict";
 
-//TODO document factory-like construction
+/**
+ * This function more or less functions like a factory. It recieves a parent 'class', it then adds its own behavior on
+ * top of the existing behavior. When done with modifying the 'class' this method then returns the modified class/function.
+ * @param {EMMLightResourceDialog} LightResourceDialog - The 'class'-definition of EMMLightResourceDialog
+ * @returns {EMMExternalLinkDialog} - returns the 'class'-definition of an EMMExternalLinkDialog
+ */
 function createExternalLinkDialog(LightResourceDialog) {
+    /**
+     * Calls the constructor of it's super class, EMMLightResourceDialog. Has no additional own behaviour.
+     * @constructor
+     */
     var EMMExternalLinkDialog = function () {
         LightResourceDialog.call(this);
+        this.autocompleteQuery = "[[Category:Resource Description]] [[Hyperlink::+]]|?Semantic title|?Hyperlink|?Dct:creator|?Dct:date|?Organization|?Dct:subject|limit=10000";
+        this.editQuery = "[[PAGENAMEPARAMETER]] |?Semantic title|?Hyperlink|?Dct:creator|?Dct:date|?Organization|?Dct:subject";
     };
     OO.inheritClass(EMMExternalLinkDialog, LightResourceDialog);
 
+    /**
+     * Creates the input fields unique for an ExternalLinkDialog, calls its parent method to create more generic fields.
+     */
     EMMExternalLinkDialog.prototype.createFields = function () {
         LightResourceDialog.prototype.createFields.call(this);
         //Create input fields for an external link dialog
@@ -19,6 +33,10 @@ function createExternalLinkDialog(LightResourceDialog) {
         this.titleField.$element.find('input').prop("placeholder", OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-def")());
     };
 
+    /**
+     * Adds fields specific for an ExternalLinkDialog to the fieldset and configures other layout options.
+     *
+     */
     EMMExternalLinkDialog.prototype.createDialogLayout = function () {
         LightResourceDialog.prototype.createDialogLayout.call(this);
         // todo validation property verplaatsen.
@@ -156,6 +174,7 @@ function createExternalLinkDialog(LightResourceDialog) {
         }
         return "External link";
     };
+
 
     return EMMExternalLinkDialog;
 }

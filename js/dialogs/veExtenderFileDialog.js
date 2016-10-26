@@ -6,6 +6,8 @@
 function createFileDialog(LightResourceDialog) {
     var EMMFileDialog = function () {
         LightResourceDialog.call(this);
+        this.autocompleteQuery = "[[Category:Resource Description]] [[file name::+]] |?Semantic title|?Dct:creator|?Dct:date|?Organization|?Dct:subject|?file name|limit=10000";
+        this.editQuery = "[[PAGENAMEPARAMETER]] |?Semantic title|?Dct:creator|?Dct:date|?Organization|?Dct:subject|?file name";
     };
     OO.inheritClass(EMMFileDialog, LightResourceDialog);
 
@@ -198,6 +200,7 @@ function createFileDialog(LightResourceDialog) {
     EMMFileDialog.prototype.findTemplateToUse = function () {
         return "Cite";
     };
+
 
     return EMMFileDialog;
 }
