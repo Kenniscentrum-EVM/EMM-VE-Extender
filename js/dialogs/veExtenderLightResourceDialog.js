@@ -4,8 +4,8 @@
 "use strict";
 
 function createLightResourceDialog(Dialog, resourceType) {
-    var EMMLightResourceDialog = function (surface, config) {
-        Dialog.call(this, surface, config);
+    var EMMLightResourceDialog = function () {
+        Dialog.call(this);
     };
     OO.inheritClass(EMMLightResourceDialog, Dialog);
 
