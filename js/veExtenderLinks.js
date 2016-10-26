@@ -204,13 +204,11 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
         {
             config.source = config.source.replace(/ /g,"_");
             var api = new mw.Api();
-            console.log(config.source);
             var query = this.getEditQuery(config.source);
             api.get({
                 action: "ask",
                 query: query
             }).done(function (queryData) {
-                console.log(queryData);
                 dialogInstance.validator.disable();
                 dialogInstance.validator.disableOnChange();
                 var res = queryData.query.results;
@@ -225,7 +223,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                 dialogInstance.validator.enable();
                 dialogInstance.validator.validateAll();
                 dialogInstance.validator.enableOnChange();
-            }).fail(function(e){console.log("lol")});
+            });
         }
         return EMMDialog.super.prototype.getReadyProcess.call(this, config);
     };
@@ -493,6 +491,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
          */
         var autocompleteCallback = function (queryResults) {
             initAutoComplete(queryResults, dialogInstance);
+            toggleAutoComplete(dialogInstance);
         };
 
         //Execute the askQuery in order to gather all resources
@@ -682,6 +681,7 @@ function initAutoComplete(data, dialogInstance) {
                 dialogInstance.suggestion = suggestion;
                 dialogInstance.isExistingResource = true;
                 dialogInstance.fillFields(suggestion);
+
             }
         },
         appendTo: inputField.parentElement,
@@ -689,15 +689,13 @@ function initAutoComplete(data, dialogInstance) {
     });
 }
 
-
-//fixme this may not be the most efficient way
 /**
  *
  * @param dialogInstance
  * @param input
  */
-function toggleAutoComplete(dialogInstance, input) {
-    var element = input.$element.find('input');
+function toggleAutoComplete(dialogInstance) {
+    var element = dialogInstance.titleField.$element.find('input');
     if (element.autocomplete() == null)
         return;
     if (dialogInstance.dialogMode == 1)

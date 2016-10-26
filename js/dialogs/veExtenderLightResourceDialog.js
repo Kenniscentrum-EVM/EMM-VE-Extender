@@ -36,7 +36,6 @@ function createLightResourceDialog(Dialog, resourceType) {
     };
 
     EMMLightResourceDialog.prototype.fillFields = function (suggestion) {
-        console.log(suggestion.creator);
         this.creatorField.setValue(suggestion.creator);
         this.dateField.setValue(fixDate(suggestion.date));
         this.organizationField.setValue(suggestion.organization);
@@ -58,7 +57,6 @@ function createLightResourceDialog(Dialog, resourceType) {
         //Remove comma and space at the end of the subject list
         //todo discuss with hans
         suggestionObject.subjects = suggestionObject.subjects.slice(0, -2);
-        //console.log(suggestionObject);
     };
 
     switch (resourceType) {

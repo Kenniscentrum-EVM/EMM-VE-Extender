@@ -162,6 +162,7 @@ function createExternalLinkDialog(LightResourceDialog) {
     EMMExternalLinkDialog.prototype.fillFields = function (suggestion) {
         LightResourceDialog.prototype.fillFields.call(this, suggestion);
         this.linkField.setValue(suggestion.hyperlink);
+        this.validator.validateAll();
     };
 
     EMMExternalLinkDialog.prototype.processDialogSpecificQueryResult = function (singleResult, suggestionObject) {
