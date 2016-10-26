@@ -649,7 +649,7 @@ function grabSelectedText(inputObject) {
 
 /**
  * Initializes the autocomplete library
- * @param data A collection fo all the items that can be searched through
+ * @param data A collection of all the items that can be searched through
  * @param dialogInstance The dialog for which the autocomplete dropdown should be activated
  */
 function initAutoComplete(data, dialogInstance) {
@@ -687,17 +687,19 @@ function toggleAutoComplete(dialogInstance, input) {
 }
 
 /**
- * The datepicker requires a yyyy/mm/dd value when it's being set remotely.
- * @param date
- * @returns {*}
+ * The datepicker requires a yyyy/mm/dd value when it's being set remotely. This function transforms an object with a
+ * timestamp into a Date object of the required format.
+ * @param {Object} date - An object that contains a timestamp field, which contains a timestamp representation of a date
+ * @returns {String} - A string containing the date in the US format: "yyyy-mm-dd"
  */
 function fixDate(date) {
+    console.log(date);
     if (date == null) {
         return "";
     }
     var d = new Date(date.timestamp * 1000);
     var mm = ("0" + (d.getMonth() + 1)).slice(-2);
     var dd = ("0" + d.getDate()).slice(-2);
-    var yy = d.getFullYear();
-    return yy + '-' + mm + '-' + dd; //(US)
+    var yyyy = d.getFullYear();
+    return yyyy + '-' + mm + '-' + dd; //(US)
 }
