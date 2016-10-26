@@ -197,6 +197,11 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
         return this.editQuery.replace(/PAGENAMEPARAMETER/g, internalPageName);
     };
 
+    /**
+     * //TODO commentaar nick
+     * @param config
+     * @returns {*}
+     */
     EMMDialog.prototype.getReadyProcess = function( config ) {
         var dialogInstance = this;
         //are we editing?
@@ -531,12 +536,12 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
         return this.fieldset;
     };
 
-    /*  semanticAskQuery
-     *  This method is responsible for executing a call to the mediawiki API of the type "ask"
-     *  @param query {String} the query that is to be used in the API-call
-     *  @param callback {function} a function that will be executed after the api-call is finished
+    /**
+     * TODO nick comment
+     * @param row
+     * @param resultSet
+     * @returns {{}}
      */
-
     EMMDialog.prototype.processSingleQueryResult = function(row, resultSet){
         var suggestionObject = {};
         var singleResultRow = resultSet[row]; //One row from the set of results
@@ -553,6 +558,11 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
         return suggestionObject;
     };
 
+    /*  semanticAskQuery
+     *  This method is responsible for executing a call to the mediawiki API of the type "ask"
+     *  @param query {String} the query that is to be used in the API-call
+     *  @param callback {function} a function that will be executed after the api-call is finished
+     */
     EMMDialog.prototype.semanticAskQuery = function (query, callback) {
         var dialogInstance = this;
         var api = new mw.Api();
@@ -635,7 +645,7 @@ function semanticCreateWithFormQuery(query, callback, target, form) {
 
 /**
  * Grabs the text that is selected (outside the dialog) and inserts it into the presentationtitle field inside the dialog
- * @param inputObject the field in which the selected text should be inserted
+ * @param {OO.ui.TextInputWidget} inpuObject - The field in which the selected text should be inserted
  */
 function grabSelectedText(inputObject) {
     var surfaceModel = ve.init.target.getSurface().getModel();
@@ -669,8 +679,8 @@ function grabSelectedText(inputObject) {
 
 /**
  * Initializes the autocomplete library
- * @param data A collection of all the items that can be searched through
- * @param dialogInstance The dialog for which the autocomplete dropdown should be activated
+ * @param {Object[]} data - A collection of all the items that can be searched through
+ * @param {EMMDialog} dialogInstance - The dialog for which the autocomplete dropdown should be activated
  */
 function initAutoComplete(data, dialogInstance) {
     var inputField = $(dialogInstance.titleField.$element).find("input");
@@ -689,9 +699,8 @@ function initAutoComplete(data, dialogInstance) {
 }
 
 /**
- *
- * @param dialogInstance
- * @param input
+ * Depending on the mode the dialog is in, this function activates or deactivates the autoComplete dropdown.
+ * @param {EMMDialog} dialogInstance - The dialog for which the autoComplete dropdown should be activated or deactivated.
  */
 function toggleAutoComplete(dialogInstance) {
     var element = dialogInstance.titleField.$element.find('input');
