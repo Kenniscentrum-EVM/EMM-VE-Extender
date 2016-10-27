@@ -439,8 +439,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                     return;
                 }
                 surfaceModel.getLinearFragment(dialogInstance.selectionRange).insertContent(mytemplate);
-                if(currentMode == 1)
-                    dialogInstance.semanticAskQuery(dialogInstance.getAutocompleteQuery(), autocompleteCallback);
+                dialogInstance.semanticAskQuery(dialogInstance.getAutocompleteQuery(), autocompleteCallback);
             };
             //Get the name of the current page and replace any underscores with whitespaces to prevent errors later on.
             var currentPageID = mw.config.get('wgPageName').replace(/_/g, " ");

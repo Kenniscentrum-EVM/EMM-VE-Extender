@@ -49,11 +49,10 @@ function createInternalLinkDialog(Dialog) {
 
     EMMInternalLinkDialog.prototype.buildAndExecuteQuery = function (currentPageID, insertCallback, linkdata) {
         var dialogInstance = this;
-        var query = "";
+        var query = "Light Context[Heading]=" + this.titleField.getValue();
         if (!this.isExistingResource) {
             //Start building the sfautoedit query
-            query += "Light Context[Supercontext]=" + currentPageID +
-                "&Light Context[Heading]=" + this.titleField.getValue();
+            query += "&Light Context[Supercontext]=" + currentPageID;
             //Find the topcontext of the current page
             var api = new mw.Api();
             api.get({
