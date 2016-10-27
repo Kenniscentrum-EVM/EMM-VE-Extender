@@ -222,7 +222,6 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                 dialogInstance.validator.disable(); //completely disable validation before we're going to fill the dialog.
                 dialogInstance.validator.disableOnChange();
                 var res = queryData.query.results;
-                console.log(res);
                 for(var row in res) {
                     if (!res.hasOwnProperty(row)) //seems to be required.
                         continue;
@@ -561,7 +560,6 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
         else
             suggestionObject.value = suggestionObject.data;
         this.processDialogSpecificQueryResult(singleResultRow, suggestionObject);
-        console.log(suggestionObject);
         return suggestionObject;
     };
 
@@ -579,10 +577,8 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
             query: query
         }).done(function (data) {
             var res = data.query.results;
-            console.log(res);
             var arr = []; //array to store the results
             for (var row in res) {
-                console.log(row);
                 if (!res.hasOwnProperty(row))
                     continue;
                 arr.push(dialogInstance.processSingleQueryResult(row, res));
