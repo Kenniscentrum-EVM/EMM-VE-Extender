@@ -72,7 +72,7 @@ function createInternalLinkDialog(Dialog) {
             });
         }
         else {
-            if (false) {
+            if (this.suggestion.value != this.titleField.getValue()) {
                 this.executeQuery(query, insertCallback, linkdata);
             }
             else {
