@@ -18,11 +18,13 @@ function createInternalLinkDialog(Dialog) {
 
     EMMInternalLinkDialog.prototype.createDialogLayout = function () {
         Dialog.prototype.createDialogLayout.call(this);
+        var dialogInstance = this;
         //Things to do when the specified field changes
         this.titleField.onChangeFunctions = [function () {
             if (this.isExistingResource) {
-                if (this.suggestion.value != this.titleField.value)
+                if (dialogInstance.titleField.value.length == 0) {
                     this.isExistingResource = false;
+                }
             }
         }];
         this.fieldset.addItems([
@@ -70,12 +72,17 @@ function createInternalLinkDialog(Dialog) {
             });
         }
         else {
-            insertCallback(this.suggestion.data);
+            if (false) {
+                this.executeQuery(query, insertCallback, linkdata);
+            }
+            else {
+                insertCallback(this.suggestion.data);
+            }
         }
     };
 
     EMMInternalLinkDialog.prototype.executeQuery = function (query, insertCallback, linkdata) {
-        semanticCreateWithFormQuery(query, insertCallback, null, "Light Context");
+        semanticCreateWithFormQuery(query, insertCallback, linkdata, "Light Context");
     };
 
     EMMInternalLinkDialog.prototype.fillFields = function () {

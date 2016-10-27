@@ -3,6 +3,12 @@
  */
 "use strict";
 
+/**
+ * This function more or less functions like a factory. It recieves a parent 'class', it then adds its own behavior on
+ * top of the existing behavior. When done with modifying the 'class' this method then returns the modified class/function.
+ * @param {EMMLightResourceDialog} LightResourceDialog - The 'class'-definition of EMMLightResourceDialog
+ * @returns {EMMFileDialog} - returns the 'class'-definition of an EMMFileDialog
+ */
 function createLightResourceDialog(Dialog, resourceType) {
     var EMMLightResourceDialog = function () {
         Dialog.call(this);
