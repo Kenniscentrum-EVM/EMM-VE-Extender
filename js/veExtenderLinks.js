@@ -438,6 +438,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                     return;
                 }
                 surfaceModel.getLinearFragment(dialogInstance.selectionRange).insertContent(mytemplate);
+                dialogInstance.semanticAskQuery(dialogInstance.getAutocompleteQuery(), autocompleteCallback);
             };
 
             //Get the name of the current page and replace any underscores with whitespaces to prevent errors later on.
@@ -506,7 +507,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
         };
 
         //Execute the askQuery in order to gather all resources
-        dialogInstance.semanticAskQuery(dialogInstance.getAutocompleteQuery(), autocompleteCallback, dialogInstance);
+        dialogInstance.semanticAskQuery(dialogInstance.getAutocompleteQuery(), autocompleteCallback);
 
         //fixme dirty hack
         //todo in plaats van deze hack een eigen event afvuren en opvangen?
@@ -599,7 +600,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
 
 /**
  * Clears the input fields of a given fieldset
- * @param {OO.ui.fieldsetLayout} fieldset - The fieldset wose input fields should be emptied
+ * @param {OO.ui.FieldsetLayout} fieldset - The fieldset wose input fields should be emptied
  * @param {int[]} exclude - The indices of the fields in the fieldset that should not be cleared
  * @param {String[]} inputTypeExclude - An array of the names of types of fields that should not be cleared
  */
