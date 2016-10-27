@@ -198,39 +198,46 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
     };
 
     /**
-     * //TODO commentaar nick
-     * @param config
-     * @returns {*}
+     * Get the 'ready' process.
+     * The ready process is used to ready a window for use in a particular context, based on the data argument. This method is called during the
+     * opening phase of the windows lifecycle, after the window has been setup.
+     *
+     * We override this method to add additional steps to the 'ready' process, currently we check if the 'data' parameter contains a source property.
+     * This source property contains a string which is a reference to a page. If the 'data' parameter contains a source property that means that we are trying to edit
+     * an existing link, in which case we will ask the api for information about the referenced page and fill our dialog with the result.
+     * @param {Object} data - Window opening data.
+     * @returns {OO.ui.Process}
      */
-    EMMDialog.prototype.getReadyProcess = function( config ) {
+    EMMDialog.prototype.getReadyProcess = function(data) {
         var dialogInstance = this;
-        //are we editing?
-        if(config.source != null)
+        if(data.source != null) //are we editing?
         {
-            config.source = config.source.replace(/ /g,"_");
+            data.source = data.source.replace(/ /g,"_"); //convert whitespaces to underscores
             var api = new mw.Api();
-            var query = this.getEditQuery(config.source);
+            var query = this.getEditQuery(data.source); //getEditQuery retrieves the correct query for us.
             api.get({
                 action: "ask",
                 query: query
             }).done(function (queryData) {
-                dialogInstance.validator.disable();
+                dialogInstance.validator.disable(); //completely disable validation before we're going to fill the dialog.
                 dialogInstance.validator.disableOnChange();
                 var res = queryData.query.results;
-
+                console.log(res);
                 for(var row in res) {
+                    if (!res.hasOwnProperty(row)) //seems to be required.
+                        continue;
                     var suggestion = dialogInstance.processSingleQueryResult(row, res);
                     this.suggestion = suggestion;
                     dialogInstance.titleField.setValue(suggestion.value);
                     this.isExistingResource = true;
-                    dialogInstance.fillFields(suggestion);
+                    dialogInstance.fillFields(suggestion); //fill our dialog.
                 }
-                dialogInstance.validator.enable();
+                dialogInstance.validator.enable(); //enable validation again.
                 dialogInstance.validator.validateAll();
                 dialogInstance.validator.enableOnChange();
             });
         }
-        return EMMDialog.super.prototype.getReadyProcess.call(this, config);
+        return EMMDialog.super.prototype.getReadyProcess.call(this, data);
     };
 
     /**
@@ -238,7 +245,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
      * @param {String} functionName - The name of the function that has no overloaded equivalent
      */
     function displayOverloadError(functionName) {
-        alert(OO.ui.deferMsg("visualeditor-emm-overloaded-function-error")() + functionName);
+        throw new Error(OO.ui.deferMsg("visualeditor-emm-overloaded-function-error")() + functionName);
     }
 
     /*Define basic versions of functions that need to be overloaded.
@@ -528,6 +535,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
         };
     };
 
+    //todo is this still needed?
     /**
      * Getter function for the fieldset of the dialog
      * @returns {OO.ui.FieldsetLayout} - The fieldset corresponding to this dialog
@@ -537,16 +545,14 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
     };
 
     /**
-     * TODO nick comment
-     * @param row
-     * @param resultSet
-     * @returns {{}}
+     * Processes a single query result into a suggestion object.
+     * @param {String} row - String index of a row in the resultSet associative array.
+     * @param {Object[]} resultSet - Associative array which functions like a dictionary, using strings as indexes, contains the result of a query.
+     * @returns {Object} suggestionObject - A suggestion object, containing relevant information about a particular page which can be used by various functions fillFields.
      */
     EMMDialog.prototype.processSingleQueryResult = function(row, resultSet){
         var suggestionObject = {};
-        var singleResultRow = resultSet[row]; //One row from the set of results
-        //The data field of this object needs to contain the internal pagename of the resource in order to
-        // work correctly with the atuomcplete library. This is the same for value which needs to contain the title
+        var singleResultRow = resultSet[row];
         suggestionObject.data = singleResultRow.fulltext;
         suggestionObject.value = "";
         var semanticTitle = singleResultRow.printouts["Semantic title"][0];
@@ -555,10 +561,11 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
         else
             suggestionObject.value = suggestionObject.data;
         this.processDialogSpecificQueryResult(singleResultRow, suggestionObject);
+        console.log(suggestionObject);
         return suggestionObject;
     };
 
-    /*  semanticAskQuery
+    /**  semanticAskQuery
      *  This method is responsible for executing a call to the mediawiki API of the type "ask"
      *  @param query {String} the query that is to be used in the API-call
      *  @param callback {function} a function that will be executed after the api-call is finished
@@ -572,8 +579,10 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
             query: query
         }).done(function (data) {
             var res = data.query.results;
+            console.log(res);
             var arr = []; //array to store the results
             for (var row in res) {
+                console.log(row);
                 if (!res.hasOwnProperty(row))
                     continue;
                 arr.push(dialogInstance.processSingleQueryResult(row, res));
@@ -651,7 +660,6 @@ function grabSelectedText(inputObject) {
     var surfaceModel = ve.init.target.getSurface().getModel();
     var selected = "";
     if (surfaceModel.getFragment().selection.range) {
-        //fixme misschien moet er een apart selectieobject gemaakt worden waarin dit soort dingen netjes afgehandeld worden..
         for (var i = surfaceModel.getFragment().selection.range.start; i < surfaceModel.getFragment().selection.range.end; i++) {
             var node = ve.init.target.getSurface().getModel().getDocument().getDocumentNode().getNodeFromOffset(i);
             if (node.getType() == "mwTransclusionInline") {
@@ -719,7 +727,6 @@ function toggleAutoComplete(dialogInstance) {
  * @returns {String} - A string containing the date in the US format: "yyyy-mm-dd"
  */
 function fixDate(date) {
-    console.log(date);
     if (date == null) {
         return "";
     }
