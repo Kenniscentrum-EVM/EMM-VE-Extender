@@ -93,7 +93,7 @@ Validator.prototype.bindEvents = function (fieldset, eventFunction) {
             widget.connect(widget, {change: eventFunction});
         }
     }
-}
+};
 
 
 Validator.prototype.enable = function () {

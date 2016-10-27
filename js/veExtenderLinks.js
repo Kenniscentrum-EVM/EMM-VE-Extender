@@ -275,16 +275,16 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
     /**
      * Abstract method that needs to be overridden, displays an error message if this is not the case.
      * Expected behavior and parameters when overriding:
-     * Builds and executes a query that inserts the new resource or edits an existing one. After the new resource has
-     * been added, a link is then inserted into the page by executing the insertCallback.
-     * @param {String} currentPageId - The ID of the page that is currently being edited, can only contain alphanumeric
-     * characters an whitespace
+     * Builds and executes a query that creates a new resource or edits an existing one with the sfautoedit api-calll.
+     * After the new resource has been added, a link is then inserted into the page by executing insertCallback.
+     * @param {String} currentPageID - The ID of the page that is currently being edited, can only contain alphanumeric
+     * characters and whitespace
      * @param {function} insertCallback - The function that should be executed after a new resource has been added or
      * an existing one was changed. This function handles inserting a link into the current page.
      * @param {String} linkdata - In case of an existing resource, linkdata contains the internal name of the resource
      * in order to let the api know what existing resource should be edited. Otherwise linkdata is just an empty string.
      */
-    EMMDialog.prototype.buildAndExecuteQuery = function (currentPageId, insertCallback, linkdata) {
+    EMMDialog.prototype.buildAndExecuteQuery = function (currentPageID, insertCallback, linkdata) {
         displayOverloadError("buildAndExecuteQuery");
     };
 
@@ -316,14 +316,14 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
     /**
      * Abstract method that needs to be overridden, displays an error message if this is not the case.
      * Expected behavior and parameters when overriding:
-     * Processes part of the result of a ask query. Expands an existing suggestionobject by adding dialog-specific
+     * Processes part of the result of an ask query. Expands an existing suggestionobject by adding dialog-specific
      * data from the result to the suggestionObject.
-     * @param {Object} singleresult - A single row from the result of the api-call that contains all the information
+     * @param {Object} singleResult - A single row from the result of the api-call that contains all the information
      * asked for in the query.
      * @param {Object} suggestionObject - A single suggestion that should be expanded. Should already contain
      * dialog-independent data.
      */
-    EMMDialog.prototype.processDialogSpecificQueryResult = function (singleresult, suggestionObject) {
+    EMMDialog.prototype.processDialogSpecificQueryResult = function (singleResult, suggestionObject) {
         displayOverloadError("processQueryResult");
     };
 
@@ -719,7 +719,6 @@ function toggleAutoComplete(dialogInstance) {
  * @returns {String} - A string containing the date in the US format: "yyyy-mm-dd"
  */
 function fixDate(date) {
-    console.log(date);
     if (date == null) {
         return "";
     }
