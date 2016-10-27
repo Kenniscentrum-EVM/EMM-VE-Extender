@@ -112,7 +112,6 @@ function createExternalLinkDialog(LightResourceDialog) {
                 }
                 this.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-linkdialog-title-npage")());
                 input = this.titleField.$element.find('input');
-                console.log(input.autocomplete());
                 input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-new")());
                 //todo temporary
                 this.dialogMode = 1;
