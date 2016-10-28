@@ -135,6 +135,7 @@ function createFileDialog(LightResourceDialog) {
                 break;
         }
         this.validator.cleanUpForm();
+        toggleAutoComplete(this);
     };
 
     /**
@@ -147,35 +148,20 @@ function createFileDialog(LightResourceDialog) {
                 if (this.fileField.currentFile == "")
                     return;
                 if ((!this.isExistingResource && this.fileField.currentFile != null)) {
-                    this.executeModeChange(1);
                     this.dialogMode = 1;
+                    this.executeModeChange(1);
                 }
                 break;
             case 1:
                 if (this.fileField.currentFile == null) {
-                    this.executeModeChange(0);
                     this.dialogMode = 0;
+                    this.executeModeChange(0);
                 }
                 break;
             case 2:
                 //todo, same as external link mode 2.
                 break;
         }
-        toggleAutoComplete(this);
-    };
-
-    /**
-     * TODO Commentaar Nick
-     */
-    EMMFileDialog.prototype.resetMode = function () {
-        this.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-dialogfiletitle")());
-        this.dialogMode = 0;
-        toggleAutoComplete(this, this.titleField);
-        var input = this.titleField.$element.find('input');
-        input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-filedialog-titlefield-placeholder-def")());
-        this.fileField.$element.show();
-        this.titleField.currentFile = null;
-        this.validator.cleanUpForm();
     };
 
     /**

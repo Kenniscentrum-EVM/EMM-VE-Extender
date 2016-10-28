@@ -21,12 +21,12 @@ function createInternalLinkDialog(Dialog) {
         var dialogInstance = this;
         //Things to do when the specified field changes
         this.titleField.onChangeFunctions = [function () {
-            if (this.isExistingResource) {
+            if (this.isExistingResource && this.dialogMode != 2) {
                 if (dialogInstance.titleField.value.length == 0) {
                     this.isExistingResource = false;
                 }
             }
-        }];
+        }, this.testAndChangeDialogMode];
         this.fieldset.addItems([
             new OO.ui.FieldLayout(this.titleField, {
                 label: OO.ui.deferMsg("visualeditor-emm-page"),
@@ -39,13 +39,42 @@ function createInternalLinkDialog(Dialog) {
         ]);
     };
 
-    EMMInternalLinkDialog.prototype.testAndChangeDialogMode = function () {
-        //Modes not implemented yet
+    EMMInternalLinkDialog.prototype.executeModeChange = function (mode) {
+        switch(mode)
+        {
+            case 0:
+                this.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-dialoginternallinktitle")());
+                break;
+            case 1:
+                this.$element.find('.oo-ui-processDialog-title').text("Aanpassen & Invoegen koppeling naar pagina");
+                break;
+            case 2:
+                this.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-inlidialog-title-edit")());
+                break;
+        }
+        toggleAutoComplete(this); //fixme: lijkt niet te werken?
     };
 
-    EMMInternalLinkDialog.prototype.resetMode = function () {
-        //Modes not implemented yet
+    EMMInternalLinkDialog.prototype.testAndChangeDialogMode = function () {
+        switch(this.dialogMode)
+        {
+            case 0:
+                if(this.isExistingResource && this.titleField.getValue() != this.suggestion.value)
+                {
+                    this.dialogMode = 1;
+                    this.executeModeChange(1);
+                }
+                break;
+            case 1:
+                if((this.isExistingResource && this.titleField.getValue() == this.suggestion.value) || !this.isExistingResource)
+                {
+                    this.dialogMode = 0;
+                    this.executeModeChange(0);
+                }
+                break;
+        }
     };
+
 
     EMMInternalLinkDialog.prototype.buildAndExecuteQuery = function (currentPageID, insertCallback, linkdata) {
         var dialogInstance = this;

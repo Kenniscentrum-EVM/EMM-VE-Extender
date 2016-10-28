@@ -292,15 +292,6 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
 
     /**
      * Abstract method that needs to be overridden, displays an error message if this is not the case.
-     * Expected behavior when overriding:
-     * Resets the dialogmode and resets the properties of the dialog to the default values.
-     */
-    EMMDialog.prototype.resetMode = function () {
-        displayOverloadError("resetMode");
-    };
-
-    /**
-     * Abstract method that needs to be overridden, displays an error message if this is not the case.
      * Expected behavior and parameters when overriding:
      * Builds and executes a query that creates a new resource or edits an existing one with the sfautoedit api-calll.
      * After the new resource has been added, a link is then inserted into the page by executing insertCallback.
@@ -509,11 +500,12 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
             //todo check if closed and then clean the fields for a more elegant cleanup?
             dialogInstance.validator.disable();
             clearInputFields(dialogInstance.fieldset, null, ["OoUiLabelWidget"]);
-            dialogInstance.resetMode();
+            dialogInstance.executeModeChange(0);
             dialogInstance.validator.enable();
             dialogInstance.isExistingResource = false;
             dialogInstance.suggestion = null;
             dialogInstance.dialogMode = 0;
+            toggleAutoComplete(dialogInstance);
         }
 
         /**
@@ -743,7 +735,7 @@ function toggleAutoComplete(dialogInstance) {
     var element = dialogInstance.titleField.$element.find('input');
     if (element.autocomplete() == null)
         return;
-    if (dialogInstance.dialogMode == 1)
+    if (dialogInstance.dialogMode > 0)
         element.autocomplete().disable();
     else
         element.autocomplete().enable();

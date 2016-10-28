@@ -72,7 +72,8 @@ function defineTranslations() {
             "visualeditor-emm-validation-date": "This field must contain a valid date.",
 
             "visualeditor-emm-linkdialog-title-npage": "Insert new link",
-            "visualeditor-emm-linkdialog-title-edit": "Edit link",
+            "visualeditor-emm-linkdialog-title-edit": "Edit link to website",
+            "visualeditor-emm-inlidialog-title-edit": "Edit link to page",
             "visualeditor-emm-linkdialog-titlefield-placeholder-def": "Search for link",
             "visualeditor-emm-linkdialog-titlefield-placeholder-new": "Title new link",
             "visualeditor-emm-filedialog-title-npage": "Insert new file",
@@ -153,6 +154,7 @@ function defineTranslations() {
 
             "visualeditor-emm-linkdialog-title-npage": "Invoegen nieuwe koppeling naar website",
             "visualeditor-emm-linkdialog-title-edit": "Aanpassen koppeling naar website",
+            "visualeditor-emm-inlidialog-title-edit": "Aanpassen koppeling naar pagina",
             "visualeditor-emm-linkdialog-titlefield-placeholder-def": "Zoeken naar een koppeling",
             "visualeditor-emm-linkdialog-titlefield-placeholder-new": "Titel nieuwe koppeling",
             "visualeditor-emm-linkdialog-linkfield-placeholder-def": "Invoegen nieuwe koppeling",

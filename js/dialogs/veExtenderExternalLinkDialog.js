@@ -137,6 +137,7 @@ function createExternalLinkDialog(LightResourceDialog) {
                 break;
         }
         this.validator.cleanUpForm();
+        toggleAutoComplete(this); //fixme bugged, doesn't work for some reason.
     };
 
     /**
@@ -147,14 +148,14 @@ function createExternalLinkDialog(LightResourceDialog) {
         switch (this.dialogMode) {
             case 0: // insert existing
                 if (!this.isExistingResource && this.linkField.value.length != 0) {
-                    this.executeModeChange(1);
                     this.dialogMode = 1;
+                    this.executeModeChange(1);
                 }
                 break;
             case 1: // insert new
                 if (this.linkField.value.length == 0) {
-                    this.executeModeChange(0);
                     this.dialogMode = 0;
+                    this.executeModeChange(0);
                 }
                 break;
             case 2: // edit existing
@@ -165,19 +166,6 @@ function createExternalLinkDialog(LightResourceDialog) {
                 }
                 break;
         }
-        toggleAutoComplete(this);
-    };
-
-    /**
-     * TODO Commentaar Nick
-     */
-    EMMExternalLinkDialog.prototype.resetMode = function () {
-        this.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-dialogexternallinktitle")());
-        this.dialogMode = 0; //TODO: check if this is still necessary
-        toggleAutoComplete(this, this.titleField);
-        var input = this.titleField.$element.find('input');
-        input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-def")());
-        this.validator.cleanUpForm();
     };
 
     /**
