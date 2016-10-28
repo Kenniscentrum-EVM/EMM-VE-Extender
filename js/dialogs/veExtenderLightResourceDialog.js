@@ -3,18 +3,28 @@
  */
 "use strict";
 
+
 /**
  * This function more or less functions like a factory. It recieves a parent 'class', it then adds its own behavior on
  * top of the existing behavior. When done with modifying the 'class' this method then returns the modified class/function.
- * @param {EMMLightResourceDialog} LightResourceDialog - The 'class'-definition of EMMLightResourceDialog
- * @returns {EMMFileDialog} - returns the 'class'-definition of an EMMFileDialog
+ * @param {EMMDialog} Dialog - The 'class'-definition of EMMLightResourceDialog
+ * @param {String} resourceType - The type of resource for which this 'factory' should create a class
+ * @returns {EMMLightResourceDialog} - returns the 'class'-definition of an EMMLightResourceDialog
  */
 function createLightResourceDialog(Dialog, resourceType) {
+    /**
+     * Calls the constructor of it's super class, EMMDialog.
+     * @constructor
+     */
     var EMMLightResourceDialog = function () {
         Dialog.call(this);
     };
     OO.inheritClass(EMMLightResourceDialog, Dialog);
 
+    /**
+     * Creates generic input fields for a dialog that handles a Light Resource.
+     * The most generic fields are created in the constructor of EMMDialog.
+     */
     EMMLightResourceDialog.prototype.createFields = function () {
         this.titleField = new OO.ui.TextInputWidget({placeholder: OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-def")()});
         this.creatorField = new OO.ui.TextInputWidget({});
@@ -23,6 +33,10 @@ function createLightResourceDialog(Dialog, resourceType) {
         this.subjectField = new OO.ui.TextInputWidget({});
     };
 
+    /**
+     * Add validation to the generic fields for a dialog that handles a Light Resource.
+     * Validation for the most generic fields is added in the constructor of EMMDialog.
+     */
     EMMLightResourceDialog.prototype.createDialogLayout = function () {
         this.titleField.validation = [checkIfEmpty];
         this.presentationTitleField.validation = [checkIfEmpty];
@@ -30,6 +44,12 @@ function createLightResourceDialog(Dialog, resourceType) {
         this.dateField.validation = [checkIfEmpty, checkIfDate];
     };
 
+    /**
+     * Builds a generic query for editing or creating a light resource, should be expanded on in classes that extend this class.
+     * @param {String} currentPageID - The internal name of the current page
+     * @returns {string} - Returns a basic query for editing or creating a light resource, should be expanded on for
+     * specific kinds of light resources.
+     */
     EMMLightResourceDialog.prototype.buildQuery = function (currentPageID) {
         var query = "";
         query += "Resource Description[title]=" + this.titleField.getValue() +
@@ -41,6 +61,12 @@ function createLightResourceDialog(Dialog, resourceType) {
         return query;
     };
 
+    /**
+     * Fill the generic fields of a dialog handling a light resource based on a selected resource from the autocomplete dropdown.
+     * Fields for a specific type of Light Resource should be filled in their own method.
+     * @param {Object} suggestion - An object containing the properties of the selected light resource.
+     * This ojbect is created when initiating the autocomplete library.
+     */
     EMMLightResourceDialog.prototype.fillFields = function (suggestion) {
         this.creatorField.setValue(suggestion.creator);
         this.dateField.setValue(fixDate(suggestion.date));
@@ -48,6 +74,16 @@ function createLightResourceDialog(Dialog, resourceType) {
         this.subjectField.setValue(suggestion.subjects);
     };
 
+    /**
+     * Processes (a part of) a single row in the resultset of an ask-query that gathered information about all light
+     * resources of a certain type. May need to be further expanded for filling specific fields only present in more
+     * specific types of Light Resource. This expands a suggestion object that already contains generic information for
+     * an EMMDialog.
+     * @param {Object} singleResult - A single row from the result of the api-call that contains all the information
+     * about a Light Resource that was asked for in the query.
+     * @param {Object} suggestionObject - A single suggestion for the autocomplete dropdown that should be expanded.
+     * Should already contain data that every resource has.
+     */
     EMMLightResourceDialog.prototype.processDialogSpecificQueryResult = function (singleResult, suggestionObject) {
 
         suggestionObject.creator = singleResult.printouts["Dct:creator"][0];
@@ -65,6 +101,9 @@ function createLightResourceDialog(Dialog, resourceType) {
         suggestionObject.subjects = suggestionObject.subjects.slice(0, -2);
     };
 
+    /**
+     * Decide what type of dialog-class the 'factory' function should return.
+     */
     switch (resourceType) {
         case "File":
             return createFileDialog(EMMLightResourceDialog);
