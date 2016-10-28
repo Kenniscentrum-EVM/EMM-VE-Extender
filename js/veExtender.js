@@ -1,4 +1,6 @@
-//redefine what tools will be initially available in the insert-menu
+/**
+ * Redifine the order in which tools appeear in the insert-menu
+ */
 function redefineMenu() {
     var tools = ve.ui.toolFactory.bindings.register;
     //Helps adding tools to the insert menu, makes sure they're not hidden behind the 'show more' button
@@ -28,6 +30,10 @@ function redefineMenu() {
             force.push(toadd[i]);
 }
 
+/**
+ * 'Main' function that executes all functions required to load the EMMVEExtender and expand the current functionality
+ * of the Visual Editor.
+ */
 function loadEMMExtender() {
     new VEETemplateForclosure();
     redefineMenu();
@@ -38,6 +44,10 @@ function loadEMMExtender() {
     overwriteEditBehaviour();
 }
 
+/**
+ * Once the visual editor is done loading, this function will be executed.
+ * Initializes the entire EMMVEExtender.
+ */
 mw.hook('ve.activationComplete').add(function () {
     // Register plugins to VE. will be loaded once the user opens the VE
     loadEMMExtender();

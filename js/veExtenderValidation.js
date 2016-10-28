@@ -1,4 +1,5 @@
-"use strict"
+"use strict";
+
 /***
  * Validator class
  * This class reads the fieldSet of the assigned dialogInstance and checks if the InputWidgets of the fieldSet have the 'validation' property.
@@ -29,7 +30,10 @@ var Validator = function (dialogInstance, inputSuccess, inputFail, validationSuc
     // assign the on-change events to the InputWidgets in the fieldSet. (if they're required)
     this.bindEvents(this.fieldset, eventWrapper);
 
-    // wrapper function because we're using a closure to facilitate the 'return' behaviour of the validator.
+    /**
+     * wrapper function because we're using a closure to facilitate the 'return' behaviour of the validator.
+     * @param {*} value - Parameter given to this method by the eventhandler, currently not used
+     */
     function eventWrapper(value) {
         (function (widget) {
             // is the validator enabled?
@@ -76,12 +80,11 @@ var Validator = function (dialogInstance, inputSuccess, inputFail, validationSuc
             }
         })(this);
         // execute the onChangeFunctions..
-        if(validator.onChangeEnabled) {
+        if (validator.onChangeEnabled) {
             if (this.onChangeFunctions != null)
                 for (var i = 0; i < this.onChangeFunctions.length; i++)
                     this.onChangeFunctions[i].call(validator.dialogInstance);
         }
-
     }
 };
 
@@ -94,7 +97,7 @@ Validator.prototype.bindEvents = function (fieldSet, eventFunction) {
     //Add event handlers to the widget given by the fieldSet.
     var validator = this;
     for (var i = 0; i < fieldSet.items.length; i++) {
-        //uh....? closure
+        //Use closure to solve issues with widget
         (function () {
             var widget = fieldSet.items[i].fieldWidget;
             fieldSet.items[i].fieldWidget.$element.find("input").focusout(function () {
@@ -122,17 +125,15 @@ Validator.prototype.enable = function () {
 /**
  * Enables the execution of the functions in the 'onChangeFunctions' property.
  */
-Validator.prototype.enableOnChange = function()
-{
-  this.onChangeEnabled = true;
+Validator.prototype.enableOnChange = function () {
+    this.onChangeEnabled = true;
 };
 
 /**
  * Disables the execution of the functions in the 'onChangeFunctions' property.
  */
-Validator.prototype.disableOnChange = function()
-{
-  this.onChangeEnabled = false;
+Validator.prototype.disableOnChange = function () {
+    this.onChangeEnabled = false;
 };
 
 /**

@@ -2,16 +2,19 @@
 
 /**
  * This function overwrites the default Visual Extender edit behaviour.
- * The behaviour is triggered when a user pressed the edit button after a transclusion has been selected.
+ * The behaviour is triggered when a user presses the edit button after a transclusion has been selected.
  */
 function overwriteEditBehaviour() {
     var onEditButtonClickBase = ve.ui.LinearContextItem.prototype.onEditButtonClick;
+    /**
+     * Defines what should happen when clicking the edit button, returns the result of calling the original function at the end.
+     * @returns {*} - The result of the original function
+     */
     ve.ui.LinearContextItem.prototype.onEditButtonClick = function () {
         if (this.model.type === "mwTransclusionBlock" || this.model.type === "mwTransclusionInline") {
             var template = this.model.element.attributes.mw.parts[0].template;
             if (template != null) {
                 if (template.params.dialog != null) {
-                    console.log(template.params.dialog,"wat is het probleem");
                     if (template.params.dialog.wt == "process-linkpage-dialog") {
                         ve.ui.actionFactory.create('window', ve.init.target.getSurface()).open(template.params.dialog.wt, {
                             target: ve.init.target,
@@ -20,7 +23,6 @@ function overwriteEditBehaviour() {
                         return;
                     }
                     else {
-                        console.log(template.params.dialog);
                         ve.ui.actionFactory.create('window', ve.init.target.getSurface()).open(template.params.dialog.wt, {
                             target: ve.init.target,
                             source: template.params.resource.wt
