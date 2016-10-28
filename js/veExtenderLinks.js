@@ -1,6 +1,5 @@
 "use strict";
 
-
 /**
  * This method is executed when the extention is loaded and is responsible for passing the correct information to the loadEMMDialog method
  * At the moment it calls loadEMMDialog to create three dialogs and menu items: File, Internal link and External link
@@ -213,9 +212,9 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
      * @param {Object} data - Window opening data.
      * @returns {OO.ui.Process}
      */
-    EMMDialog.prototype.getReadyProcess = function(data) {
+    EMMDialog.prototype.getReadyProcess = function (data) {
         var dialogInstance = this;
-        if(data.source != null) //are we editing?
+        if (data.source != null) //are we editing?
         {
             this.dialogMode = 2;
             this.executeModeChange(2);
@@ -231,7 +230,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                 dialogInstance.validator.disable(); //completely disable validation before we're going to fill the dialog.
                 dialogInstance.validator.disableOnChange();
                 var res = queryData.query.results;
-                for(var row in res) {
+                for (var row in res) {
                     if (!res.hasOwnProperty(row)) //seems to be required.
                         continue;
                     var suggestion = dialogInstance.processSingleQueryResult(row, res);
@@ -563,7 +562,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
      * @param {Object[]} resultSet - Associative array which functions like a dictionary, using strings as indexes, contains the result of a query.
      * @returns {Object} suggestionObject - A suggestion object, containing relevant information about a particular page which can be used by various functions fillFields.
      */
-    EMMDialog.prototype.processSingleQueryResult = function(row, resultSet){
+    EMMDialog.prototype.processSingleQueryResult = function (row, resultSet) {
         var suggestionObject = {};
         var singleResultRow = resultSet[row];
         suggestionObject.data = singleResultRow.fulltext;

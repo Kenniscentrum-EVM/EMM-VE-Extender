@@ -1,3 +1,7 @@
+/**
+ * Defines the translations for all text messages found in the EMMVEExtender.
+ * Currently available languages: English(en) and Dutch(nl)
+ */
 function defineTranslations() {
     "use strict";
     var translations = {
@@ -167,5 +171,4 @@ function defineTranslations() {
     };
     var userLanguage = mw.config.get("wgUserLanguage");
     mw.messages.set(translations[userLanguage] || translations.en);
-    //OO.ui.deferMsg( 'visualeditor-mwsignatureinspector-title' );
 }

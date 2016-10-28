@@ -8,65 +8,86 @@ function createExitDialog() {
     var cancelToolGroupFactory = new OO.ui.ToolGroupFactory();
     var cancelToolbar = new OO.ui.Toolbar(cancelToolFactory, cancelToolGroupFactory);
 
-    function cancelButton() {
-        cancelButton.parent.apply(this, arguments);
-    }
-    OO.inheritClass(cancelButton, OO.ui.Tool);
+    /**
+     * Constructor for CancelButton, calls its parent constructor.
+     * @constructor
+     */
+    var CancelButton = function () {
+        CancelButton.parent.apply(this, arguments);
+    };
+    OO.inheritClass(CancelButton, OO.ui.Tool);
 
-    cancelButton.static.name = 'cancelbutton';
-    cancelButton.static.title = OO.ui.deferMsg('visualeditor-emm-cancel');
-    cancelButton.prototype.onUpdateState = function () {};
-    cancelButton.prototype.onSelect = function () {
+    CancelButton.static.name = 'cancelbutton';
+    CancelButton.static.title = OO.ui.deferMsg('visualeditor-emm-cancel');
 
-        //Wanneer het document is aangepast...
+    /**
+     * Method that needs to be implemented in order to properly inherit from OO.ui.Tool. CancelButton has no special
+     * behaviour, so this function is empty in this case.
+     */
+    CancelButton.prototype.onUpdateState = function () {
+    };
+
+    /**
+     * What to do when the cancel button (in the top-menu) is clicked.
+     */
+    CancelButton.prototype.onSelect = function () {
+        //When the document has been modified:
         if (ve.init.target.getSurface().getModel().hasBeenModified()) {
-            //open onze eigen exit dialog
+            //open our own exit dialog
+            this.setActive(false);
             ve.init.target.getSurface().execute("window", "open", "cancelconfirm", null);
         }
         else {
+            //just close the visual editor
             ve.init.target.deactivate();
-            //ve.init.target.deactivate();
         }
     };
 
-    cancelToolFactory.register(cancelButton);
+    //Add the button to the menu
+    cancelToolFactory.register(CancelButton);
     cancelToolbar.setup([
         {
             type: 'bar',
             include: ['cancelbutton']
         }
     ]);
-
     $('.oo-ui-toolbar-actions').children().first().after(cancelToolbar.$group);
 
-    //Unregister the default exit dialog which is part of the visualextender library, we don't use it because the chameleon skin breaks it.
+    //Unregister the default exit dialog which is part of the visualeditor library, we don't use it because the chameleon skin breaks it.
     ve.ui.windowFactory.unregister(ve.ui.MWCancelConfirmDialog);
 
-    //Dialog creation happens like usual.
-    var cancelDialog = function (surface, config) {
-        OO.ui.ProcessDialog.call(this, surface, config);
+    /**
+     * Constructor for CancelDialog, calls the constructor of ProcessDialog.
+     * @constructor
+     */
+    var CancelDialog = function () {
+        OO.ui.ProcessDialog.call(this);
     };
-    OO.inheritClass(cancelDialog, OO.ui.ProcessDialog);
+    OO.inheritClass(CancelDialog, OO.ui.ProcessDialog);
 
     //This name is very important because the visualeditor uses it to open the dialog which we are going to overwrite
-    cancelDialog.static.name = 'cancelconfirm';
-    cancelDialog.static.title = OO.ui.deferMsg('visualeditor-viewpage-savewarning-title');
+    CancelDialog.static.name = 'cancelconfirm';
+    CancelDialog.static.title = OO.ui.deferMsg('visualeditor-viewpage-savewarning-title');
 
-    cancelDialog.prototype.initialize = function () {
-        var diaInstance = this;
+    /**
+     * Initializes the CancelDialog. This is called when the dialog is opened for the first time.
+     */
+    CancelDialog.prototype.initialize = function () {
+        var dialogInstance = this;
 
-        var buttonOk = new OO.ui.ButtonWidget({
+        //Create an 'ok'-button for the dialog
+        var okButton = new OO.ui.ButtonWidget({
             label: OO.ui.deferMsg('visualeditor-viewpage-savewarning-discard'),
             flags: ["destructive"],
             target: "_blank"
         });
+        okButton.$element.find('.oo-ui-labelElement-label').css("width", "100%");
 
-        buttonOk.$element.find('.oo-ui-labelElement-label').css("width", "100%");
-
-        var buttonCancel = new OO.ui.ButtonWidget({
+        //Create a 'cancel'-button for the dialog
+        var cancelButton = new OO.ui.ButtonWidget({
             label: OO.ui.deferMsg('visualeditor-viewpage-savewarning-keep')
         });
-        cancelDialog.super.prototype.initialize.call(this);
+        CancelDialog.super.prototype.initialize.call(this);
 
         this.content = new OO.ui.PanelLayout({
             padded: true,
@@ -82,45 +103,49 @@ function createExitDialog() {
         this.$body.append(this.content.$element);
         this.content.$element.after(this.footer.$element);
 
-        buttonOk.$element.css("float", "right");
-        buttonOk.onClick = function () {
+        okButton.$element.css("float", "right");
+        /**
+         * What should happen when clicking the 'ok' button.
+         */
+        okButton.onClick = function () {
             //Closes the visual editor
-            //ve.init.target.cancel('navigate-read');
-            diaInstance.close();
+            dialogInstance.close();
             ve.init.target.deactivate(true, 'navigate-read');
-
         };
-
-        buttonOk.connect(buttonOk, {
+        //Connect the onClick function with the button
+        okButton.connect(okButton, {
             click: "onClick"
         });
 
-        buttonCancel.onClick = function () {
-            diaInstance.close();
+        /**
+         * What should happen when clicking the 'cancel' button.
+         */
+        cancelButton.onClick = function () {
+            dialogInstance.close();
         };
-
-        buttonCancel.connect(buttonCancel, {
+        //Connect the onClick function with the button
+        cancelButton.connect(cancelButton, {
             click: "onClick"
         });
 
-        buttonCancel.$element.css("float", "left");
-        //buttonCancel.$element.css("margin-right", "5px");
+        cancelButton.$element.css("float", "left");
+        cancelButton.$element.find('.oo-ui-labelElement-label').css("width", "100%");
 
-        buttonCancel.$element.find('.oo-ui-labelElement-label').css("width", "100%");
+        //Add the buttons to the footer
+        this.footer.$element.append(okButton.$element);
+        this.footer.$element.append(cancelButton.$element);
 
-        this.footer.$element.append(buttonOk.$element);
-        this.footer.$element.append(buttonCancel.$element);
-
-        // body height is slightly increased to make the dialog look a bit prettier
-
-        cancelDialog.prototype.getBodyHeight = function () {
-            //Small bugfix for the menubutton.
-            $(".oo-ui-tool-name-cancelbutton").removeClass("oo-ui-tool-active");
-            return this.content.$element.outerHeight( true ) + this.footer.$element.outerHeight( true ) + 30;
+        /**
+         * Set the width and height of the dialog.
+         * @param {Object} dim - The current dimensions of the dialog
+         */
+        CancelDialog.prototype.setDimensions = function (dim) {
+            this.$frame.css({
+                height: this.getContentHeight() + 20
+            });
         };
-
     };
     //register our new dialog in the factory
-    ve.ui.windowFactory.register(cancelDialog);
+    ve.ui.windowFactory.register(CancelDialog);
 }
 
