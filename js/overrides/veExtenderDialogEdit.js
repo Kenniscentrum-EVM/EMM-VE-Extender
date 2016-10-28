@@ -11,7 +11,6 @@ function overwriteEditBehaviour() {
             var template = this.model.element.attributes.mw.parts[0].template;
             if (template != null) {
                 if (template.params.dialog != null) {
-                    console.log(template.params.dialog,"wat is het probleem");
                     if (template.params.dialog.wt == "process-linkpage-dialog") {
                         ve.ui.actionFactory.create('window', ve.init.target.getSurface()).open(template.params.dialog.wt, {
                             target: ve.init.target,
@@ -20,7 +19,6 @@ function overwriteEditBehaviour() {
                         return;
                     }
                     else {
-                        console.log(template.params.dialog);
                         ve.ui.actionFactory.create('window', ve.init.target.getSurface()).open(template.params.dialog.wt, {
                             target: ve.init.target,
                             source: template.params.resource.wt

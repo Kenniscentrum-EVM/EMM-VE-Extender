@@ -49,7 +49,7 @@ function createExternalLinkDialog(LightResourceDialog) {
          * Checks the titlefield and sets existingresource to false if the titlefield changed to empty from a full field
          */
         var testSuggestedLink = function () {
-            if (this.isExistingResource) {
+            if (this.isExistingResource && this.dialogMode != 2) {
                 if (dialogInstance.titleField.value.length == 0) {
                     this.isExistingResource = false;
                 }
@@ -98,13 +98,19 @@ function createExternalLinkDialog(LightResourceDialog) {
         ]);
     };
 
-    /**
-     * TODO commentaar Nick
-     */
-    EMMExternalLinkDialog.prototype.testAndChangeDialogMode = function () {
+
+    EMMExternalLinkDialog.prototype.executeModeChange = function (mode)
+    {
         var input = null;
-        if (this.dialogMode == 0) {
-            if (!this.isExistingResource && this.linkField.value.length != 0) {
+        switch(mode)
+        {
+            case 0:
+                this.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-dialogexternallinktitle")());
+                input = this.titleField.$element.find('input');
+                input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-def")());
+                clearInputFields(this.fieldset, [2], ["OoUiLabelWidget"]);
+                break;
+            case 1:
                 if (this.suggestion != null) {
                     if (this.suggestion.hyperlink == this.linkField.value) {
                         clearInputFields(this.fieldset, [0, 2], ["OoUiLabelWidget"]);
@@ -122,22 +128,44 @@ function createExternalLinkDialog(LightResourceDialog) {
                 input = this.titleField.$element.find('input');
                 input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-new")());
                 //todo temporary
-                this.dialogMode = 1;
-                toggleAutoComplete(this, this.titleField);
-                this.validator.cleanUpForm();
-            }
-        }
-        else {
-            if (this.linkField.value.length == 0) {
-                this.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-dialogexternallinktitle")());
+                break;
+            case 2:
+                this.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-linkdialog-title-edit")());
                 input = this.titleField.$element.find('input');
                 input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-def")());
-                this.dialogMode = 0;
-                toggleAutoComplete(this, this.titleField);
-                clearInputFields(this.fieldset, [1, 2], ["OoUiLabelWidget"]);
-                this.validator.cleanUpForm();
-            }
+                clearInputFields(this.fieldset, [2], ["OoUiLabelWidget"]);
+                break;
         }
+        this.validator.cleanUpForm();
+    };
+
+    /**
+     * TODO commentaar Nick
+     */
+    EMMExternalLinkDialog.prototype.testAndChangeDialogMode = function () {
+
+        switch (this.dialogMode) {
+            case 0: // insert existing
+                if (!this.isExistingResource && this.linkField.value.length != 0) {
+                    this.executeModeChange(1);
+                    this.dialogMode = 1;
+                }
+                break;
+            case 1: // insert new
+                if (this.linkField.value.length == 0) {
+                    this.executeModeChange(0);
+                    this.dialogMode = 0;
+                }
+                break;
+            case 2: // edit existing
+                if(!this.isExistingResource) {
+                    //todo discuss with Hans.
+                    //this.executeModeChange(0);
+                    //this.dialogMode = 0;
+                }
+                break;
+        }
+        toggleAutoComplete(this);
     };
 
     /**

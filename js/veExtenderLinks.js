@@ -113,6 +113,11 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
         this.suggestion = null;
         this.isExistingResource = false;
         this.dialogMode = 0;
+        /* Dialog modes:
+         * 0 : Existing reference
+         * 1 : New reference
+         * 2 : Editing reference
+         */
         this.selectionRange = null;
         //Create some common fields, present in all dialogs
         this.presentationTitleField = new OO.ui.TextInputWidget();
@@ -212,6 +217,10 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
         var dialogInstance = this;
         if(data.source != null) //are we editing?
         {
+            this.dialogMode = 2;
+            this.executeModeChange(2);
+
+            toggleInputFields(this.fieldset, true);
             data.source = data.source.replace(/ /g,"_"); //convert whitespaces to underscores
             var api = new mw.Api();
             var query = this.getEditQuery(data.source); //getEditQuery retrieves the correct query for us.
@@ -226,10 +235,11 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                     if (!res.hasOwnProperty(row)) //seems to be required.
                         continue;
                     var suggestion = dialogInstance.processSingleQueryResult(row, res);
-                    this.suggestion = suggestion;
+                    dialogInstance.suggestion = suggestion;
                     dialogInstance.titleField.setValue(suggestion.value);
-                    this.isExistingResource = true;
+                    toggleInputFields(dialogInstance.fieldset, false);
                     dialogInstance.fillFields(suggestion); //fill our dialog.
+                    dialogInstance.isExistingResource = true;
                 }
                 dialogInstance.validator.enable(); //enable validation again.
                 dialogInstance.validator.validateAll();
@@ -258,6 +268,17 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
      */
     EMMDialog.prototype.createFields = function () {
         displayOverloadError("createFields");
+    };
+
+    /**
+     * Abstract method that needs to be overridden, displays an error message if this is not the case.
+     * Expected behavior when overriding:
+     * Preforms the a mode change, this may include visual changes to a dialog.
+     * @param {Integer} mode - Mode to be switched to.
+     */
+    EMMDialog.prototype.executeModeChange = function (mode)
+    {
+        displayOverloadError("executeModeChange");
     };
 
     /**
@@ -596,6 +617,17 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
             callback(arr);
         });
     };
+}
+
+/**
+ * Enables or disables an entire fieldSet depending on the given boolean value.
+ * @param {OO.ui.FieldsetLayout} fieldSet - FieldSet to disable or enable.
+ * @param {boolean} value - Boolean instruction, true = disable, false = enable.
+ */
+function toggleInputFields(fieldSet, value)
+{
+    for (var i = 0; i < fieldSet.getItems().length; i++)
+        fieldSet.getItems()[i].getField().setDisabled(value);
 }
 
 /**

@@ -64,7 +64,7 @@ function createFileDialog(LightResourceDialog) {
          */
         var testSuggestedLink = function () {
             //todo replace this temporary thing with something better.
-            if (this.isExistingResource) {
+            if (this.isExistingResource && this.dialogMode != 2) {
                 if (dialogInstance.titleField.value.length == 0) {
                     this.isExistingResource = false;
                     fileFieldLayout.$element.show();
@@ -106,22 +106,21 @@ function createFileDialog(LightResourceDialog) {
         ]);
     };
 
-    /**
-     * TODO commentaar Nick
-     */
-    EMMFileDialog.prototype.testAndChangeDialogMode = function () {
+    EMMFileDialog.prototype.executeModeChange = function (mode)
+    {
         var input = null;
-        if (this.dialogMode == 0) {
-            //fixme dirty hack
-            if (this.fileField.currentFile == "")
-                return;
-            if ((!this.isExistingResource && this.fileField.currentFile != null)) {
+        switch(mode)
+        {
+            case 0:
+                this.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-dialogfiletitle")());
+                input = this.titleField.$element.find('input');
+                input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-filedialog-titlefield-placeholder-def")());
+                clearInputFields(this.fieldset, [1, 2], ["OoUiLabelWidget"]);
+                break;
+            case 1:
                 this.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-filedialog-title-npage")());
-                this.dialogMode = 1;
-                toggleAutoComplete(this, this.titleField);
                 input = this.titleField.$element.find('input');
                 input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-filedialog-titlefield-placeholder-new")());
-
                 if (this.suggestion != null) {
                     if (this.suggestion.value != this.titleField.value) {
                         clearInputFields(this.fieldset, [0, 1, 2], ["OoUiLabelWidget"]);
@@ -131,20 +130,38 @@ function createFileDialog(LightResourceDialog) {
                 }
                 else
                     clearInputFields(this.fieldset, [1, 2], ["OoUiLabelWidget"]);
-                this.validator.cleanUpForm();
-            }
+                break;
+            case 2:
+                break;
         }
-        else {
-            if (this.fileField.currentFile == null) {
-                this.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-dialogfiletitle")());
-                this.dialogMode = 0;
-                toggleAutoComplete(this, this.titleField);
-                input = this.titleField.$element.find('input');
-                input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-filedialog-titlefield-placeholder-def")());
-                clearInputFields(this.fieldset, [1, 2], ["OoUiLabelWidget"]);
-                this.validator.cleanUpForm();
-            }
+        this.validator.cleanUpForm();
+    };
+
+    /**
+     * TODO commentaar Nick
+     */
+    EMMFileDialog.prototype.testAndChangeDialogMode = function () {
+        switch(this.dialogMode)
+        {
+            case 0:
+                if (this.fileField.currentFile == "")
+                    return;
+                if ((!this.isExistingResource && this.fileField.currentFile != null)) {
+                    this.executeModeChange(1);
+                    this.dialogMode = 1;
+                }
+                break;
+            case 1:
+                if (this.fileField.currentFile == null) {
+                    this.executeModeChange(0);
+                    this.dialogMode = 0;
+                }
+                break;
+            case 2:
+                //todo, same as external link mode 2.
+                break;
         }
+        toggleAutoComplete(this);
     };
 
     /**
