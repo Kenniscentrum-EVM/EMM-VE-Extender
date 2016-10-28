@@ -76,18 +76,6 @@ function createInternalLinkDialog(Dialog) {
     };
 
     /**
-     * Builds and executes a query that creates a new file resource or edits an existing one with the sfautoedit api-calll.
-     * After the new file resource has been added, a link is then inserted into the page by executing insertCallback.
-     * @param {String} currentPageID - The ID of the page that is currently being edited, can only contain alphanumeric
-     * characters and whitespace
-     * @param {function} insertCallback - The function that should be executed after a new file resource has been added or
-     * an existing one was changed. This function handles inserting a clickable link to the file in the current page.
-     * @param {String} linkdata - In case of an existing file, linkdata contains the internal name of the file
-     * in order to let the api know what file link should be edited. Otherwise linkdata is just an empty string.
-     */
-
-
-    /**
      * Builds and executes a query that creates a new Light Context or edits an existing one with the sfautoedit api-calll.
      * After the new Light Context has been added, a link is then inserted into the page by executing insertCallback.
      * @param {String} currentPageID - The ID of the page that is currently being edited, can only contain alphanumeric
