@@ -43,7 +43,6 @@ function createExternalLinkDialog(LightResourceDialog) {
     EMMExternalLinkDialog.prototype.createDialogLayout = function () {
         LightResourceDialog.prototype.createDialogLayout.call(this);
         var dialogInstance = this;
-        // todo validation property verplaatsen.
         this.linkField.validation = [checkIfEmpty, checkIfWebsite];
 
         /**

@@ -1,30 +1,44 @@
 /**
- * Deze klasse wordt geinstancieerd in veExtender.js
- * @param protectedTypes array van nodetypes die niet verwijderd mogen worden, het node type is te achterhalen door de
- * console.log in dit script te uncommenten en dan in de visual editor elementen te verwijderen.
- *
- * Dit werkt nu nog niet naar behoren, nu kunnen er namelijk alleen nodetypes worden beschermt wanneer je eigenlijk binnen die types nog
- * onderscheid wil maken tussen verschillende templates. Denk aan systeem templates en reguliere templates.
+ * Class responsible for protecting system templates in the visual editor.
  */
 var VEETemplateForclosure = function() {
 
-    evaluateTransclusions();
+    //Make our list containing the templates that are to be protected.
     var protectedTemplates = {};
-    //de methode die over de verwijdering van elmenten gaat (terug te vinden in \mediawiki\extensions\VisualEditor\lib\ve\src\dm\ve.dm.Transaction.js)
+    //fill the list.
+    evaluateTransclusions();
+    //The method responsible for deleting elements (originally located in: \mediawiki\extensions\VisualEditor\lib\ve\src\dm\ve.dm.Transaction.js).
     var base = ve.dm.Transaction.prototype.addSafeRemoveOps;
+    /**
+     * Adds a replace op to remove the desired range and, where required, splices in retain ops
+     * to prevent the deletion of undeletable nodes.
+     *
+     * @param {ve.dm.Document} doc - Document.
+     * @param {number} removeStart - Offset to start removing from.
+     * @param {number} removeEnd - Offset to remove to.
+     * @param {boolean} removeMetadata -  Remove metadata instead of collapsing it.
+     * @return {number} - End offset of the removal.
+     */
     ve.dm.Transaction.prototype.addSafeRemoveOps = function(doc, removeStart, removeEnd, removeMetadata)
     {
-        // x is de offset van het punt in het document waar iets verwijdert moet worden.
+        //execute our recursive function.
         return removeRange(doc, removeStart, removeEnd, removeMetadata, this);
     };
+
+    /**
+     * Retrieves all templates in the document, checks if they are system templates and if so puts them in a list.
+     */
     function evaluateTransclusions() {
+        //Get all nodes in the document.
         var nodes = ve.init.target.getSurface().getModel().getDocument().getDocumentNode();
+        //Filter the result so we only keep the 'transclusion nodes' (templates).
         var transclusions = getTransclusions(nodes);
-        //todo somehow check if the async operations are complete
+        //iterate over our transclusions
         for(var i = 0; i < transclusions.length; i++)
         {
+            //retrieve the template name.
             var templateName = getTemplate(transclusions[i]);
-            //todo this may have to be wrapped into a closure.
+            //execute an ask query for every template, checking the categories the template belongs to.
             mw.loader.using('mediawiki.api', function () {
                     (new mw.Api()).get({
                         action: 'query',
@@ -34,7 +48,9 @@ var VEETemplateForclosure = function() {
                     }).done(function (data) {
                         var page = data.query.pages[0]; // we're only asking for a single page.
                         for(var y = 0; y < page.categories.length; y++) {
+                            //Does the template have the 'System' template?
                             if (page.categories[y].title.split(":").pop() == "System") {
+                                //if so, add it to our list of protected templates.
                                 protectedTemplates[templateName] = true;
                             }
                         }
@@ -44,6 +60,14 @@ var VEETemplateForclosure = function() {
         }
     }
 
+    /**
+     * Recursive function that checks if a selection has a protected template, if this is the case the template should be skipped
+     * and this function will be executed again with a modified offset.
+     *
+     * Most parameters are identical to those of of 'addSafeRemoveOps'.
+     * @param {ve.dm.Transaction} thisContext - The 'this' context from the base function.
+     * @returns {number} - End offset of the removal.
+     */
     function removeRange(doc, removeStart, removeEnd, removeMetadata, thisContext)
     {
         var x;
@@ -69,6 +93,11 @@ var VEETemplateForclosure = function() {
         return returnValue;
     }
 
+    /**
+     * Retrieves transclusion nodes from a node.
+     * @param {vm.dm.Node} node - Node to get the tranclusions from.
+     * @returns {vm.dm.Node[]} - Array of transclusion nodes.
+     */
     function getTransclusions(node)
     {
         var transclusions = [];
@@ -79,6 +108,11 @@ var VEETemplateForclosure = function() {
         return transclusions;
     }
 
+    /**
+     * Retrieves the template name from a transclusion node.
+     * @param {vm.dm.Node} node - Node to retrieve the template name from.
+     * @returns {String} - Template name.
+     */
     function getTemplate(node)
     {
         if(node.type == 'mwTransclusionBlock') {

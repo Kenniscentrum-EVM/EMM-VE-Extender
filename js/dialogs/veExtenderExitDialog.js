@@ -1,9 +1,9 @@
+"use strict";
+
 /**
  * Creates a custom exit dialog which is shown when the user tries to close the visual editor when the user made unsaved changes.
  */
 function createExitDialog() {
-
-
     var cancelToolFactory = new OO.ui.ToolFactory();
     var cancelToolGroupFactory = new OO.ui.ToolGroupFactory();
     var cancelToolbar = new OO.ui.Toolbar(cancelToolFactory, cancelToolGroupFactory);
@@ -15,8 +15,7 @@ function createExitDialog() {
 
     cancelButton.static.name = 'cancelbutton';
     cancelButton.static.title = OO.ui.deferMsg('visualeditor-emm-cancel');
-    cancelButton.prototype.onUpdateState = function () {
-    };
+    cancelButton.prototype.onUpdateState = function () {};
     cancelButton.prototype.onSelect = function () {
 
         //Wanneer het document is aangepast...
@@ -34,16 +33,11 @@ function createExitDialog() {
     cancelToolbar.setup([
         {
             type: 'bar',
-            //label: "Annuleren", //todo translations
             include: ['cancelbutton']
         }
     ]);
 
-
-
-
     $('.oo-ui-toolbar-actions').children().first().after(cancelToolbar.$group);
-
 
     //Unregister the default exit dialog which is part of the visualextender library, we don't use it because the chameleon skin breaks it.
     ve.ui.windowFactory.unregister(ve.ui.MWCancelConfirmDialog);
@@ -59,7 +53,6 @@ function createExitDialog() {
     cancelDialog.static.title = OO.ui.deferMsg('visualeditor-viewpage-savewarning-title');
 
     cancelDialog.prototype.initialize = function () {
-
         var diaInstance = this;
 
         var buttonOk = new OO.ui.ButtonWidget({
@@ -73,8 +66,8 @@ function createExitDialog() {
         var buttonCancel = new OO.ui.ButtonWidget({
             label: OO.ui.deferMsg('visualeditor-viewpage-savewarning-keep')
         });
-
         cancelDialog.super.prototype.initialize.call(this);
+
         this.content = new OO.ui.PanelLayout({
             padded: true,
             expanded: false,
@@ -87,9 +80,7 @@ function createExitDialog() {
         });
 
         this.$body.append(this.content.$element);
-
         this.content.$element.after(this.footer.$element);
-
 
         buttonOk.$element.css("float", "right");
         buttonOk.onClick = function () {
@@ -98,7 +89,7 @@ function createExitDialog() {
             diaInstance.close();
             ve.init.target.deactivate(true, 'navigate-read');
 
-        }
+        };
 
         buttonOk.connect(buttonOk, {
             click: "onClick"
@@ -106,7 +97,7 @@ function createExitDialog() {
 
         buttonCancel.onClick = function () {
             diaInstance.close();
-        }
+        };
 
         buttonCancel.connect(buttonCancel, {
             click: "onClick"
