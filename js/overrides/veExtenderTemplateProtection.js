@@ -35,9 +35,9 @@ var VEETemplateForclosure = function () {
             //retrieve the template name.
             var templateName = getTemplate(transclusions[i]);
             //execute an ask query for every template, checking the categories the template belongs to.
-            mw.loader.using('mediawiki.api', function () {
+            mw.loader.using("mediawiki.api", function () {
                     (new mw.Api()).get({
-                        action: 'query',
+                        action: "query",
                         prop: "categories",
                         titles: templateName,
                         formatversion: 2
@@ -73,7 +73,7 @@ var VEETemplateForclosure = function () {
         for (x = removeStart; x < removeEnd; x++) {
             var node = doc.getDocumentNode().getNodeFromOffset(x);
             if (node.type != null)
-                if (node.type == 'mwTransclusionBlock' && protectedTemplates[getTemplate(node)] != null) {
+                if (node.type == "mwTransclusionBlock" && protectedTemplates[getTemplate(node)] != null) {
                     ve.dm.nodeFactory.registry[doc.data.getType(x)].static.isDeletable = false;
                     protect = true;
                     removeRange(doc, x + 1, removeEnd, removeMetadata, thisContext);
@@ -99,7 +99,7 @@ var VEETemplateForclosure = function () {
         var transclusions = [];
         //todo add inline transclusion grabber?
         for (var i = 0; i < node.children.length; i++)
-            if (node.children[i].type == 'mwTransclusionBlock')
+            if (node.children[i].type == "mwTransclusionBlock")
                 transclusions.push(node.children[i]);
         return transclusions;
     }
@@ -110,7 +110,7 @@ var VEETemplateForclosure = function () {
      * @returns {String} - Template name.
      */
     function getTemplate(node) {
-        if (node.type == 'mwTransclusionBlock') {
+        if (node.type == "mwTransclusionBlock") {
             for (var z = 0; node.element.attributes.mw.parts.length; z++) {
                 if (typeof node.element.attributes.mw.parts[z] === "object")
                     return node.element.attributes.mw.parts[z].template.target.href.split("./").pop();

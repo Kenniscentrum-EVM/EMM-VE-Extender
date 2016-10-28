@@ -29,7 +29,7 @@ function createInternalLinkDialog(Dialog) {
      */
     EMMInternalLinkDialog.prototype.createFields = function () {
         //Set the placeholder of titleField
-        this.titleField.$element.find('input').prop("placeholder", OO.ui.deferMsg("visualeditor-emm-search")());
+        this.titleField.$element.find("input").prop("placeholder", OO.ui.deferMsg("visualeditor-emm-search")());
     };
 
     /**
@@ -94,13 +94,13 @@ function createInternalLinkDialog(Dialog) {
             //Find the topcontext of the current page
             var api = new mw.Api();
             api.get({
-                action: 'ask',
-                parameters: 'limit:10000',//check how to increase limit of ask-result; done in LocalSettings.php
+                action: "ask",
+                parameters: "limit:10000",//check how to increase limit of ask-result; done in LocalSettings.php
                 query: "[[" + currentPageID + "]]|?Topcontext|limit=10000"//
             }).done(function (data) {
                 var res = data.query.results;
-                if (res[currentPageID].printouts["Topcontext"][0] != null) {
-                    var topContext = res[currentPageID].printouts["Topcontext"][0].fulltext;
+                if (res[currentPageID].printouts.Topcontext[0] != null) {
+                    var topContext = res[currentPageID].printouts.Topcontext[0].fulltext;
                     query += "&Light Context[Topcontext]=" + topContext;
                     dialogInstance.executeQuery(query, insertCallback);
                 } else {

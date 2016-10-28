@@ -32,7 +32,7 @@ function createExternalLinkDialog(LightResourceDialog) {
         this.linkField = new OO.ui.TextInputWidget({placeholder: OO.ui.deferMsg("visualeditor-emm-linkdialog-linkfield-placeholder-def")()});
         this.addToResourcesField = new OO.ui.CheckboxInputWidget({selected: true});
         //Set the placeholder of titleField
-        this.titleField.$element.find('input').prop("placeholder", OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-def")());
+        this.titleField.$element.find("input").prop("placeholder", OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-def")());
     };
 
     /**
@@ -111,15 +111,13 @@ function createExternalLinkDialog(LightResourceDialog) {
                         this.validator.cleanUpForm();
                         return;
                     }
-                    else {
-                        clearInputFields(this.fieldset, [0, 1, 2], ["OoUiLabelWidget"]);
-                    }
+                    clearInputFields(this.fieldset, [0, 1, 2], ["OoUiLabelWidget"]);
                 }
                 else {
                     clearInputFields(this.fieldset, [0, 1, 2], ["OoUiLabelWidget"]);
                 }
-                this.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-linkdialog-title-npage")());
-                input = this.titleField.$element.find('input');
+                this.$element.find(".oo-ui-processDialog-title").text(OO.ui.deferMsg("visualeditor-emm-linkdialog-title-npage")());
+                input = this.titleField.$element.find("input");
                 input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-new")());
                 //todo temporary
                 this.dialogMode = 1;
@@ -129,8 +127,8 @@ function createExternalLinkDialog(LightResourceDialog) {
         }
         else {
             if (this.linkField.value.length == 0) {
-                this.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-dialogexternallinktitle")());
-                input = this.titleField.$element.find('input');
+                this.$element.find(".oo-ui-processDialog-title").text(OO.ui.deferMsg("visualeditor-emm-dialogexternallinktitle")());
+                input = this.titleField.$element.find("input");
                 input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-def")());
                 this.dialogMode = 0;
                 toggleAutoComplete(this, this.titleField);
@@ -144,10 +142,10 @@ function createExternalLinkDialog(LightResourceDialog) {
      * TODO Commentaar Nick
      */
     EMMExternalLinkDialog.prototype.resetMode = function () {
-        this.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-dialogexternallinktitle")());
+        this.$element.find(".oo-ui-processDialog-title").text(OO.ui.deferMsg("visualeditor-emm-dialogexternallinktitle")());
         this.dialogMode = 0; //TODO: check if this is still necessary
         toggleAutoComplete(this, this.titleField);
-        var input = this.titleField.$element.find('input');
+        var input = this.titleField.$element.find("input");
         input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-def")());
         this.validator.cleanUpForm();
     };
@@ -208,7 +206,7 @@ function createExternalLinkDialog(LightResourceDialog) {
      */
     EMMExternalLinkDialog.prototype.processDialogSpecificQueryResult = function (singleResult, suggestionObject) {
         LightResourceDialog.prototype.processDialogSpecificQueryResult.call(this, singleResult, suggestionObject);
-        suggestionObject.hyperlink = singleResult.printouts["Hyperlink"][0];
+        suggestionObject.hyperlink = singleResult.printouts.Hyperlink[0];
     };
 
     /**

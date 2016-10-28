@@ -89,7 +89,7 @@ function loadEMMDialog(resourceType, toolId, menuText, dialogText, templateResul
     tool.static.deactivateOnSelect = true;
     tool.prototype.onSelect = function () {
         //Target: ve.init.target is passed in order to enable closing the dialog with the escape key.
-        ve.ui.actionFactory.create('window', this.toolbar.getSurface()).open(dialogName, {target: ve.init.target});
+        ve.ui.actionFactory.create("window", this.toolbar.getSurface()).open(dialogName, {target: ve.init.target});
         this.setActive(false);
     };
     ve.ui.toolFactory.register(tool);
@@ -211,7 +211,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
         var dialogInstance = this;
         if (data.source != null) //are we editing?
         {
-            data.source = data.source.replace(/ /g, "_"); //convert whitespaces to underscores
+            data.source = data.source.replace(/\ /g, "_"); //convert whitespaces to underscores
             var api = new mw.Api();
             var query = this.getEditQuery(data.source); //getEditQuery retrieves the correct query for us.
             api.get({
@@ -441,7 +441,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                 dialogInstance.semanticAskQuery(dialogInstance.getAutocompleteQuery(), autocompleteCallback);
             };
             //Get the name of the current page and replace any underscores with whitespaces to prevent errors later on.
-            var currentPageID = mw.config.get('wgPageName').replace(/_/g, " ");
+            var currentPageID = mw.config.get("wgPageName").replace(/_/g, " ");
             dialogInstance.buildAndExecuteQuery(currentPageID, insertCallback, linkdata);
             cleanUpDialog();
         };
@@ -664,7 +664,7 @@ function grabSelectedText(inputObject) {
                 continue;
             }
             var element = surfaceModel.getFragment().document.data.data[i];
-            if (typeof element[0] === 'undefined')
+            if (typeof element[0] === "undefined")
                 continue;
             //todo moet dit?
             var toAdd = element;
@@ -707,7 +707,7 @@ function initAutoComplete(data, dialogInstance) {
  * @param {EMMDialog} dialogInstance - The dialog for which the autoComplete dropdown should be activated or deactivated.
  */
 function toggleAutoComplete(dialogInstance) {
-    var element = dialogInstance.titleField.$element.find('input');
+    var element = dialogInstance.titleField.$element.find("input");
     if (element.autocomplete() == null)
         return;
     if (dialogInstance.dialogMode == 1)
@@ -730,5 +730,5 @@ function fixDate(date) {
     var mm = ("0" + (d.getMonth() + 1)).slice(-2);
     var dd = ("0" + d.getDate()).slice(-2);
     var yyyy = d.getFullYear();
-    return yyyy + '-' + mm + '-' + dd; //(US)
+    return yyyy + "-" + mm + "-" + dd; //(US)
 }

@@ -55,9 +55,15 @@ function createLightResourceDialog(Dialog, resourceType) {
         query += "Resource Description[title]=" + this.titleField.getValue() +
             "&Resource Description[creator]=" + this.creatorField.getValue() +
             "&Resource Description[date]=" + this.dateField.getValue();
-        if (this.organizationField.getValue().length > 0) query += "&Resource Description[organization]=" + this.organizationField.getValue();
-        if (this.subjectField.getValue().length > 0) query += "&Resource Description[subject]=" + this.subjectField.getValue();
-        if (!this.isExistingResource) query += "&Resource Description[created in page]=" + currentPageID;
+        if (this.organizationField.getValue().length > 0) {
+            query += "&Resource Description[organization]=" + this.organizationField.getValue();
+        }
+        if (this.subjectField.getValue().length > 0) {
+            query += "&Resource Description[subject]=" + this.subjectField.getValue();
+        }
+        if (!this.isExistingResource) {
+            query += "&Resource Description[created in page]=" + currentPageID;
+        }
         return query;
     };
 
@@ -88,7 +94,7 @@ function createLightResourceDialog(Dialog, resourceType) {
 
         suggestionObject.creator = singleResult.printouts["Dct:creator"][0];
         suggestionObject.date = singleResult.printouts["Dct:date"][0];
-        suggestionObject.organization = singleResult.printouts["Organization"][0];
+        suggestionObject.organization = singleResult.printouts.Organization[0];
         suggestionObject.subjects = "";
         var querySubjects = singleResult.printouts["Dct:subject"];
         //Gathers all subjects and creates a single string which contains the fulltext name of all the subjects,

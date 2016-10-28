@@ -24,7 +24,7 @@ function redefineMenu() {
             break;
         }
     //add options to menu if they are not already there
-    var toadd = ['file', 'linkpage', 'linkwebsite'];
+    var toadd = ["file", "linkpage", "linkwebsite"];
     for (var i = 0; i < toadd.length; i++)
         if (force.indexOf(toadd[i]) < 0)
             force.push(toadd[i]);
@@ -48,7 +48,7 @@ function loadEMMExtender() {
  * Once the visual editor is done loading, this function will be executed.
  * Initializes the entire EMMVEExtender.
  */
-mw.hook('ve.activationComplete').add(function () {
+mw.hook("ve.activationComplete").add(function () {
     // Register plugins to VE. will be loaded once the user opens the VE
     loadEMMExtender();
 });
