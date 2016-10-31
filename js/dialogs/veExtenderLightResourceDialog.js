@@ -26,7 +26,6 @@ function createLightResourceDialog(Dialog, resourceType) {
      * The most generic fields are created in the constructor of EMMDialog.
      */
     EMMLightResourceDialog.prototype.createFields = function () {
-        this.titleField = new OO.ui.TextInputWidget({placeholder: OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-def")()});
         this.creatorField = new OO.ui.TextInputWidget({});
         this.dateField = new OO.ui.TextInputWidget({type: "date"});
         this.organizationField = new OO.ui.TextInputWidget({});

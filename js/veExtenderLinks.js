@@ -185,7 +185,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
      * Returns the query that is used to gather information for all existing resources of a certain type.
      */
     EMMDialog.prototype.getAutocompleteQuery = function () {
-        return this.autocompleteQuery;
+        return this.autoCompleteQuery;
     };
 
     /**
@@ -534,7 +534,6 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
         };
     };
 
-    //todo is this still needed?
     /**
      * Getter function for the fieldset of the dialog
      * @returns {OO.ui.FieldsetLayout} - The fieldset corresponding to this dialog
@@ -651,6 +650,7 @@ function semanticCreateWithFormQuery(query, callback, target, form) {
 /**
  * Grabs the text that is selected (outside the dialog) and inserts it into the presentationtitle field inside the dialog
  * @param {OO.ui.TextInputWidget} inpuObject - The field in which the selected text should be inserted
+ * @returns {ve.Range}
  */
 function grabSelectedText(inputObject) {
     var surfaceModel = ve.init.target.getSurface().getModel();

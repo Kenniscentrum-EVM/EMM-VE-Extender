@@ -17,7 +17,7 @@ function createFileDialog(LightResourceDialog) {
      */
     var EMMFileDialog = function () {
         LightResourceDialog.call(this);
-        this.autocompleteQuery = "[[Category:Resource Description]] [[file name::+]] |?Semantic title|?Dct:creator|?Dct:date|?Organization|?Dct:subject|?file name|limit=10000";
+        this.autoCompleteQuery = "[[Category:Resource Description]] [[file name::+]] |?Semantic title|?Dct:creator|?Dct:date|?Organization|?Dct:subject|?file name|limit=10000";
         this.editQuery = "[[PAGENAMEPARAMETER]] |?Semantic title|?Dct:creator|?Dct:date|?Organization|?Dct:subject|?file name";
         //Define a new upload object to handle file uploads
         this.upload = new mw.Upload({parameters: {ignorewarnings: true}});

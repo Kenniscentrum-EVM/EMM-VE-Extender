@@ -17,7 +17,7 @@ function createExternalLinkDialog(LightResourceDialog) {
      */
     var EMMExternalLinkDialog = function () {
         LightResourceDialog.call(this);
-        this.autocompleteQuery = "[[Category:Resource Description]] [[Hyperlink::+]]|?Semantic title|?Hyperlink|?Dct:creator|?Dct:date|?Organization|?Dct:subject|limit=10000";
+        this.autoCompleteQuery = "[[Category:Resource Description]] [[Hyperlink::+]]|?Semantic title|?Hyperlink|?Dct:creator|?Dct:date|?Organization|?Dct:subject|limit=10000";
         this.editQuery = "[[PAGENAMEPARAMETER]] |?Semantic title|?Hyperlink|?Dct:creator|?Dct:date|?Organization|?Dct:subject";
     };
     OO.inheritClass(EMMExternalLinkDialog, LightResourceDialog);
