@@ -101,16 +101,17 @@ function createExternalLinkDialog(LightResourceDialog) {
 
     EMMExternalLinkDialog.prototype.executeModeChange = function (mode)
     {
+        this.dialogMode = mode;
         var input = null;
         switch(mode)
         {
-            case 0:
+            case this.modeEnum.INSERT_EXISTING:
                 this.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-dialogexternallinktitle")());
                 input = this.titleField.$element.find('input');
                 input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-def")());
                 clearInputFields(this.fieldset, [2], ["OoUiLabelWidget"]);
                 break;
-            case 1:
+            case this.modeEnum.INSERT_NEW:
                 if (this.suggestion != null) {
                     if (this.suggestion.hyperlink == this.linkField.value) {
                         clearInputFields(this.fieldset, [0, 2], ["OoUiLabelWidget"]);
@@ -129,7 +130,7 @@ function createExternalLinkDialog(LightResourceDialog) {
                 input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-new")());
                 //todo temporary
                 break;
-            case 2:
+            case this.modeEnum.EDIT_EXISTING:
                 this.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-linkdialog-title-edit")());
                 input = this.titleField.$element.find('input');
                 input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-def")());
@@ -146,23 +147,17 @@ function createExternalLinkDialog(LightResourceDialog) {
     EMMExternalLinkDialog.prototype.testAndChangeDialogMode = function () {
 
         switch (this.dialogMode) {
-            case 0: // insert existing
-                if (!this.isExistingResource && this.linkField.value.length != 0) {
-                    this.dialogMode = 1;
-                    this.executeModeChange(1);
-                }
+            case this.modeEnum.INSERT_EXISTING:
+                if (!this.isExistingResource && this.linkField.value.length != 0)
+                    this.executeModeChange(this.modeEnum.INSERT_NEW);
                 break;
-            case 1: // insert new
-                if (this.linkField.value.length == 0) {
-                    this.dialogMode = 0;
-                    this.executeModeChange(0);
-                }
+            case this.modeEnum.INSERT_NEW:
+                if (this.linkField.value.length == 0)
+                    this.executeModeChange(this.modeEnum.INSERT_EXISTING);
                 break;
-            case 2: // edit existing
+            case this.modeEnum.EDIT_EXISTING:
                 if(!this.isExistingResource) {
                     //todo discuss with Hans.
-                    //this.executeModeChange(0);
-                    //this.dialogMode = 0;
                 }
                 break;
         }

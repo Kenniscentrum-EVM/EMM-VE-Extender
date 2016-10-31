@@ -42,7 +42,7 @@ function createInternalLinkDialog(Dialog) {
         var dialogInstance = this;
         //Define what functions to execute when the content of this field changes.
         this.titleField.onChangeFunctions = [function () {
-            if (this.isExistingResource && this.dialogMode != 2) {
+            if (this.isExistingResource && this.dialogMode != this.modeEnum.EDIT_EXISTING) {
                 if (dialogInstance.titleField.value.length == 0) {
                     this.isExistingResource = false;
                 }
@@ -65,18 +65,20 @@ function createInternalLinkDialog(Dialog) {
      * TODO expand this and comment
      */
     EMMInternalLinkDialog.prototype.executeModeChange = function (mode) {
+        this.dialogMode = mode;
         switch(mode)
         {
-            case 0:
+            case this.modeEnum.INSERT_EXISTING:
                 this.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-dialoginternallinktitle")());
                 break;
-            case 1:
+            case this.modeEnum.INSERT_NEW:
                 this.$element.find('.oo-ui-processDialog-title').text("Aanpassen & Invoegen koppeling naar pagina");
                 break;
-            case 2:
+            case this.modeEnum.EDIT_EXISTING:
                 this.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-inlidialog-title-edit")());
                 break;
         }
+        //console.log(this.titleField.$element.find("input").autocomplete());
         toggleAutoComplete(this); //fixme: lijkt niet te werken?
     };
 
@@ -86,19 +88,13 @@ function createInternalLinkDialog(Dialog) {
     EMMInternalLinkDialog.prototype.testAndChangeDialogMode = function () {
         switch(this.dialogMode)
         {
-            case 0:
+            case this.modeEnum.INSERT_EXISTING:
                 if(this.isExistingResource && this.titleField.getValue() != this.suggestion.value)
-                {
-                    this.dialogMode = 1;
-                    this.executeModeChange(1);
-                }
+                    this.executeModeChange(this.modeEnum.INSERT_NEW);
                 break;
-            case 1:
+            case this.modeEnum.INSERT_NEW:
                 if((this.isExistingResource && this.titleField.getValue() == this.suggestion.value) || !this.isExistingResource)
-                {
-                    this.dialogMode = 0;
-                    this.executeModeChange(0);
-                }
+                    this.executeModeChange(this.modeEnum.INSERT_EXISTING);
                 break;
         }
     };

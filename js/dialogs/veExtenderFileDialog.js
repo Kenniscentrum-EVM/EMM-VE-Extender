@@ -108,16 +108,17 @@ function createFileDialog(LightResourceDialog) {
 
     EMMFileDialog.prototype.executeModeChange = function (mode)
     {
+        this.dialogMode = mode;
         var input = null;
         switch(mode)
         {
-            case 0:
+            case this.modeEnum.INSERT_EXISTING:
                 this.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-dialogfiletitle")());
                 input = this.titleField.$element.find('input');
                 input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-filedialog-titlefield-placeholder-def")());
                 clearInputFields(this.fieldset, [1, 2], ["OoUiLabelWidget"]);
                 break;
-            case 1:
+            case this.modeEnum.INSERT_NEW:
                 this.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-filedialog-title-npage")());
                 input = this.titleField.$element.find('input');
                 input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-filedialog-titlefield-placeholder-new")());
@@ -131,7 +132,7 @@ function createFileDialog(LightResourceDialog) {
                 else
                     clearInputFields(this.fieldset, [1, 2], ["OoUiLabelWidget"]);
                 break;
-            case 2:
+            case this.modeEnum.EDIT_EXISTING:
                 break;
         }
         this.validator.cleanUpForm();
@@ -144,22 +145,17 @@ function createFileDialog(LightResourceDialog) {
     EMMFileDialog.prototype.testAndChangeDialogMode = function () {
         switch(this.dialogMode)
         {
-            case 0:
+            case this.modeEnum.INSERT_EXISTING:
                 if (this.fileField.currentFile == "")
                     return;
-                if ((!this.isExistingResource && this.fileField.currentFile != null)) {
-                    this.dialogMode = 1;
-                    this.executeModeChange(1);
-                }
+                if ((!this.isExistingResource && this.fileField.currentFile != null))
+                    this.executeModeChange(this.modeEnum.INSERT_NEW);
                 break;
-            case 1:
-                if (this.fileField.currentFile == null) {
-                    this.dialogMode = 0;
-                    this.executeModeChange(0);
-                }
+            case this.modeEnum.INSERT_NEW:
+                if (this.fileField.currentFile == null)
+                    this.executeModeChange(this.modeEnum.INSERT_EXISTING);
                 break;
-            case 2:
-                //todo, same as external link mode 2.
+            case this.modeEnum.EDIT_EXISTING:
                 break;
         }
     };

@@ -111,12 +111,17 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
         OO.ui.ProcessDialog.call(this);
         this.suggestion = null;
         this.isExistingResource = false;
-        this.dialogMode = 0;
         /* Dialog modes:
          * 0 : Existing reference
          * 1 : New reference
          * 2 : Editing reference
          */
+        this.modeEnum = {
+            INSERT_EXISTING: 0,
+            INSERT_NEW : 1,
+            EDIT_EXISTING : 2
+        };
+        this.dialogMode = this.modeEnum.INSERT_EXISTING;
         this.selectionRange = null;
         //Create some common fields, present in all dialogs
         this.presentationTitleField = new OO.ui.TextInputWidget();
@@ -216,9 +221,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
         var dialogInstance = this;
         if (data.source != null) //are we editing?
         {
-            this.dialogMode = 2;
-            this.executeModeChange(2);
-
+            this.executeModeChange(this.modeEnum.EDIT_EXISTING);
             toggleInputFields(this.fieldset, true);
             data.source = data.source.replace(/ /g,"_"); //convert whitespaces to underscores
             var api = new mw.Api();
@@ -404,7 +407,6 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
          */
         var insertButtonHandler = function () {
             var namedata = dialogInstance.presentationTitleField.getValue();
-            var currentMode = dialogInstance.dialogMode;
             if (dialogInstance.suggestion != null) {
                 var linkdata = dialogInstance.suggestion.data.length > 0 ? dialogInstance.suggestion.data : "";
             }
@@ -499,12 +501,11 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
             //todo check if closed and then clean the fields for a more elegant cleanup?
             dialogInstance.validator.disable();
             clearInputFields(dialogInstance.fieldset, null, ["OoUiLabelWidget"]);
-            dialogInstance.executeModeChange(0);
+            dialogInstance.dialogMode = dialogInstance.modeEnum.INSERT_EXISTING;
+            dialogInstance.executeModeChange(dialogInstance.modeEnum.INSERT_EXISTING);
             dialogInstance.validator.enable();
             dialogInstance.isExistingResource = false;
             dialogInstance.suggestion = null;
-            dialogInstance.dialogMode = 0;
-            toggleAutoComplete(dialogInstance);
         }
 
         /**
@@ -520,6 +521,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
 
         //Execute the askQuery in order to gather all resources
         dialogInstance.semanticAskQuery(dialogInstance.getAutocompleteQuery(), autocompleteCallback);
+
 
         //fixme dirty hack
         //todo in plaats van deze hack een eigen event afvuren en opvangen?
