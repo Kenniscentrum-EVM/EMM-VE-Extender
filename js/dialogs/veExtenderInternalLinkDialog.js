@@ -80,12 +80,14 @@ function createInternalLinkDialog(Dialog) {
         }
         //console.log(this.titleField.$element.find("input").autocomplete());
         toggleAutoComplete(this); //fixme: lijkt niet te werken?
+
     };
 
     /**
      * TODO expand this and comment
      */
     EMMInternalLinkDialog.prototype.testAndChangeDialogMode = function () {
+        console.log(this.titleField.$element.find("input").autocomplete());
         switch(this.dialogMode)
         {
             case this.modeEnum.INSERT_EXISTING:

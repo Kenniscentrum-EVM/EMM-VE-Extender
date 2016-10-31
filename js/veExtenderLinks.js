@@ -498,6 +498,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
          */
         function cleanUpDialog() {
             dialogInstance.close();
+            hideAutoComplete(dialogInstance.titleField.$element.find("input"));
             //todo check if closed and then clean the fields for a more elegant cleanup?
             dialogInstance.validator.disable();
             clearInputFields(dialogInstance.fieldset, null, ["OoUiLabelWidget"]);
@@ -506,6 +507,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
             dialogInstance.validator.enable();
             dialogInstance.isExistingResource = false;
             dialogInstance.suggestion = null;
+
         }
 
         /**
@@ -514,13 +516,13 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
          * The user will be able to pick a resource from the list of all resources gathered by the askQuery
          * @param {Ojbect[]} queryResults - An array containing all the possible options for the autocomplete dropdown
          */
-        var autocompleteCallback = function (queryResults) {
+        var autoCompleteCallback = function (queryResults) {
             initAutoComplete(queryResults, dialogInstance);
             toggleAutoComplete(dialogInstance);
         };
 
         //Execute the askQuery in order to gather all resources
-        dialogInstance.semanticAskQuery(dialogInstance.getAutocompleteQuery(), autocompleteCallback);
+        dialogInstance.semanticAskQuery(dialogInstance.getAutocompleteQuery(), autoCompleteCallback);
 
 
         //fixme dirty hack
@@ -729,17 +731,43 @@ function initAutoComplete(data, dialogInstance) {
 }
 
 /**
+ * Hides the autocomplete suggestion box.
+ * @param {JQuery} element - JQuery element that has autocomplete functionality.
+ */
+function hideAutoComplete(element)
+{
+    if (element.autocomplete() != null)
+        element.autocomplete().hide();
+}
+
+/**
  * Depending on the mode the dialog is in, this function activates or deactivates the autoComplete dropdown.
  * @param {EMMDialog} dialogInstance - The dialog for which the autoComplete dropdown should be activated or deactivated.
  */
 function toggleAutoComplete(dialogInstance) {
     var element = dialogInstance.titleField.$element.find('input');
+    if (dialogInstance.dialogMode > 0)
+        setAutoCompleteEnabled(element, false);
+    else
+        setAutoCompleteEnabled(element, true);
+}
+
+/**
+ * Enables or disables the autocomplete functionality of a given element depending on the given value.
+ * @param {JQuery} element - Jquery element containing autoComplete functionality.
+ * @param {Boolean} value - Boolean value that decides the state of the autoComplete. true = enabled, false = disabled.
+ */
+function setAutoCompleteEnabled(element, value)
+{
     if (element.autocomplete() == null)
         return;
-    if (dialogInstance.dialogMode > 0)
-        element.autocomplete().disable();
-    else
+    if(value) {
         element.autocomplete().enable();
+    }
+    else {
+        hideAutoComplete(element);
+        element.autocomplete().disable();
+    }
 }
 
 /**

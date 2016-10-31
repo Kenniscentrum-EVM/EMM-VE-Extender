@@ -99,6 +99,10 @@ function createExternalLinkDialog(LightResourceDialog) {
     };
 
 
+    /**
+     * Executes a dialog mode change.
+     * @param {Number} mode - Dialog mode to switch to (defined in modeEnum).
+     */
     EMMExternalLinkDialog.prototype.executeModeChange = function (mode)
     {
         this.dialogMode = mode;
@@ -138,11 +142,12 @@ function createExternalLinkDialog(LightResourceDialog) {
                 break;
         }
         this.validator.cleanUpForm();
-        toggleAutoComplete(this); //fixme bugged, doesn't work for some reason.
+        toggleAutoComplete(this);
     };
 
     /**
-     * TODO commentaar Nick
+     * Checks the dialog variables to determine if a mode-change is needed.
+     * If one is needed, execute it.
      */
     EMMExternalLinkDialog.prototype.testAndChangeDialogMode = function () {
 
