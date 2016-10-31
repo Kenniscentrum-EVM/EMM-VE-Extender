@@ -1157,6 +1157,6 @@ var currencies1 = [
     {value: 'Vietnamese dong', data: 'VND'},
     {value: 'Yemeni rial', data: 'YER'},
     {value: 'Zambian kwacha', data: 'ZMK'},
-    {value: 'Zimbabwean dollar', data: 'ZWD'},
+    {value: 'Zimbabwean dollar', data: 'ZWD'}
 ];
  

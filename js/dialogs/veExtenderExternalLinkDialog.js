@@ -4,7 +4,7 @@
 "use strict";
 
 /**
- * This function more or less functions like a factory. It recieves a parent 'class', it then adds its own behavior on
+ * This function more or less functions like a factory. It receives a parent 'class', it then adds its own behavior on
  * top of the existing behavior. When done with modifying the 'class' this method then returns the modified class/function.
  * @param {EMMLightResourceDialog} LightResourceDialog - The 'class'-definition of EMMLightResourceDialog
  * @returns {EMMExternalLinkDialog} - returns the 'class'-definition of an EMMExternalLinkDialog
@@ -72,7 +72,7 @@ function createExternalLinkDialog(LightResourceDialog) {
                 align: "left"
             }),
             new OO.ui.FieldLayout(this.presentationTitleField, {
-                label: OO.ui.deferMsg("viualeditor-emm-link-presentationtitle"),
+                label: OO.ui.deferMsg("visualeditor-emm-link-presentationtitle"),
                 align: "left"
             }),
             new OO.ui.FieldLayout(this.creatorField, {
@@ -119,9 +119,8 @@ function createExternalLinkDialog(LightResourceDialog) {
                 this.$element.find(".oo-ui-processDialog-title").text(OO.ui.deferMsg("visualeditor-emm-linkdialog-title-npage")());
                 input = this.titleField.$element.find("input");
                 input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-new")());
-                //todo temporary
                 this.dialogMode = 1;
-                toggleAutoComplete(this, this.titleField);
+                toggleAutoComplete(this);
                 this.validator.cleanUpForm();
             }
         }
@@ -131,7 +130,7 @@ function createExternalLinkDialog(LightResourceDialog) {
                 input = this.titleField.$element.find("input");
                 input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-def")());
                 this.dialogMode = 0;
-                toggleAutoComplete(this, this.titleField);
+                toggleAutoComplete(this);
                 clearInputFields(this.fieldset, [1, 2], ["OoUiLabelWidget"]);
                 this.validator.cleanUpForm();
             }
@@ -143,8 +142,8 @@ function createExternalLinkDialog(LightResourceDialog) {
      */
     EMMExternalLinkDialog.prototype.resetMode = function () {
         this.$element.find(".oo-ui-processDialog-title").text(OO.ui.deferMsg("visualeditor-emm-dialogexternallinktitle")());
-        this.dialogMode = 0; //TODO: check if this is still necessary
-        toggleAutoComplete(this, this.titleField);
+        this.dialogMode = 0;
+        toggleAutoComplete(this);
         var input = this.titleField.$element.find("input");
         input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-def")());
         this.validator.cleanUpForm();
@@ -188,7 +187,7 @@ function createExternalLinkDialog(LightResourceDialog) {
     /**
      * Fill the fields of the dialog based on an external link the user has selected from the autocomplete dropdown.
      * @param {Object} suggestion - An object containing the properties of the selected external link.
-     * This ojbect is created when initiating the autocomplete library.
+     * This object is created when initiating the autocomplete library.
      */
     EMMExternalLinkDialog.prototype.fillFields = function (suggestion) {
         LightResourceDialog.prototype.fillFields.call(this, suggestion);

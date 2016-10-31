@@ -1,5 +1,5 @@
 /**
- * Redifine the order in which tools appeear in the insert-menu
+ * Redefine the order in which tools appeear in the insert-menu
  */
 function redefineMenu() {
     var tools = ve.ui.toolFactory.bindings.register;
@@ -24,10 +24,10 @@ function redefineMenu() {
             break;
         }
     //add options to menu if they are not already there
-    var toadd = ["file", "linkpage", "linkwebsite"];
-    for (var i = 0; i < toadd.length; i++)
-        if (force.indexOf(toadd[i]) < 0)
-            force.push(toadd[i]);
+    var toAdd = ["file", "linkpage", "linkwebsite"];
+    for (var i = 0; i < toAdd.length; i++)
+        if (force.indexOf(toAdd[i]) < 0)
+            force.push(toAdd[i]);
 }
 
 /**
@@ -35,7 +35,7 @@ function redefineMenu() {
  * of the Visual Editor.
  */
 function loadEMMExtender() {
-    new VEETemplateForclosure();
+    new VEETemplateProtection();
     redefineMenu();
     defineTranslations();
     addEMMLinks();

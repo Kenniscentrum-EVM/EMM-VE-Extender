@@ -215,7 +215,7 @@ Validator.prototype.getWidgetValue = function (widget) {
  * @returns {String} - Error message to be displayed.
  */
 function checkIfWebsite(value, sender) {
-    var expr = /(https:\/\/|http:\/\/)?(www\.)?\[[a-z0-9]{1,256}\.[a-z]{2,6}\b\/?([a-z0-9\-@:%_\+.~#?&\/=]*)/ig;
+    var expr = /(https:\/\/|http:\/\/)?(www\.)?[[a-z0-9]{1,256}\.[a-z]{2,6}\b\/?([a-z0-9\-@:%_\+.~#?&\/=]*)/ig;
     if (expr.test(value)) return "";
     else return OO.ui.deferMsg("visualeditor-emm-validation-website")();
 }

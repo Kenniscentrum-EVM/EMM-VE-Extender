@@ -21,7 +21,7 @@ function defineTranslations() {
 
             "visualeditor-emm-link": "Link*:",
             "visualeditor-emm-link-title": "Resource title*:",
-            "viualeditor-emm-link-presentationtitle": "Page-text*:",
+            "visualeditor-emm-link-presentationtitle": "Page-text*:",
             "visualeditor-emm-link-creator": "Author*:",
             "visualeditor-emm-link-date": "Date*:",
             "visualeditor-emm-link-organization": "Organization:",
@@ -43,7 +43,7 @@ function defineTranslations() {
             "visualeditor-emm-file-upload-timeout": "Your file upload request timed out. Please make sure the file isn't too large, check your connection and try again.",
             "visualeditor-emm-file-upload-duplicate": "Another file with the same content already exists",
             "visualeditor-emm-file-upload-exists": "Another file with the same name already exists",
-            "visualeditor-emm-file-upload-verification-error": "A verification error occured, the system returned the following message:",
+            "visualeditor-emm-file-upload-verification-error": "A verification error occurred, the system returned the following message:",
             "visualeditor-emm-file-upload-parsererror": "The file extension is invalid, only the following extensions are allowed: \n" +
             "svg, png, gif, jpg, jpeg, ppt, pptx, pdf, mp3, mp4, xls, xlsx, doc, docx, odt, odc, odp, odg, txt",
             "visualeditor-emm-file-upload-file-too-large": "The file is too large. The maximum size of a file is 64MB",
@@ -99,7 +99,7 @@ function defineTranslations() {
 
             "visualeditor-emm-link": "Koppeling*:",
             "visualeditor-emm-link-title": "Brontitel*:",
-            "viualeditor-emm-link-presentationtitle": "Paginatekst*:",
+            "visualeditor-emm-link-presentationtitle": "Paginatekst*:",
             "visualeditor-emm-link-creator": "Auteur*:",
             "visualeditor-emm-link-date": "Datum*:",
             "visualeditor-emm-link-organization": "Organisatie:",

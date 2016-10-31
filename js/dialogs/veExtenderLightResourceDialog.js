@@ -5,7 +5,7 @@
 
 
 /**
- * This function more or less functions like a factory. It recieves a parent 'class', it then adds its own behavior on
+ * This function more or less functions like a factory. It receives a parent 'class', it then adds its own behavior on
  * top of the existing behavior. When done with modifying the 'class' this method then returns the modified class/function.
  * @param {EMMDialog} Dialog - The 'class'-definition of EMMLightResourceDialog
  * @param {String} resourceType - The type of resource for which this 'factory' should create a class
@@ -70,7 +70,7 @@ function createLightResourceDialog(Dialog, resourceType) {
      * Fill the generic fields of a dialog handling a light resource based on a selected resource from the autocomplete dropdown.
      * Fields for a specific type of Light Resource should be filled in their own method.
      * @param {Object} suggestion - An object containing the properties of the selected light resource.
-     * This ojbect is created when initiating the autocomplete library.
+     * This object is created when initiating the autocomplete library.
      */
     EMMLightResourceDialog.prototype.fillFields = function (suggestion) {
         this.creatorField.setValue(suggestion.creator);
@@ -97,7 +97,7 @@ function createLightResourceDialog(Dialog, resourceType) {
         suggestionObject.subjects = "";
         var querySubjects = singleResult.printouts["Dct:subject"];
         //Gathers all subjects and creates a single string which contains the fulltext name of all the subjects,
-        //seperated by a ,
+        //separated by a ,
         for (var j = 0; j < querySubjects.length; j++) {
             suggestionObject.subjects += querySubjects[j].fulltext + ", ";
         }

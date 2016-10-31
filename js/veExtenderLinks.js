@@ -1,7 +1,7 @@
 "use strict";
 
 /**
- * This method is executed when the extention is loaded and is responsible for passing the correct information to the loadEMMDialog method
+ * This method is executed when the extension is loaded and is responsible for passing the correct information to the loadEMMDialog method
  * At the moment it calls loadEMMDialog to create three dialogs and menu items: File, Internal link and External link
  */
 function addEMMLinks() {
@@ -58,7 +58,7 @@ function addEMMLinks() {
 /**
  * This function creates a dialog of the specified type, it also adds a menu button to the insert-menu in order to access the dialog
  * Currently available dialog types are: Internal link, External link and File
- * @param {string} resourceType - The name of the resource type for which we want to create a dialog and manu-items
+ * @param {string} resourceType - The name of the resource type for which we want to create a dialog and menu-items
  * @param {string} toolId - The internal name for the tool/button in the menu-bar
  * @param {string} menuText - The text that should be displayed in the menu-bar
  * @param {string} dialogText - The text that should be displayed at the top of the dialog
@@ -335,9 +335,9 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
     /**
      * Abstract method that needs to be overridden, displays an error message if this is not the case.
      * Expected behavior and parameters when overriding:
-     * Depending on the type of resource and choices made by the user in the dialog, links to diffrent types of resources
-     * are created in the current page with diffrent types of templates. This function returns what template type to use.
-     * @returns {String} - Null in the abastract case, but should be a String containing the type of template to use.
+     * Depending on the type of resource and choices made by the user in the dialog, links to different types of resources
+     * are created in the current page with different types of templates. This function returns what template type to use.
+     * @returns {String} - Null in the abstract case, but should be a String containing the type of template to use.
      */
     EMMDialog.prototype.findTemplateToUse = function () {
         displayOverloadError("findTemplateToUse");
@@ -392,7 +392,6 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
          */
         var insertButtonHandler = function () {
             var namedata = dialogInstance.presentationTitleField.getValue();
-            var currentMode = dialogInstance.dialogMode;
             if (dialogInstance.suggestion != null) {
                 var linkdata = dialogInstance.suggestion.data.length > 0 ? dialogInstance.suggestion.data : "";
             }
@@ -484,7 +483,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
          */
         function cleanUpDialog() {
             dialogInstance.close();
-            //todo check if closed and then clean the fields for a more elegant cleanup?
+            //fixme check if closed and then clean the fields for a more elegant cleanup?
             dialogInstance.validator.disable();
             clearInputFields(dialogInstance.fieldset, null, ["OoUiLabelWidget"]);
             dialogInstance.resetMode();
@@ -498,7 +497,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
          * A function that should be called after the askQuery is done gathering all available resources of a specified type
          * This function initiates the autocomplete library for the resource input field
          * The user will be able to pick a resource from the list of all resources gathered by the askQuery
-         * @param {Ojbect[]} queryResults - An array containing all the possible options for the autocomplete dropdown
+         * @param {Object[]} queryResults - An array containing all the possible options for the autocomplete dropdown
          */
         var autocompleteCallback = function (queryResults) {
             initAutoComplete(queryResults, dialogInstance);
@@ -508,8 +507,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
         //Execute the askQuery in order to gather all resources
         dialogInstance.semanticAskQuery(dialogInstance.getAutocompleteQuery(), autocompleteCallback);
 
-        //fixme dirty hack
-        //todo in plaats van deze hack een eigen event afvuren en opvangen?
+        //todo grabSelectedText en dergelijke verplaatsen naar getReadyProcess.
         /**
          * Selected text is gathered here and put inside the input field
          * Beyond that this is also the place where the size of the dialog is set.
@@ -649,7 +647,7 @@ function semanticCreateWithFormQuery(query, callback, target, form) {
 
 /**
  * Grabs the text that is selected (outside the dialog) and inserts it into the presentationtitle field inside the dialog
- * @param {OO.ui.TextInputWidget} inpuObject - The field in which the selected text should be inserted
+ * @param {OO.ui.TextInputWidget} inputObject - The field in which the selected text should be inserted
  * @returns {ve.Range}
  */
 function grabSelectedText(inputObject) {

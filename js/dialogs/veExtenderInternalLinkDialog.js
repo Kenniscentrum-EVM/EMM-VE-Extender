@@ -5,7 +5,7 @@
 
 
 /**
- * This function more or less functions like a factory. It recieves a parent 'class', it then adds its own behavior on
+ * This function more or less functions like a factory. It receives a parent 'class', it then adds its own behavior on
  * top of the existing behavior. When done with modifying the 'class' this method then returns the modified class/function.
  * @param {EMMDialog} Dialog - The 'class'-definition of EMMDialog
  * @returns {EMMInternalLinkDialog} - returns the 'class'-definition of an EMMInternalLinkDialog
@@ -102,7 +102,7 @@ function createInternalLinkDialog(Dialog) {
                 if (res[currentPageID].printouts.Topcontext[0] != null) {
                     var topContext = res[currentPageID].printouts.Topcontext[0].fulltext;
                     query += "&Light Context[Topcontext]=" + topContext;
-                    dialogInstance.executeQuery(query, insertCallback);
+                    dialogInstance.executeQuery(query, insertCallback, linkdata);
                 } else {
                     alert(OO.ui.deferMsg("visualeditor-emm-topcontext-error")());
                 }
@@ -133,7 +133,7 @@ function createInternalLinkDialog(Dialog) {
     /**
      * Fill the fields of the dialog based on a Light Context the user has selected from the autocomplete dropdown.
      * Because internal link has no fields that should be filled after selecting the autocomplete this function is currently empty.
-     * @param {Object} suggestion - An object containing the properties of the selected Light Context. This ojbect is
+     * @param {Object} suggestion - An object containing the properties of the selected Light Context. This object is
      * created when initiating the autocomplete library.
      */
     EMMInternalLinkDialog.prototype.fillFields = function (suggestion) {
@@ -141,7 +141,7 @@ function createInternalLinkDialog(Dialog) {
     };
 
     /**
-     * Processes part of the result of an ask query. Expands an existing suggestionObject by adding internal link-specifc
+     * Processes part of the result of an ask query. Expands an existing suggestionObject by adding internal link-specific
      * data from the queryresult to the suggestionObject. Currently this function is empty, because an EMMInternalLinkDialog
      * does not contain any other fields beyond the basic fields of an EMMDialog.
      * @param {Object} singleResult - A single row from the result of the api-call that contains all the information
