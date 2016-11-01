@@ -204,38 +204,61 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
      * We override this method to add additional steps to the 'ready' process, currently we check if the 'data' parameter contains a source property.
      * This source property contains a string which is a reference to a page. If the 'data' parameter contains a source property that means that we are trying to edit
      * an existing link, in which case we will ask the api for information about the referenced page and fill our dialog with the result.
+     * We also add a step to the process where the currently selected text in the page the user is editing is inserted
+     * into the presentationtitlefield.
      * @param {Object} data - Window opening data.
-     * @returns {OO.ui.Process}
+     * @returns {OO.ui.Process} - The process that should be executed when the dialog is ready
      */
     EMMDialog.prototype.getReadyProcess = function (data) {
         var dialogInstance = this;
-        if (data.source != null) //are we editing?
-        {
-            data.source = data.source.replace(/\ /g, "_"); //convert whitespaces to underscores
-            var api = new mw.Api();
-            var query = this.getEditQuery(data.source); //getEditQuery retrieves the correct query for us.
-            api.get({
-                action: "ask",
-                query: query
-            }).done(function (queryData) {
-                dialogInstance.validator.disable(); //completely disable validation before we're going to fill the dialog.
-                dialogInstance.validator.disableOnChange();
-                var res = queryData.query.results;
-                for (var row in res) {
-                    if (!res.hasOwnProperty(row)) //seems to be required.
-                        continue;
-                    var suggestion = dialogInstance.processSingleQueryResult(row, res);
-                    this.suggestion = suggestion;
-                    dialogInstance.titleField.setValue(suggestion.value);
-                    this.isExistingResource = true;
-                    dialogInstance.fillFields(suggestion); //fill our dialog.
-                }
-                dialogInstance.validator.enable(); //enable validation again.
-                dialogInstance.validator.validateAll();
-                dialogInstance.validator.enableOnChange();
-            });
+
+        /**
+         * Checks if the user is trying to edit an existing link to a resource. If this is the case, information about
+         * the resource is gathered and an edit dialog is opened with the fields already filled in.
+         */
+        function checkIfEdit() {
+            //When being queued by the first method of OO.ui.process the scope of 'this' is set.
+            var data = this;
+            if (data.source != null) //are we editing?
+            {
+                data.source = data.source.replace(/\ /g, "_"); //convert whitespaces to underscores
+                var api = new mw.Api();
+                var query = dialogInstance.getEditQuery(data.source); //getEditQuery retrieves the correct query for us.
+                api.get({
+                    action: "ask",
+                    query: query
+                }).done(function (queryData) {
+                    dialogInstance.validator.disable(); //completely disable validation before we're going to fill the dialog.
+                    dialogInstance.validator.disableOnChange();
+                    var res = queryData.query.results;
+                    for (var row in res) {
+                        if (!res.hasOwnProperty(row)) //seems to be required.
+                            continue;
+                        var suggestion = dialogInstance.processSingleQueryResult(row, res);
+                        dialogInstance.suggestion = suggestion;
+                        dialogInstance.titleField.setValue(suggestion.value);
+                        dialogInstance.isExistingResource = true;
+                        dialogInstance.fillFields(suggestion); //fill our dialog.
+                    }
+                    dialogInstance.validator.enable(); //enable validation again.
+                    dialogInstance.validator.validateAll();
+                    dialogInstance.validator.enableOnChange();
+                });
+            }
         }
-        return EMMDialog.super.prototype.getReadyProcess.call(this, data);
+
+        /**
+         * Inserts the text that was selected before the dialog was opened into the presentationtitlefield
+         */
+        function grabAndValidateText() {
+            dialogInstance.selectionRange = grabSelectedText(dialogInstance.presentationTitleField);
+            if (dialogInstance.presentationTitleField.value.length > 0) {
+                dialogInstance.validator.validateWidget(dialogInstance.presentationTitleField);
+            }
+        }
+
+        //Add the two functions above to the queue of processes that will be executed when a dialog is opened
+        return EMMDialog.super.prototype.getReadyProcess.call(this, data).first(checkIfEdit, data).next(grabAndValidateText);
     };
 
     /**
@@ -442,7 +465,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
             //Get the name of the current page and replace any underscores with whitespaces to prevent errors later on.
             var currentPageID = mw.config.get("wgPageName").replace(/_/g, " ");
             dialogInstance.buildAndExecuteQuery(currentPageID, insertCallback, linkdata);
-            cleanUpDialog();
+            dialogInstance.close();
         };
 
 
@@ -450,8 +473,8 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
          * Define what should happen when the cancel button is clicked.
          */
         var cancelButtonHandler = function () {
-            //Clear the dialog and close it
-            cleanUpDialog();
+            //Close the dialoginstance
+            dialogInstance.close();
         };
 
         /**
@@ -472,26 +495,11 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
             }
             //Needed to enable proper dialog-closing behavior when closing a dialog by pressing the escape-button.
             else {
-                cleanUpDialog();
+                dialogInstance.close();
             }
             //Use parent handler in case something goes wrong
             return EMMDialog.super.prototype.getActionProcess.call(this, action);
         };
-
-        /**
-         * Empties all the fields of the dialog and resets it to its default state.
-         */
-        function cleanUpDialog() {
-            dialogInstance.close();
-            //fixme check if closed and then clean the fields for a more elegant cleanup?
-            dialogInstance.validator.disable();
-            clearInputFields(dialogInstance.fieldset, null, ["OoUiLabelWidget"]);
-            dialogInstance.resetMode();
-            dialogInstance.validator.enable();
-            dialogInstance.isExistingResource = false;
-            dialogInstance.suggestion = null;
-            dialogInstance.dialogMode = 0;
-        }
 
         /**
          * A function that should be called after the askQuery is done gathering all available resources of a specified type
@@ -507,17 +515,11 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
         //Execute the askQuery in order to gather all resources
         dialogInstance.semanticAskQuery(dialogInstance.getAutocompleteQuery(), autocompleteCallback);
 
-        //todo grabSelectedText en dergelijke verplaatsen naar getReadyProcess.
         /**
-         * Selected text is gathered here and put inside the input field
-         * Beyond that this is also the place where the size of the dialog is set.
+         * The size of the dialog is set up and some more layout settings are configured here.
          * @param {Object} dim - An object containing css properties for the dimensions of the dialog
          */
         EMMDialog.prototype.setDimensions = function (dim) {
-            dialogInstance.selectionRange = grabSelectedText(dialogInstance.presentationTitleField);
-            if (dialogInstance.presentationTitleField.value.length > 0) {
-                dialogInstance.validator.validateWidget(dialogInstance.presentationTitleField);
-            }
             dialogInstance.fieldset.$element.css({width: dim.width - 10});
             this.$frame.css({
                 width: dim.width + 250 || "",
@@ -530,6 +532,29 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                 dialogInstance.fieldset.getItems()[i].$element.find(".oo-ui-fieldLayout-body").css("width", "100%").css("overflow", "hidden");
             }
         };
+
+        /**
+         * Method that we override in order to expand the behaviour of a dialog when it is closing. We add a step to the
+         * process that will be executed when a dialog closes.
+         * @returns {OO.ui.Process} - The process that will be executed when the dialog closes.
+         */
+        EMMDialog.prototype.getTeardownProcess = function () {
+            /**
+             * Clears all the input fields and resets other variables to their default state.
+             */
+            function cleanUpDialog() {
+                dialogInstance.validator.disable();
+                clearInputFields(dialogInstance.fieldset, null, ["OoUiLabelWidget"]);
+                dialogInstance.resetMode();
+                dialogInstance.validator.enable();
+                dialogInstance.isExistingResource = false;
+                dialogInstance.suggestion = null;
+                dialogInstance.dialogMode = 0;
+            }
+
+            //Execute the original getTeardownProcess, but add our cleanup function to the process that is executed on closing.
+            return EMMDialog.super.prototype.getTeardownProcess.call(this).next(cleanUpDialog)
+        }
     };
 
     /**

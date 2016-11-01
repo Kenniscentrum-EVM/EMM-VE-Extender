@@ -11,11 +11,11 @@ function overwriteEditBehaviour() {
      * @returns {*} - The result of the original function
      */
     ve.ui.LinearContextItem.prototype.onEditButtonClick = function () {
-        if (this.model.type === "mwTransclusionBlock" || this.model.type === "mwTransclusionInline") {
+        if (this.model.type == "mwTransclusionBlock" || this.model.type == "mwTransclusionInline") {
             var template = this.model.element.attributes.mw.parts[0].template;
-            if (template !== null) {
-                if (template.params.dialog !== null) {
-                    if (template.params.dialog.wt === "process-linkpage-dialog") {
+            if (template != null) {
+                if (template.params.dialog != null) {
+                    if (template.params.dialog.wt == "process-linkpage-dialog") {
                         ve.ui.actionFactory.create("window", ve.init.target.getSurface()).open(template.params.dialog.wt, {
                             target: ve.init.target,
                             source: template.params.link.wt
