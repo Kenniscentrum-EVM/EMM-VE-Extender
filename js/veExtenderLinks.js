@@ -197,6 +197,15 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
     };
 
     /**
+     * Checks if the current contents of the dialog match the last picked suggestion. If they don't the user is editing
+     * the resource.
+     * @returns {boolean} - Whether the user is editing the selected resource
+     */
+    EMMDialog.prototype.isEdit = function () {
+        return this.titleField.getValue() != this.suggestion.value;
+    };
+
+    /**
      * Get the 'ready' process.
      * The ready process is used to ready a window for use in a particular context, based on the data argument. This method is called during the
      * opening phase of the windows lifecycle, after the window has been setup.
@@ -238,7 +247,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                         dialogInstance.suggestion = suggestion;
                         dialogInstance.titleField.setValue(suggestion.value);
                         dialogInstance.isExistingResource = true;
-                        dialogInstance.fillFields(suggestion); //fill our dialog.
+                        dialogInstance.fillFields(); //fill our dialog.
                     }
                     dialogInstance.validator.enable(); //enable validation again.
                     dialogInstance.validator.validateAll();
@@ -334,10 +343,8 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
      * Abstract method that needs to be overridden, displays an error message if this is not the case.
      * Expected behavior and parameters when overriding:
      * Fill the fields of the dialog based on a resource the user has selected from the autocomplete dropdown.
-     * @param {Object} suggestion - An object containing properties of the selected resource. This is first created when
-     * initiating the autocomplete library.
      */
-    EMMDialog.prototype.fillFields = function (suggestion) {
+    EMMDialog.prototype.fillFields = function () {
         displayOverloadError("fillFields");
     };
 
@@ -464,7 +471,15 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
             };
             //Get the name of the current page and replace any underscores with whitespaces to prevent errors later on.
             var currentPageID = mw.config.get("wgPageName").replace(/_/g, " ");
-            dialogInstance.buildAndExecuteQuery(currentPageID, insertCallback, linkdata);
+            if (!dialogInstance.isExistingResource) {
+                //In this case, dialoginstance.suggestion is empty, so build and execute the query
+                dialogInstance.buildAndExecuteQuery(currentPageID, insertCallback, linkdata);
+            } else if (dialogInstance.isEdit()) { //dealing with an existing resource, so isEdit exists.
+                dialogInstance.buildAndExecuteQuery(currentPageID, insertCallback, linkdata);
+            }
+            else {
+                insertCallback(dialogInstance.suggestion.data);
+            }
             dialogInstance.close();
         };
 
@@ -717,7 +732,7 @@ function initAutoComplete(data, dialogInstance) {
             if (!dialogInstance.isExistingResource) {
                 dialogInstance.suggestion = suggestion;
                 dialogInstance.isExistingResource = true;
-                dialogInstance.fillFields(suggestion);
+                dialogInstance.fillFields();
             }
         },
         appendTo: inputField.parentElement,

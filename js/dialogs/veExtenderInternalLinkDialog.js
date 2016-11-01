@@ -7,21 +7,21 @@
 /**
  * This function more or less functions like a factory. It receives a parent 'class', it then adds its own behavior on
  * top of the existing behavior. When done with modifying the 'class' this method then returns the modified class/function.
- * @param {EMMDialog} Dialog - The 'class'-definition of EMMDialog
+ * @param {EMMDialog} EMMDialog - The 'class'-definition of EMMDialog
  * @returns {EMMInternalLinkDialog} - returns the 'class'-definition of an EMMInternalLinkDialog
  */
-function createInternalLinkDialog(Dialog) {
+function createInternalLinkDialog(EMMDialog) {
     /**
      * Calls the constructor of it's super class, EMMDialog. Also defines some queries used to get information
      * about internal links.
      * @constructor
      */
     var EMMInternalLinkDialog = function () {
-        Dialog.call(this);
+        EMMDialog.call(this);
         this.autoCompleteQuery = "[[Category:Light Context||Project]]|?Semantic title|limit=10000";
         this.editQuery = "[[PAGENAMEPARAMETER]] |?Semantic title";
     };
-    OO.inheritClass(EMMInternalLinkDialog, Dialog);
+    OO.inheritClass(EMMInternalLinkDialog, EMMDialog);
 
     /**
      * Creates the input fields unique for a EMMInternalLinkDialog.
@@ -38,7 +38,7 @@ function createInternalLinkDialog(Dialog) {
      * adds functions that need to be executed when the content of a certain field changes.
      */
     EMMInternalLinkDialog.prototype.createDialogLayout = function () {
-        Dialog.prototype.createDialogLayout.call(this);
+        EMMDialog.prototype.createDialogLayout.call(this);
         var dialogInstance = this;
         //Define what functions to execute when the content of this field changes.
         this.titleField.onChangeFunctions = [function () {
@@ -109,12 +109,7 @@ function createInternalLinkDialog(Dialog) {
             });
         }
         else {
-            if (this.suggestion.value != this.titleField.getValue()) {
-                this.executeQuery(query, insertCallback, linkdata);
-            }
-            else {
-                insertCallback(this.suggestion.data);
-            }
+            this.executeQuery(query, insertCallback, linkdata);
         }
     };
 
@@ -131,12 +126,19 @@ function createInternalLinkDialog(Dialog) {
     };
 
     /**
+     * Checks if the current contents of the dialog match the last picked suggestion. If they don't the user is editing
+     * the resource.
+     * @returns {boolean} - Whether the user is editing the selected resource
+     */
+    EMMInternalLinkDialog.prototype.isEdit = function () {
+        return EMMDialog.prototype.isEdit.call(this);
+    };
+
+    /**
      * Fill the fields of the dialog based on a Light Context the user has selected from the autocomplete dropdown.
      * Because internal link has no fields that should be filled after selecting the autocomplete this function is currently empty.
-     * @param {Object} suggestion - An object containing the properties of the selected Light Context. This object is
-     * created when initiating the autocomplete library.
      */
-    EMMInternalLinkDialog.prototype.fillFields = function (suggestion) {
+    EMMInternalLinkDialog.prototype.fillFields = function () {
         //Nothing to fill, no editable fields beyond presentationtitle and title
     };
 

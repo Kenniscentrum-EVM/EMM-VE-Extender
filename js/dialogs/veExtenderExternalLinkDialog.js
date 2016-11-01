@@ -185,13 +185,21 @@ function createExternalLinkDialog(LightResourceDialog) {
     };
 
     /**
-     * Fill the fields of the dialog based on an external link the user has selected from the autocomplete dropdown.
-     * @param {Object} suggestion - An object containing the properties of the selected external link.
-     * This object is created when initiating the autocomplete library.
+     * Checks if the current contents of the dialog match the last picked suggestion. If they don't the user is editing
+     * the resource.
+     * @returns {boolean} - Whether the user is editing the selected resource
      */
-    EMMExternalLinkDialog.prototype.fillFields = function (suggestion) {
-        LightResourceDialog.prototype.fillFields.call(this, suggestion);
-        this.linkField.setValue(suggestion.hyperlink);
+    EMMExternalLinkDialog.prototype.isEdit = function () {
+        return LightResourceDialog.prototype.isEdit.call(this) ||
+                this.linkField.getValue() != this.suggestion.hyperlink;
+    };
+
+    /**
+     * Fill the fields of the dialog based on an external link the user has selected from the autocomplete dropdown.
+     */
+    EMMExternalLinkDialog.prototype.fillFields = function () {
+        LightResourceDialog.prototype.fillFields.call(this);
+        this.linkField.setValue(this.suggestion.hyperlink);
         this.validator.validateAll();
     };
 
