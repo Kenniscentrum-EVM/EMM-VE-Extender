@@ -507,7 +507,6 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
             dialogInstance.validator.enable();
             dialogInstance.isExistingResource = false;
             dialogInstance.suggestion = null;
-
         }
 
         /**
