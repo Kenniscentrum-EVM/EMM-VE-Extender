@@ -67,7 +67,6 @@ function createFileDialog(LightResourceDialog) {
             if (this.isExistingResource) {
                 if (dialogInstance.titleField.value.length == 0) {
                     this.isExistingResource = false;
-                    fileFieldLayout.$element.show();
                 }
             }
         };
@@ -157,7 +156,6 @@ function createFileDialog(LightResourceDialog) {
         toggleAutoComplete(this);
         var input = this.titleField.$element.find("input");
         input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-filedialog-titlefield-placeholder-def")());
-        this.fileField.$element.show();
         this.titleField.currentFile = null;
         this.validator.cleanUpForm();
     };
@@ -254,6 +252,7 @@ function createFileDialog(LightResourceDialog) {
      * @returns {boolean} - Whether the user is editing the selected resource
      */
     EMMFileDialog.prototype.isEdit = function () {
+        console.log("in filefield zit:",this.fileField.getValue());
         return LightResourceDialog.prototype.isEdit.call(this);
     };
 
@@ -261,7 +260,6 @@ function createFileDialog(LightResourceDialog) {
      * Fill the fields of the dialog based on a file the user has selected from the autocomplete dropdown.
      */
     EMMFileDialog.prototype.fillFields = function () {
-        this.fieldset.items[1].$element.hide();
         LightResourceDialog.prototype.fillFields.call(this);
         this.validator.validateAll();
     };
