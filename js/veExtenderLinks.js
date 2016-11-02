@@ -452,7 +452,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                     return;
                 }
                 surfaceModel.getLinearFragment(dialogInstance.selectionRange).insertContent(mytemplate);
-                dialogInstance.semanticAskQuery(dialogInstance.getAutocompleteQuery(), autocompleteCallback);
+                dialogInstance.semanticAskQuery(dialogInstance.getAutocompleteQuery(), autoCompleteCallback);
             };
             //Get the name of the current page and replace any underscores with whitespaces to prevent errors later on.
             var currentPageID = mw.config.get('wgPageName').replace(/_/g, " ");
@@ -718,6 +718,7 @@ function initAutoComplete(data, dialogInstance) {
     $(inputField).autocomplete({
         lookup: data,
         onSelect: function (suggestion) {
+            console.log("test");
             if (!dialogInstance.isExistingResource) {
                 dialogInstance.suggestion = suggestion;
                 dialogInstance.isExistingResource = true;

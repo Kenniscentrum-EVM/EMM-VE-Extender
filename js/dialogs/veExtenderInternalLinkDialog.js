@@ -87,7 +87,6 @@ function createInternalLinkDialog(Dialog) {
      * TODO expand this and comment
      */
     EMMInternalLinkDialog.prototype.testAndChangeDialogMode = function () {
-        console.log(this.titleField.$element.find("input").autocomplete());
         switch(this.dialogMode)
         {
             case this.modeEnum.INSERT_EXISTING:
