@@ -6,6 +6,47 @@ var VEETemplateProtection = function () {
         var protectedTemplates = {};
         //fill the list.
         evaluateTransclusions();
+
+
+        var onEditButtonClickBase = ve.ui.LinearContextItem.prototype.onEditButtonClick;
+        ve.ui.LinearContextItem.prototype.onEditButtonClick = function () {
+            console.log(this);
+            if(this.model.type == "mwTransclusionBlock" && protectedTemplates[getTemplate(node)] != null)
+            {
+
+            }
+            return onEditButtonClickBase.call(this);
+        };
+
+
+        var copyBase = ve.ce.Surface.prototype.onCopy;
+        ve.ce.Surface.prototype.onCopy = function (e)
+        {
+            var selection = this.getModel().getSelection();
+            for(var i = selection.range.start; i < selection.range.end; i++)
+            {
+                var node = this.getModel().getDocument().getDocumentNode().getNodeFromOffset(i);
+                if(node.type == "mwTransclusionBlock" && protectedTemplates[getTemplate(node)] != null)
+                {
+                    mw.notify(OO.ui.deferMsg("visualeditor-emm-notification-template-copy")(), {title: OO.ui.deferMsg("visualeditor-emm-notification-template-title")()});
+                    return;
+                }
+            }
+            return copyBase.call(this, e);
+        };
+
+        ve.init.target.getSurface().view.$documentNode.off("copy");
+
+        ve.init.target.getSurface().view.$documentNode.on(
+            {copy: ve.ce.Surface.prototype.onCopy.bind(ve.init.target.getSurface().view)}
+        );
+
+        ve.init.target.getSurface().view.$pasteTarget.off("copy");
+
+        ve.init.target.getSurface().view.$pasteTarget.on(
+            {copy: ve.ce.Surface.prototype.onCopy.bind(ve.init.target.getSurface().view)}
+        );
+
         //The method responsible for deleting elements (originally located in: \mediawiki\extensions\VisualEditor\lib\ve\src\dm\ve.dm.Transaction.js).
         var base = ve.dm.Transaction.prototype.addSafeRemoveOps;
         /**
@@ -44,7 +85,7 @@ var VEETemplateProtection = function () {
                     var page = data.query.pages[0]; // we're only asking for a single page.
                     for (var y = 0; y < page.categories.length; y++) {
                         //Does the template have the 'System' template?
-                        if (page.categories[y].title.split(":").pop() == "System") {
+                        if (page.categories[y].title.split(":").pop() == "EMont core protected") {
                             //if so, add it to our list of protected templates.
                             protectedTemplates[templateName] = true;
                         }
@@ -69,17 +110,19 @@ var VEETemplateProtection = function () {
             var protect = false;
             for (x = removeStart; x < removeEnd; x++) {
                 var node = doc.getDocumentNode().getNodeFromOffset(x);
+                //console.log(node);
                 if (node.type != null)
                     if (node.type == "mwTransclusionBlock" && protectedTemplates[getTemplate(node)] != null) {
                         ve.dm.nodeFactory.registry[doc.data.getType(x)].static.isDeletable = false;
                         protect = true;
-                        removeRange(doc, x + 1, removeEnd, removeMetadata, thisContext);
+                        //removeRange(doc, x + 1, removeEnd, removeMetadata, thisContext); //fixme does not work, wrong index probably.
                         break;
                     }
             }
             var returnValue;
             if (protect) {
                 returnValue = base.call(thisContext, doc, removeStart, x - 1, removeMetadata);
+                mw.notify(OO.ui.deferMsg("visualeditor-emm-notification-template-body")(), {title: OO.ui.deferMsg("visualeditor-emm-notification-template-title")()});
                 ve.dm.nodeFactory.registry[doc.data.getType(x)].static.isDeletable = true;
             }
             else
@@ -107,7 +150,7 @@ var VEETemplateProtection = function () {
          */
         function getTemplate(node) {
             if (node.type == "mwTransclusionBlock") {
-                for (var z = 0; node.element.attributes.mw.parts.length; z++) {
+                for (var z = 0; z < node.element.attributes.mw.parts.length; z++) {
                     if (typeof node.element.attributes.mw.parts[z] === "object")
                         return node.element.attributes.mw.parts[z].template.target.href.split("./").pop();
                 }
@@ -115,6 +158,5 @@ var VEETemplateProtection = function () {
             }
             return node.element.attributes.mw.parts[0].template.target.href.split("./").pop();
         }
-    }
-    ;
+};
 
