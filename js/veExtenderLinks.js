@@ -232,6 +232,9 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
     EMMDialog.prototype.getReadyProcess = function (data) {
         var dialogInstance = this;
 
+
+        console.log("source: ", data.source);
+
         /**
          * Checks if the user is trying to edit an existing link to a resource. If this is the case, information about
          * the resource is gathered and an edit dialog is opened with the fields already filled in.
@@ -491,11 +494,16 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
             };
             //Get the name of the current page and replace any underscores with whitespaces to prevent errors later on.
             var currentPageID = mw.config.get("wgPageName").replace(/_/g, " ");
+
+            console.log("suggestion: ", dialogInstance.suggestion);
+            console.log("suggestion: ", dialogInstance.titleField.getValue());
             if (!dialogInstance.isExistingResource) {
+                console.log("hij is geen existing resource");
                 //In this case, dialoginstance.suggestion is empty, so build and execute the query
                 dialogInstance.buildAndExecuteQuery(currentPageID, insertCallback, linkdata);
             } else if (dialogInstance.isEdit()) { //dealing with an existing resource, so isEdit exists.
                 dialogInstance.buildAndExecuteQuery(currentPageID, insertCallback, linkdata);
+                console.log("isedit is true");
             }
             else {
                 insertCallback(dialogInstance.suggestion.data);
