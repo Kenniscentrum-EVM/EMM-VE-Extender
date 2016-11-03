@@ -230,7 +230,6 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
      */
     EMMDialog.prototype.getReadyProcess = function (data) {
         var dialogInstance = this;
-
         /**
          * Checks if the user is trying to edit an existing link to a resource. If this is the case, information about
          * the resource is gathered and an edit dialog is opened with the fields already filled in.
@@ -240,8 +239,8 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
             var data = this;
             if (data.source != null) //are we editing?
             {
-                this.executeModeChange(this.modeEnum.EDIT_EXISTING);
-                toggleInputFields(this.fieldset, true);
+                dialogInstance.executeModeChange(dialogInstance.modeEnum.EDIT_EXISTING);
+                toggleInputFields(dialogInstance.fieldset, true);
                 data.source = data.source.replace(/\ /g, "_"); //convert whitespaces to underscores
                 var api = new mw.Api();
                 var query = dialogInstance.getEditQuery(data.source); //getEditQuery retrieves the correct query for us.
@@ -498,7 +497,6 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
             dialogInstance.close();
         };
 
-
         /**
          * Define what should happen when the cancel button is clicked.
          */
@@ -544,7 +542,6 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
 
         //Execute the askQuery in order to gather all resources
         dialogInstance.semanticAskQuery(dialogInstance.getAutocompleteQuery(), autoCompleteCallback);
-
 
         /**
          * The size of the dialog is set up and some more layout settings are configured here.
