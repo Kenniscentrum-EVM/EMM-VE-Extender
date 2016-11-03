@@ -122,6 +122,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
             EDIT_EXISTING : 2
         };
         this.dialogMode = this.modeEnum.INSERT_EXISTING;
+        this.suggestionCache = null;
         this.selectionRange = null;
         //Create some common fields, present in all dialogs
         this.presentationTitleField = new OO.ui.TextInputWidget();
@@ -535,10 +536,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
          * The user will be able to pick a resource from the list of all resources gathered by the askQuery
          * @param {Object[]} queryResults - An array containing all the possible options for the autocomplete dropdown
          */
-        var autoCompleteCallback = function (queryResults) {
-            initAutoComplete(queryResults, dialogInstance);
-            toggleAutoComplete(dialogInstance);
-        };
+        var autoCompleteCallback = function () { toggleAutoComplete(dialogInstance); };
 
         //Execute the askQuery in order to gather all resources
         dialogInstance.semanticAskQuery(dialogInstance.getAutocompleteQuery(), autoCompleteCallback);
@@ -571,8 +569,8 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
              * Clears all the input fields and resets other variables to their default state.
              */
             function cleanUpDialog() {
-                dialogInstance.validator.disable();
                 hideAutoComplete(dialogInstance.titleField.$element.find("input"));
+                dialogInstance.validator.disable();
                 clearInputFields(dialogInstance.fieldset, null, ["OoUiLabelWidget"]);
                 dialogInstance.dialogMode = dialogInstance.modeEnum.INSERT_EXISTING;
                 dialogInstance.executeModeChange(dialogInstance.modeEnum.INSERT_EXISTING);
@@ -643,7 +641,8 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                 }
                 return 0;
             });
-            callback(arr);
+            dialogInstance.suggestionCache = arr;
+            callback();
         });
     };
 }
@@ -778,11 +777,12 @@ function hideAutoComplete(element)
  * @param {EMMDialog} dialogInstance - The dialog for which the autoComplete dropdown should be activated or deactivated.
  */
 function toggleAutoComplete(dialogInstance) {
-    var element = dialogInstance.titleField.$element.find("input");
-    if (dialogInstance.dialogMode > 0)
-        setAutoCompleteEnabled(element, false);
-    else
-        setAutoCompleteEnabled(element, true);
+    if (dialogInstance.dialogMode > 0) {
+        setAutoCompleteEnabled(dialogInstance, false);
+    }
+    else {
+        setAutoCompleteEnabled(dialogInstance, true);
+    }
 }
 
 /**
@@ -790,16 +790,15 @@ function toggleAutoComplete(dialogInstance) {
  * @param {JQuery} element - Jquery element containing autoComplete functionality.
  * @param {Boolean} value - Boolean value that decides the state of the autoComplete. true = enabled, false = disabled.
  */
-function setAutoCompleteEnabled(element, value)
+function setAutoCompleteEnabled(dialogInstance, value)
 {
-    if (element.autocomplete() == null)
-        return;
-    if(value) {
-        element.autocomplete().enable();
+    var element = dialogInstance.titleField.$element.find("input");
+    if(value && element.autocomplete() == null && dialogInstance.suggestionCache != null) {
+        initAutoComplete(dialogInstance.suggestionCache, dialogInstance);
     }
-    else {
+    else if(!value && element.autocomplete() != null) {
         hideAutoComplete(element);
-        element.autocomplete().disable();
+        element.autocomplete().dispose();
     }
 }
 

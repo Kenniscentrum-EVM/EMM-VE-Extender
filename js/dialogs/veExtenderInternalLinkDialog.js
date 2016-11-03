@@ -66,7 +66,6 @@ function createInternalLinkDialog(EMMDialog) {
      */
     EMMInternalLinkDialog.prototype.executeModeChange = function (mode) {
         this.dialogMode = mode;
-
         switch(mode)
         {
             case this.modeEnum.INSERT_EXISTING:
@@ -80,7 +79,6 @@ function createInternalLinkDialog(EMMDialog) {
                 break;
         }
         //console.log(this.titleField.$element.find("input").autocomplete());
-         //fixme: lijkt niet te werken?
         toggleAutoComplete(this);
 
     };
@@ -89,14 +87,9 @@ function createInternalLinkDialog(EMMDialog) {
      * TODO expand this and comment
      */
     EMMInternalLinkDialog.prototype.testAndChangeDialogMode = function () {
-        console.log(this.titleField.$element.find("input").autocomplete());
         switch(this.dialogMode)
         {
             case this.modeEnum.INSERT_EXISTING:
-                if(this.isExistingResource) {
-                    setAutoCompleteEnabled(this.titleField.$element.find("input"), false);
-                    console.log('disable');
-                }
                 if(this.isExistingResource && this.titleField.getValue() != this.suggestion.value)
                     this.executeModeChange(this.modeEnum.INSERT_NEW);
                 break;

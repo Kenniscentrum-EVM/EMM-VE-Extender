@@ -149,7 +149,6 @@ function createExternalLinkDialog(LightResourceDialog) {
      * If one is needed, execute it.
      */
     EMMExternalLinkDialog.prototype.testAndChangeDialogMode = function () {
-        console.log(this.titleField.$element.find("input").autocomplete());
         switch (this.dialogMode) {
             case this.modeEnum.INSERT_EXISTING:
                 if (!this.isExistingResource && this.linkField.value.length != 0)
