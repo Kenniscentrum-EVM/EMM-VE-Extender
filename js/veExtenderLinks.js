@@ -718,12 +718,9 @@ function initAutoComplete(data, dialogInstance) {
     $(inputField).autocomplete({
         lookup: data,
         onSelect: function (suggestion) {
-            console.log("test");
-            if (!dialogInstance.isExistingResource) {
                 dialogInstance.suggestion = suggestion;
                 dialogInstance.isExistingResource = true;
                 dialogInstance.fillFields(suggestion);
-            }
         },
         appendTo: inputField.parentElement,
         maxHeight: 300
