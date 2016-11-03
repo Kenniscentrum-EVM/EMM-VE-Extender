@@ -35,7 +35,6 @@ function redefineMenu() {
  * of the Visual Editor.
  */
 function loadEMMExtender() {
-    console.log("test");
     new VEETemplateProtection();
     redefineMenu();
     defineTranslations();

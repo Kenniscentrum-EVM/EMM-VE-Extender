@@ -624,9 +624,6 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                 if (singleQueryResult != null) {
                     arr.push(singleQueryResult);
                 }
-                else {
-                    console.log("koek");
-                }
             }
             arr.sort(function (a, b) {
                 if (a.value > b.value) {
