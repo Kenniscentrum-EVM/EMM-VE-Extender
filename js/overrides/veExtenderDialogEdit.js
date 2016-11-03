@@ -7,9 +7,8 @@
 function overwriteEditBehaviour() {
 
     var getCommandForNodeBase = ve.ui.CommandRegistry.prototype.getCommandForNode;
-    ve.ui.CommandRegistry.prototype.getCommandForNode = function(node)
-    {
-        if(openDialog(node))
+    ve.ui.CommandRegistry.prototype.getCommandForNode = function (node) {
+        if (openDialog(node))
             return "";
         else
             return getCommandForNodeBase.call(this, node);
@@ -21,14 +20,13 @@ function overwriteEditBehaviour() {
      * @returns {*} - The result of the original function
      */
     ve.ui.LinearContextItem.prototype.onEditButtonClick = function () {
-       if(openDialog(this.model))
-           return;
+        if (openDialog(this.model))
+            return;
         else
             return onEditButtonClickBase.call(this);
     };
 
-    function openDialog(node)
-    {
+    function openDialog(node) {
         if (node.type == "mwTransclusionBlock" || node.type == "mwTransclusionInline") {
             var template = node.model.element.attributes.mw.parts[0].template;
             if (template != null) {

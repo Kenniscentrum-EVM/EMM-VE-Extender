@@ -97,17 +97,15 @@ function createExternalLinkDialog(LightResourceDialog) {
             })
         ]);
     };
-    
+
     /**
      * Executes a dialog mode change.
      * @param {Number} mode - Dialog mode to switch to (defined in modeEnum).
      */
-    EMMExternalLinkDialog.prototype.executeModeChange = function (mode)
-    {
+    EMMExternalLinkDialog.prototype.executeModeChange = function (mode) {
         this.dialogMode = mode;
         var input = null;
-        switch(mode)
-        {
+        switch (mode) {
             case this.modeEnum.INSERT_EXISTING:
                 this.$element.find(".oo-ui-processDialog-title").text(OO.ui.deferMsg("visualeditor-emm-dialogexternallinktitle")());
                 input = this.titleField.$element.find("input");
@@ -159,7 +157,7 @@ function createExternalLinkDialog(LightResourceDialog) {
                     this.executeModeChange(this.modeEnum.INSERT_EXISTING);
                 break;
             case this.modeEnum.EDIT_EXISTING:
-                if(!this.isExistingResource) {
+                if (!this.isExistingResource) {
                     //todo discuss with Hans.
                 }
                 break;
@@ -208,7 +206,7 @@ function createExternalLinkDialog(LightResourceDialog) {
      */
     EMMExternalLinkDialog.prototype.isEdit = function () {
         return LightResourceDialog.prototype.isEdit.call(this) ||
-                this.linkField.getValue() != this.suggestion.hyperlink;
+            this.linkField.getValue() != this.suggestion.hyperlink;
     };
 
     /**

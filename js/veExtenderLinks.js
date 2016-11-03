@@ -118,8 +118,8 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
          */
         this.modeEnum = {
             INSERT_EXISTING: 0,
-            INSERT_NEW : 1,
-            EDIT_EXISTING : 2
+            INSERT_NEW: 1,
+            EDIT_EXISTING: 2
         };
         this.dialogMode = this.modeEnum.INSERT_EXISTING;
         this.suggestionCache = null;
@@ -231,6 +231,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
      */
     EMMDialog.prototype.getReadyProcess = function (data) {
         var dialogInstance = this;
+
         /**
          * Checks if the user is trying to edit an existing link to a resource. If this is the case, information about
          * the resource is gathered and an edit dialog is opened with the fields already filled in.
@@ -310,8 +311,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
      * Preforms the a mode change, this may include visual changes to a dialog.
      * @param {Integer} mode - Mode to be switched to.
      */
-    EMMDialog.prototype.executeModeChange = function (mode)
-    {
+    EMMDialog.prototype.executeModeChange = function (mode) {
         displayOverloadError("executeModeChange");
     };
 
@@ -536,7 +536,9 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
          * The user will be able to pick a resource from the list of all resources gathered by the askQuery
          * @param {Object[]} queryResults - An array containing all the possible options for the autocomplete dropdown
          */
-        var autoCompleteCallback = function () { toggleAutoComplete(dialogInstance); };
+        var autoCompleteCallback = function () {
+            toggleAutoComplete(dialogInstance);
+        };
 
         //Execute the askQuery in order to gather all resources
         dialogInstance.semanticAskQuery(dialogInstance.getAutocompleteQuery(), autoCompleteCallback);
@@ -652,8 +654,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
  * @param {OO.ui.FieldsetLayout} fieldSet - FieldSet to disable or enable.
  * @param {boolean} value - Boolean instruction, true = disable, false = enable.
  */
-function toggleInputFields(fieldSet, value)
-{
+function toggleInputFields(fieldSet, value) {
     for (var i = 0; i < fieldSet.getItems().length; i++)
         fieldSet.getItems()[i].getField().setDisabled(value);
 }
@@ -753,9 +754,9 @@ function initAutoComplete(data, dialogInstance) {
     $(inputField).autocomplete({
         lookup: data,
         onSelect: function (suggestion) {
-                dialogInstance.suggestion = suggestion;
-                dialogInstance.isExistingResource = true;
-                dialogInstance.fillFields(suggestion);
+            dialogInstance.suggestion = suggestion;
+            dialogInstance.isExistingResource = true;
+            dialogInstance.fillFields(suggestion);
         },
         appendTo: inputField.parentElement,
         maxHeight: 300
@@ -766,8 +767,7 @@ function initAutoComplete(data, dialogInstance) {
  * Hides the autocomplete suggestion box.
  * @param {JQuery} element - JQuery element that has autocomplete functionality.
  */
-function hideAutoComplete(element)
-{
+function hideAutoComplete(element) {
     if (element.autocomplete() != null)
         element.autocomplete().hide();
 }
@@ -790,13 +790,12 @@ function toggleAutoComplete(dialogInstance) {
  * @param {JQuery} element - Jquery element containing autoComplete functionality.
  * @param {Boolean} value - Boolean value that decides the state of the autoComplete. true = enabled, false = disabled.
  */
-function setAutoCompleteEnabled(dialogInstance, value)
-{
+function setAutoCompleteEnabled(dialogInstance, value) {
     var element = dialogInstance.titleField.$element.find("input");
-    if(value && element.autocomplete() == null && dialogInstance.suggestionCache != null) {
+    if (value && element.autocomplete() == null && dialogInstance.suggestionCache != null) {
         initAutoComplete(dialogInstance.suggestionCache, dialogInstance);
     }
-    else if(!value && element.autocomplete() != null) {
+    else if (!value && element.autocomplete() != null) {
         hideAutoComplete(element);
         element.autocomplete().dispose();
     }
