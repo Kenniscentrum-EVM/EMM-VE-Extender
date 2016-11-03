@@ -241,8 +241,9 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                     dialogInstance.validator.disableOnChange();
                     var res = queryData.query.results;
                     for (var row in res) {
-                        if (!res.hasOwnProperty(row)) //seems to be required.
+                        if (!res.hasOwnProperty(row)) { //seems to be required.
                             continue;
+                        }
                         var suggestion = dialogInstance.processSingleQueryResult(row, res);
                         dialogInstance.suggestion = suggestion;
                         dialogInstance.titleField.setValue(suggestion.value);
@@ -592,12 +593,12 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
         suggestionObject.data = singleResultRow.fulltext;
         suggestionObject.value = "";
         var semanticTitle = singleResultRow.printouts["Semantic title"][0];
-        if (semanticTitle)
+        if (semanticTitle) {
             suggestionObject.value = semanticTitle;
-        else
+        } else {
             suggestionObject.value = suggestionObject.data;
-        this.processDialogSpecificQueryResult(singleResultRow, suggestionObject);
-        return suggestionObject;
+        }
+        return this.processDialogSpecificQueryResult(singleResultRow, suggestionObject);
     };
 
     /**  semanticAskQuery
@@ -616,9 +617,16 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
             var res = data.query.results;
             var arr = []; //array to store the results
             for (var row in res) {
-                if (!res.hasOwnProperty(row))
+                if (!res.hasOwnProperty(row)) {
                     continue;
-                arr.push(dialogInstance.processSingleQueryResult(row, res));
+                }
+                var singleQueryResult = dialogInstance.processSingleQueryResult(row, res);
+                if (singleQueryResult != null) {
+                    arr.push(singleQueryResult);
+                }
+                else {
+                    console.log("koek");
+                }
             }
             arr.sort(function (a, b) {
                 if (a.value > b.value) {

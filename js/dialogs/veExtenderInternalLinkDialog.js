@@ -150,9 +150,11 @@ function createInternalLinkDialog(EMMDialog) {
      * about an internal link that was asked for in the query.
      * @param {Object} suggestionObject - A single suggestion for the autocomplete dropdown that should be expanded.
      * Should already contain data of generic resource and a lightResource.
+     * @returns {Object} - An updated suggestionObject, or null when the singleresult is invalid
      */
     EMMInternalLinkDialog.prototype.processDialogSpecificQueryResult = function (singleResult, suggestionObject) {
         //No additional behaviour on top of the default behaviour
+        return suggestionObject;
     };
 
     /**
