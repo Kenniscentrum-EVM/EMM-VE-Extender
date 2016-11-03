@@ -4,7 +4,7 @@
 "use strict";
 
 /**
- * This function more or less functions like a factory. It recieves a parent 'class', it then adds its own behavior on
+ * This function more or less functions like a factory. It receives a parent 'class', it then adds its own behavior on
  * top of the existing behavior. When done with modifying the 'class' this method then returns the modified class/function.
  * @param {EMMLightResourceDialog} LightResourceDialog - The 'class'-definition of EMMLightResourceDialog
  * @returns {EMMExternalLinkDialog} - returns the 'class'-definition of an EMMExternalLinkDialog
@@ -17,7 +17,7 @@ function createExternalLinkDialog(LightResourceDialog) {
      */
     var EMMExternalLinkDialog = function () {
         LightResourceDialog.call(this);
-        this.autocompleteQuery = "[[Category:Resource Description]] [[Hyperlink::+]]|?Semantic title|?Hyperlink|?Dct:creator|?Dct:date|?Organization|?Dct:subject|limit=10000";
+        this.autoCompleteQuery = "[[Category:Resource Description]] [[Hyperlink::+]]|?Semantic title|?Hyperlink|?Dct:creator|?Dct:date|?Organization|?Dct:subject|limit=10000";
         this.editQuery = "[[PAGENAMEPARAMETER]] |?Semantic title|?Hyperlink|?Dct:creator|?Dct:date|?Organization|?Dct:subject";
     };
     OO.inheritClass(EMMExternalLinkDialog, LightResourceDialog);
@@ -32,7 +32,7 @@ function createExternalLinkDialog(LightResourceDialog) {
         this.linkField = new OO.ui.TextInputWidget({placeholder: OO.ui.deferMsg("visualeditor-emm-linkdialog-linkfield-placeholder-def")()});
         this.addToResourcesField = new OO.ui.CheckboxInputWidget({selected: true});
         //Set the placeholder of titleField
-        this.titleField.$element.find('input').prop("placeholder", OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-def")());
+        this.titleField.$element.find("input").prop("placeholder", OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-def")());
     };
 
     /**
@@ -72,7 +72,7 @@ function createExternalLinkDialog(LightResourceDialog) {
                 align: "left"
             }),
             new OO.ui.FieldLayout(this.presentationTitleField, {
-                label: OO.ui.deferMsg("viualeditor-emm-link-presentationtitle"),
+                label: OO.ui.deferMsg("visualeditor-emm-link-presentationtitle"),
                 align: "left"
             }),
             new OO.ui.FieldLayout(this.creatorField, {
@@ -97,8 +97,7 @@ function createExternalLinkDialog(LightResourceDialog) {
             })
         ]);
     };
-
-
+    
     /**
      * Executes a dialog mode change.
      * @param {Number} mode - Dialog mode to switch to (defined in modeEnum).
@@ -110,8 +109,8 @@ function createExternalLinkDialog(LightResourceDialog) {
         switch(mode)
         {
             case this.modeEnum.INSERT_EXISTING:
-                this.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-dialogexternallinktitle")());
-                input = this.titleField.$element.find('input');
+                this.$element.find(".oo-ui-processDialog-title").text(OO.ui.deferMsg("visualeditor-emm-dialogexternallinktitle")());
+                input = this.titleField.$element.find("input");
                 input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-def")());
                 clearInputFields(this.fieldset, [2], ["OoUiLabelWidget"]);
                 break;
@@ -129,14 +128,14 @@ function createExternalLinkDialog(LightResourceDialog) {
                 else {
                     clearInputFields(this.fieldset, [0, 1, 2], ["OoUiLabelWidget"]);
                 }
-                this.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-linkdialog-title-npage")());
-                input = this.titleField.$element.find('input');
+                this.$element.find(".oo-ui-processDialog-title").text(OO.ui.deferMsg("visualeditor-emm-linkdialog-title-npage")());
+                input = this.titleField.$element.find("input");
                 input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-new")());
                 //todo temporary
                 break;
             case this.modeEnum.EDIT_EXISTING:
-                this.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-linkdialog-title-edit")());
-                input = this.titleField.$element.find('input');
+                this.$element.find(".oo-ui-processDialog-title").text(OO.ui.deferMsg("visualeditor-emm-linkdialog-title-edit")());
+                input = this.titleField.$element.find("input");
                 input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-def")());
                 clearInputFields(this.fieldset, [2], ["OoUiLabelWidget"]);
                 break;
@@ -204,13 +203,21 @@ function createExternalLinkDialog(LightResourceDialog) {
     };
 
     /**
-     * Fill the fields of the dialog based on an external link the user has selected from the autocomplete dropdown.
-     * @param {Object} suggestion - An object containing the properties of the selected external link.
-     * This ojbect is created when initiating the autocomplete library.
+     * Checks if the current contents of the dialog match the last picked suggestion. If they don't the user is editing
+     * the resource.
+     * @returns {boolean} - Whether the user is editing the selected resource
      */
-    EMMExternalLinkDialog.prototype.fillFields = function (suggestion) {
-        LightResourceDialog.prototype.fillFields.call(this, suggestion);
-        this.linkField.setValue(suggestion.hyperlink);
+    EMMExternalLinkDialog.prototype.isEdit = function () {
+        return LightResourceDialog.prototype.isEdit.call(this) ||
+                this.linkField.getValue() != this.suggestion.hyperlink;
+    };
+
+    /**
+     * Fill the fields of the dialog based on an external link the user has selected from the autocomplete dropdown.
+     */
+    EMMExternalLinkDialog.prototype.fillFields = function () {
+        LightResourceDialog.prototype.fillFields.call(this);
+        this.linkField.setValue(this.suggestion.hyperlink);
         this.validator.validateAll();
     };
 
@@ -224,7 +231,7 @@ function createExternalLinkDialog(LightResourceDialog) {
      */
     EMMExternalLinkDialog.prototype.processDialogSpecificQueryResult = function (singleResult, suggestionObject) {
         LightResourceDialog.prototype.processDialogSpecificQueryResult.call(this, singleResult, suggestionObject);
-        suggestionObject.hyperlink = singleResult.printouts["Hyperlink"][0];
+        suggestionObject.hyperlink = singleResult.printouts.Hyperlink[0];
     };
 
     /**

@@ -4,7 +4,7 @@
 "use strict";
 
 /**
- * This function more or less functions like a factory. It recieves a parent 'class', it then adds its own behavior on
+ * This function more or less functions like a factory. It receives a parent 'class', it then adds its own behavior on
  * top of the existing behavior. When done with modifying the 'class' this method then returns the modified class/function.
  * @param {EMMLightResourceDialog} LightResourceDialog - The 'class'-definition of EMMLightResourceDialog
  * @returns {EMMFileDialog} - returns the 'class'-definition of an EMMFileDialog
@@ -17,7 +17,7 @@ function createFileDialog(LightResourceDialog) {
      */
     var EMMFileDialog = function () {
         LightResourceDialog.call(this);
-        this.autocompleteQuery = "[[Category:Resource Description]] [[file name::+]] |?Semantic title|?Dct:creator|?Dct:date|?Organization|?Dct:subject|?file name|limit=10000";
+        this.autoCompleteQuery = "[[Category:Resource Description]] [[file name::+]] |?Semantic title|?Dct:creator|?Dct:date|?Organization|?Dct:subject|?file name|limit=10000";
         this.editQuery = "[[PAGENAMEPARAMETER]] |?Semantic title|?Dct:creator|?Dct:date|?Organization|?Dct:subject|?file name";
         //Define a new upload object to handle file uploads
         this.upload = new mw.Upload({parameters: {ignorewarnings: true}});
@@ -36,7 +36,7 @@ function createFileDialog(LightResourceDialog) {
             showDropTarget: true
         });
         //Set the placeholder of titleField
-        this.titleField.$element.find('input').prop("placeholder", OO.ui.deferMsg("visualeditor-emm-filedialog-titlefield-placeholder-def")());
+        this.titleField.$element.find("input").prop("placeholder", OO.ui.deferMsg("visualeditor-emm-filedialog-titlefield-placeholder-def")());
     };
 
     /**
@@ -53,7 +53,7 @@ function createFileDialog(LightResourceDialog) {
             return "";
         }];
 
-        //Seperate declaration in order to more easily access this fieldlayout for hiding and showing.
+        //Separate declaration in order to more easily access this fieldlayout for hiding and showing.
         var fileFieldLayout = new OO.ui.FieldLayout(this.fileField, {
             label: OO.ui.deferMsg("visualeditor-emm-file-filename"),
             align: "left"
@@ -113,13 +113,13 @@ function createFileDialog(LightResourceDialog) {
         switch(mode)
         {
             case this.modeEnum.INSERT_EXISTING:
-                this.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-dialogfiletitle")());
-                input = this.titleField.$element.find('input');
+                this.$element.find(".oo-ui-processDialog-title").text(OO.ui.deferMsg("visualeditor-emm-dialogfiletitle")());
+                input = this.titleField.$element.find("input");
                 input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-filedialog-titlefield-placeholder-def")());
                 clearInputFields(this.fieldset, [1, 2], ["OoUiLabelWidget"]);
                 break;
             case this.modeEnum.INSERT_NEW:
-                this.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-filedialog-title-npage")());
+                this.$element.find(".oo-ui-processDialog-title").text(OO.ui.deferMsg("visualeditor-emm-filedialog-title-npage")());
                 input = this.titleField.$element.find('input');
                 input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-filedialog-titlefield-placeholder-new")());
                 if (this.suggestion != null) {
@@ -140,7 +140,7 @@ function createFileDialog(LightResourceDialog) {
     };
 
     /**
-     * TODO commentaar Nick
+     * TODO Commentaar Nick
      */
     EMMFileDialog.prototype.testAndChangeDialogMode = function () {
         switch(this.dialogMode)
@@ -173,7 +173,7 @@ function createFileDialog(LightResourceDialog) {
     EMMFileDialog.prototype.buildAndExecuteQuery = function (currentPageID, insertCallback, linkdata) {
         //First call the method of the parent to build the basic query for a light resource
         var query = LightResourceDialog.prototype.buildQuery.call(this, currentPageID);
-        //Gather the filename in diffrent ways depending on whether it is an existing file or not.
+        //Gather the filename in different ways depending on whether it is an existing file or not.
         var filename = "";
         if (this.isExistingResource) {
             filename = this.suggestion.data.replace("Bestand:", "").replace("File:", "");
@@ -230,12 +230,12 @@ function createFileDialog(LightResourceDialog) {
                                 alert(OO.ui.deferMsg("visualeditor-emm-file-upload-parsererror")());
                                 break;
                             default:
-                                //uknown eroror
-                                alert("An unkown error of the type " + exceptionobject.exception + " has occured.");
+                                //unknown eroror
+                                alert("An unknown error of the type " + exceptionobject.exception + " has occurred.");
                         }
                         break;
                     default:
-                        alert("An unkown error of the type " + status + " has occured.");
+                        alert("An unknown error of the type " + status + " has occurred.");
                 }
             }).done(function () {
                 semanticCreateWithFormQuery(query, insertCallback, target, "Resource Light");
@@ -247,13 +247,20 @@ function createFileDialog(LightResourceDialog) {
     };
 
     /**
-     * Fill the fields of the dialog based on a file the user has selected from the autocomplete dropdown.
-     * @param {Object} suggestion - An object containing the properties of the selected file.
-     * This ojbect is created when initiating the autocomplete library.
+     * Checks if the current contents of the dialog match the last picked suggestion. If they don't the user is editing
+     * the resource.
+     * @returns {boolean} - Whether the user is editing the selected resource
      */
-    EMMFileDialog.prototype.fillFields = function (suggestion) {
+    EMMFileDialog.prototype.isEdit = function () {
+        return LightResourceDialog.prototype.isEdit.call(this);
+    };
+
+    /**
+     * Fill the fields of the dialog based on a file the user has selected from the autocomplete dropdown.
+     */
+    EMMFileDialog.prototype.fillFields = function () {
         this.fieldset.items[1].$element.hide();
-        LightResourceDialog.prototype.fillFields.call(this, suggestion);
+        LightResourceDialog.prototype.fillFields.call(this);
         this.validator.validateAll();
     };
 

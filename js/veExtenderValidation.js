@@ -41,9 +41,10 @@ var Validator = function (dialogInstance, inputSuccess, inputFail, validationSuc
                 // does the widget have the validation property?
                 if (widget.validation != null) {
                     // was a cleanUp function provided?
-                    if (cleanUp != null)
-                    // execute the cleanUp method.
+                    if (cleanUp != null) {
+                        // execute the cleanUp method.
                         cleanUp(widget);
+                    }
                     // Loop through the validation functions.
                     for (var i = 0; i < widget.validation.length; i++) {
                         if (widget.validation[i](validator.getWidgetValue(widget), widget).length > 0) {
@@ -214,7 +215,7 @@ Validator.prototype.getWidgetValue = function (widget) {
  * @returns {String} - Error message to be displayed.
  */
 function checkIfWebsite(value, sender) {
-    var expr = /(https:\/\/|http:\/\/)?(www\.)?[[a-z0-9]{1,256}\.[a-z]{2,6}\b\/?([-a-z0-9@:%_\+.~#?&//=]*)/ig;
+    var expr = /(https:\/\/|http:\/\/)?(www\.)?[[a-z0-9]{1,256}\.[a-z]{2,6}\b\/?([a-z0-9\-@:%_\+.~#?&\/=]*)/ig;
     if (expr.test(value)) return "";
     else return OO.ui.deferMsg("visualeditor-emm-validation-website")();
 }

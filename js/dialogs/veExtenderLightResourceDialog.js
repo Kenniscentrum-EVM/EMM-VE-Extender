@@ -5,28 +5,27 @@
 
 
 /**
- * This function more or less functions like a factory. It recieves a parent 'class', it then adds its own behavior on
+ * This function more or less functions like a factory. It receives a parent 'class', it then adds its own behavior on
  * top of the existing behavior. When done with modifying the 'class' this method then returns the modified class/function.
- * @param {EMMDialog} Dialog - The 'class'-definition of EMMLightResourceDialog
+ * @param {EMMDialog} EMMDialog - The 'class'-definition of EMMLightResourceDialog
  * @param {String} resourceType - The type of resource for which this 'factory' should create a class
  * @returns {EMMLightResourceDialog} - returns the 'class'-definition of an EMMLightResourceDialog
  */
-function createLightResourceDialog(Dialog, resourceType) {
+function createLightResourceDialog(EMMDialog, resourceType) {
     /**
      * Calls the constructor of it's super class, EMMDialog.
      * @constructor
      */
     var EMMLightResourceDialog = function () {
-        Dialog.call(this);
+        EMMDialog.call(this);
     };
-    OO.inheritClass(EMMLightResourceDialog, Dialog);
+    OO.inheritClass(EMMLightResourceDialog, EMMDialog);
 
     /**
      * Creates generic input fields for a dialog that handles a Light Resource.
      * The most generic fields are created in the constructor of EMMDialog.
      */
     EMMLightResourceDialog.prototype.createFields = function () {
-        this.titleField = new OO.ui.TextInputWidget({placeholder: OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-def")()});
         this.creatorField = new OO.ui.TextInputWidget({});
         this.dateField = new OO.ui.TextInputWidget({type: "date"});
         this.organizationField = new OO.ui.TextInputWidget({});
@@ -55,23 +54,40 @@ function createLightResourceDialog(Dialog, resourceType) {
         query += "Resource Description[title]=" + this.titleField.getValue() +
             "&Resource Description[creator]=" + this.creatorField.getValue() +
             "&Resource Description[date]=" + this.dateField.getValue();
-        if (this.organizationField.getValue().length > 0) query += "&Resource Description[organization]=" + this.organizationField.getValue();
-        if (this.subjectField.getValue().length > 0) query += "&Resource Description[subject]=" + this.subjectField.getValue();
-        if (!this.isExistingResource) query += "&Resource Description[created in page]=" + currentPageID;
+        if (this.organizationField.getValue().length > 0) {
+            query += "&Resource Description[organization]=" + this.organizationField.getValue();
+        }
+        if (this.subjectField.getValue().length > 0) {
+            query += "&Resource Description[subject]=" + this.subjectField.getValue();
+        }
+        if (!this.isExistingResource) {
+            query += "&Resource Description[created in page]=" + currentPageID;
+        }
         return query;
+    };
+
+    /**
+     * Checks if the current contents of the dialog match the last picked suggestion. If they don't the user is editing
+     * the resource.
+     * @returns {boolean} - Whether the user is editing the selected resource
+     */
+    EMMLightResourceDialog.prototype.isEdit = function () {
+        return EMMDialog.prototype.isEdit.call(this) ||
+            this.creatorField.getValue() != this.suggestion.creator ||
+            this.dateField.getValue() != fixDate(this.suggestion.date) ||
+            (this.organizationField.getValue() != this.suggestion.organization && !(this.organizationField.getValue() == "" && this.suggestion.organization == null)) ||
+            (this.subjectField.getValue() != this.suggestion.subjects && !(this.organizationField.getValue() == "" && this.suggestion.organization == null));
     };
 
     /**
      * Fill the generic fields of a dialog handling a light resource based on a selected resource from the autocomplete dropdown.
      * Fields for a specific type of Light Resource should be filled in their own method.
-     * @param {Object} suggestion - An object containing the properties of the selected light resource.
-     * This ojbect is created when initiating the autocomplete library.
      */
-    EMMLightResourceDialog.prototype.fillFields = function (suggestion) {
-        this.creatorField.setValue(suggestion.creator);
-        this.dateField.setValue(fixDate(suggestion.date));
-        this.organizationField.setValue(suggestion.organization);
-        this.subjectField.setValue(suggestion.subjects);
+    EMMLightResourceDialog.prototype.fillFields = function () {
+        this.creatorField.setValue(this.suggestion.creator);
+        this.dateField.setValue(fixDate(this.suggestion.date));
+        this.organizationField.setValue(this.suggestion.organization);
+        this.subjectField.setValue(this.suggestion.subjects);
     };
 
     /**
@@ -88,11 +104,11 @@ function createLightResourceDialog(Dialog, resourceType) {
 
         suggestionObject.creator = singleResult.printouts["Dct:creator"][0];
         suggestionObject.date = singleResult.printouts["Dct:date"][0];
-        suggestionObject.organization = singleResult.printouts["Organization"][0];
+        suggestionObject.organization = singleResult.printouts.Organization[0];
         suggestionObject.subjects = "";
         var querySubjects = singleResult.printouts["Dct:subject"];
         //Gathers all subjects and creates a single string which contains the fulltext name of all the subjects,
-        //seperated by a ,
+        //separated by a ,
         for (var j = 0; j < querySubjects.length; j++) {
             suggestionObject.subjects += querySubjects[j].fulltext + ", ";
         }

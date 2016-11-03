@@ -21,7 +21,7 @@ function defineTranslations() {
 
             "visualeditor-emm-link": "Link*:",
             "visualeditor-emm-link-title": "Resource title*:",
-            "viualeditor-emm-link-presentationtitle": "Page-text*:",
+            "visualeditor-emm-link-presentationtitle": "Page-text*:",
             "visualeditor-emm-link-creator": "Author*:",
             "visualeditor-emm-link-date": "Date*:",
             "visualeditor-emm-link-organization": "Organization:",
@@ -43,7 +43,7 @@ function defineTranslations() {
             "visualeditor-emm-file-upload-timeout": "Your file upload request timed out. Please make sure the file isn't too large, check your connection and try again.",
             "visualeditor-emm-file-upload-duplicate": "Another file with the same content already exists",
             "visualeditor-emm-file-upload-exists": "Another file with the same name already exists",
-            "visualeditor-emm-file-upload-verification-error": "A verification error occured, the system returned the following message:",
+            "visualeditor-emm-file-upload-verification-error": "A verification error occurred, the system returned the following message:",
             "visualeditor-emm-file-upload-parsererror": "The file extension is invalid, only the following extensions are allowed: \n" +
             "svg, png, gif, jpg, jpeg, ppt, pptx, pdf, mp3, mp4, xls, xlsx, doc, docx, odt, odc, odp, odg, txt",
             "visualeditor-emm-file-upload-file-too-large": "The file is too large. The maximum size of a file is 64MB",
@@ -84,7 +84,12 @@ function defineTranslations() {
             "visualeditor-emm-filedialog-title-edit": "Edit file",
             "visualeditor-emm-filedialog-titlefield-placeholder-def": "Search for file",
             "visualeditor-emm-filedialog-titlefield-placeholder-new": "Title of new file",
-            "visualeditor-emm-required": "*Required"
+            "visualeditor-emm-required": "*Required",
+
+            "visualeditor-emm-notification-template-title": "Illegal operation",
+            "visualeditor-emm-notification-template-body": "You are attempting to remove a system template, this is not allowed.",
+            "visualeditor-emm-notification-template-copy": "You are attempting to copy a system template, this is not allowed.",
+            "visualeditor-emm-notification-template-edit": "You are attempting to edit a system template, this is not allowed."
         },
         nl: {
             "visualeditor-emm-add-file": "Toevoegen bestand",
@@ -102,7 +107,7 @@ function defineTranslations() {
 
             "visualeditor-emm-link": "Koppeling*:",
             "visualeditor-emm-link-title": "Brontitel*:",
-            "viualeditor-emm-link-presentationtitle": "Paginatekst*:",
+            "visualeditor-emm-link-presentationtitle": "Paginatekst*:",
             "visualeditor-emm-link-creator": "Auteur*:",
             "visualeditor-emm-link-date": "Datum*:",
             "visualeditor-emm-link-organization": "Organisatie:",
@@ -166,7 +171,13 @@ function defineTranslations() {
             "visualeditor-emm-filedialog-title-edit": "Aanpassen bestand",
             "visualeditor-emm-filedialog-titlefield-placeholder-def": "Zoeken naar een bestand",
             "visualeditor-emm-filedialog-titlefield-placeholder-new": "Titel nieuw bestand",
-            "visualeditor-emm-required": "*Vereist"
+            "visualeditor-emm-required": "*Vereist",
+
+            "visualeditor-emm-notification-template-title": "Actie niet toegestaan",
+            "visualeditor-emm-notification-template-body": "U probeert een systeemtemplate te verwijderen, dit is niet toegestaan.",
+            "visualeditor-emm-notification-template-copy": "U probeert een systeemtemplate te kopiëren, dit is niet toegestaan.",
+            "visualeditor-emm-notification-template-edit": "U probeert een systeemtemplate te bewerken, dit is niet toegestaan."
+
         }
     };
     var userLanguage = mw.config.get("wgUserLanguage");

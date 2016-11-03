@@ -1,5 +1,5 @@
 /**
- * Redifine the order in which tools appeear in the insert-menu
+ * Redefine the order in which tools appeear in the insert-menu
  */
 function redefineMenu() {
     var tools = ve.ui.toolFactory.bindings.register;
@@ -24,10 +24,10 @@ function redefineMenu() {
             break;
         }
     //add options to menu if they are not already there
-    var toadd = ['file', 'linkpage', 'linkwebsite'];
-    for (var i = 0; i < toadd.length; i++)
-        if (force.indexOf(toadd[i]) < 0)
-            force.push(toadd[i]);
+    var toAdd = ["file", "linkpage", "linkwebsite"];
+    for (var i = 0; i < toAdd.length; i++)
+        if (force.indexOf(toAdd[i]) < 0)
+            force.push(toAdd[i]);
 }
 
 /**
@@ -35,7 +35,8 @@ function redefineMenu() {
  * of the Visual Editor.
  */
 function loadEMMExtender() {
-    new VEETemplateForclosure();
+    console.log("test");
+    new VEETemplateProtection();
     redefineMenu();
     defineTranslations();
     addEMMLinks();
@@ -48,7 +49,7 @@ function loadEMMExtender() {
  * Once the visual editor is done loading, this function will be executed.
  * Initializes the entire EMMVEExtender.
  */
-mw.hook('ve.activationComplete').add(function () {
+mw.hook("ve.activationComplete").add(function () {
     // Register plugins to VE. will be loaded once the user opens the VE
     loadEMMExtender();
 });

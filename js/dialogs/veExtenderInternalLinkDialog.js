@@ -5,23 +5,23 @@
 
 
 /**
- * This function more or less functions like a factory. It recieves a parent 'class', it then adds its own behavior on
+ * This function more or less functions like a factory. It receives a parent 'class', it then adds its own behavior on
  * top of the existing behavior. When done with modifying the 'class' this method then returns the modified class/function.
- * @param {EMMDialog} Dialog - The 'class'-definition of EMMDialog
+ * @param {EMMDialog} EMMDialog - The 'class'-definition of EMMDialog
  * @returns {EMMInternalLinkDialog} - returns the 'class'-definition of an EMMInternalLinkDialog
  */
-function createInternalLinkDialog(Dialog) {
+function createInternalLinkDialog(EMMDialog) {
     /**
      * Calls the constructor of it's super class, EMMDialog. Also defines some queries used to get information
      * about internal links.
      * @constructor
      */
     var EMMInternalLinkDialog = function () {
-        Dialog.call(this);
-        this.autocompleteQuery = "[[Category:Light Context||Project]]|?Semantic title|limit=10000";
+        EMMDialog.call(this);
+        this.autoCompleteQuery = "[[Category:Light Context||Project]]|?Semantic title|limit=10000";
         this.editQuery = "[[PAGENAMEPARAMETER]] |?Semantic title";
     };
-    OO.inheritClass(EMMInternalLinkDialog, Dialog);
+    OO.inheritClass(EMMInternalLinkDialog, EMMDialog);
 
     /**
      * Creates the input fields unique for a EMMInternalLinkDialog.
@@ -29,7 +29,7 @@ function createInternalLinkDialog(Dialog) {
      */
     EMMInternalLinkDialog.prototype.createFields = function () {
         //Set the placeholder of titleField
-        this.titleField.$element.find('input').prop("placeholder", OO.ui.deferMsg("visualeditor-emm-search")());
+        this.titleField.$element.find("input").prop("placeholder", OO.ui.deferMsg("visualeditor-emm-search")());
     };
 
     /**
@@ -38,7 +38,7 @@ function createInternalLinkDialog(Dialog) {
      * adds functions that need to be executed when the content of a certain field changes.
      */
     EMMInternalLinkDialog.prototype.createDialogLayout = function () {
-        Dialog.prototype.createDialogLayout.call(this);
+        EMMDialog.prototype.createDialogLayout.call(this);
         var dialogInstance = this;
         //Define what functions to execute when the content of this field changes.
         this.titleField.onChangeFunctions = [function () {
@@ -127,27 +127,22 @@ function createInternalLinkDialog(Dialog) {
             //Find the topcontext of the current page
             var api = new mw.Api();
             api.get({
-                action: 'ask',
-                parameters: 'limit:10000',//check how to increase limit of ask-result; done in LocalSettings.php
+                action: "ask",
+                parameters: "limit:10000",//check how to increase limit of ask-result; done in LocalSettings.php
                 query: "[[" + currentPageID + "]]|?Topcontext|limit=10000"//
             }).done(function (data) {
                 var res = data.query.results;
-                if (res[currentPageID].printouts["Topcontext"][0] != null) {
-                    var topContext = res[currentPageID].printouts["Topcontext"][0].fulltext;
+                if (res[currentPageID].printouts.Topcontext[0] != null) {
+                    var topContext = res[currentPageID].printouts.Topcontext[0].fulltext;
                     query += "&Light Context[Topcontext]=" + topContext;
-                    dialogInstance.executeQuery(query, insertCallback);
+                    dialogInstance.executeQuery(query, insertCallback, linkdata);
                 } else {
                     alert(OO.ui.deferMsg("visualeditor-emm-topcontext-error")());
                 }
             });
         }
         else {
-            if (this.suggestion.value != this.titleField.getValue()) {
-                this.executeQuery(query, insertCallback, linkdata);
-            }
-            else {
-                insertCallback(this.suggestion.data);
-            }
+            this.executeQuery(query, insertCallback, linkdata);
         }
     };
 
@@ -164,17 +159,24 @@ function createInternalLinkDialog(Dialog) {
     };
 
     /**
+     * Checks if the current contents of the dialog match the last picked suggestion. If they don't the user is editing
+     * the resource.
+     * @returns {boolean} - Whether the user is editing the selected resource
+     */
+    EMMInternalLinkDialog.prototype.isEdit = function () {
+        return EMMDialog.prototype.isEdit.call(this);
+    };
+
+    /**
      * Fill the fields of the dialog based on a Light Context the user has selected from the autocomplete dropdown.
      * Because internal link has no fields that should be filled after selecting the autocomplete this function is currently empty.
-     * @param {Object} suggestion - An object containing the properties of the selected Light Context. This ojbect is
-     * created when initiating the autocomplete library.
      */
-    EMMInternalLinkDialog.prototype.fillFields = function (suggestion) {
+    EMMInternalLinkDialog.prototype.fillFields = function () {
         //Nothing to fill, no editable fields beyond presentationtitle and title
     };
 
     /**
-     * Processes part of the result of an ask query. Expands an existing suggestionObject by adding internal link-specifc
+     * Processes part of the result of an ask query. Expands an existing suggestionObject by adding internal link-specific
      * data from the queryresult to the suggestionObject. Currently this function is empty, because an EMMInternalLinkDialog
      * does not contain any other fields beyond the basic fields of an EMMDialog.
      * @param {Object} singleResult - A single row from the result of the api-call that contains all the information
