@@ -249,14 +249,36 @@ function createFileDialog(LightResourceDialog) {
     };
 
     /**
-     * Fill the fields of the dialog based on a file the user has selected from the autocomplete dropdown.
-     * @param {Object} suggestion - An object containing the properties of the selected file.
-     * This object is created when initiating the autocomplete library.
+     * Checks if the current contents of the dialog match the last picked suggestion. If they don't the user is editing
+     * the resource.
+     * @returns {boolean} - Whether the user is editing the selected resource
      */
-    EMMFileDialog.prototype.fillFields = function (suggestion) {
+    EMMFileDialog.prototype.isEdit = function () {
+        return LightResourceDialog.prototype.isEdit.call(this);
+    };
+
+    /**
+     * Fill the fields of the dialog based on a file the user has selected from the autocomplete dropdown.
+     */
+    EMMFileDialog.prototype.fillFields = function () {
         this.fieldset.items[1].$element.hide();
-        LightResourceDialog.prototype.fillFields.call(this, suggestion);
+        LightResourceDialog.prototype.fillFields.call(this);
         this.validator.validateAll();
+    };
+
+    /**
+     * Processes part of the result of an ask query. Expands an existing suggestionobject by adding file-specific
+     * data from the queryresult to the suggestionObject.
+     * @param {Object} singleResult - A single row from the result of the api-call that contains all the information
+     * about a file that was asked for in the query.
+     * @param {Object} suggestionObject - A single suggestion for the autocomplete dropdown that should be expanded.
+     * Should already contain data of generic resource and a lightResource.
+     * @returns {Object} - An updated suggestionObject, or null when the singleresult is invalid
+     */
+    EMMFileDialog.prototype.processDialogSpecificQueryResult = function (singleResult, suggestionObject) {
+        suggestionObject = LightResourceDialog.prototype.processDialogSpecificQueryResult.call(this, singleResult, suggestionObject);
+        suggestionObject.filename = singleResult.printouts["File name"][0].fulltext;
+        return suggestionObject;
     };
 
     /**

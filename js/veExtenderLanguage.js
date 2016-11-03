@@ -81,7 +81,12 @@ function defineTranslations() {
             "visualeditor-emm-filedialog-title-npage": "Insert new file",
             "visualeditor-emm-filedialog-titlefield-placeholder-def": "Search for file",
             "visualeditor-emm-filedialog-titlefield-placeholder-new": "Title of new file",
-            "visualeditor-emm-required": "*Required"
+            "visualeditor-emm-required": "*Required",
+
+            "visualeditor-emm-notification-template-title": "Illegal operation",
+            "visualeditor-emm-notification-template-body": "You are attempting to remove a system template, this is not allowed.",
+            "visualeditor-emm-notification-template-copy": "You are attempting to copy a system template, this is not allowed.",
+            "visualeditor-emm-notification-template-edit": "You are attempting to edit a system template, this is not allowed."
         },
         nl: {
             "visualeditor-emm-add-file": "Toevoegen bestand",
@@ -160,7 +165,13 @@ function defineTranslations() {
             "visualeditor-emm-filedialog-title-npage": "Invoegen nieuw bestand",
             "visualeditor-emm-filedialog-titlefield-placeholder-def": "Zoeken naar een bestand",
             "visualeditor-emm-filedialog-titlefield-placeholder-new": "Titel nieuw bestand",
-            "visualeditor-emm-required": "*Vereist"
+            "visualeditor-emm-required": "*Vereist",
+
+            "visualeditor-emm-notification-template-title": "Actie niet toegestaan",
+            "visualeditor-emm-notification-template-body": "U probeert een systeemtemplate te verwijderen, dit is niet toegestaan.",
+            "visualeditor-emm-notification-template-copy": "U probeert een systeemtemplate te kopiëren, dit is niet toegestaan.",
+            "visualeditor-emm-notification-template-edit": "U probeert een systeemtemplate te bewerken, dit is niet toegestaan."
+
         }
     };
     var userLanguage = mw.config.get("wgUserLanguage");

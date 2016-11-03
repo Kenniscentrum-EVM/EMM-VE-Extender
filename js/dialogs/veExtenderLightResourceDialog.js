@@ -7,19 +7,19 @@
 /**
  * This function more or less functions like a factory. It receives a parent 'class', it then adds its own behavior on
  * top of the existing behavior. When done with modifying the 'class' this method then returns the modified class/function.
- * @param {EMMDialog} Dialog - The 'class'-definition of EMMLightResourceDialog
+ * @param {EMMDialog} EMMDialog - The 'class'-definition of EMMLightResourceDialog
  * @param {String} resourceType - The type of resource for which this 'factory' should create a class
  * @returns {EMMLightResourceDialog} - returns the 'class'-definition of an EMMLightResourceDialog
  */
-function createLightResourceDialog(Dialog, resourceType) {
+function createLightResourceDialog(EMMDialog, resourceType) {
     /**
      * Calls the constructor of it's super class, EMMDialog.
      * @constructor
      */
     var EMMLightResourceDialog = function () {
-        Dialog.call(this);
+        EMMDialog.call(this);
     };
-    OO.inheritClass(EMMLightResourceDialog, Dialog);
+    OO.inheritClass(EMMLightResourceDialog, EMMDialog);
 
     /**
      * Creates generic input fields for a dialog that handles a Light Resource.
@@ -67,16 +67,27 @@ function createLightResourceDialog(Dialog, resourceType) {
     };
 
     /**
+     * Checks if the current contents of the dialog match the last picked suggestion. If they don't the user is editing
+     * the resource.
+     * @returns {boolean} - Whether the user is editing the selected resource
+     */
+    EMMLightResourceDialog.prototype.isEdit = function () {
+        return EMMDialog.prototype.isEdit.call(this) ||
+            this.creatorField.getValue() != this.suggestion.creator ||
+            this.dateField.getValue() != fixDate(this.suggestion.date) ||
+            (this.organizationField.getValue() != this.suggestion.organization && !(this.organizationField.getValue() == "" && this.suggestion.organization == null)) ||
+            (this.subjectField.getValue() != this.suggestion.subjects && !(this.organizationField.getValue() == "" && this.suggestion.organization == null));
+    };
+
+    /**
      * Fill the generic fields of a dialog handling a light resource based on a selected resource from the autocomplete dropdown.
      * Fields for a specific type of Light Resource should be filled in their own method.
-     * @param {Object} suggestion - An object containing the properties of the selected light resource.
-     * This object is created when initiating the autocomplete library.
      */
-    EMMLightResourceDialog.prototype.fillFields = function (suggestion) {
-        this.creatorField.setValue(suggestion.creator);
-        this.dateField.setValue(fixDate(suggestion.date));
-        this.organizationField.setValue(suggestion.organization);
-        this.subjectField.setValue(suggestion.subjects);
+    EMMLightResourceDialog.prototype.fillFields = function () {
+        this.creatorField.setValue(this.suggestion.creator);
+        this.dateField.setValue(fixDate(this.suggestion.date));
+        this.organizationField.setValue(this.suggestion.organization);
+        this.subjectField.setValue(this.suggestion.subjects);
     };
 
     /**
@@ -88,9 +99,9 @@ function createLightResourceDialog(Dialog, resourceType) {
      * about a Light Resource that was asked for in the query.
      * @param {Object} suggestionObject - A single suggestion for the autocomplete dropdown that should be expanded.
      * Should already contain data that every resource has.
+     * @returns {Object} - An updated suggestionObject, or null when the singleresult is invalid
      */
     EMMLightResourceDialog.prototype.processDialogSpecificQueryResult = function (singleResult, suggestionObject) {
-
         suggestionObject.creator = singleResult.printouts["Dct:creator"][0];
         suggestionObject.date = singleResult.printouts["Dct:date"][0];
         suggestionObject.organization = singleResult.printouts.Organization[0];
@@ -102,8 +113,8 @@ function createLightResourceDialog(Dialog, resourceType) {
             suggestionObject.subjects += querySubjects[j].fulltext + ", ";
         }
         //Remove comma and space at the end of the subject list
-        //todo discuss with hans
         suggestionObject.subjects = suggestionObject.subjects.slice(0, -2);
+        return suggestionObject;
     };
 
     /**
