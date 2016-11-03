@@ -20,6 +20,15 @@ var VEETemplateProtection = function () {
             return onEditButtonClickBase.call(this);
         };
 
+        var getCommandForNodeBase = ve.ui.CommandRegistry.prototype.getCommandForNode;
+        ve.ui.CommandRegistry.prototype.getCommandForNode = function(node)
+        {
+            if (node.type == "mwTransclusionBlock" && protectedTemplates[getTemplate(node.model)] != null) {
+                mw.notify(OO.ui.deferMsg("visualeditor-emm-notification-template-edit")(), {title: OO.ui.deferMsg("visualeditor-emm-notification-template-title")()});
+                return "";
+            }
+            return getCommandForNodeBase.call(this, node);
+        };
 
         var copyBase = ve.ce.Surface.prototype.onCopy;
         ve.ce.Surface.prototype.onCopy = function (e) {
