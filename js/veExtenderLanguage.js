@@ -25,7 +25,7 @@ function defineTranslations() {
             "visualeditor-emm-link-creator": "Author*:",
             "visualeditor-emm-link-date": "Date*:",
             "visualeditor-emm-link-organization": "Organization:",
-            "visualeditor-emm-link-subject": "Subject:",
+            "visualeditor-emm-link-subject": "Keywords:",
             "visualeditor-emm-link-add-resource": "Include in references list:",
 
             "visualeditor-emm-page": "Resource title*:",
@@ -39,7 +39,7 @@ function defineTranslations() {
             "visualeditor-emm-file-creator": "Author*:",
             "visualeditor-emm-file-date": "Date*:",
             "visualeditor-emm-file-organization": "Organization:",
-            "visualeditor-emm-file-subject": "Subject:",
+            "visualeditor-emm-file-subject": "Keywords:",
             "visualeditor-emm-file-upload-timeout": "Your file upload request timed out. Please make sure the file isn't too large, check your connection and try again.",
             "visualeditor-emm-file-upload-duplicate": "Another file with the same content already exists",
             "visualeditor-emm-file-upload-exists": "Another file with the same name already exists",
@@ -108,7 +108,7 @@ function defineTranslations() {
             "visualeditor-emm-link-creator": "Auteur*:",
             "visualeditor-emm-link-date": "Datum*:",
             "visualeditor-emm-link-organization": "Organisatie:",
-            "visualeditor-emm-link-subject": "Onderwerp:",
+            "visualeditor-emm-link-subject": "Trefwoorden:",
             "visualeditor-emm-link-add-resource": "Opnemen in referentielijst:",
 
             "visualeditor-emm-page": "Brontitel*:",
@@ -122,7 +122,7 @@ function defineTranslations() {
             "visualeditor-emm-file-creator": "Auteur*:",
             "visualeditor-emm-file-date": "Datum*:",
             "visualeditor-emm-file-organization": "Organisatie:",
-            "visualeditor-emm-file-subject": "Onderwerp:",
+            "visualeditor-emm-file-subject": "Trefwoorden:",
 
             "visualeditor-emm-file-upload-timeout": "Het verzoek om een bestand te uploaden is verlopen. Controleer of het bestand niet te groot is, controleer de verbinding en probeer opnieuw.",
             "visualeditor-emm-file-upload-duplicate": "Er bestaat al een bestand met dezelfde inhoud",
