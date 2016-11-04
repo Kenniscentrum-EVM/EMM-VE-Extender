@@ -18,7 +18,7 @@ function createInternalLinkDialog(EMMDialog) {
      */
     var EMMInternalLinkDialog = function () {
         EMMDialog.call(this);
-        this.autoCompleteQuery = "[[Category:Light Context||Project]]|?Semantic title|limit=10000";
+        this.autoCompleteQuery = "[[Category:Light Context||Project]]|?Semantic title|?Category=Category|limit=10000";
         this.editQuery = "[[PAGENAMEPARAMETER]] |?Semantic title";
     };
     OO.inheritClass(EMMInternalLinkDialog, EMMDialog);
@@ -178,7 +178,9 @@ function createInternalLinkDialog(EMMDialog) {
      * Should already contain data of generic resource and a lightResource.
      */
     EMMInternalLinkDialog.prototype.processDialogSpecificQueryResult = function (singleResult, suggestionObject) {
-        //No additional behaviour on top of the default behaviour
+        suggestionObject.category = singleResult.printouts.Category;
+        console.log(singleResult.printouts.Category);
+        return suggestionObject;
     };
 
     /**
