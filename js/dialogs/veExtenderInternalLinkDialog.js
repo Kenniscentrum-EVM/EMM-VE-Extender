@@ -100,7 +100,6 @@ function createInternalLinkDialog(EMMDialog) {
         }
     };
 
-
     /**
      * Builds and executes a query that creates a new Light Context or edits an existing one with the sfautoedit api-calll.
      * After the new Light Context has been added, a link is then inserted into the page by executing insertCallback.
@@ -177,10 +176,10 @@ function createInternalLinkDialog(EMMDialog) {
      * about an internal link that was asked for in the query.
      * @param {Object} suggestionObject - A single suggestion for the autocomplete dropdown that should be expanded.
      * Should already contain data of generic resource and a lightResource.
+     * @returns {Object} - An updated suggestionObject, or null when the singleresult is invalid
      */
     EMMInternalLinkDialog.prototype.processDialogSpecificQueryResult = function (singleResult, suggestionObject) {
-        suggestionObject.category = singleResult.printouts.Category;
-        console.log(singleResult.printouts.Category);
+        //No additional behaviour on top of the default behaviour
         return suggestionObject;
     };
 

@@ -265,6 +265,21 @@ function createFileDialog(LightResourceDialog) {
     };
 
     /**
+     * Processes part of the result of an ask query. Expands an existing suggestionobject by adding file-specific
+     * data from the queryresult to the suggestionObject.
+     * @param {Object} singleResult - A single row from the result of the api-call that contains all the information
+     * about a file that was asked for in the query.
+     * @param {Object} suggestionObject - A single suggestion for the autocomplete dropdown that should be expanded.
+     * Should already contain data of generic resource and a lightResource.
+     * @returns {Object} - An updated suggestionObject, or null when the singleresult is invalid
+     */
+    EMMFileDialog.prototype.processDialogSpecificQueryResult = function (singleResult, suggestionObject) {
+        suggestionObject = LightResourceDialog.prototype.processDialogSpecificQueryResult.call(this, singleResult, suggestionObject);
+        suggestionObject.filename = singleResult.printouts["File name"][0].fulltext;
+        return suggestionObject;
+    };
+
+    /**
      * Returns what type of template to insert into the existing page in order to create a link to the file.
      * In case of a file this will always be a template of the "Cite" type.
      * @returns {String} - A string containing "Cite"

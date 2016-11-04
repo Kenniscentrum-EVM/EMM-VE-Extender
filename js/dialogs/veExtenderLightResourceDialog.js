@@ -99,9 +99,9 @@ function createLightResourceDialog(EMMDialog, resourceType) {
      * about a Light Resource that was asked for in the query.
      * @param {Object} suggestionObject - A single suggestion for the autocomplete dropdown that should be expanded.
      * Should already contain data that every resource has.
+     * @returns {Object} - An updated suggestionObject, or null when the singleresult is invalid
      */
     EMMLightResourceDialog.prototype.processDialogSpecificQueryResult = function (singleResult, suggestionObject) {
-
         suggestionObject.creator = singleResult.printouts["Dct:creator"][0];
         suggestionObject.date = singleResult.printouts["Dct:date"][0];
         suggestionObject.organization = singleResult.printouts.Organization[0];
@@ -113,8 +113,8 @@ function createLightResourceDialog(EMMDialog, resourceType) {
             suggestionObject.subjects += querySubjects[j].fulltext + ", ";
         }
         //Remove comma and space at the end of the subject list
-        //todo discuss with hans
         suggestionObject.subjects = suggestionObject.subjects.slice(0, -2);
+        return suggestionObject;
     };
 
     /**
