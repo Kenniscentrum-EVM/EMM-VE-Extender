@@ -135,6 +135,7 @@ function createInternalLinkDialog(EMMDialog) {
             });
         }
         else {
+            console.log("exists");
             this.executeQuery(query, insertCallback, linkdata);
         }
     };

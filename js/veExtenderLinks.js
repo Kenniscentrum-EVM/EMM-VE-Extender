@@ -486,10 +486,10 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                 }
                 surfaceModel.getLinearFragment(dialogInstance.selectionRange).insertContent(mytemplate);
                 dialogInstance.semanticAskQuery(dialogInstance.getAutocompleteQuery(),
-                    function(){
+                    function () {
                         setAutoCompleteEnabled(dialogInstance, false);
                         toggleAutoComplete(dialogInstance);
-                });
+                    });
 
             };
             //Get the name of the current page and replace any underscores with whitespaces to prevent errors later on.
@@ -719,8 +719,14 @@ function semanticCreateWithFormQuery(query, callback, target, form) {
         query: query,
         target: target
     }).done(function (data) {
+        console.log("hoi");
         callback(data.target);
-    });
+    }).fail(
+        function (data, ex) {
+            console.log(ex);
+            console.log(data);
+        }
+    );
 }
 
 /**

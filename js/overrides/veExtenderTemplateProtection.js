@@ -78,7 +78,7 @@ var VEETemplateProtection = function () {
                 if (node.type != null)
                     if (node.type == "mwTransclusionBlock" && protectedTemplates[getTemplate(node)] != null) {
                         protect = true;
-                        removeRange(doc, x + 1, removeEnd, removeMetadata, thisContext); //fixme does not work, wrong index probably.
+                        //removeRange(doc, x + 1, removeEnd, removeMetadata, thisContext); //fixme does not work, wrong index probably.
                         break;
                     }
             }
@@ -90,70 +90,7 @@ var VEETemplateProtection = function () {
                 ve.dm.nodeFactory.registry[doc.data.getType(x)].static.isDeletable = true;
             }
             else
-                returnValue = base.call(thisContext, doc, removeStart, x, removeMetadata);
-            return returnValue;
-        }
-
-        function removeRange2(doc, removeStart, removeEnd, removeMetadata, thisContext) {
-            var offset = removeEnd;
-            var rmvRange = removeEnd;
-            var returnVal = 0;
-            var pass = 0;
-            while (offset > removeStart) {
-                var node = doc.getDocumentNode().getNodeFromOffset(offset);
-                var type = doc.data.getType(offset);
-                console.log("loop offset:", offset);
-                console.log("pass:", pass);
-                //console.log("node:", node);
-                offset--;
-                if (node.type == "mwTransclusionBlock" && protectedTemplates[getTemplate(node)] != null) {
-                    ve.dm.nodeFactory.registry[type].static.isDeletable = false;
-                    pass++;
-                    console.log("==== inside condition ====");
-                    console.log("rmvRange", rmvRange);
-                    console.log("offset (startRange)", offset);
-                    console.log("removeEnd", removeEnd);
-                    console.log("returnVal", returnVal);
-                    console.log("=========================");
-                    returnVal = base.call(thisContext, doc, offset, rmvRange, removeMetadata);
-                    ve.dm.nodeFactory.registry[type].static.isDeletable = true;
-                    rmvRange = offset;
-                }
-            }
-            console.log("==== end of function ====");
-            console.log("rmvRange", rmvRange);
-            console.log("offset", offset);
-            console.log("removeStart", removeStart);
-            console.log("removeEnd", removeEnd);
-            console.log("returnVal", returnVal);
-            console.log("=========================");
-            if (rmvRange > removeStart) {
-
-                return base.call(thisContext, doc, removeStart, rmvRange, removeMetadata);
-            }
-            else {
-                return returnVal;
-            }
-        }
-
-
-        function removeRange3(doc, removeStart, removeEnd, removeMetadata, thisContext) {
-            var offset = removeEnd;
-            while (offset > removeStart) {
-                console.log(offset);
-
-                var node = doc.getDocumentNode().getNodeFromOffset(offset);
-                if (node.type == "mwTransclusionBlock" && protectedTemplates[getTemplate(node)] != null) {
-                    var isDeleteAbleBase = ve.dm.NodeFactory.prototype.isNodeDeletable;
-                    ve.dm.NodeFactory.prototype.isNodeDeletable = function (type) {
-                        return false;
-                    };
-                    mw.notify(OO.ui.deferMsg("visualeditor-emm-notification-template-body")(), {title: OO.ui.deferMsg("visualeditor-emm-notification-template-title")()});
-                }
-                offset--;
-            }
-            var returnValue = base.call(thisContext, doc, removeStart, removeEnd, removeMetadata);
-            ve.dm.NodeFactory.prototype.isNodeDeletable = isDeleteAbleBase;
+                returnValue = base.call(thisContext, doc, removeStart, removeEnd, removeMetadata);
             return returnValue;
         }
 
@@ -168,7 +105,7 @@ var VEETemplateProtection = function () {
          */
         ve.dm.Transaction.prototype.addSafeRemoveOps = function (doc, removeStart, removeEnd, removeMetadata) {
             //execute our recursive function.
-            return removeRange3(doc, removeStart, removeEnd, removeMetadata, this);
+            return removeRange(doc, removeStart, removeEnd, removeMetadata, this);
         };
     }
 
