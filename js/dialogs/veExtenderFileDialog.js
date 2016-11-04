@@ -113,6 +113,7 @@ function createFileDialog(LightResourceDialog) {
         switch(mode)
         {
             case this.modeEnum.INSERT_EXISTING:
+                this.fieldset.items[1].$element.show();
                 this.$element.find(".oo-ui-processDialog-title").text(OO.ui.deferMsg("visualeditor-emm-dialogfiletitle")());
                 input = this.titleField.$element.find("input");
                 input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-filedialog-titlefield-placeholder-def")());
