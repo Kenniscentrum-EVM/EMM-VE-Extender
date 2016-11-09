@@ -286,6 +286,30 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
     };
 
     /**
+     * Checks what should happen after a user has pressed the insert button. Depending on what the user was trying to do
+     * we either need to call a query, or simply only link to the selected resource.
+     * @param {function} insertCallback - The callback function that creates a link on the wiki page to the selected or
+     * created resource. Will be executed directly, or after the query has finished processing if a query was executed.
+     * @param {String} currentPageID - The ID of the page that is currently being edited, can only contain alphanumeric
+     * characters and whitespace
+     * @param {String} linkdata - In case of an existing resource, linkdata contains the internal name of the resource
+     * in order to let the api know what existing resource should be edited. Otherwise linkdata is just an empty string.
+     * @return {boolean} - Returns true or false depending on the success of executing the action.
+     */
+    EMMDialog.prototype.executeInsertAction = function (insertCallback, currentPageID, linkdata) {
+        if (!this.isExistingResource) {
+            //In this case, dialoginstance.suggestion is empty, so build and execute the query
+            this.buildAndExecuteQuery(currentPageID, insertCallback, linkdata);
+        } else if (this.isEdit()) { //dealing with an existing resource, so isEdit exists, otherwise isEdit would crash.
+            this.buildAndExecuteQuery(currentPageID, insertCallback, linkdata);
+        }
+        else {
+            insertCallback(this.suggestion.data);
+        }
+        return true;
+    };
+
+    /**
      * Displays an error message for when a specific overloaded function isn't present
      * @param {String} functionName - The name of the function that has no overloaded equivalent
      */
@@ -493,16 +517,11 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
             //Get the name of the current page and replace any underscores with whitespaces to prevent errors later on.
             var currentPageID = mw.config.get("wgPageName").replace(/_/g, " ");
 
-            if (!dialogInstance.isExistingResource) {
-                //In this case, dialoginstance.suggestion is empty, so build and execute the query
-                dialogInstance.buildAndExecuteQuery(currentPageID, insertCallback, linkdata);
-            } else if (dialogInstance.isEdit()) { //dealing with an existing resource, so isEdit exists, otherwise isEdit would crash.
-                dialogInstance.buildAndExecuteQuery(currentPageID, insertCallback, linkdata);
+            //Check some variables and decide what has to be done
+            var actionSuccess = dialogInstance.executeInsertAction(insertCallback, currentPageID, linkdata);
+            if (actionSuccess) {
+                dialogInstance.close();
             }
-            else {
-                insertCallback(dialogInstance.suggestion.data);
-            }
-            dialogInstance.close();
         };
 
         /**
@@ -767,7 +786,7 @@ function initAutoComplete(data, dialogInstance) {
         onSelect: function (suggestion) {
             dialogInstance.suggestion = suggestion;
             dialogInstance.isExistingResource = true;
-            dialogInstance.fillFields(suggestion);
+            dialogInstance.fillFields();
         },
         appendTo: inputField.parentElement,
         maxHeight: 300

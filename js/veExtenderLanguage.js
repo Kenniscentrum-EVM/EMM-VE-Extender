@@ -40,6 +40,8 @@ function defineTranslations() {
             "visualeditor-emm-file-date": "Date*:",
             "visualeditor-emm-file-organization": "Organization:",
             "visualeditor-emm-file-subject": "Keywords:",
+            "visualeditor-emm-file-changing-empty-file" : "An error occured: the file you are attempting to change does not exist",
+
             "visualeditor-emm-file-upload-timeout": "Your file upload request timed out. Please make sure the file isn't too large, check your connection and try again.",
             "visualeditor-emm-file-upload-duplicate": "Another file with the same content already exists",
             "visualeditor-emm-file-upload-exists": "Another file with the same name already exists",
@@ -126,6 +128,7 @@ function defineTranslations() {
             "visualeditor-emm-file-date": "Datum*:",
             "visualeditor-emm-file-organization": "Organisatie:",
             "visualeditor-emm-file-subject": "Trefwoorden:",
+            "visualeditor-emm-file-changing-empty-file" : "Er is een fout opgetreden: Het bestand dat u probeert aan te passen bestaat al.",
 
             "visualeditor-emm-file-upload-timeout": "Het verzoek om een bestand te uploaden is verlopen. Controleer of het bestand niet te groot is, controleer de verbinding en probeer opnieuw.",
             "visualeditor-emm-file-upload-duplicate": "Er bestaat al een bestand met dezelfde inhoud",
