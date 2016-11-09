@@ -49,7 +49,7 @@ function createExternalLinkDialog(LightResourceDialog) {
          * Checks the titlefield and sets existingresource to false if the titlefield changed to empty from a full field
          */
         var testSuggestedLink = function () {
-            if (this.isExistingResource) {
+            if (this.isExistingResource && this.dialogMode != 2) {
                 if (dialogInstance.titleField.value.length == 0) {
                     this.isExistingResource = false;
                 }
@@ -99,19 +99,29 @@ function createExternalLinkDialog(LightResourceDialog) {
     };
 
     /**
-     * TODO commentaar Nick
+     * Executes a dialog mode change.
+     * @param {Number} mode - Dialog mode to switch to (defined in modeEnum).
      */
-    EMMExternalLinkDialog.prototype.testAndChangeDialogMode = function () {
+    EMMExternalLinkDialog.prototype.executeModeChange = function (mode) {
+        this.dialogMode = mode;
         var input = null;
-        if (this.dialogMode == 0) {
-            if (!this.isExistingResource && this.linkField.value.length != 0) {
+        switch (mode) {
+            case this.modeEnum.INSERT_EXISTING:
+                this.$element.find(".oo-ui-processDialog-title").text(OO.ui.deferMsg("visualeditor-emm-dialogexternallinktitle")());
+                input = this.titleField.$element.find("input");
+                input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-def")());
+                clearInputFields(this.fieldset, [2], ["OoUiLabelWidget"]);
+                break;
+            case this.modeEnum.INSERT_NEW:
                 if (this.suggestion != null) {
                     if (this.suggestion.hyperlink == this.linkField.value) {
                         clearInputFields(this.fieldset, [0, 2], ["OoUiLabelWidget"]);
                         this.validator.cleanUpForm();
                         return;
                     }
-                    clearInputFields(this.fieldset, [0, 1, 2], ["OoUiLabelWidget"]);
+                    else {
+                        clearInputFields(this.fieldset, [0, 1, 2], ["OoUiLabelWidget"]);
+                    }
                 }
                 else {
                     clearInputFields(this.fieldset, [0, 1, 2], ["OoUiLabelWidget"]);
@@ -119,34 +129,39 @@ function createExternalLinkDialog(LightResourceDialog) {
                 this.$element.find(".oo-ui-processDialog-title").text(OO.ui.deferMsg("visualeditor-emm-linkdialog-title-npage")());
                 input = this.titleField.$element.find("input");
                 input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-new")());
-                this.dialogMode = 1;
-                toggleAutoComplete(this);
-                this.validator.cleanUpForm();
-            }
-        }
-        else {
-            if (this.linkField.value.length == 0) {
-                this.$element.find(".oo-ui-processDialog-title").text(OO.ui.deferMsg("visualeditor-emm-dialogexternallinktitle")());
+                //todo temporary
+                break;
+            case this.modeEnum.EDIT_EXISTING:
+                this.$element.find(".oo-ui-processDialog-title").text(OO.ui.deferMsg("visualeditor-emm-linkdialog-title-edit")());
                 input = this.titleField.$element.find("input");
                 input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-def")());
-                this.dialogMode = 0;
-                toggleAutoComplete(this);
-                clearInputFields(this.fieldset, [1, 2], ["OoUiLabelWidget"]);
-                this.validator.cleanUpForm();
-            }
+                clearInputFields(this.fieldset, [2], ["OoUiLabelWidget"]);
+                break;
         }
+        this.validator.cleanUpForm();
+        toggleAutoComplete(this);
     };
 
     /**
-     * TODO Commentaar Nick
+     * Checks the dialog variables to determine if a mode-change is needed.
+     * If one is needed, execute it.
      */
-    EMMExternalLinkDialog.prototype.resetMode = function () {
-        this.$element.find(".oo-ui-processDialog-title").text(OO.ui.deferMsg("visualeditor-emm-dialogexternallinktitle")());
-        this.dialogMode = 0;
-        toggleAutoComplete(this);
-        var input = this.titleField.$element.find("input");
-        input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-def")());
-        this.validator.cleanUpForm();
+    EMMExternalLinkDialog.prototype.testAndChangeDialogMode = function () {
+        switch (this.dialogMode) {
+            case this.modeEnum.INSERT_EXISTING:
+                if (!this.isExistingResource && this.linkField.value.length != 0)
+                    this.executeModeChange(this.modeEnum.INSERT_NEW);
+                break;
+            case this.modeEnum.INSERT_NEW:
+                if (this.linkField.value.length == 0)
+                    this.executeModeChange(this.modeEnum.INSERT_EXISTING);
+                break;
+            case this.modeEnum.EDIT_EXISTING:
+                if (!this.isExistingResource) {
+                    //todo discuss with Hans.
+                }
+                break;
+        }
     };
 
     /**
@@ -191,7 +206,7 @@ function createExternalLinkDialog(LightResourceDialog) {
      */
     EMMExternalLinkDialog.prototype.isEdit = function () {
         return LightResourceDialog.prototype.isEdit.call(this) ||
-                this.linkField.getValue() != this.suggestion.hyperlink;
+            this.linkField.getValue() != this.suggestion.hyperlink;
     };
 
     /**
@@ -211,9 +226,25 @@ function createExternalLinkDialog(LightResourceDialog) {
      * @param {Object} suggestionObject - A single suggestion for the autocomplete dropdown that should be expanded.
      * Should already contain data of generic resource and a lightResource.
      */
+
+    /**
+     * Processes part of the result of an ask query. Expands an existing suggestionobject by adding external link-specific
+     * data from the queryresult to the suggestionObject.
+     * @param {Object} singleResult - A single row from the result of the api-call that contains all the information
+     * about an external link that was asked for in the query.
+     * @param {Object} suggestionObject - A single suggestion for the autocomplete dropdown that should be expanded.
+     * Should already contain data of generic resource and a lightResource.
+     * @returns {Object} - An updated suggestionObject, or null when the singleresult is invalid
+     */
     EMMExternalLinkDialog.prototype.processDialogSpecificQueryResult = function (singleResult, suggestionObject) {
-        LightResourceDialog.prototype.processDialogSpecificQueryResult.call(this, singleResult, suggestionObject);
-        suggestionObject.hyperlink = singleResult.printouts.Hyperlink[0];
+        if (/Bestand:|File:/ig.test(suggestionObject.data)) {
+            return null;
+        }
+        else {
+            suggestionObject = LightResourceDialog.prototype.processDialogSpecificQueryResult.call(this, singleResult, suggestionObject);
+            suggestionObject.hyperlink = singleResult.printouts.Hyperlink[0];
+            return suggestionObject;
+        }
     };
 
     /**
@@ -227,7 +258,6 @@ function createExternalLinkDialog(LightResourceDialog) {
         }
         return "External link";
     };
-
     //Return the entire 'class' in order to pass this definition to the window factory.
     return EMMExternalLinkDialog;
 }

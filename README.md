@@ -1,5 +1,9 @@
 # EMM-VE-Extender
 
+Adds and removes various new functions to the visual editor including 
+but not limited to:
+
+
 Instellen van extender op test-server
 
 Voorlopig moeten de volgende aanpassingen gemaakt in de volgende bestanden

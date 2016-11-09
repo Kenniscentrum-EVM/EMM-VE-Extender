@@ -18,8 +18,8 @@ function createInternalLinkDialog(EMMDialog) {
      */
     var EMMInternalLinkDialog = function () {
         EMMDialog.call(this);
-        this.autoCompleteQuery = "[[Category:Light Context||Project]]|?Semantic title|limit=10000";
-        this.editQuery = "[[PAGENAMEPARAMETER]] |?Semantic title";
+        this.autoCompleteQuery = "[[Category:Light Context||Project]]|?Semantic title|?Category=Category|limit=10000";
+        this.editQuery = "[[PAGENAMEPARAMETER]] |?Semantic title|?Category=Category";
     };
     OO.inheritClass(EMMInternalLinkDialog, EMMDialog);
 
@@ -42,12 +42,12 @@ function createInternalLinkDialog(EMMDialog) {
         var dialogInstance = this;
         //Define what functions to execute when the content of this field changes.
         this.titleField.onChangeFunctions = [function () {
-            if (this.isExistingResource) {
+            if (this.isExistingResource && this.dialogMode != this.modeEnum.EDIT_EXISTING) {
                 if (dialogInstance.titleField.value.length == 0) {
                     this.isExistingResource = false;
                 }
             }
-        }];
+        }, this.testAndChangeDialogMode];
         //Add all the fields to the fieldset, configuring the order in which they appear in the dialog.
         this.fieldset.addItems([
             new OO.ui.FieldLayout(this.titleField, {
@@ -64,15 +64,37 @@ function createInternalLinkDialog(EMMDialog) {
     /**
      * TODO expand this and comment
      */
-    EMMInternalLinkDialog.prototype.testAndChangeDialogMode = function () {
-        //Modes not implemented yet
+    EMMInternalLinkDialog.prototype.executeModeChange = function (mode) {
+        this.dialogMode = mode;
+        switch (mode) {
+            case this.modeEnum.INSERT_EXISTING:
+                this.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-dialoginternallinktitle")());
+                break;
+            case this.modeEnum.INSERT_NEW:
+                this.$element.find('.oo-ui-processDialog-title').text("Aanpassen & Invoegen koppeling naar pagina");
+                break;
+            case this.modeEnum.EDIT_EXISTING:
+                this.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-inlidialog-title-edit")());
+                break;
+        }
+        toggleAutoComplete(this);
+
     };
 
     /**
      * TODO expand this and comment
      */
-    EMMInternalLinkDialog.prototype.resetMode = function () {
-        //Modes not implemented yet
+    EMMInternalLinkDialog.prototype.testAndChangeDialogMode = function () {
+        switch (this.dialogMode) {
+            case this.modeEnum.INSERT_EXISTING:
+                if (this.isExistingResource && this.titleField.getValue() != this.suggestion.value)
+                    this.executeModeChange(this.modeEnum.INSERT_NEW);
+                break;
+            case this.modeEnum.INSERT_NEW:
+                if ((this.isExistingResource && this.titleField.getValue() == this.suggestion.value) || !this.isExistingResource)
+                    this.executeModeChange(this.modeEnum.INSERT_EXISTING);
+                break;
+        }
     };
 
     /**
@@ -87,9 +109,27 @@ function createInternalLinkDialog(EMMDialog) {
      */
     EMMInternalLinkDialog.prototype.buildAndExecuteQuery = function (currentPageID, insertCallback, linkdata) {
         var dialogInstance = this;
-        var query = "Light Context[Heading]=" + this.titleField.getValue();
-        if (!this.isExistingResource) {
+        var query = "";
+        if (this.isExistingResource) { //This is true whenever we're editing an exisiting resource
+            var formCategory = "";
+            for (var i = 0; i < this.suggestion.category.length; i++) {
+                if (/Light Context/g.test(this.suggestion.category[i].fulltext)) {
+                    formCategory = "Light Context";
+                    query += "Light Context[Heading]=" + this.titleField.getValue();
+                    dialogInstance.executeQuery(query, insertCallback, linkdata, "Light Context")
+                    break;
+                }
+                else if (/Project/g.test(this.suggestion.category[i].fulltext)) {
+                    formCategory = "Project";
+                    query += "Project[Name]=" + this.titleField.getValue();
+                    dialogInstance.executeQuery(query, insertCallback, linkdata, "Project")
+                    break;
+                }
+            }
+        }
+        else {
             //Start building the sfautoedit query
+            query += "Project[Name]=" + this.titleField.getValue();
             query += "&Light Context[Supercontext]=" + currentPageID;
             //Find the topcontext of the current page
             var api = new mw.Api();
@@ -102,14 +142,11 @@ function createInternalLinkDialog(EMMDialog) {
                 if (res[currentPageID].printouts.Topcontext[0] != null) {
                     var topContext = res[currentPageID].printouts.Topcontext[0].fulltext;
                     query += "&Light Context[Topcontext]=" + topContext;
-                    dialogInstance.executeQuery(query, insertCallback, linkdata);
+                    dialogInstance.executeQuery(query, insertCallback, linkdata, "Light Context");
                 } else {
                     alert(OO.ui.deferMsg("visualeditor-emm-topcontext-error")());
                 }
             });
-        }
-        else {
-            this.executeQuery(query, insertCallback, linkdata);
         }
     };
 
@@ -120,9 +157,10 @@ function createInternalLinkDialog(EMMDialog) {
      * This is executed after the api has finished processing the request.
      * @param {String} linkdata - The internal title of a Light Context resource. Should be set to the internal title of the Light Context
      * you want to edit, or be empty when creating a new file resource.
+     * @param {String} form - What type of form to use in order to execute the query.
      */
-    EMMInternalLinkDialog.prototype.executeQuery = function (query, insertCallback, linkdata) {
-        semanticCreateWithFormQuery(query, insertCallback, linkdata, "Light Context");
+    EMMInternalLinkDialog.prototype.executeQuery = function (query, insertCallback, linkdata, form) {
+        semanticCreateWithFormQuery(query, insertCallback, linkdata, form);
     };
 
     /**
@@ -150,9 +188,11 @@ function createInternalLinkDialog(EMMDialog) {
      * about an internal link that was asked for in the query.
      * @param {Object} suggestionObject - A single suggestion for the autocomplete dropdown that should be expanded.
      * Should already contain data of generic resource and a lightResource.
+     * @returns {Object} - An updated suggestionObject, or null when the singleresult is invalid
      */
     EMMInternalLinkDialog.prototype.processDialogSpecificQueryResult = function (singleResult, suggestionObject) {
-        //No additional behaviour on top of the default behaviour
+        suggestionObject.category = singleResult.printouts.Category;
+        return suggestionObject;
     };
 
     /**

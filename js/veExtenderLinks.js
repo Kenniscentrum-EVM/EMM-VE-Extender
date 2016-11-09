@@ -111,7 +111,18 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
         OO.ui.ProcessDialog.call(this);
         this.suggestion = null;
         this.isExistingResource = false;
-        this.dialogMode = 0;
+        /* Dialog modes:
+         * 0 : Existing reference
+         * 1 : New reference
+         * 2 : Editing reference
+         */
+        this.modeEnum = {
+            INSERT_EXISTING: 0,
+            INSERT_NEW: 1,
+            EDIT_EXISTING: 2
+        };
+        this.dialogMode = this.modeEnum.INSERT_EXISTING;
+        this.suggestionCache = null;
         this.selectionRange = null;
         //Create some common fields, present in all dialogs
         this.presentationTitleField = new OO.ui.TextInputWidget();
@@ -230,6 +241,8 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
             var data = this;
             if (data.source != null) //are we editing?
             {
+                dialogInstance.executeModeChange(dialogInstance.modeEnum.EDIT_EXISTING);
+                toggleInputFields(dialogInstance.fieldset, true);
                 data.source = data.source.replace(/\ /g, "_"); //convert whitespaces to underscores
                 var api = new mw.Api();
                 var query = dialogInstance.getEditQuery(data.source); //getEditQuery retrieves the correct query for us.
@@ -241,13 +254,15 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                     dialogInstance.validator.disableOnChange();
                     var res = queryData.query.results;
                     for (var row in res) {
-                        if (!res.hasOwnProperty(row)) //seems to be required.
+                        if (!res.hasOwnProperty(row)) { //seems to be required.
                             continue;
+                        }
                         var suggestion = dialogInstance.processSingleQueryResult(row, res);
                         dialogInstance.suggestion = suggestion;
                         dialogInstance.titleField.setValue(suggestion.value);
-                        dialogInstance.isExistingResource = true;
+                        toggleInputFields(dialogInstance.fieldset, false);
                         dialogInstance.fillFields(); //fill our dialog.
+                        dialogInstance.isExistingResource = true;
                     }
                     dialogInstance.validator.enable(); //enable validation again.
                     dialogInstance.validator.validateAll();
@@ -294,19 +309,20 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
     /**
      * Abstract method that needs to be overridden, displays an error message if this is not the case.
      * Expected behavior when overriding:
-     * Checks the status of the dialog and changes the dialogmode if necessary.
+     * Preforms the a mode change, this may include visual changes to a dialog.
+     * @param {Integer} mode - Mode to be switched to.
      */
-    EMMDialog.prototype.testAndChangeDialogMode = function () {
-        displayOverloadError("testAndChangeDialogMode");
+    EMMDialog.prototype.executeModeChange = function (mode) {
+        displayOverloadError("executeModeChange");
     };
 
     /**
      * Abstract method that needs to be overridden, displays an error message if this is not the case.
      * Expected behavior when overriding:
-     * Resets the dialogmode and resets the properties of the dialog to the default values.
+     * Checks the status of the dialog and changes the dialogmode if necessary.
      */
-    EMMDialog.prototype.resetMode = function () {
-        displayOverloadError("resetMode");
+    EMMDialog.prototype.testAndChangeDialogMode = function () {
+        displayOverloadError("testAndChangeDialogMode");
     };
 
     /**
@@ -467,14 +483,20 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                     return;
                 }
                 surfaceModel.getLinearFragment(dialogInstance.selectionRange).insertContent(mytemplate);
-                dialogInstance.semanticAskQuery(dialogInstance.getAutocompleteQuery(), autocompleteCallback);
+                dialogInstance.semanticAskQuery(dialogInstance.getAutocompleteQuery(),
+                    function () {
+                        setAutoCompleteEnabled(dialogInstance, false);
+                        toggleAutoComplete(dialogInstance);
+                    });
+
             };
             //Get the name of the current page and replace any underscores with whitespaces to prevent errors later on.
             var currentPageID = mw.config.get("wgPageName").replace(/_/g, " ");
+
             if (!dialogInstance.isExistingResource) {
                 //In this case, dialoginstance.suggestion is empty, so build and execute the query
                 dialogInstance.buildAndExecuteQuery(currentPageID, insertCallback, linkdata);
-            } else if (dialogInstance.isEdit()) { //dealing with an existing resource, so isEdit exists.
+            } else if (dialogInstance.isEdit()) { //dealing with an existing resource, so isEdit exists, otherwise isEdit would crash.
                 dialogInstance.buildAndExecuteQuery(currentPageID, insertCallback, linkdata);
             }
             else {
@@ -482,7 +504,6 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
             }
             dialogInstance.close();
         };
-
 
         /**
          * Define what should happen when the cancel button is clicked.
@@ -522,13 +543,12 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
          * The user will be able to pick a resource from the list of all resources gathered by the askQuery
          * @param {Object[]} queryResults - An array containing all the possible options for the autocomplete dropdown
          */
-        var autocompleteCallback = function (queryResults) {
-            initAutoComplete(queryResults, dialogInstance);
+        var autoCompleteCallback = function () {
             toggleAutoComplete(dialogInstance);
         };
 
         //Execute the askQuery in order to gather all resources
-        dialogInstance.semanticAskQuery(dialogInstance.getAutocompleteQuery(), autocompleteCallback);
+        dialogInstance.semanticAskQuery(dialogInstance.getAutocompleteQuery(), autoCompleteCallback);
 
         /**
          * The size of the dialog is set up and some more layout settings are configured here.
@@ -558,13 +578,14 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
              * Clears all the input fields and resets other variables to their default state.
              */
             function cleanUpDialog() {
+                hideAutoComplete(dialogInstance.titleField.$element.find("input"));
                 dialogInstance.validator.disable();
                 clearInputFields(dialogInstance.fieldset, null, ["OoUiLabelWidget"]);
-                dialogInstance.resetMode();
+                dialogInstance.dialogMode = dialogInstance.modeEnum.INSERT_EXISTING;
+                dialogInstance.executeModeChange(dialogInstance.modeEnum.INSERT_EXISTING);
                 dialogInstance.validator.enable();
                 dialogInstance.isExistingResource = false;
                 dialogInstance.suggestion = null;
-                dialogInstance.dialogMode = 0;
             }
 
             //Execute the original getTeardownProcess, but add our cleanup function to the process that is executed on closing.
@@ -592,12 +613,12 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
         suggestionObject.data = singleResultRow.fulltext;
         suggestionObject.value = "";
         var semanticTitle = singleResultRow.printouts["Semantic title"][0];
-        if (semanticTitle)
+        if (semanticTitle) {
             suggestionObject.value = semanticTitle;
-        else
+        } else {
             suggestionObject.value = suggestionObject.data;
-        this.processDialogSpecificQueryResult(singleResultRow, suggestionObject);
-        return suggestionObject;
+        }
+        return this.processDialogSpecificQueryResult(singleResultRow, suggestionObject);
     };
 
     /**  semanticAskQuery
@@ -616,9 +637,13 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
             var res = data.query.results;
             var arr = []; //array to store the results
             for (var row in res) {
-                if (!res.hasOwnProperty(row))
+                if (!res.hasOwnProperty(row)) {
                     continue;
-                arr.push(dialogInstance.processSingleQueryResult(row, res));
+                }
+                var singleQueryResult = dialogInstance.processSingleQueryResult(row, res);
+                if (singleQueryResult != null) {
+                    arr.push(singleQueryResult);
+                }
             }
             arr.sort(function (a, b) {
                 if (a.value > b.value) {
@@ -629,9 +654,20 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                 }
                 return 0;
             });
-            callback(arr);
+            dialogInstance.suggestionCache = arr;
+            callback();
         });
     };
+}
+
+/**
+ * Enables or disables an entire fieldSet depending on the given boolean value.
+ * @param {OO.ui.FieldsetLayout} fieldSet - FieldSet to disable or enable.
+ * @param {boolean} value - Boolean instruction, true = disable, false = enable.
+ */
+function toggleInputFields(fieldSet, value) {
+    for (var i = 0; i < fieldSet.getItems().length; i++)
+        fieldSet.getItems()[i].getField().setDisabled(value);
 }
 
 /**
@@ -729,12 +765,9 @@ function initAutoComplete(data, dialogInstance) {
     $(inputField).autocomplete({
         lookup: data,
         onSelect: function (suggestion) {
-            console.log("suggestion is:",suggestion);
-            if (!dialogInstance.isExistingResource) {
-                dialogInstance.suggestion = suggestion;
-                dialogInstance.isExistingResource = true;
-                dialogInstance.fillFields();
-            }
+            dialogInstance.suggestion = suggestion;
+            dialogInstance.isExistingResource = true;
+            dialogInstance.fillFields(suggestion);
         },
         appendTo: inputField.parentElement,
         maxHeight: 300
@@ -742,17 +775,41 @@ function initAutoComplete(data, dialogInstance) {
 }
 
 /**
+ * Hides the autocomplete suggestion box.
+ * @param {JQuery} element - JQuery element that has autocomplete functionality.
+ */
+function hideAutoComplete(element) {
+    if (element.autocomplete() != null)
+        element.autocomplete().hide();
+}
+
+/**
  * Depending on the mode the dialog is in, this function activates or deactivates the autoComplete dropdown.
  * @param {EMMDialog} dialogInstance - The dialog for which the autoComplete dropdown should be activated or deactivated.
  */
 function toggleAutoComplete(dialogInstance) {
+    if (dialogInstance.dialogMode > 0) {
+        setAutoCompleteEnabled(dialogInstance, false);
+    }
+    else {
+        setAutoCompleteEnabled(dialogInstance, true);
+    }
+}
+
+/**
+ * Enables or disables the autocomplete functionality of a given element depending on the given value.
+ * @param {JQuery} element - Jquery element containing autoComplete functionality.
+ * @param {Boolean} value - Boolean value that decides the state of the autoComplete. true = enabled, false = disabled.
+ */
+function setAutoCompleteEnabled(dialogInstance, value) {
     var element = dialogInstance.titleField.$element.find("input");
-    if (element.autocomplete() == null)
-        return;
-    if (dialogInstance.dialogMode == 1)
-        element.autocomplete().disable();
-    else
-        element.autocomplete().enable();
+    if (value && element.autocomplete() == null && dialogInstance.suggestionCache != null) {
+        initAutoComplete(dialogInstance.suggestionCache, dialogInstance);
+    }
+    else if (!value && element.autocomplete() != null) {
+        hideAutoComplete(element);
+        element.autocomplete().dispose();
+    }
 }
 
 /**

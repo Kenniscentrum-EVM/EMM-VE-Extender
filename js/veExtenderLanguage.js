@@ -25,7 +25,7 @@ function defineTranslations() {
             "visualeditor-emm-link-creator": "Author*:",
             "visualeditor-emm-link-date": "Date*:",
             "visualeditor-emm-link-organization": "Organization:",
-            "visualeditor-emm-link-subject": "Subject:",
+            "visualeditor-emm-link-subject": "Keywords:",
             "visualeditor-emm-link-add-resource": "Include in references list:",
 
             "visualeditor-emm-page": "Resource title*:",
@@ -39,7 +39,7 @@ function defineTranslations() {
             "visualeditor-emm-file-creator": "Author*:",
             "visualeditor-emm-file-date": "Date*:",
             "visualeditor-emm-file-organization": "Organization:",
-            "visualeditor-emm-file-subject": "Subject:",
+            "visualeditor-emm-file-subject": "Keywords:",
             "visualeditor-emm-file-upload-timeout": "Your file upload request timed out. Please make sure the file isn't too large, check your connection and try again.",
             "visualeditor-emm-file-upload-duplicate": "Another file with the same content already exists",
             "visualeditor-emm-file-upload-exists": "Another file with the same name already exists",
@@ -76,12 +76,20 @@ function defineTranslations() {
             "visualeditor-emm-validation-date": "This field must contain a valid date.",
 
             "visualeditor-emm-linkdialog-title-npage": "Insert new link",
+            "visualeditor-emm-linkdialog-title-edit": "Edit link to website",
+            "visualeditor-emm-inlidialog-title-edit": "Edit link to page",
             "visualeditor-emm-linkdialog-titlefield-placeholder-def": "Search for link",
             "visualeditor-emm-linkdialog-titlefield-placeholder-new": "Title new link",
             "visualeditor-emm-filedialog-title-npage": "Insert new file",
+            "visualeditor-emm-filedialog-title-edit": "Edit file",
             "visualeditor-emm-filedialog-titlefield-placeholder-def": "Search for file",
             "visualeditor-emm-filedialog-titlefield-placeholder-new": "Title of new file",
-            "visualeditor-emm-required": "*Required"
+            "visualeditor-emm-required": "*Required",
+
+            "visualeditor-emm-notification-template-title": "Illegal operation",
+            "visualeditor-emm-notification-template-body": "You are attempting to remove a system template, this is not allowed.",
+            "visualeditor-emm-notification-template-copy": "You are attempting to copy a system template, this is not allowed.",
+            "visualeditor-emm-notification-template-edit": "You are attempting to edit a system template, this is not allowed."
         },
         nl: {
             "visualeditor-emm-add-file": "Toevoegen bestand",
@@ -103,7 +111,7 @@ function defineTranslations() {
             "visualeditor-emm-link-creator": "Auteur*:",
             "visualeditor-emm-link-date": "Datum*:",
             "visualeditor-emm-link-organization": "Organisatie:",
-            "visualeditor-emm-link-subject": "Onderwerp:",
+            "visualeditor-emm-link-subject": "Trefwoorden:",
             "visualeditor-emm-link-add-resource": "Opnemen in referentielijst:",
 
             "visualeditor-emm-page": "Brontitel*:",
@@ -117,7 +125,7 @@ function defineTranslations() {
             "visualeditor-emm-file-creator": "Auteur*:",
             "visualeditor-emm-file-date": "Datum*:",
             "visualeditor-emm-file-organization": "Organisatie:",
-            "visualeditor-emm-file-subject": "Onderwerp:",
+            "visualeditor-emm-file-subject": "Trefwoorden:",
 
             "visualeditor-emm-file-upload-timeout": "Het verzoek om een bestand te uploaden is verlopen. Controleer of het bestand niet te groot is, controleer de verbinding en probeer opnieuw.",
             "visualeditor-emm-file-upload-duplicate": "Er bestaat al een bestand met dezelfde inhoud",
@@ -154,13 +162,22 @@ function defineTranslations() {
             "visualeditor-emm-validation-date": "Dit veld moet een geldige datum bevatten.",
 
             "visualeditor-emm-linkdialog-title-npage": "Invoegen nieuwe koppeling naar website",
+            "visualeditor-emm-linkdialog-title-edit": "Aanpassen koppeling naar website",
+            "visualeditor-emm-inlidialog-title-edit": "Aanpassen koppeling naar pagina",
             "visualeditor-emm-linkdialog-titlefield-placeholder-def": "Zoeken naar een koppeling",
             "visualeditor-emm-linkdialog-titlefield-placeholder-new": "Titel nieuwe koppeling",
             "visualeditor-emm-linkdialog-linkfield-placeholder-def": "Invoegen nieuwe koppeling",
             "visualeditor-emm-filedialog-title-npage": "Invoegen nieuw bestand",
+            "visualeditor-emm-filedialog-title-edit": "Aanpassen bestand",
             "visualeditor-emm-filedialog-titlefield-placeholder-def": "Zoeken naar een bestand",
             "visualeditor-emm-filedialog-titlefield-placeholder-new": "Titel nieuw bestand",
-            "visualeditor-emm-required": "*Vereist"
+            "visualeditor-emm-required": "*Vereist",
+
+            "visualeditor-emm-notification-template-title": "Actie niet toegestaan",
+            "visualeditor-emm-notification-template-body": "U probeert een systeemtemplate te verwijderen, dit is niet toegestaan.",
+            "visualeditor-emm-notification-template-copy": "U probeert een systeemtemplate te kopiëren, dit is niet toegestaan.",
+            "visualeditor-emm-notification-template-edit": "U probeert een systeemtemplate te bewerken, dit is niet toegestaan."
+
         }
     };
     var userLanguage = mw.config.get("wgUserLanguage");

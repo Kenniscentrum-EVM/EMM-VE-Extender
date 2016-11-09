@@ -64,7 +64,7 @@ function createFileDialog(LightResourceDialog) {
          */
         var testSuggestedLink = function () {
             //todo replace this temporary thing with something better.
-            if (this.isExistingResource) {
+            if (this.isExistingResource && this.dialogMode != 2) {
                 if (dialogInstance.titleField.value.length == 0) {
                     this.isExistingResource = false;
                 }
@@ -105,59 +105,59 @@ function createFileDialog(LightResourceDialog) {
         ]);
     };
 
-    /**
-     * TODO commentaar Nick
-     */
-    EMMFileDialog.prototype.testAndChangeDialogMode = function () {
+    EMMFileDialog.prototype.executeModeChange = function (mode)
+    {
+        this.dialogMode = mode;
         var input = null;
-        if (this.dialogMode == 0) {
-            if (this.fileField.currentFile == "") {
-                return;
-            }
-            if (!this.isExistingResource && this.fileField.currentFile != null) {
-                this.$element.find(".oo-ui-processDialog-title").text(OO.ui.deferMsg("visualeditor-emm-filedialog-title-npage")());
-                this.dialogMode = 1;
-                toggleAutoComplete(this);
+        switch(mode)
+        {
+            case this.modeEnum.INSERT_EXISTING:
+                this.fieldset.items[1].$element.show();
+                this.$element.find(".oo-ui-processDialog-title").text(OO.ui.deferMsg("visualeditor-emm-dialogfiletitle")());
                 input = this.titleField.$element.find("input");
+                input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-filedialog-titlefield-placeholder-def")());
+                clearInputFields(this.fieldset, [1, 2], ["OoUiLabelWidget"]);
+                break;
+            case this.modeEnum.INSERT_NEW:
+                this.$element.find(".oo-ui-processDialog-title").text(OO.ui.deferMsg("visualeditor-emm-filedialog-title-npage")());
+                input = this.titleField.$element.find('input');
                 input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-filedialog-titlefield-placeholder-new")());
-
                 if (this.suggestion != null) {
                     if (this.suggestion.value != this.titleField.value) {
                         clearInputFields(this.fieldset, [0, 1, 2], ["OoUiLabelWidget"]);
                     }
-                    else {
+                    else
                         clearInputFields(this.fieldset, [1, 2], ["OoUiLabelWidget"]);
-                    }
-                } else {
-                    clearInputFields(this.fieldset, [1, 2], ["OoUiLabelWidget"]);
                 }
-                this.validator.cleanUpForm();
-            }
+                else
+                    clearInputFields(this.fieldset, [1, 2], ["OoUiLabelWidget"]);
+                break;
+            case this.modeEnum.EDIT_EXISTING:
+                break;
         }
-        else {
-            if (this.fileField.currentFile == null) {
-                this.$element.find(".oo-ui-processDialog-title").text(OO.ui.deferMsg("visualeditor-emm-dialogfiletitle")());
-                this.dialogMode = 0;
-                toggleAutoComplete(this);
-                input = this.titleField.$element.find("input");
-                input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-filedialog-titlefield-placeholder-def")());
-                clearInputFields(this.fieldset, [1, 2], ["OoUiLabelWidget"]);
-                this.validator.cleanUpForm();
-            }
-        }
+        this.validator.cleanUpForm();
+        toggleAutoComplete(this);
     };
 
     /**
      * TODO Commentaar Nick
      */
-    EMMFileDialog.prototype.resetMode = function () {
-        this.$element.find(".oo-ui-processDialog-title").text(OO.ui.deferMsg("visualeditor-emm-dialogfiletitle")());
-        this.dialogMode = 0;
-        toggleAutoComplete(this);
-        var input = this.titleField.$element.find("input");
-        input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-filedialog-titlefield-placeholder-def")());
-        this.titleField.currentFile = null;
-        this.validator.cleanUpForm();
+    EMMFileDialog.prototype.testAndChangeDialogMode = function () {
+        switch(this.dialogMode)
+        {
+            case this.modeEnum.INSERT_EXISTING:
+                if (this.fileField.currentFile == "")
+                    return;
+                if ((!this.isExistingResource && this.fileField.currentFile != null))
+                    this.executeModeChange(this.modeEnum.INSERT_NEW);
+                break;
+            case this.modeEnum.INSERT_NEW:
+                if (this.fileField.currentFile == null)
+                    this.executeModeChange(this.modeEnum.INSERT_EXISTING);
+                break;
+            case this.modeEnum.EDIT_EXISTING:
+                break;
+        }
     };
 
     /**
@@ -262,6 +262,21 @@ function createFileDialog(LightResourceDialog) {
     EMMFileDialog.prototype.fillFields = function () {
         LightResourceDialog.prototype.fillFields.call(this);
         this.validator.validateAll();
+    };
+
+    /**
+     * Processes part of the result of an ask query. Expands an existing suggestionobject by adding file-specific
+     * data from the queryresult to the suggestionObject.
+     * @param {Object} singleResult - A single row from the result of the api-call that contains all the information
+     * about a file that was asked for in the query.
+     * @param {Object} suggestionObject - A single suggestion for the autocomplete dropdown that should be expanded.
+     * Should already contain data of generic resource and a lightResource.
+     * @returns {Object} - An updated suggestionObject, or null when the singleresult is invalid
+     */
+    EMMFileDialog.prototype.processDialogSpecificQueryResult = function (singleResult, suggestionObject) {
+        suggestionObject = LightResourceDialog.prototype.processDialogSpecificQueryResult.call(this, singleResult, suggestionObject);
+        suggestionObject.filename = singleResult.printouts["File name"][0].fulltext;
+        return suggestionObject;
     };
 
     /**
