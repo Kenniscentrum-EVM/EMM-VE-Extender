@@ -135,7 +135,7 @@ function createInternalLinkDialog(EMMDialog) {
         }
         else {
             //Start building the sfautoedit query
-            query += "Project[Name]=" + this.titleField.getValue();
+            query += "Light Context[Heading]=" + this.titleField.getValue();
             query += "&Light Context[Supercontext]=" + currentPageID;
             //Find the topcontext of the current page
             var api = new mw.Api();
@@ -166,6 +166,10 @@ function createInternalLinkDialog(EMMDialog) {
      * @param {String} form - What type of form to use in order to execute the query.
      */
     EMMInternalLinkDialog.prototype.executeQuery = function (query, insertCallback, linkdata, form) {
+        console.log("query",query);
+        console.log("callback",insertCallback);
+        console.log("linkdata",linkdata);
+        console.log("form",form);
         semanticCreateWithFormQuery(query, insertCallback, linkdata, form);
     };
 
