@@ -14,6 +14,7 @@ function createInternalLinkDialog(EMMDialog) {
     /**
      * Calls the constructor of it's super class, EMMDialog. Also defines some queries used to get information
      * about internal links.
+     * @extends EMMDialog
      * @constructor
      */
     var EMMInternalLinkDialog = function () {

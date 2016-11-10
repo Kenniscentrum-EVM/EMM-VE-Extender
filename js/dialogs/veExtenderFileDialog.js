@@ -13,6 +13,7 @@ function createFileDialog(LightResourceDialog) {
     /**
      * Calls the constructor of it's super class, EMMLightResourceDialog. Also defines some queries used to get information
      * about files.
+     * @extends EMMInternalLinkDialog
      * @constructor
      */
     var EMMFileDialog = function () {

@@ -13,6 +13,7 @@ function createExternalLinkDialog(LightResourceDialog) {
     /**
      * Calls the constructor of it's super class, EMMLightResourceDialog. Also defines some queries used to get information
      * about external links.
+     * @extends EMMInternalLinkDialog
      * @constructor
      */
     var EMMExternalLinkDialog = function () {

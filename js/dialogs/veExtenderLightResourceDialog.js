@@ -14,6 +14,7 @@
 function createLightResourceDialog(EMMDialog, resourceType) {
     /**
      * Calls the constructor of it's super class, EMMDialog.
+     * @extends EMMDialog
      * @constructor
      */
     var EMMLightResourceDialog = function () {

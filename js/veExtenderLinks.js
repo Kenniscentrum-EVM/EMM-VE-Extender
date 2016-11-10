@@ -6,14 +6,14 @@
  */
 function addEMMLinks() {
     //Create a File-dialog and add a menu item for the dialog
-    loadEMMDialog("File", "file", OO.ui.deferMsg("visualeditor-emm-menufiletitle"), OO.ui.deferMsg("visualeditor-emm-dialogfiletitle"),
-        function (namedata, linkdata) {
+    loadEMMDialog("File", "file", OO.ui.deferMsg("visualeditor-emm-menufiletitle")(), OO.ui.deferMsg("visualeditor-emm-dialogfiletitle")(),
+        function (nameData, linkData) {
             return {
                 resource: {
-                    wt: linkdata
+                    wt: linkData
                 },
                 name: {
-                    wt: namedata
+                    wt: nameData
                 },
                 dialog: {
                     wt: "process-file-dialog"
@@ -22,14 +22,14 @@ function addEMMLinks() {
         }
     );
     //Create an internal-link-dialog and add a menu item for the dialog
-    loadEMMDialog("Internal link", "linkpage", OO.ui.deferMsg("visualeditor-emm-menuinternallinktitle"), OO.ui.deferMsg("visualeditor-emm-dialoginternallinktitle"),
-        function (namedata, linkdata) {
+    loadEMMDialog("Internal link", "linkpage", OO.ui.deferMsg("visualeditor-emm-menuinternallinktitle")(), OO.ui.deferMsg("visualeditor-emm-dialoginternallinktitle")(),
+        function (nameData, linkData) {
             return {
                 link: {
-                    wt: linkdata
+                    wt: linkData
                 },
                 name: {
-                    wt: namedata
+                    wt: nameData
                 },
                 dialog: {
                     wt: "process-linkpage-dialog"
@@ -38,14 +38,14 @@ function addEMMLinks() {
         }
     );
     //Create an external-link-dialog and add a menu item for the dialog
-    loadEMMDialog("External link", "linkwebsite", OO.ui.deferMsg("visualeditor-emm-menuexternallinktitle"), OO.ui.deferMsg("visualeditor-emm-dialogexternallinktitle"),
-        function (namedata, linkdata) {
+    loadEMMDialog("External link", "linkwebsite", OO.ui.deferMsg("visualeditor-emm-menuexternallinktitle")(), OO.ui.deferMsg("visualeditor-emm-dialogexternallinktitle")(),
+        function (nameData, linkData) {
             return {
                 resource: {
-                    wt: linkdata
+                    wt: linkData
                 },
                 name: {
-                    wt: namedata
+                    wt: nameData
                 },
                 dialog: {
                     wt: "process-linkwebsite-dialog"
@@ -74,9 +74,9 @@ function loadEMMDialog(resourceType, toolId, menuText, dialogText, templateResul
     var tool = function (config) {
         ve.ui.Tool.call(this, config);
         this.setDisabled(false);
-        this.allowCollapse = null;
         this.$element.addClass("oo-ui-tool-name-extratemplate");
     };
+
 
     //More configuration for the menu-item
     OO.inheritClass(tool, ve.ui.Tool);
@@ -243,7 +243,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
             {
                 dialogInstance.executeModeChange(dialogInstance.modeEnum.EDIT_EXISTING);
                 toggleInputFields(dialogInstance.fieldset, true);
-                data.source = data.source.replace(/\ /g, "_"); //convert whitespaces to underscores
+                data.source = data.source.replace(/ /g, "_"); //convert whitespaces to underscores
                 var api = new mw.Api();
                 var query = dialogInstance.getEditQuery(data.source); //getEditQuery retrieves the correct query for us.
                 api.get({
@@ -298,6 +298,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
      These functions are an attempt to emulate the idea of an abstract method as seen in other Object Oriented languages*/
 
     /**
+     * @abstract
      * Abstract method that needs to be overridden, displays an error message if this is not the case.
      * Expected behavior when overriding:
      * Creates all the inputfields of a dialog that are not yet created in the constructor of the general EMMDialog.
@@ -307,16 +308,18 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
     };
 
     /**
+     * @abstract
      * Abstract method that needs to be overridden, displays an error message if this is not the case.
      * Expected behavior when overriding:
      * Preforms the a mode change, this may include visual changes to a dialog.
-     * @param {Integer} mode - Mode to be switched to.
+     * @param {number} mode - Mode to be switched to.
      */
     EMMDialog.prototype.executeModeChange = function (mode) {
         displayOverloadError("executeModeChange");
     };
 
     /**
+     * @abstract
      * Abstract method that needs to be overridden, displays an error message if this is not the case.
      * Expected behavior when overriding:
      * Checks the status of the dialog and changes the dialogmode if necessary.
@@ -326,6 +329,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
     };
 
     /**
+     * @abstract
      * Abstract method that needs to be overridden, displays an error message if this is not the case.
      * Expected behavior and parameters when overriding:
      * Builds and executes a query that creates a new resource or edits an existing one with the sfautoedit api-calll.
@@ -334,28 +338,30 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
      * characters and whitespace
      * @param {function} insertCallback - The function that should be executed after a new resource has been added or
      * an existing one was changed. This function handles inserting a link into the current page.
-     * @param {String} linkdata - In case of an existing resource, linkdata contains the internal name of the resource
-     * in order to let the api know what existing resource should be edited. Otherwise linkdata is just an empty string.
+     * @param {String} linkData - In case of an existing resource, linkData contains the internal name of the resource
+     * in order to let the api know what existing resource should be edited. Otherwise linkData is just an empty string.
      */
-    EMMDialog.prototype.buildAndExecuteQuery = function (currentPageID, insertCallback, linkdata) {
+    EMMDialog.prototype.buildAndExecuteQuery = function (currentPageID, insertCallback, linkData) {
         displayOverloadError("buildAndExecuteQuery");
     };
 
     /**
+     * @abstract
      * Abstract method that needs to be overridden, displays an error message if this is not the case.
      * Expected behavior and parameters when overriding:
      * Executes a query by using the mediawiki api. This query either creates a new resource or updates an existing one
      * @param {String} query - The query that should be executed. The query should be suitable for an sfautoedit api call.
      * @param {function} insertCallback - A function that handles inserting a link to the newly created or edited resource
      * into the current page. This is executed after the api has finished processing the request.
-     * @param {String} linkdata - The internal title of a resource. Should be set to the internal title of the resource
+     * @param {String} linkData - The internal title of a resource. Should be set to the internal title of the resource
      * you want to edit, or be empty when creating a new resource.
      */
-    EMMDialog.prototype.executeQuery = function (query, insertCallback, linkdata) {
+    EMMDialog.prototype.executeQuery = function (query, insertCallback, linkData) {
         displayOverloadError("executeQuery");
     };
 
     /**
+     * @abstract
      * Abstract method that needs to be overridden, displays an error message if this is not the case.
      * Expected behavior and parameters when overriding:
      * Fill the fields of the dialog based on a resource the user has selected from the autocomplete dropdown.
@@ -365,6 +371,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
     };
 
     /**
+     * @abstract
      * Abstract method that needs to be overridden, displays an error message if this is not the case.
      * Expected behavior and parameters when overriding:
      * Processes part of the result of an ask query. Expands an existing suggestionobject by adding dialog-specific
@@ -379,6 +386,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
     };
 
     /**
+     * @abstract
      * Abstract method that needs to be overridden, displays an error message if this is not the case.
      * Expected behavior and parameters when overriding:
      * Depending on the type of resource and choices made by the user in the dialog, links to different types of resources
@@ -437,12 +445,12 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
          * Define what should happen when the insert button is clicked.
          */
         var insertButtonHandler = function () {
-            var namedata = dialogInstance.presentationTitleField.getValue();
+            var nameData = dialogInstance.presentationTitleField.getValue();
             if (dialogInstance.suggestion != null) {
-                var linkdata = dialogInstance.suggestion.data.length > 0 ? dialogInstance.suggestion.data : "";
+                var linkData = dialogInstance.suggestion.data.length > 0 ? dialogInstance.suggestion.data : "";
             }
             else {
-                linkdata = "";
+                linkData = "";
             }
 
             /**
@@ -464,7 +472,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                                                 href: "Template:" + templateToUse,
                                                 wt: templateToUse
                                             },
-                                            params: templateResult(namedata, linkTitle)
+                                            params: templateResult(nameData, linkTitle)
                                         }
                                     }
                                 ]
@@ -495,9 +503,9 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
 
             if (!dialogInstance.isExistingResource) {
                 //In this case, dialoginstance.suggestion is empty, so build and execute the query
-                dialogInstance.buildAndExecuteQuery(currentPageID, insertCallback, linkdata);
+                dialogInstance.buildAndExecuteQuery(currentPageID, insertCallback, linkData);
             } else if (dialogInstance.isEdit()) { //dealing with an existing resource, so isEdit exists, otherwise isEdit would crash.
-                dialogInstance.buildAndExecuteQuery(currentPageID, insertCallback, linkdata);
+                dialogInstance.buildAndExecuteQuery(currentPageID, insertCallback, linkData);
             }
             else {
                 insertCallback(dialogInstance.suggestion.data);
