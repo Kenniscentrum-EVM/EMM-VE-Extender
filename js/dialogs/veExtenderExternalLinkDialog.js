@@ -13,7 +13,7 @@ function createExternalLinkDialog(LightResourceDialog) {
     /**
      * Calls the constructor of it's super class, EMMLightResourceDialog. Also defines some queries used to get information
      * about external links.
-     * @extends EMMInternalLinkDialog
+     * @extends EMMLightResourceDialog
      * @constructor
      */
     var EMMExternalLinkDialog = function () {
@@ -142,8 +142,9 @@ function createExternalLinkDialog(LightResourceDialog) {
                 break;
         }
         this.validator.cleanUpForm();
-        toggleAutoComplete(this);
+        setAutoCompleteEnabled(this, this.getAutoCompleteStateForMode(mode));
     };
+
 
     /**
      * This method is responsible for determining necessary mode changes and executing them.

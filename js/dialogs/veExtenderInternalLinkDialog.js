@@ -44,7 +44,7 @@ function createInternalLinkDialog(EMMDialog) {
         //Define what functions to execute when the content of this field changes.
         this.titleField.onChangeFunctions = [function () {
             if (this.isExistingResource && this.dialogMode != this.modeEnum.EDIT_EXISTING) {
-                if (dialogInstance.titleField.value.length == 0) {
+                if (dialogInstance.titleField.getValue().length == 0) {
                     this.isExistingResource = false;
                 }
             }
@@ -75,15 +75,32 @@ function createInternalLinkDialog(EMMDialog) {
             case this.modeEnum.INSERT_EXISTING:
                 this.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-dialoginternallinktitle")());
                 break;
+            case this.modeEnum.INSERT_AND_EDIT_EXISTING:
+                this.$element.find('.oo-ui-processDialog-title').text("Aanpassen & Invoegen koppeling naar pagina"); //todo language stuff
+                break;
             case this.modeEnum.INSERT_NEW:
-                this.$element.find('.oo-ui-processDialog-title').text("Aanpassen & Invoegen koppeling naar pagina");
+                this.$element.find('.oo-ui-processDialog-title').text("Invoegen nieuwe koppeling naar pagina"); //todo language stuff
                 break;
             case this.modeEnum.EDIT_EXISTING:
                 this.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-inlidialog-title-edit")());
                 break;
         }
-        toggleAutoComplete(this);
+        setAutoCompleteEnabled(this, this.getAutoCompleteStateForMode(mode));
+    };
 
+    EMMInternalLinkDialog.prototype.getAutoCompleteStateForMode = function (mode) {
+        switch (mode) {
+            case this.modeEnum.INSERT_EXISTING:
+                return true;
+            case this.modeEnum.INSERT_AND_EDIT_EXISTING:
+                return false;
+            case this.modeEnum.INSERT_NEW:
+                return true;
+            case this.modeEnum.EDIT_EXISTING:
+                return false;
+            default:
+                return false;
+        }
     };
 
     /**
@@ -94,10 +111,16 @@ function createInternalLinkDialog(EMMDialog) {
         switch (this.dialogMode) {
             case this.modeEnum.INSERT_EXISTING:
                 if (this.isExistingResource && this.titleField.getValue() != this.suggestion.value)
+                    this.executeModeChange(this.modeEnum.INSERT_AND_EDIT_EXISTING);
+                if (!this.isExistingResource && this.titleField.getValue().length > 0)
                     this.executeModeChange(this.modeEnum.INSERT_NEW);
                 break;
             case this.modeEnum.INSERT_NEW:
-                if ((this.isExistingResource && this.titleField.getValue() == this.suggestion.value) || !this.isExistingResource)
+                if (this.isExistingResource || this.titleField.getValue().length == 0)
+                    this.executeModeChange(this.modeEnum.INSERT_EXISTING);
+                break;
+            case this.modeEnum.INSERT_AND_EDIT_EXISTING:
+                if ((this.isExistingResource && this.titleField.getValue() == this.suggestion.value) || this.titleField.getValue().length == 0)
                     this.executeModeChange(this.modeEnum.INSERT_EXISTING);
                 break;
         }
@@ -116,7 +139,8 @@ function createInternalLinkDialog(EMMDialog) {
     EMMInternalLinkDialog.prototype.buildAndExecuteQuery = function (currentPageID, insertCallback, linkdata) {
         var dialogInstance = this;
         var query = "";
-        if (this.isExistingResource) { //This is true whenever we're editing an exisiting resource
+        console.log(this.isExistingResource);
+        if (this.isExistingResource) { //This is true whenever we're editing an existing resource
             var formCategory = "";
             for (var i = 0; i < this.suggestion.category.length; i++) {
                 if (/Light Context/g.test(this.suggestion.category[i].fulltext)) {
@@ -134,6 +158,9 @@ function createInternalLinkDialog(EMMDialog) {
             }
         }
         else {
+
+            console.log(this.titleField.getValue());
+
             //Start building the sfautoedit query
             query += "Project[Name]=" + this.titleField.getValue();
             query += "&Light Context[Supercontext]=" + currentPageID;
@@ -166,7 +193,12 @@ function createInternalLinkDialog(EMMDialog) {
      * @param {String} form - What type of form to use in order to execute the query.
      */
     EMMInternalLinkDialog.prototype.executeQuery = function (query, insertCallback, linkdata, form) {
-        semanticCreateWithFormQuery(query, insertCallback, linkdata, form);
+        var target = "";
+        //Set the target of the api-call to the internal title of an existing external link, if the external link already exists.
+        if (this.isExistingResource) {
+            target = linkdata;
+        }
+        semanticCreateWithFormQuery(query, insertCallback, target, form);
     };
 
     /**

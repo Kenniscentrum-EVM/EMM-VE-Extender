@@ -103,6 +103,7 @@ function loadEMMDialog(resourceType, toolId, menuText, dialogText, templateResul
  * @param {function} templateResult - A function that transforms the inserted data into the required format for inserting the links as a template
  */
 function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
+
     /**
      * Constructor for EMMDialog, all relevant fields are initiated, mostly with default null or 0 values.
      * @constructor
@@ -119,7 +120,8 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
         this.modeEnum = {
             INSERT_EXISTING: 0,
             INSERT_NEW: 1,
-            EDIT_EXISTING: 2
+            EDIT_EXISTING: 2,
+            INSERT_AND_EDIT_EXISTING: 3
         };
         this.dialogMode = this.modeEnum.INSERT_EXISTING;
         this.suggestionCache = null;
@@ -398,6 +400,16 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
         return null;
     };
 
+    /**
+     * @abstract
+     * Retrieves the auto complete state for a given dialog mode.
+     * @param {modeEnum} mode - dialog mode to get the auto complete state for.
+     * @returns {boolean} - The value the auto complete should be set to.
+     */
+    EMMDialog.prototype.getAutoCompleteStateForMode = function (mode) {
+        displayOverloadError("findTemplateToUse");
+    };
+
     var dialog = null;
     switch (resourceType) {
         case "File":
@@ -460,7 +472,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
              */
             var insertCallback = function (linkTitle) {
                 var templateToUse = dialogInstance.findTemplateToUse();
-                var mytemplate = [
+                var myTemplate = [
                     {
                         type: "mwTransclusionInline",
                         attributes: {
@@ -480,23 +492,23 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                         }
                     }
                 ];
+
+                dialogInstance.semanticAskQuery(dialogInstance.getAutocompleteQuery(),
+                    function () {
+                        setAutoCompleteEnabled(dialogInstance, dialogInstance.getAutoCompleteStateForMode(dialogInstance.dialogMode));
+                    });
+
                 //insert result in text
                 var surfaceModel = ve.init.target.getSurface().getModel();
                 if (dialogInstance.selectionRange.start < 0 || dialogInstance.selectionRange.start > surfaceModel.getDocument().getLength()) {
-                    surfaceModel.getLinearFragment(new ve.Range(0, 0)).insertContent(mytemplate);
+                    surfaceModel.getLinearFragment(new ve.Range(0, 0)).insertContent(myTemplate);
                     return;
                 }
                 if (dialogInstance.selectionRange.end < 0 || dialogInstance.selectionRange.end > surfaceModel.getDocument().getLength()) {
-                    surfaceModel.getLinearFragment(new ve.Range(0, 0)).insertContent(mytemplate);
+                    surfaceModel.getLinearFragment(new ve.Range(0, 0)).insertContent(myTemplate);
                     return;
                 }
-                surfaceModel.getLinearFragment(dialogInstance.selectionRange).insertContent(mytemplate);
-                dialogInstance.semanticAskQuery(dialogInstance.getAutocompleteQuery(),
-                    function () {
-                        setAutoCompleteEnabled(dialogInstance, false);
-                        toggleAutoComplete(dialogInstance);
-                    });
-
+                surfaceModel.getLinearFragment(dialogInstance.selectionRange).insertContent(myTemplate);
             };
             //Get the name of the current page and replace any underscores with whitespaces to prevent errors later on.
             var currentPageID = mw.config.get("wgPageName").replace(/_/g, " ");
@@ -552,7 +564,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
          * @param {Object[]} queryResults - An array containing all the possible options for the autocomplete dropdown
          */
         var autoCompleteCallback = function () {
-            toggleAutoComplete(dialogInstance);
+            setAutoCompleteEnabled(dialogInstance, dialogInstance.getAutoCompleteStateForMode(dialogInstance.dialogMode));
         };
 
         //Execute the askQuery in order to gather all resources
@@ -729,6 +741,7 @@ function semanticCreateWithFormQuery(query, callback, target, form) {
     });
 }
 
+
 /**
  * Grabs the text that is selected (outside the dialog) and inserts it into the presentationtitle field inside the dialog
  * @param {OO.ui.TextInputWidget} inputObject - The field in which the selected text should be inserted
@@ -776,10 +789,12 @@ function initAutoComplete(data, dialogInstance) {
     var inputField = $(dialogInstance.titleField.$element).find("input");
     $(inputField).autocomplete({
         lookup: data,
+        triggerSelectOnValidInput: false,
         onSelect: function (suggestion) {
             dialogInstance.suggestion = suggestion;
             dialogInstance.isExistingResource = true;
             dialogInstance.fillFields(suggestion);
+            dialogInstance.testAndChangeDialogMode();
         },
         appendTo: inputField.parentElement,
         maxHeight: 300
@@ -788,7 +803,7 @@ function initAutoComplete(data, dialogInstance) {
 
 /**
  * Hides the autocomplete suggestion box.
- * @param {JQuery} element - JQuery element that has autocomplete functionality.
+ * @param {$} element - JQuery element that has autocomplete functionality.
  */
 function hideAutoComplete(element) {
     if (element.autocomplete() != null)
@@ -796,21 +811,8 @@ function hideAutoComplete(element) {
 }
 
 /**
- * Depending on the mode the dialog is in, this function activates or deactivates the autoComplete dropdown.
- * @param {EMMDialog} dialogInstance - The dialog for which the autoComplete dropdown should be activated or deactivated.
- */
-function toggleAutoComplete(dialogInstance) {
-    if (dialogInstance.dialogMode > 0) {
-        setAutoCompleteEnabled(dialogInstance, false);
-    }
-    else {
-        setAutoCompleteEnabled(dialogInstance, true);
-    }
-}
-
-/**
  * Enables or disables the autocomplete functionality of a given element depending on the given value.
- * @param {JQuery} element - Jquery element containing autoComplete functionality.
+ * @param {EMMDialog} dialogInstance - Jquery element containing autoComplete functionality.
  * @param {Boolean} value - Boolean value that decides the state of the autoComplete. true = enabled, false = disabled.
  */
 function setAutoCompleteEnabled(dialogInstance, value) {
