@@ -166,10 +166,6 @@ function createInternalLinkDialog(EMMDialog) {
      * @param {String} form - What type of form to use in order to execute the query.
      */
     EMMInternalLinkDialog.prototype.executeQuery = function (query, insertCallback, linkdata, form) {
-        console.log("query",query);
-        console.log("callback",insertCallback);
-        console.log("linkdata",linkdata);
-        console.log("form",form);
         semanticCreateWithFormQuery(query, insertCallback, linkdata, form);
     };
 
