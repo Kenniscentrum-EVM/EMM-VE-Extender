@@ -153,13 +153,11 @@ function createFileDialog(LightResourceDialog) {
     EMMFileDialog.prototype.testAndChangeDialogMode = function () {
         switch (this.dialogMode) {
             case this.modeEnum.INSERT_EXISTING:
-                if (this.fileField.currentFile == "")
-                    return;
-                if ((!this.isExistingResource && this.fileField.currentFile != null))
+                if ((!this.isExistingResource && this.fileField.getValue() != null))
                     this.executeModeChange(this.modeEnum.INSERT_NEW);
                 break;
             case this.modeEnum.INSERT_NEW:
-                if (this.fileField.currentFile == null)
+                if (this.fileField.getValue() == null)
                     this.executeModeChange(this.modeEnum.INSERT_EXISTING);
                 break;
             case this.modeEnum.EDIT_EXISTING:
