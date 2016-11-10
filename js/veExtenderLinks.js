@@ -746,9 +746,13 @@ function grabSelectedText(inputObject) {
                 toAdd = element[0];
             selected += toAdd;
         }
-        if (selected.length > 0)
+        if (selected.length > 0) {
+            if(selected.charAt(selected.length - 1) == " ")
+                selected = selected.substr(0, selected.length - 1);
             inputObject.setValue(selected);
-        return new ve.Range(surfaceModel.getFragment().selection.range.start, surfaceModel.getFragment().selection.range.end);
+        }
+
+        return new ve.Range(surfaceModel.getFragment().selection.range.start, surfaceModel.getFragment().selection.range.start + selected.length);
     }
     else {
         return new ve.Range(0, 0);
