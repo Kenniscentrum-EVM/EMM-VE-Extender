@@ -19,8 +19,6 @@ function createFileDialog(LightResourceDialog) {
         LightResourceDialog.call(this);
         this.autoCompleteQuery = "[[Category:Resource Description]] [[file name::+]] |?Semantic title|?Dct:creator|?Dct:date|?Organization|?Dct:subject|?file name|limit=10000";
         this.editQuery = "[[PAGENAMEPARAMETER]] |?Semantic title|?Dct:creator|?Dct:date|?Organization|?Dct:subject|?file name";
-        //Define a new upload object to handle file uploads
-        this.upload = new mw.Upload({parameters: {ignorewarnings: true}});
     };
     OO.inheritClass(EMMFileDialog, LightResourceDialog);
 
@@ -48,7 +46,7 @@ function createFileDialog(LightResourceDialog) {
         LightResourceDialog.prototype.createDialogLayout.call(this);
         var dialogInstance = this;
         //Temporary hack method in order to still activate the validator and onChangeFunctions for fileField.
-        //Fixme dirty hack
+        //Fixme dirty hack, temporary problem
         this.fileField.validation = [function (value, sender) {
             return "";
         }];
@@ -199,9 +197,9 @@ function createFileDialog(LightResourceDialog) {
         var target = "";
         //Set the target of the api-call to the internal title of an existing file resource, if the file resource already exists
         if (upload) {
-            this.upload.setFile(this.fileField.getValue());
-            this.upload.setFilename(this.fileField.getValue().name);
-            this.upload.upload().fail(function (status, exceptionobject) {
+            console.log(this.fileField);
+            console.log(this.fileField.getValue());
+            new mw.Api().upload(this.fileField.getValue()).fail(function (status, exceptionobject) {
                 //Handle possible error messages and display them in a way the user understands them.
                 dialogInstance.handleUploadFail(status, exceptionobject);
                 return false
@@ -274,7 +272,7 @@ function createFileDialog(LightResourceDialog) {
         //See the documentation wiki for a visual representation of this if/else mess
         var dialogInstance = this;
         if (this.isExistingResource) {
-            if (this.fileField != null) {
+            if (this.fileField.getValue() != null) {
                 if (this.fileField.getValue().name != this.suggestion.filename) {
                     //Upload new file and create a new resource, because the file has a diffrent name.
                     //A diffrent filename will lead to a diffrent internal name for the File.
@@ -283,39 +281,40 @@ function createFileDialog(LightResourceDialog) {
                 } else {
                     if (this.isEdit()) {
                         //Just upload a new version of the file
-                        this.upload.setFile(this.fileField.getValue());
-                        this.upload.setFilename(this.fileField.getValue().name);
-                        this.upload.upload().fail(function (status, exceptionobject) {
+                        new mw.Api().upload(this.fileField.getValue()).fail(function (status, exceptionobject) {
                             //Handle possible error messages and display them in a way the user understands them.
                             dialogInstance.handleUploadFail(status, exceptionobject);
-                            return false
+                            return false;
                         }).done(function () {
                             insertCallback(dialogInstance.suggestion.data);
                         });
                     }
                     else {
                         //Upload a new version of the file and edit the existing resource
-                        this.buildAndExecuteQuery(currentPageID, insertCallback, linkdata, true);
+                        return this.buildAndExecuteQuery(currentPageID, insertCallback, linkdata, true);
                     }
                 }
             } else {
-                if (this.fileField.getValue().name == this.suggestion.filename) {
-                    alert(OO.ui.deferMsg("visualeditor-emm-file-changing-empty-file")());
-                    return false
+                if (this.isEdit()) {
+                    //Just update the resource, don't upload anything
+                    return this.buildAndExecuteQuery(currentPageID, insertCallback, linkdata, false);
+                } else {
+                    //Only insert a link to the file, don't change anything
+                    insertCallback(dialogInstance.suggestion.data);
                 }
+
+            }
+        } else {
+            if (this.fileField.getValue() == null) {
+                //Generate an error, the filename of the selected file is empty for some reason
+                alert(OO.ui.deferMsg("visualeditor-emm-file-changing-empty-file")());
+                return false;
+            } else {
+                //Generate an error, the filename of the selected file is empty for some reason
+                return this.buildAndExecuteQuery(currentPageID, insertCallback, linkdata, true);
             }
         }
 
-
-        if (!this.isExistingResource) {
-            //In this case, dialoginstance.suggestion is empty, so build and execute the query
-            this.buildAndExecuteQuery(currentPageID, insertCallback, linkdata, true);
-        } else if (this.isEdit()) { //dealing with an existing resource, so isEdit exists, otherwise isEdit would crash.
-            this.buildAndExecuteQuery(currentPageID, insertCallback, linkdata, true);
-        }
-        else {
-            insertCallback(this.suggestion.data);
-        }
         return true;
     };
 

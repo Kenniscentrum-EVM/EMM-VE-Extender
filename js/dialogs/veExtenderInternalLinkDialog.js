@@ -116,13 +116,13 @@ function createInternalLinkDialog(EMMDialog) {
                 if (/Light Context/g.test(this.suggestion.category[i].fulltext)) {
                     formCategory = "Light Context";
                     query += "Light Context[Heading]=" + this.titleField.getValue();
-                    dialogInstance.executeQuery(query, insertCallback, linkdata, "Light Context")
+                    dialogInstance.executeQuery(query, insertCallback, linkdata, "Light Context");
                     break;
                 }
                 else if (/Project/g.test(this.suggestion.category[i].fulltext)) {
                     formCategory = "Project";
                     query += "Project[Name]=" + this.titleField.getValue();
-                    dialogInstance.executeQuery(query, insertCallback, linkdata, "Project")
+                    dialogInstance.executeQuery(query, insertCallback, linkdata, "Project");
                     break;
                 }
             }

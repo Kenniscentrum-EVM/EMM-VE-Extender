@@ -129,7 +129,6 @@ function createExternalLinkDialog(LightResourceDialog) {
                 this.$element.find(".oo-ui-processDialog-title").text(OO.ui.deferMsg("visualeditor-emm-linkdialog-title-npage")());
                 input = this.titleField.$element.find("input");
                 input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-new")());
-                //todo temporary
                 break;
             case this.modeEnum.EDIT_EXISTING:
                 this.$element.find(".oo-ui-processDialog-title").text(OO.ui.deferMsg("visualeditor-emm-linkdialog-title-edit")());
@@ -158,7 +157,7 @@ function createExternalLinkDialog(LightResourceDialog) {
                 break;
             case this.modeEnum.EDIT_EXISTING:
                 if (!this.isExistingResource) {
-                    //todo discuss with Hans.
+                    //Can't switch mode when editing an existing link
                 }
                 break;
         }

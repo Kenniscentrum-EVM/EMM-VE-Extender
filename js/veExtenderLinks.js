@@ -752,7 +752,7 @@ function grabSelectedText(inputObject) {
         for (var i = surfaceModel.getFragment().selection.range.start; i < surfaceModel.getFragment().selection.range.end; i++) {
             var node = ve.init.target.getSurface().getModel().getDocument().getDocumentNode().getNodeFromOffset(i);
             if (node.getType() == "mwTransclusionInline") {
-                //fixme hier moet nog geverifieerd worden of het om een cite gaat?
+                //fixme kijken of alle inline transclusions een 'name' parameter hebben
                 selected += node.element.attributes.mw.parts[0].template.params.name.wt;
                 continue;
             }
