@@ -99,8 +99,9 @@ function createExternalLinkDialog(LightResourceDialog) {
     };
 
     /**
-     * Executes a dialog mode change.
-     * @param {Number} mode - Dialog mode to switch to (defined in modeEnum).
+     * Method that switches the dialog to a given mode.
+     * This method preforms all necessary operations to visually and logically switch the state of the dialog to a different mode.
+     * @param {modeEnum} mode - Dialog mode to switch to.
      */
     EMMExternalLinkDialog.prototype.executeModeChange = function (mode) {
         this.dialogMode = mode;
@@ -129,7 +130,6 @@ function createExternalLinkDialog(LightResourceDialog) {
                 this.$element.find(".oo-ui-processDialog-title").text(OO.ui.deferMsg("visualeditor-emm-linkdialog-title-npage")());
                 input = this.titleField.$element.find("input");
                 input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-new")());
-                //todo temporary
                 break;
             case this.modeEnum.EDIT_EXISTING:
                 this.$element.find(".oo-ui-processDialog-title").text(OO.ui.deferMsg("visualeditor-emm-linkdialog-title-edit")());
@@ -143,8 +143,8 @@ function createExternalLinkDialog(LightResourceDialog) {
     };
 
     /**
-     * Checks the dialog variables to determine if a mode-change is needed.
-     * If one is needed, execute it.
+     * This method is responsible for determining necessary mode changes and executing them.
+     * The method is executed every time the state of the link field or title field changes.
      */
     EMMExternalLinkDialog.prototype.testAndChangeDialogMode = function () {
         switch (this.dialogMode) {
@@ -157,9 +157,6 @@ function createExternalLinkDialog(LightResourceDialog) {
                     this.executeModeChange(this.modeEnum.INSERT_EXISTING);
                 break;
             case this.modeEnum.EDIT_EXISTING:
-                if (!this.isExistingResource) {
-                    //todo discuss with Hans.
-                }
                 break;
         }
     };

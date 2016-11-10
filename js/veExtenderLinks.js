@@ -111,10 +111,10 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
         OO.ui.ProcessDialog.call(this);
         this.suggestion = null;
         this.isExistingResource = false;
-        /* Dialog modes:
-         * 0 : Existing reference
-         * 1 : New reference
-         * 2 : Editing reference
+        /**
+         * Enum for dialog modes
+         * @readonly
+         * @enum {number}
          */
         this.modeEnum = {
             INSERT_EXISTING: 0,
@@ -747,7 +747,7 @@ function grabSelectedText(inputObject) {
             selected += toAdd;
         }
         if (selected.length > 0) {
-            if(selected.charAt(selected.length - 1) == " ")
+            if (selected.charAt(selected.length - 1) == " ")
                 selected = selected.substr(0, selected.length - 1);
             inputObject.setValue(selected);
         }

@@ -106,12 +106,16 @@ function createFileDialog(LightResourceDialog) {
         ]);
     };
 
-    EMMFileDialog.prototype.executeModeChange = function (mode)
-    {
+
+    /**
+     * Method that switches the dialog to a given mode.
+     * This method preforms all necessary operations to visually and logically switch the state of the dialog to a different mode.
+     * @param {modeEnum} mode - Dialog mode to switch to.
+     */
+    EMMFileDialog.prototype.executeModeChange = function (mode) {
         this.dialogMode = mode;
         var input = null;
-        switch(mode)
-        {
+        switch (mode) {
             case this.modeEnum.INSERT_EXISTING:
                 this.fieldset.items[1].$element.show();
                 this.$element.find(".oo-ui-processDialog-title").text(OO.ui.deferMsg("visualeditor-emm-dialogfiletitle")());
@@ -141,11 +145,11 @@ function createFileDialog(LightResourceDialog) {
     };
 
     /**
-     * TODO Commentaar Nick
+     * This method is responsible for determining necessary mode changes and executing them.
+     * The method is executed every time the state of the file field or title field changes.
      */
     EMMFileDialog.prototype.testAndChangeDialogMode = function () {
-        switch(this.dialogMode)
-        {
+        switch (this.dialogMode) {
             case this.modeEnum.INSERT_EXISTING:
                 if (this.fileField.currentFile == "")
                     return;

@@ -62,7 +62,9 @@ function createInternalLinkDialog(EMMDialog) {
     };
 
     /**
-     * TODO expand this and comment
+     * Method that switches the dialog to a given mode.
+     * This method preforms all necessary operations to visually and logically switch the state of the dialog to a different mode.
+     * @param {modeEnum} mode - Dialog mode to switch to.
      */
     EMMInternalLinkDialog.prototype.executeModeChange = function (mode) {
         this.dialogMode = mode;
@@ -82,7 +84,8 @@ function createInternalLinkDialog(EMMDialog) {
     };
 
     /**
-     * TODO expand this and comment
+     * This method is responsible for determining necessary mode changes and executing them.
+     * The method is executed every time the state of the title field changes.
      */
     EMMInternalLinkDialog.prototype.testAndChangeDialogMode = function () {
         switch (this.dialogMode) {
