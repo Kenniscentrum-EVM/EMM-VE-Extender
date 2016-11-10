@@ -165,9 +165,10 @@ function createFileDialog(LightResourceDialog) {
      * @param {String} linkdata - In case of an existing file, linkdata contains the internal name of the file
      * in order to let the api know what file link should be edited. Otherwise linkdata is just an empty string.
      * @param {boolean} upload - If a new file or a new version of that file should be uploaded.
+     * @param {boolean} newUploadVersion - True if the upload is a new version of an existing file
      * @return {boolean} - Returns true or false depending on the success of executing the action.
      */
-    EMMFileDialog.prototype.buildAndExecuteQuery = function (currentPageID, insertCallback, linkdata, upload) {
+    EMMFileDialog.prototype.buildAndExecuteQuery = function (currentPageID, insertCallback, linkdata, upload, newUploadVersion) {
         //First call the method of the parent to build the basic query for a light resource
         var query = LightResourceDialog.prototype.buildQuery.call(this, currentPageID);
         //Gather the filename in different ways depending on whether it is an existing file or not.
@@ -179,7 +180,7 @@ function createFileDialog(LightResourceDialog) {
         }
         //Expand the existing query with a file-specific part.
         query += "&Resource Description[file name]=" + filename;
-        return this.executeQuery(query, insertCallback, linkdata, upload);
+        return this.executeQuery(query, insertCallback, linkdata, upload, newUploadVersion);
     };
 
     /**
@@ -190,19 +191,30 @@ function createFileDialog(LightResourceDialog) {
      * @param {String} linkdata - The internal title of a file resource. Should be set to the internal title of the file resource
      * you want to edit, or be empty when creating a new file resource.
      * @param {boolean} upload - If a new file or new version of that file should be uploaded.
+     * @param {boolean} newUploadVersion - True if the upload is a new version of an existing file
      * @return {boolean} - Returns true or false depending on the success of executing the query.
      */
-    EMMFileDialog.prototype.executeQuery = function (query, insertCallback, linkdata, upload) {
+    EMMFileDialog.prototype.executeQuery = function (query, insertCallback, linkdata, upload, newUploadVersion) {
         var dialogInstance = this;
         var target = "";
         //Set the target of the api-call to the internal title of an existing file resource, if the file resource already exists
         if (upload) {
             console.log(this.fileField);
             console.log(this.fileField.getValue());
-            new mw.Api().upload(this.fileField.getValue()).fail(function (status, exceptionobject) {
+            var ignorewarnings = newUploadVersion ? 1 : 0;
+            var file = this.fileField.getValue();
+            var filedata = {
+                filename: file.name,
+                ignorewarnings: ignorewarnings
+            };
+            new mw.Api().upload(file, filedata).fail(function (status, exceptionobject) {
                 //Handle possible error messages and display them in a way the user understands them.
-                dialogInstance.handleUploadFail(status, exceptionobject);
-                return false
+                if (newUploadVersion && status == "exists") {
+                    semanticCreateWithFormQuery(query, insertCallback, target, "Resource Light");
+                } else {
+                    dialogInstance.handleUploadFail(status, exceptionobject);
+                    return false;
+                }
             }).done(function () {
                 semanticCreateWithFormQuery(query, insertCallback, target, "Resource Light");
             });
@@ -272,32 +284,43 @@ function createFileDialog(LightResourceDialog) {
         //See the documentation wiki for a visual representation of this if/else mess
         var dialogInstance = this;
         if (this.isExistingResource) {
-            if (this.fileField.getValue() != null) {
+            if (this.fileField.getValue() != null && this.fileField.getValue() != "") {
                 if (this.fileField.getValue().name != this.suggestion.filename) {
                     //Upload new file and create a new resource, because the file has a diffrent name.
                     //A diffrent filename will lead to a diffrent internal name for the File.
                     //Linkdata is left empty on purpose
-                    return this.buildAndExecuteQuery(currentPageID, insertCallback, "", true);
+                    return this.buildAndExecuteQuery(currentPageID, insertCallback, "", true, false);
                 } else {
-                    if (this.isEdit()) {
+                    if (!this.isEdit()) {
                         //Just upload a new version of the file
-                        new mw.Api().upload(this.fileField.getValue()).fail(function (status, exceptionobject) {
+                        console.log(this.fileField);
+                        console.log(this.fileField.getValue());
+                        var file = this.fileField.getValue();
+                        var filedata = {
+                            filename: file.name,
+                            ignorewarnings: 1
+                        };
+                        new mw.Api().upload(file, filedata).upload(this.fileField.getValue()).fail(function (status, exceptionobject) {
                             //Handle possible error messages and display them in a way the user understands them.
-                            dialogInstance.handleUploadFail(status, exceptionobject);
-                            return false;
+                            if (status == "exists") {
+                                insertCallback(dialogInstance.suggestion.data);
+                            } else {
+                                dialogInstance.handleUploadFail(status, exceptionobject);
+                                return false;
+                            }
                         }).done(function () {
                             insertCallback(dialogInstance.suggestion.data);
                         });
                     }
                     else {
                         //Upload a new version of the file and edit the existing resource
-                        return this.buildAndExecuteQuery(currentPageID, insertCallback, linkdata, true);
+                        return this.buildAndExecuteQuery(currentPageID, insertCallback, linkdata, true, true);
                     }
                 }
             } else {
                 if (this.isEdit()) {
                     //Just update the resource, don't upload anything
-                    return this.buildAndExecuteQuery(currentPageID, insertCallback, linkdata, false);
+                    return this.buildAndExecuteQuery(currentPageID, insertCallback, linkdata, false, false);
                 } else {
                     //Only insert a link to the file, don't change anything
                     insertCallback(dialogInstance.suggestion.data);
@@ -305,13 +328,13 @@ function createFileDialog(LightResourceDialog) {
 
             }
         } else {
-            if (this.fileField.getValue() == null) {
+            if (this.fileField.getValue() == null || this.fileField.getValue() == "") {
                 //Generate an error, the filename of the selected file is empty for some reason
                 alert(OO.ui.deferMsg("visualeditor-emm-file-changing-empty-file")());
                 return false;
             } else {
-                //Generate an error, the filename of the selected file is empty for some reason
-                return this.buildAndExecuteQuery(currentPageID, insertCallback, linkdata, true);
+                //Insert a new resource and upload a new file
+                return this.buildAndExecuteQuery(currentPageID, insertCallback, linkdata, true, false);
             }
         }
 
