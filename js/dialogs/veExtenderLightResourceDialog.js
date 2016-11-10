@@ -80,6 +80,21 @@ function createLightResourceDialog(EMMDialog, resourceType) {
             (this.subjectField.getValue() != this.suggestion.subjects && !(this.organizationField.getValue() == "" && this.suggestion.organization == null));
     };
 
+    EMMLightResourceDialog.prototype.getAutoCompleteStateForMode = function (mode) {
+        switch (mode) {
+            case this.modeEnum.INSERT_EXISTING:
+                return true;
+            case this.modeEnum.INSERT_AND_EDIT_EXISTING:
+                return false;
+            case this.modeEnum.INSERT_NEW:
+                return false;
+            case this.modeEnum.EDIT_EXISTING:
+                return false;
+            default:
+                return false;
+        }
+    };
+
     /**
      * Fill the generic fields of a dialog handling a light resource based on a selected resource from the autocomplete dropdown.
      * Fields for a specific type of Light Resource should be filled in their own method.
