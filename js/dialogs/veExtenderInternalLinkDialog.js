@@ -139,7 +139,6 @@ function createInternalLinkDialog(EMMDialog) {
     EMMInternalLinkDialog.prototype.buildAndExecuteQuery = function (currentPageID, insertCallback, linkdata) {
         var dialogInstance = this;
         var query = "";
-        console.log(this.isExistingResource);
         if (this.isExistingResource) { //This is true whenever we're editing an existing resource
             var formCategory = "";
             for (var i = 0; i < this.suggestion.category.length; i++) {
