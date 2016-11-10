@@ -80,6 +80,12 @@ function createLightResourceDialog(EMMDialog, resourceType) {
             (this.subjectField.getValue() != this.suggestion.subjects && !(this.organizationField.getValue() == "" && this.suggestion.organization == null));
     };
 
+    /**
+     * @abstract
+     * Retrieves the auto complete state for a given dialog mode.
+     * @param {modeEnum} mode - dialog mode to get the auto complete state for.
+     * @returns {boolean} - The value the auto complete should be set to.
+     */
     EMMLightResourceDialog.prototype.getAutoCompleteStateForMode = function (mode) {
         switch (mode) {
             case this.modeEnum.INSERT_EXISTING:

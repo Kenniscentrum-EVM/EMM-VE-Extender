@@ -76,10 +76,10 @@ function createInternalLinkDialog(EMMDialog) {
                 this.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-dialoginternallinktitle")());
                 break;
             case this.modeEnum.INSERT_AND_EDIT_EXISTING:
-                this.$element.find('.oo-ui-processDialog-title').text("Aanpassen & Invoegen koppeling naar pagina"); //todo language stuff
+                this.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-inlidialog-title-insert-edit")());
                 break;
             case this.modeEnum.INSERT_NEW:
-                this.$element.find('.oo-ui-processDialog-title').text("Invoegen nieuwe koppeling naar pagina"); //todo language stuff
+                this.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-inlidialog-title-npage")());
                 break;
             case this.modeEnum.EDIT_EXISTING:
                 this.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-inlidialog-title-edit")());
@@ -88,6 +88,12 @@ function createInternalLinkDialog(EMMDialog) {
         setAutoCompleteEnabled(this, this.getAutoCompleteStateForMode(mode));
     };
 
+    /**
+     * @abstract
+     * Retrieves the auto complete state for a given dialog mode.
+     * @param {modeEnum} mode - dialog mode to get the auto complete state for.
+     * @returns {boolean} - The value the auto complete should be set to.
+     */
     EMMInternalLinkDialog.prototype.getAutoCompleteStateForMode = function (mode) {
         switch (mode) {
             case this.modeEnum.INSERT_EXISTING:
@@ -157,9 +163,6 @@ function createInternalLinkDialog(EMMDialog) {
             }
         }
         else {
-
-            console.log(this.titleField.getValue());
-
             //Start building the sfautoedit query
             query += "Light Context[Heading]=" + this.titleField.getValue();
             query += "&Light Context[Supercontext]=" + currentPageID;

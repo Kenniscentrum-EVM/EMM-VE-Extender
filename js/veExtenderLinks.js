@@ -260,6 +260,13 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                             continue;
                         }
                         var suggestion = dialogInstance.processSingleQueryResult(row, res);
+                        if(suggestion == null)
+                        {
+                            mw.notify(OO.ui.deferMsg("visualeditor-emm-notification-err-invalidlink-body")(), {title: OO.ui.deferMsg("visualeditor-emm-notification-err-invalidlink-title")()});
+                            dialogInstance.close();
+                            return;
+                        }
+
                         dialogInstance.suggestion = suggestion;
                         dialogInstance.titleField.setValue(suggestion.value);
                         toggleInputFields(dialogInstance.fieldset, false);

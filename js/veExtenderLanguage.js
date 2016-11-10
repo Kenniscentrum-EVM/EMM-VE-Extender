@@ -62,7 +62,7 @@ function defineTranslations() {
             "visualeditor-emm-menuaddpagetitle": "Page",
             "visualeditor-emm-topcontext-error": "The topcontext of this page could not be found. Please make sure the current page has a context or try again on another page",
 
-            "visualeditor-emm-menufiletitle": "File...",
+            "visualeditor-emm-menufiletitle": "Link (file)...",
             "visualeditor-emm-menuexternallinktitle": "Link (website)...",
             "visualeditor-emm-menuinternallinktitle": "Link (page)...",
             "visualeditor-emm-menuresourcemenuname": "Resources",
@@ -77,26 +77,31 @@ function defineTranslations() {
 
             "visualeditor-emm-linkdialog-title-npage": "Insert new link",
             "visualeditor-emm-linkdialog-title-edit": "Edit link to website",
+            "visualeditor-emm-inlidialog-title-npage": "Insert new link to page",
             "visualeditor-emm-inlidialog-title-edit": "Edit link to page",
+            "visualeditor-emm-inlidialog-title-insert-edit": "Insert & edit link to page",
             "visualeditor-emm-linkdialog-titlefield-placeholder-def": "Search for link",
             "visualeditor-emm-linkdialog-titlefield-placeholder-new": "Title new link",
-            "visualeditor-emm-filedialog-title-npage": "Insert new file",
-            "visualeditor-emm-filedialog-title-edit": "Edit file",
-            "visualeditor-emm-filedialog-titlefield-placeholder-def": "Search for file",
-            "visualeditor-emm-filedialog-titlefield-placeholder-new": "Title of new file",
+            "visualeditor-emm-filedialog-title-npage": "Insert new link to file",
+            "visualeditor-emm-filedialog-title-edit": "Edit link to file",
+            "visualeditor-emm-filedialog-titlefield-placeholder-def": "Search for link to file",
+            "visualeditor-emm-filedialog-titlefield-placeholder-new": "Title of new link to file",
             "visualeditor-emm-required": "*Required",
 
             "visualeditor-emm-notification-template-title": "Illegal operation",
             "visualeditor-emm-notification-template-body": "You are attempting to remove a system template, this is not allowed.",
             "visualeditor-emm-notification-template-copy": "You are attempting to copy a system template, this is not allowed.",
-            "visualeditor-emm-notification-template-edit": "You are attempting to edit a system template, this is not allowed."
+            "visualeditor-emm-notification-template-edit": "You are attempting to edit a system template, this is not allowed.",
+
+            "visualeditor-emm-notification-err-invalidlink-body": "Could not retrieve page information for the selected reference, was the page deleted?",
+            "visualeditor-emm-notification-err-invalidlink-title": "Invalid reference"
         },
         nl: {
-            "visualeditor-emm-add-file": "Toevoegen bestand",
+            "visualeditor-emm-add-file": "Toevoegen bestands",
             "visualeditor-emm-add-hyperlink": "Toevoegen link",
             "visualeditor-emm-add-page": "Toevoegen pagina",
             "visualeditor-emm-cannot-create-page": "Pagina kan niet worden gemaakt. Verplichte eigenschappen in de pagina ontbreken.",
-            "visualeditor-emm-dialogfiletitle": "Invoegen bestand",
+            "visualeditor-emm-dialogfiletitle": "Invoegen koppeling naar bestand",
             "visualeditor-emm-dialogexternallinktitle": "Invoegen koppeling naar website",
             "visualeditor-emm-dialoginternallinktitle": "Invoegen koppeling naar pagina",
             "visualeditor-emm-existing-file": "Bestaand bestand",
@@ -148,7 +153,7 @@ function defineTranslations() {
             "visualeditor-emm-menuaddpagetitle": "Pagina",
             "visualeditor-emm-topcontext-error": "Er is geen topcontext gevonden voor deze pagina. Zorg er voor dat de huidige pagina een context bevat of probeer het opnieuw op een andere pagina",
 
-            "visualeditor-emm-menufiletitle": "Bestand...",
+            "visualeditor-emm-menufiletitle": "Koppeling (bestand)...",
             "visualeditor-emm-menuexternallinktitle": "Koppeling (website)...",
             "visualeditor-emm-menuinternallinktitle": "Koppeling (pagina)...",
             "visualeditor-emm-menuresourcemenuname": "Bronnen",
@@ -163,21 +168,25 @@ function defineTranslations() {
 
             "visualeditor-emm-linkdialog-title-npage": "Invoegen nieuwe koppeling naar website",
             "visualeditor-emm-linkdialog-title-edit": "Aanpassen koppeling naar website",
+            "visualeditor-emm-inlidialog-title-npage": "Invoegen nieuwe koppeling naar pagina",
             "visualeditor-emm-inlidialog-title-edit": "Aanpassen koppeling naar pagina",
+            "visualeditor-emm-inlidialog-title-insert-edit": "Aanpassen & invoegen koppeling naar pagina",
             "visualeditor-emm-linkdialog-titlefield-placeholder-def": "Zoeken naar een koppeling",
             "visualeditor-emm-linkdialog-titlefield-placeholder-new": "Titel nieuwe koppeling",
             "visualeditor-emm-linkdialog-linkfield-placeholder-def": "Invoegen nieuwe koppeling",
-            "visualeditor-emm-filedialog-title-npage": "Invoegen nieuw bestand",
-            "visualeditor-emm-filedialog-title-edit": "Aanpassen bestand",
-            "visualeditor-emm-filedialog-titlefield-placeholder-def": "Zoeken naar een bestand",
-            "visualeditor-emm-filedialog-titlefield-placeholder-new": "Titel nieuw bestand",
+            "visualeditor-emm-filedialog-title-npage": "Invoegen nieuwe koppeling naar bestand",
+            "visualeditor-emm-filedialog-title-edit": "Aanpassen koppeling naar bestand",
+            "visualeditor-emm-filedialog-titlefield-placeholder-def": "Zoeken naar een bestandskoppeling",
+            "visualeditor-emm-filedialog-titlefield-placeholder-new": "Titel nieuwe bestandskoppeling",
             "visualeditor-emm-required": "*Vereist",
 
             "visualeditor-emm-notification-template-title": "Actie niet toegestaan",
             "visualeditor-emm-notification-template-body": "U probeert een systeemtemplate te verwijderen, dit is niet toegestaan.",
             "visualeditor-emm-notification-template-copy": "U probeert een systeemtemplate te kopiëren, dit is niet toegestaan.",
-            "visualeditor-emm-notification-template-edit": "U probeert een systeemtemplate te bewerken, dit is niet toegestaan."
+            "visualeditor-emm-notification-template-edit": "U probeert een systeemtemplate te bewerken, dit is niet toegestaan.",
 
+            "visualeditor-emm-notification-err-invalidlink-body": "De paginacontextinformatie van de geselecteerde referentie kon niet worden opgehaald, is de pagina verwijderd?",
+            "visualeditor-emm-notification-err-invalidlink-title": "Ongeldige verwijzing"
         }
     };
     var userLanguage = mw.config.get("wgUserLanguage");

@@ -141,6 +141,7 @@ function createFileDialog(LightResourceDialog) {
                     clearInputFields(this.fieldset, [1, 2], ["OoUiLabelWidget"]);
                 break;
             case this.modeEnum.EDIT_EXISTING:
+                this.$element.find(".oo-ui-processDialog-title").text(OO.ui.deferMsg("visualeditor-emm-filedialog-title-edit")());
                 break;
         }
         this.validator.cleanUpForm();
