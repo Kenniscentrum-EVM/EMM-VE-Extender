@@ -129,6 +129,7 @@ var VEETemplateProtection = function () {
                 titles: templateName,
                 formatversion: 2
             }).done(function (data) {
+                if(data.query == null) return;
                 var page = data.query.pages[0]; // we're only asking for a single page.
                 for (var y = 0; y < page.categories.length; y++) {
                     //Does the template have the 'System' template?
