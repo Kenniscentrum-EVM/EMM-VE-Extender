@@ -170,6 +170,8 @@ function createFileDialog(LightResourceDialog) {
      */
     EMMFileDialog.prototype.buildAndExecuteQuery = function (currentPageID, insertCallback, linkdata, upload, newUploadVersion) {
         //First call the method of the parent to build the basic query for a light resource
+        console.log("upload is: ", upload);
+        console.log("newUploadVersion is: ", newUploadVersion);
         var query = LightResourceDialog.prototype.buildQuery.call(this, currentPageID);
         //Gather the filename in different ways depending on whether it is an existing file or not.
         var filename = "";
@@ -283,9 +285,17 @@ function createFileDialog(LightResourceDialog) {
     EMMFileDialog.prototype.executeInsertAction = function (insertCallback, currentPageID, linkdata) {
         //See the documentation wiki for a visual representation of this if/else mess
         var dialogInstance = this;
+        console.log("isexistingresource", this.isExistingResource);
+        console.log("filefield null", this.fileField.getValue() == null);
+        console.log("filefield lege string", this.fileField.getValue() == "");
+        if (this.suggestion != null) {
+            console.log("filefield",this.fileField.getValue().name,"suggestion",this.suggestion.filename.replace("Bestand:", "").replace("File:", "").toLowerCase());
+            console.log("filefield gelijk aan suggestion", this.fileField.getValue().name == this.suggestion.filename);
+            console.log("isEdit", this.isEdit());
+        }
         if (this.isExistingResource) {
             if (this.fileField.getValue() != null && this.fileField.getValue() != "") {
-                if (this.fileField.getValue().name != this.suggestion.filename) {
+                if (this.fileField.getValue().name != this.suggestion.filename.replace("Bestand:", "").replace("File:", "").toLowerCase()) {
                     //Upload new file and create a new resource, because the file has a diffrent name.
                     //A diffrent filename will lead to a diffrent internal name for the File.
                     //Linkdata is left empty on purpose
