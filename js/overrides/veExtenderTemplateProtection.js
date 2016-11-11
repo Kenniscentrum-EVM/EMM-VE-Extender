@@ -170,7 +170,7 @@ var VEETemplateProtection = function () {
             }
             return null;
         }
-        return node.element.attributes.mw.parts[0].template.target.href.split("./").pop();
+        return null;
     }
 
 
