@@ -13,5 +13,3 @@ mw.loader.using( 'ext.EMMVEExtension', function () {
 
 aanpassen in bestand veExtender.js:
 Heading nl vervangen door: Semantic title
-
-Testcommit
