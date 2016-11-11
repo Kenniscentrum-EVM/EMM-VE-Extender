@@ -50,6 +50,8 @@ function defineTranslations() {
             "svg, png, gif, jpg, jpeg, ppt, pptx, pdf, mp3, mp4, xls, xlsx, doc, docx, odt, odc, odp, odg, txt",
             "visualeditor-emm-file-upload-file-too-large": "The file is too large. The maximum size of a file is 64MB",
             "visualeditor-emm-file-upload-empty-file": "The file that was uploaded is empty",
+            "visualeditor-emm-file-upload-filetype-banned": "The file extension is invalid, only the following extensions are allowed: \n" +
+            "svg, png, gif, jpg, jpeg, ppt, pptx, pdf, mp3, mp4, xls, xlsx, doc, docx, odt, odc, odp, odg, txt",
 
 
             "visualeditor-emm-cancel": "Cancel",
@@ -138,6 +140,8 @@ function defineTranslations() {
             "svg, png, gif, jpg, jpeg, ppt, pptx, pdf, mp3, mp4, xls, xlsx, doc, docx, odt, odc, odp, odg, txt",
             "visualeditor-emm-file-upload-file-too-large": "Het bestand is te groot. De maximale grootte van een bestand is 64MB",
             "visualeditor-emm-file-upload-empty-file": "Het opgegeven bestand is leeg.",
+            "visualeditor-emm-file-upload-filetype-banned": "Het bestandstype is ongeldig, enkel de volgende bestandstypen zijn toegestaan: \n" +
+            "svg, png, gif, jpg, jpeg, ppt, pptx, pdf, mp3, mp4, xls, xlsx, doc, docx, odt, odc, odp, odg, txt",
 
             "visualeditor-emm-cancel": "Annuleer",
             "visualeditor-emm-insert": "Voeg in",

@@ -374,6 +374,9 @@ function createFileDialog(LightResourceDialog) {
             case "empty-file":
                 alert(OO.ui.deferMsg("visualeditor-emm-file-upload-empty-file")());
                 break;
+            case "filetype-banned":
+                alert(OO.ui.deferMsg("visualeditor-emm-file-upload-filetype-banned")());
+                break;
             case "http":
                 switch (exceptionobject.textStatus) {
                     case "timeout":
