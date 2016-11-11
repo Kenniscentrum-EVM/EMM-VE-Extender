@@ -175,15 +175,16 @@ function createFileDialog(LightResourceDialog) {
         var query = LightResourceDialog.prototype.buildQuery.call(this, currentPageID);
         //Gather the filename in different ways depending on whether it is an existing file or not.
         var filename = "";
-        if (this.isExistingResource) {
-            filename = this.suggestion.data.replace("Bestand:", "").replace("File:", "");
-        } else if (this.fileField.getValue() != null) {
+        if (upload) {
             filename = this.fileField.getValue().name;
+        } else {
+            filename = this.suggestion.data.replace("Bestand:", "").replace("File:", "");
         }
         //Expand the existing query with a file-specific part.
         query += "&Resource Description[file name]=" + filename;
         return this.executeQuery(query, insertCallback, linkdata, upload, newUploadVersion);
-    };
+    }
+    ;
 
     /**
      * Executes an sf-autoedit api call by using the mediawiki api. This call either creates a new file resource or updates an existing one.
@@ -197,8 +198,13 @@ function createFileDialog(LightResourceDialog) {
      * @return {boolean} - Returns true or false depending on the success of executing the query.
      */
     EMMFileDialog.prototype.executeQuery = function (query, insertCallback, linkdata, upload, newUploadVersion) {
+        console.log("query: ",query);
         var dialogInstance = this;
         var target = "";
+        //Set the target of the api-call to the internal title of an existing file, if the file already exists.
+        if (this.isExistingResource) {
+            target = linkdata;
+        }
         //Set the target of the api-call to the internal title of an existing file resource, if the file resource already exists
         if (upload) {
             console.log(this.fileField);
@@ -289,9 +295,11 @@ function createFileDialog(LightResourceDialog) {
         console.log("filefield null", this.fileField.getValue() == null);
         console.log("filefield lege string", this.fileField.getValue() == "");
         if (this.suggestion != null) {
-            console.log("filefield",this.fileField.getValue().name,"suggestion",this.suggestion.filename.replace("Bestand:", "").replace("File:", "").toLowerCase());
-            console.log("filefield gelijk aan suggestion", this.fileField.getValue().name == this.suggestion.filename);
             console.log("isEdit", this.isEdit());
+            if (this.fileField.getValue() != null) {
+                console.log("filefield", this.fileField.getValue().name, "suggestion", this.suggestion.filename.replace("Bestand:", "").replace("File:", "").toLowerCase());
+                console.log("filefield gelijk aan suggestion", this.fileField.getValue().name == this.suggestion.filename);
+            }
         }
         if (this.isExistingResource) {
             if (this.fileField.getValue() != null && this.fileField.getValue() != "") {
