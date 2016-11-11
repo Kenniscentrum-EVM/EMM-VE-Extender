@@ -195,7 +195,7 @@ function createInternalLinkDialog(EMMDialog) {
      */
     EMMInternalLinkDialog.prototype.executeQuery = function (query, insertCallback, linkdata, form) {
         var target = "";
-        //Set the target of the api-call to the internal title of an existing external link, if the external link already exists.
+        //Set the target of the api-call to the internal title of an existing internal link, if the internal link already exists.
         if (this.isExistingResource) {
             target = linkdata;
         }
