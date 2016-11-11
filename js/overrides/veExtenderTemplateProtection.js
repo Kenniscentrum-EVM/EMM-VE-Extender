@@ -163,16 +163,11 @@ var VEETemplateProtection = function () {
      * @returns {String} - Template name.
      */
     function getTemplate(node) {
-        if (node.type == "mwTransclusionBlock") {
-            for (var z = 0; z < node.element.attributes.mw.parts.length; z++) {
-                if (typeof node.element.attributes.mw.parts[z] === "object")
+        if (node.type == "mwTransclusionBlock")
+            for (var z = 0; z < node.element.attributes.mw.parts.length; z++)
+                if (typeof node.element.attributes.mw.parts[z] === "object" && node.element.attributes.mw.parts[z].template.target.href != null)
                     return node.element.attributes.mw.parts[z].template.target.href.split("./").pop();
-            }
-            return null;
-        }
         return null;
     }
-
-
 };
 
