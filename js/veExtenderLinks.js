@@ -703,7 +703,7 @@ function toggleInputFields(fieldSet, value) {
  * @param {int[]} exclude - The indices of the fields in the fieldset that should not be cleared
  * @param {String[]} inputTypeExclude - An array of the names of types of fields that should not be cleared
  */
-function clearInputFields(fieldset, exclude, inputTypeExclude) {
+function clearInputFields(fieldset, exclude, inputTypeExclude) { //TODO rewrite this function
     if (exclude != null) {
         for (var i = 0; i < fieldset.getItems().length; i++) {
             var ex = false;
@@ -713,7 +713,10 @@ function clearInputFields(fieldset, exclude, inputTypeExclude) {
             if (!ex) {
                 //Make sure the fieldlayout doens't contain a field of the given types
                 if ($.inArray(fieldset.getItems()[i].getField().constructor.name, inputTypeExclude) == -1) {
-                    fieldset.getItems()[i].getField().setValue("");
+                    if((fieldset.getItems()[i].getField() instanceof OO.ui.SelectFileWidget))
+                        fieldset.getItems()[i].getField().setValue(null);
+                    else
+                        fieldset.getItems()[i].getField().setValue("");
                 }
             }
         }
@@ -722,7 +725,10 @@ function clearInputFields(fieldset, exclude, inputTypeExclude) {
         for (var i = 0; i < fieldset.getItems().length; i++) {
             //Make sure the fieldlayout doens't contain just a field of the given types
             if ($.inArray(fieldset.getItems()[i].getField().constructor.name, inputTypeExclude) == -1) {
-                fieldset.getItems()[i].getField().setValue("");
+                if((fieldset.getItems()[i].getField() instanceof OO.ui.SelectFileWidget))
+                    fieldset.getItems()[i].getField().setValue(null);
+                else
+                    fieldset.getItems()[i].getField().setValue("");
             }
         }
     }
