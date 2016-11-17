@@ -198,7 +198,7 @@ function createFileDialog(LightResourceDialog) {
      * @return {boolean} - Returns true or false depending on the success of executing the query.
      */
     EMMFileDialog.prototype.executeQuery = function (query, insertCallback, linkdata, upload, newUploadVersion) {
-        console.log("query: ",query);
+        console.log("query: ", query);
         var dialogInstance = this;
         var target = "";
         //Set the target of the api-call to the internal title of an existing file, if the file already exists.
@@ -207,25 +207,9 @@ function createFileDialog(LightResourceDialog) {
         }
         //Set the target of the api-call to the internal title of an existing file resource, if the file resource already exists
         if (upload) {
-            console.log(this.fileField);
-            console.log(this.fileField.getValue());
-            var ignorewarnings = newUploadVersion ? 1 : 0;
-            var file = this.fileField.getValue();
-            var filedata = {
-                filename: file.name,
-                ignorewarnings: ignorewarnings
-            };
-            new mw.Api().upload(file, filedata).fail(function (status, exceptionobject) {
-                //Handle possible error messages and display them in a way the user understands them.
-                if (newUploadVersion && status == "exists") {
-                    semanticCreateWithFormQuery(query, insertCallback, target, "Resource Light");
-                } else {
-                    dialogInstance.handleUploadFail(status, exceptionobject);
-                    return false;
-                }
-            }).done(function () {
+            return this.uploadFile(newUploadVersion, function () {
                 semanticCreateWithFormQuery(query, insertCallback, target, "Resource Light");
-            });
+            }, linkdata);
         }
         else {
             semanticCreateWithFormQuery(query, insertCallback, target, "Resource Light");
@@ -310,25 +294,10 @@ function createFileDialog(LightResourceDialog) {
                     return this.buildAndExecuteQuery(currentPageID, insertCallback, "", true, false);
                 } else {
                     if (!this.isEdit()) {
-                        //Just upload a new version of the file
-                        console.log(this.fileField);
-                        console.log(this.fileField.getValue());
-                        var file = this.fileField.getValue();
-                        var filedata = {
-                            filename: file.name,
-                            ignorewarnings: 1
-                        };
-                        new mw.Api().upload(file, filedata).upload(this.fileField.getValue()).fail(function (status, exceptionobject) {
-                            //Handle possible error messages and display them in a way the user understands them.
-                            if (status == "exists") {
-                                insertCallback(dialogInstance.suggestion.data);
-                            } else {
-                                dialogInstance.handleUploadFail(status, exceptionobject);
-                                return false;
-                            }
-                        }).done(function () {
+                        console.log("suggestion is in de callback call",this.suggestion);
+                        this.uploadFile(true,function () {
                             insertCallback(dialogInstance.suggestion.data);
-                        });
+                        })
                     }
                     else {
                         //Upload a new version of the file and edit the existing resource
@@ -402,6 +371,37 @@ function createFileDialog(LightResourceDialog) {
                 alert("An unknown error of the type " + status + " has occurred.");
         }
     };
+
+    /**
+     * Uploads a file to the wiki and executes the correct action after succeeding or failing
+     * @param {boolean} newUploadVersion - True if the upload is a new version of an existing file
+     * @param {function} postUploadFunction - Function that will be executed after successfully executing the query.
+     */
+    EMMFileDialog.prototype.uploadFile = function (newUploadVersion, postUploadFunction) {
+        var dialogInstance = this;
+        console.log(this.fileField);
+        console.log(this.fileField.getValue());
+        var ignorewarnings = newUploadVersion ? 1 : 0;
+        var file = this.fileField.getValue();
+        var filedata = {
+            filename: file.name,
+            ignorewarnings: ignorewarnings
+        };
+        new mw.Api().upload(file, filedata).fail(function (status, exceptionobject) {
+            //Handle possible error messages and display them in a way the user understands them.
+            if (newUploadVersion && status == "exists") {
+                console.log("suggestion is in upload",this.suggestion)
+                postUploadFunction();
+            } else {
+                dialogInstance.handleUploadFail(status, exceptionobject);
+                return false;
+            }
+        }).done(function () {
+            postUploadFunction();
+        });
+        return true;
+    };
+
 
     //Return the entire 'class' in order to pass this definition to the window factory.
     return EMMFileDialog;
