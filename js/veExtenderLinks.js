@@ -284,6 +284,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
          */
         function grabAndValidateText() {
             dialogInstance.selectionRange = grabSelectedText(dialogInstance.presentationTitleField);
+            console.log(dialogInstance.selectionRange);
             if (dialogInstance.presentationTitleField.value.length > 0) {
                 dialogInstance.validator.validateWidget(dialogInstance.presentationTitleField);
             }
