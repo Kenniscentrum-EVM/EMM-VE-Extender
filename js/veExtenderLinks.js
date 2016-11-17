@@ -260,8 +260,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                             continue;
                         }
                         var suggestion = dialogInstance.processSingleQueryResult(row, res);
-                        if(suggestion == null)
-                        {
+                        if (suggestion == null) {
                             mw.notify(OO.ui.deferMsg("visualeditor-emm-notification-err-invalidlink-body")(), {title: OO.ui.deferMsg("visualeditor-emm-notification-err-invalidlink-title")()});
                             dialogInstance.close();
                             return;
@@ -515,6 +514,8 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                     surfaceModel.getLinearFragment(new ve.Range(0, 0)).insertContent(myTemplate);
                     return;
                 }
+                console.log(dialogInstance.selectionRange);
+                console.log(surfaceModel.getLinearFragment(dialogInstance.selectionRange));
                 surfaceModel.getLinearFragment(dialogInstance.selectionRange).insertContent(myTemplate);
             };
             //Get the name of the current page and replace any underscores with whitespaces to prevent errors later on.
@@ -713,7 +714,7 @@ function clearInputFields(fieldset, exclude, inputTypeExclude) { //TODO rewrite 
             if (!ex) {
                 //Make sure the fieldlayout doens't contain a field of the given types
                 if ($.inArray(fieldset.getItems()[i].getField().constructor.name, inputTypeExclude) == -1) {
-                    if((fieldset.getItems()[i].getField() instanceof OO.ui.SelectFileWidget))
+                    if ((fieldset.getItems()[i].getField() instanceof OO.ui.SelectFileWidget))
                         fieldset.getItems()[i].getField().setValue(null);
                     else
                         fieldset.getItems()[i].getField().setValue("");
@@ -725,7 +726,7 @@ function clearInputFields(fieldset, exclude, inputTypeExclude) { //TODO rewrite 
         for (var i = 0; i < fieldset.getItems().length; i++) {
             //Make sure the fieldlayout doens't contain just a field of the given types
             if ($.inArray(fieldset.getItems()[i].getField().constructor.name, inputTypeExclude) == -1) {
-                if((fieldset.getItems()[i].getField() instanceof OO.ui.SelectFileWidget))
+                if ((fieldset.getItems()[i].getField() instanceof OO.ui.SelectFileWidget))
                     fieldset.getItems()[i].getField().setValue(null);
                 else
                     fieldset.getItems()[i].getField().setValue("");
