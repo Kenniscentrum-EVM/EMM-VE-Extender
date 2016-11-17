@@ -504,19 +504,26 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                         setAutoCompleteEnabled(dialogInstance, dialogInstance.getAutoCompleteStateForMode(dialogInstance.dialogMode));
                     });
 
-                //insert result in text
+
+
                 var surfaceModel = ve.init.target.getSurface().getModel();
+
+
+
+                //insert result in text
+
                 if (dialogInstance.selectionRange.start < 0 || dialogInstance.selectionRange.start > surfaceModel.getDocument().getLength()) {
-                    surfaceModel.getLinearFragment(new ve.Range(0, 0)).insertContent(myTemplate);
+                    surfaceModel.getDocument().commit(ve.dm.Transaction.newFromReplacement(surfaceModel.getDocument(), new ve.Range(0, 0), myTemplate), true);
                     return;
                 }
                 if (dialogInstance.selectionRange.end < 0 || dialogInstance.selectionRange.end > surfaceModel.getDocument().getLength()) {
-                    surfaceModel.getLinearFragment(new ve.Range(0, 0)).insertContent(myTemplate);
+                    surfaceModel.getDocument().commit(ve.dm.Transaction.newFromReplacement(surfaceModel.getDocument(), new ve.Range(0, 0), myTemplate), true);
                     return;
                 }
-                console.log(dialogInstance.selectionRange);
-                console.log(surfaceModel.getLinearFragment(dialogInstance.selectionRange));
-                surfaceModel.getLinearFragment(dialogInstance.selectionRange).insertContent(myTemplate);
+
+                surfaceModel.getDocument().commit(ve.dm.Transaction.newFromReplacement(surfaceModel.getDocument(), dialogInstance.selectionRange, myTemplate), true);
+
+                //surfaceModel.getFragment(surfaceModel.getSelection()).insertContent(myTemplate);
             };
             //Get the name of the current page and replace any underscores with whitespaces to prevent errors later on.
             var currentPageID = mw.config.get("wgPageName").replace(/_/g, " ");
