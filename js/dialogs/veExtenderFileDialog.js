@@ -390,7 +390,7 @@ function createFileDialog(LightResourceDialog) {
         new mw.Api().upload(file, filedata).fail(function (status, exceptionobject) {
             //Handle possible error messages and display them in a way the user understands them.
             if (newUploadVersion && status == "exists") {
-                console.log("suggestion is in upload",this.suggestion)
+                console.log("suggestion is in upload",dialogInstance.suggestion);
                 postUploadFunction();
             } else {
                 dialogInstance.handleUploadFail(status, exceptionobject);
