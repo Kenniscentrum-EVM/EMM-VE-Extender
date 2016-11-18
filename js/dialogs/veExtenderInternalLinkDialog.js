@@ -19,7 +19,7 @@ function createInternalLinkDialog(EMMDialog) {
      */
     var EMMInternalLinkDialog = function () {
         EMMDialog.call(this);
-        this.autoCompleteQuery = "[[Category:Light Context||Project]]|?Semantic title|?Category=Category|?Topcontext|limit=10000";
+        this.autoCompleteQuery = "[[Category:Light Context||Project||Projecten]]|?Semantic title|?Category=Category|?Supercontext|sort=Semantic title|order=asc|limit=10000";
         this.editQuery = "[[PAGENAMEPARAMETER]] |?Semantic title|?Category=Category";
     };
     OO.inheritClass(EMMInternalLinkDialog, EMMDialog);
@@ -229,8 +229,21 @@ function createInternalLinkDialog(EMMDialog) {
      * Should already contain data of generic resource and a lightResource.
      * @returns {Object} - An updated suggestionObject, or null when the singleresult is invalid
      */
-    EMMInternalLinkDialog.prototype.processDialogSpecificQueryResult = function (singleResult, suggestionObject) {
-        suggestionObject.category = singleResult.printouts.Category;
+    EMMInternalLinkDialog.prototype.processSingleQueryResult = function (row, resultSet, previousSuggestion) {
+        var suggestionObject = EMMDialog.prototype.processSingleQueryResult.call(this, row, resultSet, previousSuggestion);
+        suggestionObject.category = resultSet[row].printouts.Category;
+        var suffix;
+        if (previousSuggestion != null && previousSuggestion.semanticTitle == suggestionObject.semanticTitle && previousSuggestion.value == previousSuggestion.semanticTitle) {
+            suffix = resultSet[previousSuggestion.suffix[0].fulltext];
+            if (suffix != null)
+                previousSuggestion.value = previousSuggestion.value + " (" + suffix.printouts["Semantic title"][0] + ")";
+        }
+        suggestionObject.suffix = resultSet[row].printouts["Supercontext"];
+        if (previousSuggestion != null && previousSuggestion.semanticTitle == suggestionObject.value) {
+            suffix = resultSet[suggestionObject.suffix[0].fulltext];
+            if (suffix != null)
+                suggestionObject.value = suggestionObject.value + " (" + resultSet[suggestionObject.suffix[0].fulltext].printouts["Semantic title"][0] + ")";
+        }
         return suggestionObject;
     };
 

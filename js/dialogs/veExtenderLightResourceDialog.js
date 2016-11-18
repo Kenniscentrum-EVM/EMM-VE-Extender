@@ -123,12 +123,14 @@ function createLightResourceDialog(EMMDialog, resourceType) {
      * Should already contain data that every resource has.
      * @returns {Object} - An updated suggestionObject, or null when the singleresult is invalid
      */
-    EMMLightResourceDialog.prototype.processDialogSpecificQueryResult = function (singleResult, suggestionObject) {
-        suggestionObject.creator = singleResult.printouts["Dct:creator"][0];
-        suggestionObject.date = singleResult.printouts["Dct:date"][0];
-        suggestionObject.organization = singleResult.printouts.Organization[0];
+    EMMLightResourceDialog.prototype.processSingleQueryResult = function (row, resultSet, previousSuggestion) {
+        var suggestionObject = EMMDialog.prototype.processSingleQueryResult.call(this, row, resultSet, previousSuggestion);
+
+        suggestionObject.creator = resultSet[row].printouts["Dct:creator"][0];
+        suggestionObject.date = resultSet[row].printouts["Dct:date"][0];
+        suggestionObject.organization = resultSet[row].printouts.Organization[0];
         suggestionObject.subjects = "";
-        var querySubjects = singleResult.printouts["Dct:subject"];
+        var querySubjects = resultSet[row].printouts["Dct:subject"];
         //Gathers all subjects and creates a single string which contains the fulltext name of all the subjects,
         //separated by a ,
         for (var j = 0; j < querySubjects.length; j++) {

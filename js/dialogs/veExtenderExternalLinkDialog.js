@@ -18,7 +18,7 @@ function createExternalLinkDialog(LightResourceDialog) {
      */
     var EMMExternalLinkDialog = function () {
         LightResourceDialog.call(this);
-        this.autoCompleteQuery = "[[Category:Resource Description]] [[Hyperlink::+]]|?Semantic title|?Hyperlink|?Dct:creator|?Dct:date|?Organization|?Dct:subject|limit=10000";
+        this.autoCompleteQuery = "[[Category:Resource Description]] [[Hyperlink::+]]|?Semantic title|?Hyperlink|?Dct:creator|?Dct:date|?Organization|?Dct:subject|sort=Semantic title|order=asc|limit=10000";
         this.editQuery = "[[PAGENAMEPARAMETER]] |?Semantic title|?Hyperlink|?Dct:creator|?Dct:date|?Organization|?Dct:subject";
     };
     OO.inheritClass(EMMExternalLinkDialog, LightResourceDialog);
@@ -237,13 +237,18 @@ function createExternalLinkDialog(LightResourceDialog) {
      * Should already contain data of generic resource and a lightResource.
      * @returns {Object} - An updated suggestionObject, or null when the singleresult is invalid
      */
-    EMMExternalLinkDialog.prototype.processDialogSpecificQueryResult = function (singleResult, suggestionObject) {
+    EMMExternalLinkDialog.prototype.processSingleQueryResult = function (row, resultSet, previousSuggestion) {
+        var suggestionObject = LightResourceDialog.prototype.processSingleQueryResult.call(this, row, resultSet, previousSuggestion);
+
         if (/Bestand:|File:/ig.test(suggestionObject.data)) {
             return null;
         }
         else {
-            suggestionObject = LightResourceDialog.prototype.processDialogSpecificQueryResult.call(this, singleResult, suggestionObject);
-            suggestionObject.hyperlink = singleResult.printouts.Hyperlink[0];
+            if (previousSuggestion != null && previousSuggestion.semanticTitle == suggestionObject.semanticTitle && previousSuggestion.value == previousSuggestion.semanticTitle)
+                previousSuggestion.value = previousSuggestion.value + " (" + previousSuggestion.hyperlink + ")";
+            suggestionObject.hyperlink = resultSet[row].printouts.Hyperlink[0];
+            if (previousSuggestion != null && previousSuggestion.semanticTitle == suggestionObject.value)
+                suggestionObject.value = suggestionObject.value + " (" + suggestionObject.hyperlink + ")";
             return suggestionObject;
         }
     };

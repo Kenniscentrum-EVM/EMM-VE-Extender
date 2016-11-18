@@ -18,7 +18,7 @@ function createFileDialog(LightResourceDialog) {
      */
     var EMMFileDialog = function () {
         LightResourceDialog.call(this);
-        this.autoCompleteQuery = "[[Category:Resource Description]] [[file name::+]] |?Semantic title|?Dct:creator|?Dct:date|?Organization|?Dct:subject|?file name|limit=10000";
+        this.autoCompleteQuery = "[[Category:Resource Description]] [[file name::+]] |?Semantic title|?Dct:creator|?Dct:date|?Organization|?Dct:subject|?file name|sort=Semantic title|order=asc|limit=10000";
         this.editQuery = "[[PAGENAMEPARAMETER]] |?Semantic title|?Dct:creator|?Dct:date|?Organization|?Dct:subject|?file name";
         //Define a new upload object to handle file uploads
         this.upload = new mw.Upload({parameters: {ignorewarnings: true}});
@@ -280,9 +280,13 @@ function createFileDialog(LightResourceDialog) {
      * Should already contain data of generic resource and a lightResource.
      * @returns {Object} - An updated suggestionObject, or null when the singleresult is invalid
      */
-    EMMFileDialog.prototype.processDialogSpecificQueryResult = function (singleResult, suggestionObject) {
-        suggestionObject = LightResourceDialog.prototype.processDialogSpecificQueryResult.call(this, singleResult, suggestionObject);
-        suggestionObject.filename = singleResult.printouts["File name"][0].fulltext;
+    EMMFileDialog.prototype.processSingleQueryResult = function (row, resultSet, previousSuggestion) {
+        var suggestionObject = LightResourceDialog.prototype.processSingleQueryResult.call(this, row, resultSet, previousSuggestion);
+        suggestionObject.filename = resultSet[row].printouts["File name"][0].fulltext;
+        if(previousSuggestion != null && previousSuggestion.semanticTitle == suggestionObject.semanticTitle && previousSuggestion.value == previousSuggestion.semanticTitle)
+        previousSuggestion.value = previousSuggestion.value + " (" + previousSuggestion.filename + ")";
+        if(previousSuggestion != null && previousSuggestion.semanticTitle == suggestionObject.value)
+            suggestionObject.value = suggestionObject.value + " (" + suggestionObject.filename + ")";
         return suggestionObject;
     };
 

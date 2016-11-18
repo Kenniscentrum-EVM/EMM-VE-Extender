@@ -389,7 +389,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
      * @param {Object} suggestionObject - A single suggestion that should be expanded. Should already contain
      * dialog-independent data.
      */
-    EMMDialog.prototype.processDialogSpecificQueryResult = function (singleResult, suggestionObject) {
+    EMMDialog.prototype.processDialogSpecificQueryResult = function (row, resultSet, suggestionObject, previousTitle) {
         displayOverloadError("processQueryResult");
     };
 
@@ -501,6 +501,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
 
                 dialogInstance.semanticAskQuery(dialogInstance.getAutocompleteQuery(),
                     function () {
+                        console.log("WEW");
                         setAutoCompleteEnabled(dialogInstance, dialogInstance.getAutoCompleteStateForMode(dialogInstance.dialogMode));
                     });
 
@@ -634,30 +635,19 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
      * @param {Object[]} resultSet - Associative array which functions like a dictionary, using strings as indexes, contains the result of a query.
      * @returns {Object} suggestionObject - A suggestion object, containing relevant information about a particular page which can be used by various functions fillFields.
      */
-    EMMDialog.prototype.processSingleQueryResult = function (row, resultSet) {
+    EMMDialog.prototype.processSingleQueryResult = function (row, resultSet, previousSuggestion) {
         var suggestionObject = {};
-        var singleResultRow = resultSet[row];
-        suggestionObject.data = singleResultRow.fulltext;
+        suggestionObject.data = resultSet[row].fulltext;
         suggestionObject.value = "";
 
-
-        var semanticTitle = singleResultRow.printouts["Semantic title"][0];
+        var semanticTitle = resultSet[row].printouts["Semantic title"][0];
         if (semanticTitle) {
             suggestionObject.value = semanticTitle;
         } else {
             suggestionObject.value = suggestionObject.data;
         }
-
-        //suggestionObject.prev = suggestionObject.value;
-
-        //console.log("prevTitle: " , previousTitle);
-        //console.log("suggestionValue: " , suggestionObject.value);
-
-        //if(previousTitle == suggestionObject.value && resultSet[singleResultRow.printouts["Topcontext"][0]] != null) {
-            //suggestionObject.value = suggestionObject.value + " (" + resultSet[singleResultRow.printouts["Topcontext"][0]].printouts["Semantic title"][0] + ")";
-        //}
-
-        return this.processDialogSpecificQueryResult(singleResultRow, suggestionObject);
+        suggestionObject.semanticTitle = suggestionObject.value;
+        return suggestionObject;
     };
 
     /**  semanticAskQuery
@@ -675,18 +665,20 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
         }).done(function (data) {
             var res = data.query.results;
             var arr = []; //array to store the results
-            //var prev = "";
+            var previousSuggestion = null;
             for (var row in res) {
                 if (!res.hasOwnProperty(row)) {
                     continue;
                 }
-                var singleQueryResult = dialogInstance.processSingleQueryResult(row, res);
-                if (singleQueryResult != null) {
-                    arr.push(singleQueryResult);
-                    //console.log(singleQueryResult);
-                    //prev = singleQueryResult.prev;
-                }
+                var singleQueryResult = dialogInstance.processSingleQueryResult(row, res, previousSuggestion);
+                if (previousSuggestion != null)
+                    arr.push(previousSuggestion);
+                previousSuggestion = singleQueryResult;
             }
+
+            //fixme THE LAST ROW STILL NEEDS TO BE ADDED!
+
+            //arr.push(dialogInstance.processDialogSpecificQueryResult(res.keys(res.keys.length)));
             //todo investigate ASK query possibilities and restrictions, this may possibly be unnecessary.
             arr.sort(function (a, b) {
                 if (a.value.toUpperCase() > b.value.toUpperCase()) {
@@ -822,6 +814,7 @@ function initAutoComplete(data, dialogInstance) {
         onSelect: function (suggestion) {
             dialogInstance.suggestion = suggestion;
             dialogInstance.isExistingResource = true;
+            dialogInstance.titleField.setValue(suggestion.semanticTitle); //fixme this triggers the autocomplete, resulting in unexpected behaviour
             dialogInstance.fillFields(suggestion);
             dialogInstance.testAndChangeDialogMode();
         },
