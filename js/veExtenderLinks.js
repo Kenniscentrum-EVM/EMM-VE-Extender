@@ -666,7 +666,8 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
             var res = data.query.results;
             var arr = []; //array to store the results
             var previousSuggestion = null;
-            for (var row in res) {
+            var row;
+            for (row in res) {
                 if (!res.hasOwnProperty(row)) {
                     continue;
                 }
@@ -675,10 +676,9 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                     arr.push(previousSuggestion);
                 previousSuggestion = singleQueryResult;
             }
-
-            //fixme THE LAST ROW STILL NEEDS TO BE ADDED!
-
-            //arr.push(dialogInstance.processDialogSpecificQueryResult(res.keys(res.keys.length)));
+            //Add the final row.
+            if (previousSuggestion != null)
+                arr.push(dialogInstance.processSingleQueryResult(row, res, previousSuggestion));
             //todo investigate ASK query possibilities and restrictions, this may possibly be unnecessary.
             arr.sort(function (a, b) {
                 if (a.value.toUpperCase() > b.value.toUpperCase()) {
@@ -815,6 +815,7 @@ function initAutoComplete(data, dialogInstance) {
             dialogInstance.suggestion = suggestion;
             dialogInstance.isExistingResource = true;
             dialogInstance.titleField.setValue(suggestion.semanticTitle); //fixme this triggers the autocomplete, resulting in unexpected behaviour
+            inputField.blur();
             dialogInstance.fillFields(suggestion);
             dialogInstance.testAndChangeDialogMode();
         },
