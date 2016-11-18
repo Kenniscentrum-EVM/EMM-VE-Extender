@@ -260,8 +260,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                             continue;
                         }
                         var suggestion = dialogInstance.processSingleQueryResult(row, res);
-                        if(suggestion == null)
-                        {
+                        if (suggestion == null) {
                             mw.notify(OO.ui.deferMsg("visualeditor-emm-notification-err-invalidlink-body")(), {title: OO.ui.deferMsg("visualeditor-emm-notification-err-invalidlink-title")()});
                             dialogInstance.close();
                             return;
@@ -505,17 +504,18 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                         setAutoCompleteEnabled(dialogInstance, dialogInstance.getAutoCompleteStateForMode(dialogInstance.dialogMode));
                     });
 
-                //insert result in text
                 var surfaceModel = ve.init.target.getSurface().getModel();
+
+                //insert result in text
                 if (dialogInstance.selectionRange.start < 0 || dialogInstance.selectionRange.start > surfaceModel.getDocument().getLength()) {
-                    surfaceModel.getLinearFragment(new ve.Range(0, 0)).insertContent(myTemplate);
+                    surfaceModel.getDocument().commit(ve.dm.Transaction.newFromReplacement(surfaceModel.getDocument(), new ve.Range(0, 0), myTemplate), true);
                     return;
                 }
                 if (dialogInstance.selectionRange.end < 0 || dialogInstance.selectionRange.end > surfaceModel.getDocument().getLength()) {
-                    surfaceModel.getLinearFragment(new ve.Range(0, 0)).insertContent(myTemplate);
+                    surfaceModel.getDocument().commit(ve.dm.Transaction.newFromReplacement(surfaceModel.getDocument(), new ve.Range(0, 0), myTemplate), true);
                     return;
                 }
-                surfaceModel.getLinearFragment(dialogInstance.selectionRange).insertContent(myTemplate);
+                surfaceModel.getDocument().commit(ve.dm.Transaction.newFromReplacement(surfaceModel.getDocument(), dialogInstance.selectionRange, myTemplate), true);
             };
             //Get the name of the current page and replace any underscores with whitespaces to prevent errors later on.
             var currentPageID = mw.config.get("wgPageName").replace(/_/g, " ");
@@ -703,7 +703,7 @@ function toggleInputFields(fieldSet, value) {
  * @param {int[]} exclude - The indices of the fields in the fieldset that should not be cleared
  * @param {String[]} inputTypeExclude - An array of the names of types of fields that should not be cleared
  */
-function clearInputFields(fieldset, exclude, inputTypeExclude) {
+function clearInputFields(fieldset, exclude, inputTypeExclude) { //TODO rewrite this function
     if (exclude != null) {
         for (var i = 0; i < fieldset.getItems().length; i++) {
             var ex = false;
@@ -713,7 +713,10 @@ function clearInputFields(fieldset, exclude, inputTypeExclude) {
             if (!ex) {
                 //Make sure the fieldlayout doens't contain a field of the given types
                 if ($.inArray(fieldset.getItems()[i].getField().constructor.name, inputTypeExclude) == -1) {
-                    fieldset.getItems()[i].getField().setValue("");
+                    if ((fieldset.getItems()[i].getField() instanceof OO.ui.SelectFileWidget))
+                        fieldset.getItems()[i].getField().setValue(null);
+                    else
+                        fieldset.getItems()[i].getField().setValue("");
                 }
             }
         }
@@ -722,7 +725,10 @@ function clearInputFields(fieldset, exclude, inputTypeExclude) {
         for (var i = 0; i < fieldset.getItems().length; i++) {
             //Make sure the fieldlayout doens't contain just a field of the given types
             if ($.inArray(fieldset.getItems()[i].getField().constructor.name, inputTypeExclude) == -1) {
-                fieldset.getItems()[i].getField().setValue("");
+                if ((fieldset.getItems()[i].getField() instanceof OO.ui.SelectFileWidget))
+                    fieldset.getItems()[i].getField().setValue(null);
+                else
+                    fieldset.getItems()[i].getField().setValue("");
             }
         }
     }
