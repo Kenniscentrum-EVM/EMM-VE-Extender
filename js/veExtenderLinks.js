@@ -639,12 +639,24 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
         var singleResultRow = resultSet[row];
         suggestionObject.data = singleResultRow.fulltext;
         suggestionObject.value = "";
+
+
         var semanticTitle = singleResultRow.printouts["Semantic title"][0];
         if (semanticTitle) {
             suggestionObject.value = semanticTitle;
         } else {
             suggestionObject.value = suggestionObject.data;
         }
+
+        //suggestionObject.prev = suggestionObject.value;
+
+        //console.log("prevTitle: " , previousTitle);
+        //console.log("suggestionValue: " , suggestionObject.value);
+
+        //if(previousTitle == suggestionObject.value && resultSet[singleResultRow.printouts["Topcontext"][0]] != null) {
+            //suggestionObject.value = suggestionObject.value + " (" + resultSet[singleResultRow.printouts["Topcontext"][0]].printouts["Semantic title"][0] + ")";
+        //}
+
         return this.processDialogSpecificQueryResult(singleResultRow, suggestionObject);
     };
 
@@ -663,6 +675,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
         }).done(function (data) {
             var res = data.query.results;
             var arr = []; //array to store the results
+            //var prev = "";
             for (var row in res) {
                 if (!res.hasOwnProperty(row)) {
                     continue;
@@ -670,13 +683,16 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                 var singleQueryResult = dialogInstance.processSingleQueryResult(row, res);
                 if (singleQueryResult != null) {
                     arr.push(singleQueryResult);
+                    //console.log(singleQueryResult);
+                    //prev = singleQueryResult.prev;
                 }
             }
+            //todo investigate ASK query possibilities and restrictions, this may possibly be unnecessary.
             arr.sort(function (a, b) {
-                if (a.value > b.value) {
+                if (a.value.toUpperCase() > b.value.toUpperCase()) {
                     return 1;
                 }
-                if (a.value < b.value) {
+                if (a.value.toUpperCase() < b.value.toUpperCase()) {
                     return -1;
                 }
                 return 0;
@@ -699,7 +715,7 @@ function toggleInputFields(fieldSet, value) {
 
 /**
  * Clears the input fields of a given fieldset
- * @param {OO.ui.FieldsetLayout} fieldset - The fieldset wose input fields should be emptied
+ * @param {OO.ui.FieldsetLayout} fieldset - The fieldset whose input fields should be emptied
  * @param {int[]} exclude - The indices of the fields in the fieldset that should not be cleared
  * @param {String[]} inputTypeExclude - An array of the names of types of fields that should not be cleared
  */
@@ -711,7 +727,7 @@ function clearInputFields(fieldset, exclude, inputTypeExclude) { //TODO rewrite 
                 if (i == exclude[x])
                     ex = true;
             if (!ex) {
-                //Make sure the fieldlayout doens't contain a field of the given types
+                //Make sure the fieldlayout doesn't contain a field of the given types
                 if ($.inArray(fieldset.getItems()[i].getField().constructor.name, inputTypeExclude) == -1) {
                     if ((fieldset.getItems()[i].getField() instanceof OO.ui.SelectFileWidget))
                         fieldset.getItems()[i].getField().setValue(null);
@@ -723,7 +739,7 @@ function clearInputFields(fieldset, exclude, inputTypeExclude) { //TODO rewrite 
     }
     else {
         for (var i = 0; i < fieldset.getItems().length; i++) {
-            //Make sure the fieldlayout doens't contain just a field of the given types
+            //Make sure the fieldlayout doesn't contain just a field of the given types
             if ($.inArray(fieldset.getItems()[i].getField().constructor.name, inputTypeExclude) == -1) {
                 if ((fieldset.getItems()[i].getField() instanceof OO.ui.SelectFileWidget))
                     fieldset.getItems()[i].getField().setValue(null);
