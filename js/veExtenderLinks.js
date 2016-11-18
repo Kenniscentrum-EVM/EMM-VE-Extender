@@ -109,6 +109,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
      */
     var EMMDialog = function () {
         OO.ui.ProcessDialog.call(this);
+        this.noEditFieldTypes = ["OoUiLabelWidget","OoUiProgressBarWidget"];
         this.suggestion = null;
         this.isExistingResource = false;
         /* Dialog modes:
@@ -236,13 +237,13 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
          * Checks if the user is trying to edit an existing link to a resource. If this is the case, information about
          * the resource is gathered and an edit dialog is opened with the fields already filled in.
          */
-        function checkIfEdit() {
+        function openEditDialog() {
             //When being queued by the first method of OO.ui.process the scope of 'this' is set.
             var data = this;
             if (data.source != null) //are we editing?
             {
                 dialogInstance.executeModeChange(dialogInstance.modeEnum.EDIT_EXISTING);
-                toggleInputFields(dialogInstance.fieldset, true);
+                setDisabledInputFields(dialogInstance.fieldset, true);
                 data.source = data.source.replace(/\ /g, "_"); //convert whitespaces to underscores
                 var api = new mw.Api();
                 var query = dialogInstance.getEditQuery(data.source); //getEditQuery retrieves the correct query for us.
@@ -260,7 +261,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                         var suggestion = dialogInstance.processSingleQueryResult(row, res);
                         dialogInstance.suggestion = suggestion;
                         dialogInstance.titleField.setValue(suggestion.value);
-                        toggleInputFields(dialogInstance.fieldset, false);
+                        setDisabledInputFields(dialogInstance.fieldset, false);
                         dialogInstance.fillFields(); //fill our dialog.
                         dialogInstance.isExistingResource = true;
                     }
@@ -282,7 +283,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
         }
 
         //Add the two functions above to the queue of processes that will be executed when a dialog is opened
-        return EMMDialog.super.prototype.getReadyProcess.call(this, data).first(checkIfEdit, data).next(grabAndValidateText);
+        return EMMDialog.super.prototype.getReadyProcess.call(this, data).first(openEditDialog, data).next(grabAndValidateText);
     };
 
     /**
@@ -294,7 +295,6 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
      * characters and whitespace
      * @param {String} linkdata - In case of an existing resource, linkdata contains the internal name of the resource
      * in order to let the api know what existing resource should be edited. Otherwise linkdata is just an empty string.
-     * @return {boolean} - Returns true or false depending on the success of executing the action.
      */
     EMMDialog.prototype.executeInsertAction = function (insertCallback, currentPageID, linkdata) {
         if (!this.isExistingResource) {
@@ -306,7 +306,6 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
         else {
             insertCallback(this.suggestion.data);
         }
-        return true;
     };
 
     /**
@@ -461,6 +460,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
          * Define what should happen when the insert button is clicked.
          */
         var insertButtonHandler = function () {
+            setDisabledDialogElements(dialogInstance, true);
             var namedata = dialogInstance.presentationTitleField.getValue();
             if (dialogInstance.suggestion != null) {
                 var linkdata = dialogInstance.suggestion.data.length > 0 ? dialogInstance.suggestion.data : "";
@@ -512,17 +512,15 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                         setAutoCompleteEnabled(dialogInstance, false);
                         toggleAutoComplete(dialogInstance);
                     });
-
+                dialogInstance.close();
+                setDisabledDialogElements(dialogInstance, false);
             };
 
             //Get the name of the current page and replace any underscores with whitespaces to prevent errors later on.
             var currentPageID = mw.config.get("wgPageName").replace(/_/g, " ");
 
             //Check some variables and decide what has to be done
-            var actionSuccess = dialogInstance.executeInsertAction(insertCallback, currentPageID, linkdata);
-            if (actionSuccess) {
-                dialogInstance.close();
-            }
+            dialogInstance.executeInsertAction(insertCallback, currentPageID, linkdata);
         };
 
         /**
@@ -600,7 +598,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
             function cleanUpDialog() {
                 hideAutoComplete(dialogInstance.titleField.$element.find("input"));
                 dialogInstance.validator.disable();
-                clearInputFields(dialogInstance.fieldset, null, ["OoUiLabelWidget"]);
+                clearInputFields(dialogInstance.fieldset, null, dialogInstance.noEditFieldTypes);
                 dialogInstance.dialogMode = dialogInstance.modeEnum.INSERT_EXISTING;
                 dialogInstance.executeModeChange(dialogInstance.modeEnum.INSERT_EXISTING);
                 dialogInstance.validator.enable();
@@ -611,14 +609,6 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
             //Execute the original getTeardownProcess, but add our cleanup function to the process that is executed on closing.
             return EMMDialog.super.prototype.getTeardownProcess.call(this).next(cleanUpDialog)
         }
-    };
-
-    /**
-     * Getter function for the fieldset of the dialog
-     * @returns {OO.ui.FieldsetLayout} - The fieldset corresponding to this dialog
-     */
-    EMMDialog.prototype.getFieldset = function () {
-        return this.fieldset;
     };
 
     /**
@@ -685,9 +675,39 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
  * @param {OO.ui.FieldsetLayout} fieldSet - FieldSet to disable or enable.
  * @param {boolean} value - Boolean instruction, true = disable, false = enable.
  */
-function toggleInputFields(fieldSet, value) {
-    for (var i = 0; i < fieldSet.getItems().length; i++)
+function setDisabledInputFields(fieldSet, value) {
+    for (var i = 0; i < fieldSet.getItems().length; i++) {
         fieldSet.getItems()[i].getField().setDisabled(value);
+    }
+}
+
+/**
+ * Enables or disables all clickable items of a dialog. Also adds or removes a progress bar.
+ * @param {OO.ui.EMMDialog} dialogInstance - FieldSet to disable or enable.
+ * @param {boolean} value - Boolean instruction, true = disable, false = enable.
+ */
+function setDisabledDialogElements(dialogInstance, value) {
+    setDisabledInputFields(dialogInstance.fieldset, value);
+    dialogInstance.actions.forEach(null, function (action) {
+        action.setDisabled(value);
+    });
+    if(value) {
+        var progressBar = new OO.ui.ProgressBarWidget({
+            progress: false
+        });
+        progressBar.$element.css("width", "100%");
+        progressBar.$element.find(".oo-ui-fieldLayout-field").css("width", "100%");
+        var progressbarFieldLayout = new OO.ui.FieldLayout(progressBar);
+        progressbarFieldLayout.$element.css("width", "100%");
+        dialogInstance.fieldset.addItems([progressbarFieldLayout]);
+        dialogInstance.updateSize();
+        progressbarFieldLayout.$element.find(".oo-ui-fieldLayout-field").css("width", "100%");
+        progressbarFieldLayout.$element.find(".oo-ui-fieldLayout-body").css("width", "100%").css("overflow", "hidden");
+    }
+    else {
+        dialogInstance.fieldset.removeItems([dialogInstance.fieldset.getItems()[dialogInstance.fieldset.getItems().length-1]]);
+        dialogInstance.updateSize();
+    }
 }
 
 /**

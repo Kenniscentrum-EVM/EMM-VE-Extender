@@ -110,21 +110,21 @@ function createExternalLinkDialog(LightResourceDialog) {
                 this.$element.find(".oo-ui-processDialog-title").text(OO.ui.deferMsg("visualeditor-emm-dialogexternallinktitle")());
                 input = this.titleField.$element.find("input");
                 input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-def")());
-                clearInputFields(this.fieldset, [2], ["OoUiLabelWidget"]);
+                clearInputFields(this.fieldset, [2], this.noEditFieldTypes);
                 break;
             case this.modeEnum.INSERT_NEW:
                 if (this.suggestion != null) {
                     if (this.suggestion.hyperlink == this.linkField.value) {
-                        clearInputFields(this.fieldset, [0, 2], ["OoUiLabelWidget"]);
+                        clearInputFields(this.fieldset, [0, 2], this.noEditFieldTypes);
                         this.validator.cleanUpForm();
                         return;
                     }
                     else {
-                        clearInputFields(this.fieldset, [0, 1, 2], ["OoUiLabelWidget"]);
+                        clearInputFields(this.fieldset, [0, 1, 2], this.noEditFieldTypes);
                     }
                 }
                 else {
-                    clearInputFields(this.fieldset, [0, 1, 2], ["OoUiLabelWidget"]);
+                    clearInputFields(this.fieldset, [0, 1, 2], this.noEditFieldTypes);
                 }
                 this.$element.find(".oo-ui-processDialog-title").text(OO.ui.deferMsg("visualeditor-emm-linkdialog-title-npage")());
                 input = this.titleField.$element.find("input");
@@ -134,7 +134,7 @@ function createExternalLinkDialog(LightResourceDialog) {
                 this.$element.find(".oo-ui-processDialog-title").text(OO.ui.deferMsg("visualeditor-emm-linkdialog-title-edit")());
                 input = this.titleField.$element.find("input");
                 input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-def")());
-                clearInputFields(this.fieldset, [2], ["OoUiLabelWidget"]);
+                clearInputFields(this.fieldset, [2], this.noEditFieldTypes);
                 break;
         }
         this.validator.cleanUpForm();
