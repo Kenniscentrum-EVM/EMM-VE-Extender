@@ -232,18 +232,16 @@ function createInternalLinkDialog(EMMDialog) {
     EMMInternalLinkDialog.prototype.processSingleQueryResult = function (row, resultSet, previousSuggestion) {
         var suggestionObject = EMMDialog.prototype.processSingleQueryResult.call(this, row, resultSet, previousSuggestion);
         suggestionObject.category = resultSet[row].printouts.Category;
-        var suffix;
-        if (previousSuggestion != null && previousSuggestion.semanticTitle == suggestionObject.semanticTitle && previousSuggestion.value == previousSuggestion.semanticTitle) {
-            suffix = resultSet[previousSuggestion.suffix[0].fulltext];
-            if (suffix != null)
-                previousSuggestion.value = previousSuggestion.value + " (" + suffix.printouts["Semantic title"][0] + ")";
-        }
         suggestionObject.suffix = resultSet[row].printouts["Supercontext"];
-        if (previousSuggestion != null && previousSuggestion.semanticTitle == suggestionObject.value) {
-            suffix = resultSet[suggestionObject.suffix[0].fulltext];
-            if (suffix != null)
-                suggestionObject.value = suggestionObject.value + " (" + resultSet[suggestionObject.suffix[0].fulltext].printouts["Semantic title"][0] + ")";
+
+        if(previousSuggestion != null)
+        {
+            if(previousSuggestion.semanticTitle == suggestionObject.semanticTitle && previousSuggestion.value == previousSuggestion.semanticTitle)
+                previousSuggestion.value = checkAndPrintSuffix(previousSuggestion, resultSet[previousSuggestion.suffix[0].fulltext]);
+            else if (previousSuggestion.semanticTitle == suggestionObject.value)
+                suggestionObject.value = checkAndPrintSuffix(suggestionObject, resultSet[suggestionObject.suffix[0].fulltext]);
         }
+
         return suggestionObject;
     };
 
@@ -255,6 +253,14 @@ function createInternalLinkDialog(EMMDialog) {
     EMMInternalLinkDialog.prototype.findTemplateToUse = function () {
         return "Internal link";
     };
+
+    function checkAndPrintSuffix(suggestionObject, suffix)
+    {
+        if(suffix != null)
+            return suggestionObject.value + " (" + suffix.printouts["Semantic title"][0] + ")";
+        else
+            return suggestionObject.value + " (Invalid suffix)";
+    }
 
     //Return the entire 'class' in order to pass this definition to the window factory.
     return EMMInternalLinkDialog;

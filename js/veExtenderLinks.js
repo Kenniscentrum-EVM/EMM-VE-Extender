@@ -106,6 +106,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
 
     /**
      * Constructor for EMMDialog, all relevant fields are initiated, mostly with default null or 0 values.
+     * @extends OO.ui.ProcessDialog
      * @constructor
      */
     var EMMDialog = function () {
@@ -814,7 +815,7 @@ function initAutoComplete(data, dialogInstance) {
         onSelect: function (suggestion) {
             dialogInstance.suggestion = suggestion;
             dialogInstance.isExistingResource = true;
-            dialogInstance.titleField.setValue(suggestion.semanticTitle); //fixme this triggers the autocomplete, resulting in unexpected behaviour
+            dialogInstance.titleField.setValue(suggestion.semanticTitle);
             inputField.blur();
             dialogInstance.fillFields(suggestion);
             dialogInstance.testAndChangeDialogMode();
