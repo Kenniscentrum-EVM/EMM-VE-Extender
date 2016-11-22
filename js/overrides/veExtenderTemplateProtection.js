@@ -33,11 +33,14 @@ var VEETemplateProtection = function () {
         var copyBase = ve.ce.Surface.prototype.onCopy;
         ve.ce.Surface.prototype.onCopy = function (e) {
             var selection = this.getModel().getSelection();
-            for (var i = selection.range.start; i < selection.range.end; i++) {
-                var node = this.getModel().getDocument().getDocumentNode().getNodeFromOffset(i);
-                if (node.type == "mwTransclusionBlock" && protectedTemplates[getTemplate(node)] != null) {
-                    mw.notify(OO.ui.deferMsg("visualeditor-emm-notification-template-copy")(), {title: OO.ui.deferMsg("visualeditor-emm-notification-template-title")()});
-                    return;
+            if(selection.range != null)
+            {
+                for (var i = selection.range.start; i < selection.range.end; i++) {
+                    var node = this.getModel().getDocument().getDocumentNode().getNodeFromOffset(i);
+                    if (node.type == "mwTransclusionBlock" && protectedTemplates[getTemplate(node)] != null) {
+                        mw.notify(OO.ui.deferMsg("visualeditor-emm-notification-template-copy")(), {title: OO.ui.deferMsg("visualeditor-emm-notification-template-title")()});
+                        return;
+                    }
                 }
             }
             return copyBase.call(this, e);
