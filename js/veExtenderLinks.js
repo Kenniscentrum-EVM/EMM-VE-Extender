@@ -712,7 +712,7 @@ function setDisabledDialogElements(dialogInstance, value) {
 
 /**
  * Clears the input fields of a given fieldset
- * @param {OO.ui.FieldsetLayout} fieldset - The fieldset wose input fields should be emptied
+ * @param {OO.ui.FieldsetLayout} fieldset - The fieldset whose input fields should be emptied
  * @param {int[]} exclude - The indices of the fields in the fieldset that should not be cleared
  * @param {String[]} inputTypeExclude - An array of the names of types of fields that should not be cleared
  */
