@@ -383,21 +383,6 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
      * @abstract
      * Abstract method that needs to be overridden, displays an error message if this is not the case.
      * Expected behavior and parameters when overriding:
-     * Processes part of the result of an ask query. Expands an existing suggestionobject by adding dialog-specific
-     * data from the result to the suggestionObject.
-     * @param {Object} singleResult - A single row from the result of the api-call that contains all the information
-     * asked for in the query.
-     * @param {Object} suggestionObject - A single suggestion that should be expanded. Should already contain
-     * dialog-independent data.
-     */
-    EMMDialog.prototype.processDialogSpecificQueryResult = function (row, resultSet, suggestionObject, previousTitle) {
-        displayOverloadError("processQueryResult");
-    };
-
-    /**
-     * @abstract
-     * Abstract method that needs to be overridden, displays an error message if this is not the case.
-     * Expected behavior and parameters when overriding:
      * Depending on the type of resource and choices made by the user in the dialog, links to different types of resources
      * are created in the current page with different types of templates. This function returns what template type to use.
      * @returns {String} - Null in the abstract case, but should be a String containing the type of template to use.
@@ -634,6 +619,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
      * Processes a single query result into a suggestion object.
      * @param {String} row - String index of a row in the resultSet associative array.
      * @param {Object[]} resultSet - Associative array which functions like a dictionary, using strings as indexes, contains the result of a query.
+     * @param {Object} previousSuggestion - A suggestion object that contains the information about the previous processed suggestion, useful for comparing and sorting.
      * @returns {Object} suggestionObject - A suggestion object, containing relevant information about a particular page which can be used by various functions fillFields.
      */
     EMMDialog.prototype.processSingleQueryResult = function (row, resultSet, previousSuggestion) {

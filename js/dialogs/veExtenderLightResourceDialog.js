@@ -117,11 +117,10 @@ function createLightResourceDialog(EMMDialog, resourceType) {
      * resources of a certain type. May need to be further expanded for filling specific fields only present in more
      * specific types of Light Resource. This expands a suggestion object that already contains generic information for
      * an EMMDialog.
-     * @param {Object} singleResult - A single row from the result of the api-call that contains all the information
-     * about a Light Resource that was asked for in the query.
-     * @param {Object} suggestionObject - A single suggestion for the autocomplete dropdown that should be expanded.
-     * Should already contain data that every resource has.
-     * @returns {Object} - An updated suggestionObject, or null when the singleresult is invalid
+     * @param {String} row - String index of a row in the resultSet associative array.
+     * @param {Object[]} resultSet - Associative array which functions like a dictionary, using strings as indexes, contains the result of a query.
+     * @param {Object} previousSuggestion - A suggestion object that contains the information about the previous processed suggestion, useful for comparing and sorting.
+     * @returns {Object} - An updated suggestionObject.
      */
     EMMLightResourceDialog.prototype.processSingleQueryResult = function (row, resultSet, previousSuggestion) {
         var suggestionObject = EMMDialog.prototype.processSingleQueryResult.call(this, row, resultSet, previousSuggestion);

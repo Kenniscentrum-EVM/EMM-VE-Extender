@@ -274,11 +274,10 @@ function createFileDialog(LightResourceDialog) {
     /**
      * Processes part of the result of an ask query. Expands an existing suggestionobject by adding file-specific
      * data from the queryresult to the suggestionObject.
-     * @param {Object} singleResult - A single row from the result of the api-call that contains all the information
-     * about a file that was asked for in the query.
-     * @param {Object} suggestionObject - A single suggestion for the autocomplete dropdown that should be expanded.
-     * Should already contain data of generic resource and a lightResource.
-     * @returns {Object} - An updated suggestionObject, or null when the singleresult is invalid
+     * @param {String} row - String index of a row in the resultSet associative array.
+     * @param {Object[]} resultSet - Associative array which functions like a dictionary, using strings as indexes, contains the result of a query.
+     * @param {Object} previousSuggestion - A suggestion object that contains the information about the previous processed suggestion, useful for comparing and sorting.
+     * @returns {Object} - An updated suggestionObject;
      */
     EMMFileDialog.prototype.processSingleQueryResult = function (row, resultSet, previousSuggestion) {
         var suggestionObject = LightResourceDialog.prototype.processSingleQueryResult.call(this, row, resultSet, previousSuggestion);
