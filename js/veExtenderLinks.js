@@ -281,7 +281,6 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                 dialogInstance.validator.validateWidget(dialogInstance.presentationTitleField);
             }
         }
-
         //Add the two functions above to the queue of processes that will be executed when a dialog is opened
         return EMMDialog.super.prototype.getReadyProcess.call(this, data).first(openEditDialog, data).next(grabAndValidateText);
     };
@@ -695,14 +694,13 @@ function setDisabledDialogElements(dialogInstance, value) {
         var progressBar = new OO.ui.ProgressBarWidget({
             progress: false
         });
-        progressBar.$element.css("width", "100%");
-        progressBar.$element.find(".oo-ui-fieldLayout-field").css("width", "100%");
         var progressbarFieldLayout = new OO.ui.FieldLayout(progressBar);
-        progressbarFieldLayout.$element.css("width", "100%");
         dialogInstance.fieldset.addItems([progressbarFieldLayout]);
         dialogInstance.updateSize();
         progressbarFieldLayout.$element.find(".oo-ui-fieldLayout-field").css("width", "100%");
-        progressbarFieldLayout.$element.find(".oo-ui-fieldLayout-body").css("width", "100%").css("overflow", "hidden");
+        progressbarFieldLayout.$element.find(".oo-ui-fieldLayout-body").css("width", "100%");
+        progressbarFieldLayout.$element.find(".oo-ui-progressBarWidget").css("max-width", "100%");
+        progressbarFieldLayout.$element.find(".oo-ui-progressBarWidget-bar").css("background-color", "#347bff");
     }
     else {
         dialogInstance.fieldset.removeItems([dialogInstance.fieldset.getItems()[dialogInstance.fieldset.getItems().length-1]]);
