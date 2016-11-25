@@ -221,8 +221,7 @@ function createInternalLinkDialog(EMMDialog) {
 
     /**
      * Processes part of the result of an ask query. Expands an existing suggestionObject by adding internal link-specific
-     * data from the queryresult to the suggestionObject. Currently this function is empty, because an EMMInternalLinkDialog
-     * does not contain any other fields beyond the basic fields of an EMMDialog.
+     * data from the resultSet to the suggestionObject.
      * @param {Object} singleResult - A single row from the result of the api-call that contains all the information
      * about an internal link that was asked for in the query.
      * @param {Object} suggestionObject - A single suggestion for the autocomplete dropdown that should be expanded.
@@ -236,13 +235,19 @@ function createInternalLinkDialog(EMMDialog) {
 
         if(previousSuggestion != null)
         {
-            if(previousSuggestion.semanticTitle == suggestionObject.semanticTitle && previousSuggestion.value == previousSuggestion.semanticTitle)
+            if(previousSuggestion.semanticTitle == suggestionObject.semanticTitle && previousSuggestion.value == previousSuggestion.semanticTitle) {
+                console.log("xd");
                 previousSuggestion.value = checkAndPrintSuffix(previousSuggestion, resultSet[previousSuggestion.suffix[0].fulltext]);
-            else if (previousSuggestion.semanticTitle == suggestionObject.value)
+            }
+            if (previousSuggestion.semanticTitle == suggestionObject.value)
                 suggestionObject.value = checkAndPrintSuffix(suggestionObject, resultSet[suggestionObject.suffix[0].fulltext]);
         }
 
-        return suggestionObject;
+        for(var i = 0; i < suggestionObject.category.length; i++)
+            if(/Light Context/g.test(suggestionObject.category[i].fulltext) || /Project/g.test(suggestionObject.category[i].fulltext))
+                return suggestionObject;
+
+        return null;
     };
 
     /**
@@ -259,7 +264,7 @@ function createInternalLinkDialog(EMMDialog) {
         if(suffix != null)
             return suggestionObject.value + " (" + suffix.printouts["Semantic title"][0] + ")";
         else
-            return suggestionObject.value + " (Invalid suffix)";
+            return suggestionObject.value + " (Missing Supercontext)";
     }
 
     //Return the entire 'class' in order to pass this definition to the window factory.
