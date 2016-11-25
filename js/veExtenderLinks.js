@@ -288,7 +288,6 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                 dialogInstance.validator.validateWidget(dialogInstance.presentationTitleField);
             }
         }
-
         //Add the two functions above to the queue of processes that will be executed when a dialog is opened
         return EMMDialog.super.prototype.getReadyProcess.call(this, data).first(checkIfEdit, data).next(grabAndValidateText);
     };
@@ -506,16 +505,28 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
 
                 var surfaceModel = ve.init.target.getSurface().getModel();
 
+
+
+
+
                 //insert result in text
-                if (dialogInstance.selectionRange.start < 0 || dialogInstance.selectionRange.start > surfaceModel.getDocument().getLength()) {
-                    surfaceModel.getDocument().commit(ve.dm.Transaction.newFromReplacement(surfaceModel.getDocument(), new ve.Range(0, 0), myTemplate), true);
+                /*if (dialogInstance.selectionRange.start < 0 || dialogInstance.selectionRange.start > surfaceModel.getDocument().getLength()) {
+                    surfaceModel.getLinearFragment(new ve.Range(0, 0)).removeContent();
+                    surfaceModel.getLinearFragment(new ve.Range(0, 0)).insertContent(myTemplate);
+                    //surfaceModel.getDocument().commit(ve.dm.Transaction.newFromReplacement(surfaceModel.getDocument(), new ve.Range(0, 0), myTemplate), true);
                     return;
-                }
-                if (dialogInstance.selectionRange.end < 0 || dialogInstance.selectionRange.end > surfaceModel.getDocument().getLength()) {
-                    surfaceModel.getDocument().commit(ve.dm.Transaction.newFromReplacement(surfaceModel.getDocument(), new ve.Range(0, 0), myTemplate), true);
+                }*/
+                /*if (dialogInstance.selectionRange.end < 0 || dialogInstance.selectionRange.end > surfaceModel.getDocument().getLength()) {
+                    surfaceModel.getLinearFragment(new ve.Range(0, 0)).removeContent();
+                    surfaceModel.getLinearFragment(new ve.Range(0, 0)).insertContent(myTemplate);
+                    //surfaceModel.getDocument().commit(ve.dm.Transaction.newFromReplacement(surfaceModel.getDocument(), new ve.Range(0, 0), myTemplate), true);
                     return;
-                }
-                surfaceModel.getDocument().commit(ve.dm.Transaction.newFromReplacement(surfaceModel.getDocument(), dialogInstance.selectionRange, myTemplate), true);
+                }*/
+                //surfaceModel.getLinearFragment(dialogInstance.selectionRange).removeContent();
+                //surfaceModel.getLinearFragment(dialogInstance.selectionRange).insertContent(myTemplate);
+                surfaceModel.change(ve.dm.Transaction.newFromReplacement(surfaceModel.getDocument(), dialogInstance.selectionRange, myTemplate));
+
+                //surfaceModel.getDocument().commit(ve.dm.Transaction.newFromReplacement(surfaceModel.getDocument(), dialogInstance.selectionRange, myTemplate), true);
             };
             //Get the name of the current page and replace any underscores with whitespaces to prevent errors later on.
             var currentPageID = mw.config.get("wgPageName").replace(/_/g, " ");
@@ -786,7 +797,7 @@ function grabSelectedText(inputObject) {
             inputObject.setValue(selected);
         }
 
-        return new ve.Range(surfaceModel.getFragment().selection.range.start, surfaceModel.getFragment().selection.range.start + selected.length);
+        return new ve.Range(surfaceModel.getFragment().selection.range.start, surfaceModel.getFragment().selection.range.end);
     }
     else {
         return new ve.Range(0, 0);
