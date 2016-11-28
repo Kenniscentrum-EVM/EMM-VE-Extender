@@ -125,7 +125,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
         };
         this.dialogMode = this.modeEnum.INSERT_EXISTING;
         this.suggestionCache = null;
-        this.selectionRange = null;
+        this.selectedTextObject = null;
         //Create some common fields, present in all dialogs
         this.presentationTitleField = new OO.ui.TextInputWidget();
         this.titleField = new OO.ui.TextInputWidget();
@@ -283,7 +283,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
          * Inserts the text that was selected before the dialog was opened into the presentationtitlefield
          */
         function grabAndValidateText() {
-            dialogInstance.selectionRange = grabSelectedText(dialogInstance.presentationTitleField);
+            dialogInstance.selectedTextObject = grabSelectedText(dialogInstance.presentationTitleField);
             if (dialogInstance.presentationTitleField.value.length > 0) {
                 dialogInstance.validator.validateWidget(dialogInstance.presentationTitleField);
             }
@@ -506,17 +506,29 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
 
                 var surfaceModel = ve.init.target.getSurface().getModel();
 
-                //insert result in text
-                if (dialogInstance.selectionRange.start < 0 || dialogInstance.selectionRange.start > surfaceModel.getDocument().getLength()) {
-                    surfaceModel.change(ve.dm.Transaction.newFromReplacement(surfaceModel.getDocument(), new ve.Range(0, 0), myTemplate));
-                    return;
-                }
-                if (dialogInstance.selectionRange.end < 0 || dialogInstance.selectionRange.end > surfaceModel.getDocument().getLength()) {
-                    surfaceModel.change(ve.dm.Transaction.newFromReplacement(surfaceModel.getDocument(), new ve.Range(0, 0), myTemplate));
-                    return;
-                }
-                surfaceModel.change(ve.dm.Transaction.newFromReplacement(surfaceModel.getDocument(), dialogInstance.selectionRange, myTemplate));
+                var transaction = ve.dm.Transaction.newFromReplacement(surfaceModel.getDocument(), dialogInstance.selectedTextObject.range, myTemplate);
+                var newRange = transaction.getModifiedRange();
+                surfaceModel.change(transaction, newRange ? new ve.dm.LinearSelection(surfaceModel.getDocument(), newRange) : new ve.dm.NullSelection(surfaceModel.getDocument()));
                 surfaceModel.setNullSelection();
+
+
+                if (dialogInstance.selectedTextObject.whiteSpace) {
+                    var content = [];
+                    content.push({type: 'paragraph'});
+                    content = myTemplate.concat(' ');
+                    content.push({type: '/paragraph'});
+
+                    var tx = ve.dm.Transaction.newFromInsertion(surfaceModel.getDocument(), newRange.end, content);
+                    var rng = tx.getModifiedRange();
+                    surfaceModel.change(tx, rng ? new ve.dm.LinearSelection(surfaceModel.getDocument(), rng) : new ve.dm.NullSelection(surfaceModel.getDocument()));
+                }
+                /*
+                 var annotations = surfaceModel.getDocument().data
+                 .getAnnotationsFromOffset( dialogInstance.selectedTextObject.range.start === 0 ? 0 : dialogInstance.selectedTextObject.range.start - 1 );
+                 ve.dm.Document.static.addAnnotationsToData( myTemplate, annotations );
+                 */
+
+
             };
             //Get the name of the current page and replace any underscores with whitespaces to prevent errors later on.
             var currentPageID = mw.config.get("wgPageName").replace(/_/g, " ");
@@ -759,11 +771,13 @@ function semanticCreateWithFormQuery(query, callback, target, form) {
 /**
  * Grabs the text that is selected (outside the dialog) and inserts it into the presentationtitle field inside the dialog
  * @param {OO.ui.TextInputWidget} inputObject - The field in which the selected text should be inserted
- * @returns {ve.Range}
+ * @returns {Object}
  */
 function grabSelectedText(inputObject) {
+    var selectedTextObject = {};
     var surfaceModel = ve.init.target.getSurface().getModel();
     var selected = "";
+    selectedTextObject.whiteSpace = false;
     if (surfaceModel.getFragment().selection.range) {
         for (var i = surfaceModel.getFragment().selection.range.start; i < surfaceModel.getFragment().selection.range.end; i++) {
             var node = ve.init.target.getSurface().getModel().getDocument().getDocumentNode().getNodeFromOffset(i);
@@ -781,17 +795,19 @@ function grabSelectedText(inputObject) {
                 toAdd = element[0];
             selected += toAdd;
         }
+
         if (selected.length > 0) {
             if (selected.charAt(selected.length - 1) == " ")
-                selected = selected.substr(0, selected.length - 1);
-            inputObject.setValue(selected);
+                selectedTextObject.whiteSpace = true; //define length here?
         }
 
-        return new ve.Range(surfaceModel.getFragment().selection.range.start, surfaceModel.getFragment().selection.range.end);
+        inputObject.setValue(selected);
+        selectedTextObject.range = new ve.Range(surfaceModel.getFragment().selection.range.start, surfaceModel.getFragment().selection.range.end);
     }
-    else {
-        return new ve.Range(0, 0);
-    }
+    else
+        selectedTextObject.range = new ve.Range(0, 0);
+
+    return selectedTextObject;
 }
 
 /**
