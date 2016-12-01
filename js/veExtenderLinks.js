@@ -776,7 +776,6 @@ function grabSelectedText(inputObject) {
     }
     else
         return new ve.Range(0, 0);
-
 }
 
 /**
