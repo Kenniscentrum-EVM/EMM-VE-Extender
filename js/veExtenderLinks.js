@@ -503,45 +503,21 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                     function () {
                         setAutoCompleteEnabled(dialogInstance, dialogInstance.getAutoCompleteStateForMode(dialogInstance.dialogMode));
                     });
-
                 var surfaceModel = ve.init.target.getSurface().getModel();
-
-                var transaction = ve.dm.Transaction.newFromReplacement(surfaceModel.getDocument(), dialogInstance.selectedTextObject.range, myTemplate);
+                var transaction = ve.dm.Transaction.newFromReplacement(surfaceModel.getDocument(), dialogInstance.selectedTextObject, myTemplate);
                 var newRange = transaction.getModifiedRange();
                 surfaceModel.change(transaction, newRange ? new ve.dm.LinearSelection(surfaceModel.getDocument(), newRange) : new ve.dm.NullSelection(surfaceModel.getDocument()));
                 surfaceModel.setNullSelection();
-
-
-                if (dialogInstance.selectedTextObject.whiteSpace) {
-                    var content = [];
-                    content.push({type: 'paragraph'});
-                    content = myTemplate.concat(' ');
-                    content.push({type: '/paragraph'});
-
-                    var tx = ve.dm.Transaction.newFromInsertion(surfaceModel.getDocument(), newRange.end, content);
-                    var rng = tx.getModifiedRange();
-                    surfaceModel.change(tx, rng ? new ve.dm.LinearSelection(surfaceModel.getDocument(), rng) : new ve.dm.NullSelection(surfaceModel.getDocument()));
-                }
-                /*
-                 var annotations = surfaceModel.getDocument().data
-                 .getAnnotationsFromOffset( dialogInstance.selectedTextObject.range.start === 0 ? 0 : dialogInstance.selectedTextObject.range.start - 1 );
-                 ve.dm.Document.static.addAnnotationsToData( myTemplate, annotations );
-                 */
-
-
             };
             //Get the name of the current page and replace any underscores with whitespaces to prevent errors later on.
             var currentPageID = mw.config.get("wgPageName").replace(/_/g, " ");
 
-            if (!dialogInstance.isExistingResource) {
+            if (!dialogInstance.isExistingResource || dialogInstance.isEdit()) {
                 //In this case, dialoginstance.suggestion is empty, so build and execute the query
                 dialogInstance.buildAndExecuteQuery(currentPageID, insertCallback, linkData);
-            } else if (dialogInstance.isEdit()) { //dealing with an existing resource, so isEdit exists, otherwise isEdit would crash.
-                dialogInstance.buildAndExecuteQuery(currentPageID, insertCallback, linkData);
             }
-            else {
+            else
                 insertCallback(dialogInstance.suggestion.data);
-            }
             dialogInstance.close();
         };
 
@@ -774,10 +750,8 @@ function semanticCreateWithFormQuery(query, callback, target, form) {
  * @returns {Object}
  */
 function grabSelectedText(inputObject) {
-    var selectedTextObject = {};
     var surfaceModel = ve.init.target.getSurface().getModel();
     var selected = "";
-    selectedTextObject.whiteSpace = false;
     if (surfaceModel.getFragment().selection.range) {
         for (var i = surfaceModel.getFragment().selection.range.start; i < surfaceModel.getFragment().selection.range.end; i++) {
             var node = ve.init.target.getSurface().getModel().getDocument().getDocumentNode().getNodeFromOffset(i);
@@ -795,19 +769,16 @@ function grabSelectedText(inputObject) {
                 toAdd = element[0];
             selected += toAdd;
         }
-
-        if (selected.length > 0) {
-            if (selected.charAt(selected.length - 1) == " ")
-                selectedTextObject.whiteSpace = true; //define length here?
-        }
-
+        if (selected.length > 0)
+            while (selected.charAt(selected.length - 1) == " ")
+                selected = selected.substring(0, selected.length - 1);
+        var range = surfaceModel.getFragment().selection.range;
         inputObject.setValue(selected);
-        selectedTextObject.range = new ve.Range(surfaceModel.getFragment().selection.range.start, surfaceModel.getFragment().selection.range.end);
+        return new ve.Range(range.start, range.start + selected.length);
     }
     else
-        selectedTextObject.range = new ve.Range(0, 0);
+        return new ve.Range(0, 0);
 
-    return selectedTextObject;
 }
 
 /**
