@@ -126,7 +126,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
         };
         this.dialogMode = this.modeEnum.INSERT_EXISTING;
         this.suggestionCache = null;
-        this.selectionRange = null;
+        this.selectedTextObject = null;
         //Create some common fields, present in all dialogs
         this.presentationTitleField = new OO.ui.TextInputWidget();
         this.titleField = new OO.ui.TextInputWidget();
@@ -284,7 +284,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
          * Inserts the text that was selected before the dialog was opened into the presentationtitlefield
          */
         function grabAndValidateText() {
-            dialogInstance.selectionRange = grabSelectedText(dialogInstance.presentationTitleField);
+            dialogInstance.selectedTextObject = grabSelectedText(dialogInstance.presentationTitleField);
             if (dialogInstance.presentationTitleField.value.length > 0) {
                 dialogInstance.validator.validateWidget(dialogInstance.presentationTitleField);
             }
@@ -490,33 +490,21 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                         console.log("WEW");
                         setAutoCompleteEnabled(dialogInstance, dialogInstance.getAutoCompleteStateForMode(dialogInstance.dialogMode));
                     });
-
                 var surfaceModel = ve.init.target.getSurface().getModel();
-
-                //insert result in text
-                if (dialogInstance.selectionRange.start < 0 || dialogInstance.selectionRange.start > surfaceModel.getDocument().getLength()) {
-                    surfaceModel.change(ve.dm.Transaction.newFromReplacement(surfaceModel.getDocument(), new ve.Range(0, 0), myTemplate));
-                    return;
-                }
-                if (dialogInstance.selectionRange.end < 0 || dialogInstance.selectionRange.end > surfaceModel.getDocument().getLength()) {
-                    surfaceModel.change(ve.dm.Transaction.newFromReplacement(surfaceModel.getDocument(), new ve.Range(0, 0), myTemplate));
-                    return;
-                }
-                surfaceModel.change(ve.dm.Transaction.newFromReplacement(surfaceModel.getDocument(), dialogInstance.selectionRange, myTemplate));
+                var transaction = ve.dm.Transaction.newFromReplacement(surfaceModel.getDocument(), dialogInstance.selectedTextObject, myTemplate);
+                var newRange = transaction.getModifiedRange();
+                surfaceModel.change(transaction, newRange ? new ve.dm.LinearSelection(surfaceModel.getDocument(), newRange) : new ve.dm.NullSelection(surfaceModel.getDocument()));
                 surfaceModel.setNullSelection();
             };
             //Get the name of the current page and replace any underscores with whitespaces to prevent errors later on.
             var currentPageID = mw.config.get("wgPageName").replace(/_/g, " ");
 
-            if (!dialogInstance.isExistingResource) {
+            if (!dialogInstance.isExistingResource || dialogInstance.isEdit()) {
                 //In this case, dialoginstance.suggestion is empty, so build and execute the query
                 dialogInstance.buildAndExecuteQuery(currentPageID, insertCallback, linkData);
-            } else if (dialogInstance.isEdit()) { //dealing with an existing resource, so isEdit exists, otherwise isEdit would crash.
-                dialogInstance.buildAndExecuteQuery(currentPageID, insertCallback, linkData);
             }
-            else {
+            else
                 insertCallback(dialogInstance.suggestion.data);
-            }
             dialogInstance.close();
         };
 
@@ -754,7 +742,7 @@ function semanticCreateWithFormQuery(query, callback, target, form) {
 /**
  * Grabs the text that is selected (outside the dialog) and inserts it into the presentationtitle field inside the dialog
  * @param {OO.ui.TextInputWidget} inputObject - The field in which the selected text should be inserted
- * @returns {ve.Range}
+ * @returns {Object}
  */
 function grabSelectedText(inputObject) {
     var surfaceModel = ve.init.target.getSurface().getModel();
@@ -776,17 +764,16 @@ function grabSelectedText(inputObject) {
                 toAdd = element[0];
             selected += toAdd;
         }
-        if (selected.length > 0) {
-            if (selected.charAt(selected.length - 1) == " ")
-                selected = selected.substr(0, selected.length - 1);
-            inputObject.setValue(selected);
-        }
-
-        return new ve.Range(surfaceModel.getFragment().selection.range.start, surfaceModel.getFragment().selection.range.end);
+        if (selected.length > 0)
+            while (selected.charAt(selected.length - 1) == " ")
+                selected = selected.substring(0, selected.length - 1);
+        var range = surfaceModel.getFragment().selection.range;
+        inputObject.setValue(selected);
+        return new ve.Range(range.start, range.start + selected.length);
     }
-    else {
+    else
         return new ve.Range(0, 0);
-    }
+
 }
 
 /**
