@@ -50,6 +50,7 @@ function createLightResourceDialog(EMMDialog, resourceType) {
      * specific kinds of light resources.
      */
     EMMLightResourceDialog.prototype.buildQuery = function (currentPageID) {
+        console.log("in lighresource is currentPageID: ", currentPageID);
         var query = "";
         query += "Resource Description[title]=" + this.titleField.getValue() +
             "&Resource Description[creator]=" + this.creatorField.getValue() +

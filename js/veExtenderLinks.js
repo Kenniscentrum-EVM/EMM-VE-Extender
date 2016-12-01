@@ -558,7 +558,6 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
          * A function that should be called after the askQuery is done gathering all available resources of a specified type
          * This function initiates the autocomplete library for the resource input field
          * The user will be able to pick a resource from the list of all resources gathered by the askQuery
-         * @param {Object[]} queryResults - An array containing all the possible options for the autocomplete dropdown
          */
         var autoCompleteCallback = function () {
             toggleAutoComplete(dialogInstance);
