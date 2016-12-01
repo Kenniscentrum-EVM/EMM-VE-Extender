@@ -13,6 +13,7 @@ function createFileDialog(LightResourceDialog) {
     /**
      * Calls the constructor of it's super class, EMMLightResourceDialog. Also defines some queries used to get information
      * about files.
+     * @extends EMMLightResourceDialog
      * @constructor
      */
     var EMMFileDialog = function () {
@@ -103,6 +104,14 @@ function createFileDialog(LightResourceDialog) {
         ]);
     };
 
+
+    /**
+     * Method that switches the dialog to a given mode.
+     * This method preforms all necessary operations to visually and logically switch the state of the dialog to a different mode.
+     *
+     * Dialog modes are defined in the modeEnum variable (which is defined in EMMDialog) this enum should always be used when switching modes.
+     * @param {number} mode - Dialog mode to switch to.
+     */
     EMMFileDialog.prototype.executeModeChange = function (mode) {
         this.dialogMode = mode;
         var input = null;
@@ -129,25 +138,25 @@ function createFileDialog(LightResourceDialog) {
                     clearInputFields(this.fieldset, [1, 2], this.noEditFieldTypes);
                 break;
             case this.modeEnum.EDIT_EXISTING:
+                this.$element.find(".oo-ui-processDialog-title").text(OO.ui.deferMsg("visualeditor-emm-filedialog-title-edit")());
                 break;
         }
         this.validator.cleanUpForm();
-        toggleAutoComplete(this);
+        setAutoCompleteEnabled(this, this.getAutoCompleteStateForMode(mode));
     };
 
     /**
-     * TODO Commentaar Nick
+     * This method is responsible for determining necessary mode changes and executing them.
+     * The method is executed every time the state of the file field or title field changes.
      */
     EMMFileDialog.prototype.testAndChangeDialogMode = function () {
         switch (this.dialogMode) {
             case this.modeEnum.INSERT_EXISTING:
-                if (this.fileField.currentFile == "")
-                    return;
-                if ((!this.isExistingResource && this.fileField.currentFile != null))
+                if ((!this.isExistingResource && this.fileField.getValue() != null))
                     this.executeModeChange(this.modeEnum.INSERT_NEW);
                 break;
             case this.modeEnum.INSERT_NEW:
-                if (this.fileField.currentFile == null)
+                if (this.fileField.getValue() == null)
                     this.executeModeChange(this.modeEnum.INSERT_EXISTING);
                 break;
             case this.modeEnum.EDIT_EXISTING:

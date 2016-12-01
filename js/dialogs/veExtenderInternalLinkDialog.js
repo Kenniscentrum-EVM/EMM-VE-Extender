@@ -14,6 +14,7 @@ function createInternalLinkDialog(EMMDialog) {
     /**
      * Calls the constructor of it's super class, EMMDialog. Also defines some queries used to get information
      * about internal links.
+     * @extends EMMDialog
      * @constructor
      */
     var EMMInternalLinkDialog = function () {
@@ -43,7 +44,7 @@ function createInternalLinkDialog(EMMDialog) {
         //Define what functions to execute when the content of this field changes.
         this.titleField.onChangeFunctions = [function () {
             if (this.isExistingResource && this.dialogMode != this.modeEnum.EDIT_EXISTING) {
-                if (dialogInstance.titleField.value.length == 0) {
+                if (dialogInstance.titleField.getValue().length == 0) {
                     this.isExistingResource = false;
                 }
             }
@@ -62,7 +63,11 @@ function createInternalLinkDialog(EMMDialog) {
     };
 
     /**
-     * TODO expand this and comment
+     * Method that switches the dialog to a given mode.
+     * This method preforms all necessary operations to visually and logically switch the state of the dialog to a different mode.
+     *
+     * Dialog modes are defined in the modeEnum variable (which is defined in EMMDialog) this enum should always be used when switching modes.
+     * @param {number} mode - Dialog mode to switch to.
      */
     EMMInternalLinkDialog.prototype.executeModeChange = function (mode) {
         this.dialogMode = mode;
@@ -70,28 +75,58 @@ function createInternalLinkDialog(EMMDialog) {
             case this.modeEnum.INSERT_EXISTING:
                 this.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-dialoginternallinktitle")());
                 break;
+            case this.modeEnum.INSERT_AND_EDIT_EXISTING:
+                this.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-inlidialog-title-insert-edit")());
+                break;
             case this.modeEnum.INSERT_NEW:
-                this.$element.find('.oo-ui-processDialog-title').text("Aanpassen & Invoegen koppeling naar pagina");
+                this.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-inlidialog-title-npage")());
                 break;
             case this.modeEnum.EDIT_EXISTING:
                 this.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-inlidialog-title-edit")());
                 break;
         }
-        toggleAutoComplete(this);
-
+        setAutoCompleteEnabled(this, this.getAutoCompleteStateForMode(mode));
     };
 
     /**
-     * TODO expand this and comment
+     * @abstract
+     * Retrieves the auto complete state for a given dialog mode.
+     * @param {modeEnum} mode - dialog mode to get the auto complete state for.
+     * @returns {boolean} - The value the auto complete should be set to.
+     */
+    EMMInternalLinkDialog.prototype.getAutoCompleteStateForMode = function (mode) {
+        switch (mode) {
+            case this.modeEnum.INSERT_EXISTING:
+                return true;
+            case this.modeEnum.INSERT_AND_EDIT_EXISTING:
+                return false;
+            case this.modeEnum.INSERT_NEW:
+                return true;
+            case this.modeEnum.EDIT_EXISTING:
+                return false;
+            default:
+                return false;
+        }
+    };
+
+    /**
+     * This method is responsible for determining necessary mode changes and executing them.
+     * The method is executed every time the state of the title field changes.
      */
     EMMInternalLinkDialog.prototype.testAndChangeDialogMode = function () {
         switch (this.dialogMode) {
             case this.modeEnum.INSERT_EXISTING:
                 if (this.isExistingResource && this.titleField.getValue() != this.suggestion.value)
+                    this.executeModeChange(this.modeEnum.INSERT_AND_EDIT_EXISTING);
+                if (!this.isExistingResource && this.titleField.getValue().length > 0)
                     this.executeModeChange(this.modeEnum.INSERT_NEW);
                 break;
             case this.modeEnum.INSERT_NEW:
-                if ((this.isExistingResource && this.titleField.getValue() == this.suggestion.value) || !this.isExistingResource)
+                if (this.isExistingResource || this.titleField.getValue().length == 0)
+                    this.executeModeChange(this.modeEnum.INSERT_EXISTING);
+                break;
+            case this.modeEnum.INSERT_AND_EDIT_EXISTING:
+                if ((this.isExistingResource && this.titleField.getValue() == this.suggestion.value) || this.titleField.getValue().length == 0)
                     this.executeModeChange(this.modeEnum.INSERT_EXISTING);
                 break;
         }
@@ -110,7 +145,7 @@ function createInternalLinkDialog(EMMDialog) {
     EMMInternalLinkDialog.prototype.buildAndExecuteQuery = function (currentPageID, insertCallback, linkdata) {
         var dialogInstance = this;
         var query = "";
-        if (this.isExistingResource) { //This is true whenever we're editing an exisiting resource
+        if (this.isExistingResource) { //This is true whenever we're editing an existing resource
             var formCategory = "";
             for (var i = 0; i < this.suggestion.category.length; i++) {
                 if (/Light Context/g.test(this.suggestion.category[i].fulltext)) {
@@ -126,10 +161,9 @@ function createInternalLinkDialog(EMMDialog) {
                     break;
                 }
             }
-        }
-        else {
+        } else {
             //Start building the sfautoedit query
-            query += "Project[Name]=" + this.titleField.getValue();
+            query += "Light Context[Heading]=" + this.titleField.getValue();
             query += "&Light Context[Supercontext]=" + currentPageID;
             //Find the topcontext of the current page
             var api = new mw.Api();
@@ -161,7 +195,12 @@ function createInternalLinkDialog(EMMDialog) {
      * @param {String} form - What type of form to use in order to execute the query.
      */
     EMMInternalLinkDialog.prototype.executeQuery = function (query, insertCallback, linkdata, form) {
-        semanticCreateWithFormQuery(query, insertCallback, linkdata, form);
+        var target = "";
+        //Set the target of the api-call to the internal title of an existing internal link, if the internal link already exists.
+        if (this.isExistingResource) {
+            target = linkdata;
+        }
+        semanticCreateWithFormQuery(query, insertCallback, target, form);
     };
 
     /**

@@ -6,14 +6,14 @@
  */
 function addEMMLinks() {
     //Create a File-dialog and add a menu item for the dialog
-    loadEMMDialog("File", "file", OO.ui.deferMsg("visualeditor-emm-menufiletitle"), OO.ui.deferMsg("visualeditor-emm-dialogfiletitle"),
-        function (namedata, linkdata) {
+    loadEMMDialog("File", "file", OO.ui.deferMsg("visualeditor-emm-menufiletitle")(), OO.ui.deferMsg("visualeditor-emm-dialogfiletitle")(),
+        function (nameData, linkData) {
             return {
                 resource: {
-                    wt: linkdata
+                    wt: linkData
                 },
                 name: {
-                    wt: namedata
+                    wt: nameData
                 },
                 dialog: {
                     wt: "process-file-dialog"
@@ -22,14 +22,14 @@ function addEMMLinks() {
         }
     );
     //Create an internal-link-dialog and add a menu item for the dialog
-    loadEMMDialog("Internal link", "linkpage", OO.ui.deferMsg("visualeditor-emm-menuinternallinktitle"), OO.ui.deferMsg("visualeditor-emm-dialoginternallinktitle"),
-        function (namedata, linkdata) {
+    loadEMMDialog("Internal link", "linkpage", OO.ui.deferMsg("visualeditor-emm-menuinternallinktitle")(), OO.ui.deferMsg("visualeditor-emm-dialoginternallinktitle")(),
+        function (nameData, linkData) {
             return {
                 link: {
-                    wt: linkdata
+                    wt: linkData
                 },
                 name: {
-                    wt: namedata
+                    wt: nameData
                 },
                 dialog: {
                     wt: "process-linkpage-dialog"
@@ -38,14 +38,14 @@ function addEMMLinks() {
         }
     );
     //Create an external-link-dialog and add a menu item for the dialog
-    loadEMMDialog("External link", "linkwebsite", OO.ui.deferMsg("visualeditor-emm-menuexternallinktitle"), OO.ui.deferMsg("visualeditor-emm-dialogexternallinktitle"),
-        function (namedata, linkdata) {
+    loadEMMDialog("External link", "linkwebsite", OO.ui.deferMsg("visualeditor-emm-menuexternallinktitle")(), OO.ui.deferMsg("visualeditor-emm-dialogexternallinktitle")(),
+        function (nameData, linkData) {
             return {
                 resource: {
-                    wt: linkdata
+                    wt: linkData
                 },
                 name: {
-                    wt: namedata
+                    wt: nameData
                 },
                 dialog: {
                     wt: "process-linkwebsite-dialog"
@@ -74,7 +74,6 @@ function loadEMMDialog(resourceType, toolId, menuText, dialogText, templateResul
     var tool = function (config) {
         ve.ui.Tool.call(this, config);
         this.setDisabled(false);
-        this.allowCollapse = null;
         this.$element.addClass("oo-ui-tool-name-extratemplate");
     };
 
@@ -112,19 +111,20 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
         this.noEditFieldTypes = ["OoUiLabelWidget","OoUiProgressBarWidget"];
         this.suggestion = null;
         this.isExistingResource = false;
-        /* Dialog modes:
-         * 0 : Existing reference
-         * 1 : New reference
-         * 2 : Editing reference
+        /**
+         * Enum for dialog modes
+         * @readonly
+         * @enum {number}
          */
         this.modeEnum = {
             INSERT_EXISTING: 0,
             INSERT_NEW: 1,
-            EDIT_EXISTING: 2
+            EDIT_EXISTING: 2,
+            INSERT_AND_EDIT_EXISTING: 3
         };
         this.dialogMode = this.modeEnum.INSERT_EXISTING;
         this.suggestionCache = null;
-        this.selectionRange = null;
+        this.selectedTextObject = null;
         //Create some common fields, present in all dialogs
         this.presentationTitleField = new OO.ui.TextInputWidget();
         this.titleField = new OO.ui.TextInputWidget();
@@ -244,7 +244,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
             {
                 dialogInstance.executeModeChange(dialogInstance.modeEnum.EDIT_EXISTING);
                 setDisabledInputFields(dialogInstance.fieldset, true);
-                data.source = data.source.replace(/\ /g, "_"); //convert whitespaces to underscores
+                data.source = data.source.replace(/ /g, "_"); //convert whitespaces to underscores
                 var api = new mw.Api();
                 var query = dialogInstance.getEditQuery(data.source); //getEditQuery retrieves the correct query for us.
                 api.get({
@@ -259,6 +259,12 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                             continue;
                         }
                         var suggestion = dialogInstance.processSingleQueryResult(row, res);
+                        if (suggestion == null) {
+                            mw.notify(OO.ui.deferMsg("visualeditor-emm-notification-err-invalidlink-body")(), {title: OO.ui.deferMsg("visualeditor-emm-notification-err-invalidlink-title")()});
+                            dialogInstance.close();
+                            return;
+                        }
+
                         dialogInstance.suggestion = suggestion;
                         dialogInstance.titleField.setValue(suggestion.value);
                         setDisabledInputFields(dialogInstance.fieldset, false);
@@ -276,7 +282,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
          * Inserts the text that was selected before the dialog was opened into the presentationtitlefield
          */
         function grabAndValidateText() {
-            dialogInstance.selectionRange = grabSelectedText(dialogInstance.presentationTitleField);
+            dialogInstance.selectedTextObject = grabSelectedText(dialogInstance.presentationTitleField);
             if (dialogInstance.presentationTitleField.value.length > 0) {
                 dialogInstance.validator.validateWidget(dialogInstance.presentationTitleField);
             }
@@ -320,6 +326,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
      These functions are an attempt to emulate the idea of an abstract method as seen in other Object Oriented languages*/
 
     /**
+     * @abstract
      * Abstract method that needs to be overridden, displays an error message if this is not the case.
      * Expected behavior when overriding:
      * Creates all the inputfields of a dialog that are not yet created in the constructor of the general EMMDialog.
@@ -329,16 +336,18 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
     };
 
     /**
+     * @abstract
      * Abstract method that needs to be overridden, displays an error message if this is not the case.
      * Expected behavior when overriding:
      * Preforms the a mode change, this may include visual changes to a dialog.
-     * @param {Integer} mode - Mode to be switched to.
+     * @param {number} mode - Mode to be switched to.
      */
     EMMDialog.prototype.executeModeChange = function (mode) {
         displayOverloadError("executeModeChange");
     };
 
     /**
+     * @abstract
      * Abstract method that needs to be overridden, displays an error message if this is not the case.
      * Expected behavior when overriding:
      * Checks the status of the dialog and changes the dialogmode if necessary.
@@ -348,6 +357,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
     };
 
     /**
+     * @abstract
      * Abstract method that needs to be overridden, displays an error message if this is not the case.
      * Expected behavior and parameters when overriding:
      * Builds and executes a query that creates a new resource or edits an existing one with the sfautoedit api-calll.
@@ -356,28 +366,30 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
      * characters and whitespace
      * @param {function} insertCallback - The function that should be executed after a new resource has been added or
      * an existing one was changed. This function handles inserting a link into the current page.
-     * @param {String} linkdata - In case of an existing resource, linkdata contains the internal name of the resource
-     * in order to let the api know what existing resource should be edited. Otherwise linkdata is just an empty string.
+     * @param {String} linkData - In case of an existing resource, linkData contains the internal name of the resource
+     * in order to let the api know what existing resource should be edited. Otherwise linkData is just an empty string.
      */
-    EMMDialog.prototype.buildAndExecuteQuery = function (currentPageID, insertCallback, linkdata) {
+    EMMDialog.prototype.buildAndExecuteQuery = function (currentPageID, insertCallback, linkData) {
         displayOverloadError("buildAndExecuteQuery");
     };
 
     /**
+     * @abstract
      * Abstract method that needs to be overridden, displays an error message if this is not the case.
      * Expected behavior and parameters when overriding:
      * Executes a query by using the mediawiki api. This query either creates a new resource or updates an existing one
      * @param {String} query - The query that should be executed. The query should be suitable for an sfautoedit api call.
      * @param {function} insertCallback - A function that handles inserting a link to the newly created or edited resource
      * into the current page. This is executed after the api has finished processing the request.
-     * @param {String} linkdata - The internal title of a resource. Should be set to the internal title of the resource
+     * @param {String} linkData - The internal title of a resource. Should be set to the internal title of the resource
      * you want to edit, or be empty when creating a new resource.
      */
-    EMMDialog.prototype.executeQuery = function (query, insertCallback, linkdata) {
+    EMMDialog.prototype.executeQuery = function (query, insertCallback, linkData) {
         displayOverloadError("executeQuery");
     };
 
     /**
+     * @abstract
      * Abstract method that needs to be overridden, displays an error message if this is not the case.
      * Expected behavior and parameters when overriding:
      * Fill the fields of the dialog based on a resource the user has selected from the autocomplete dropdown.
@@ -387,6 +399,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
     };
 
     /**
+     * @abstract
      * Abstract method that needs to be overridden, displays an error message if this is not the case.
      * Expected behavior and parameters when overriding:
      * Processes part of the result of an ask query. Expands an existing suggestionobject by adding dialog-specific
@@ -401,6 +414,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
     };
 
     /**
+     * @abstract
      * Abstract method that needs to be overridden, displays an error message if this is not the case.
      * Expected behavior and parameters when overriding:
      * Depending on the type of resource and choices made by the user in the dialog, links to different types of resources
@@ -410,6 +424,16 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
     EMMDialog.prototype.findTemplateToUse = function () {
         displayOverloadError("findTemplateToUse");
         return null;
+    };
+
+    /**
+     * @abstract
+     * Retrieves the auto complete state for a given dialog mode.
+     * @param {modeEnum} mode - dialog mode to get the auto complete state for.
+     * @returns {boolean} - The value the auto complete should be set to.
+     */
+    EMMDialog.prototype.getAutoCompleteStateForMode = function (mode) {
+        displayOverloadError("findTemplateToUse");
     };
 
     var dialog = null;
@@ -460,12 +484,12 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
          */
         var insertButtonHandler = function () {
             setDisabledDialogElements(dialogInstance, true);
-            var namedata = dialogInstance.presentationTitleField.getValue();
+            var nameData = dialogInstance.presentationTitleField.getValue();
             if (dialogInstance.suggestion != null) {
-                var linkdata = dialogInstance.suggestion.data.length > 0 ? dialogInstance.suggestion.data : "";
+                var linkData = dialogInstance.suggestion.data.length > 0 ? dialogInstance.suggestion.data : "";
             }
             else {
-                linkdata = "";
+                linkData = "";
             }
 
             /**
@@ -475,7 +499,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
              */
             var insertCallback = function (linkTitle) {
                 var templateToUse = dialogInstance.findTemplateToUse();
-                var mytemplate = [
+                var myTemplate = [
                     {
                         type: "mwTransclusionInline",
                         attributes: {
@@ -487,7 +511,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                                                 href: "Template:" + templateToUse,
                                                 wt: templateToUse
                                             },
-                                            params: templateResult(namedata, linkTitle)
+                                            params: templateResult(nameData, linkTitle)
                                         }
                                     }
                                 ]
@@ -495,31 +519,23 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                         }
                     }
                 ];
-                //insert result in text
-                var surfaceModel = ve.init.target.getSurface().getModel();
-                if (dialogInstance.selectionRange.start < 0 || dialogInstance.selectionRange.start > surfaceModel.getDocument().getLength()) {
-                    surfaceModel.getLinearFragment(new ve.Range(0, 0)).insertContent(mytemplate);
-                    return;
-                }
-                if (dialogInstance.selectionRange.end < 0 || dialogInstance.selectionRange.end > surfaceModel.getDocument().getLength()) {
-                    surfaceModel.getLinearFragment(new ve.Range(0, 0)).insertContent(mytemplate);
-                    return;
-                }
-                surfaceModel.getLinearFragment(dialogInstance.selectionRange).insertContent(mytemplate);
+
                 dialogInstance.semanticAskQuery(dialogInstance.getAutocompleteQuery(),
                     function () {
-                        setAutoCompleteEnabled(dialogInstance, false);
-                        toggleAutoComplete(dialogInstance);
+                        setAutoCompleteEnabled(dialogInstance, dialogInstance.getAutoCompleteStateForMode(dialogInstance.dialogMode));
                     });
-                dialogInstance.close();
-                setDisabledDialogElements(dialogInstance, false);
+                var surfaceModel = ve.init.target.getSurface().getModel();
+                var transaction = ve.dm.Transaction.newFromReplacement(surfaceModel.getDocument(), dialogInstance.selectedTextObject, myTemplate);
+                var newRange = transaction.getModifiedRange();
+                surfaceModel.change(transaction, newRange ? new ve.dm.LinearSelection(surfaceModel.getDocument(), newRange) : new ve.dm.NullSelection(surfaceModel.getDocument()));
+                surfaceModel.setNullSelection();
             };
-
             //Get the name of the current page and replace any underscores with whitespaces to prevent errors later on.
             var currentPageID = mw.config.get("wgPageName").replace(/_/g, " ");
-
             //Check some variables and decide what has to be done
             dialogInstance.executeInsertAction(insertCallback, currentPageID, linkdata);
+            dialogInstance.close();
+            setDisabledDialogElements(dialogInstance, false);
         };
 
         /**
@@ -560,7 +576,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
          * The user will be able to pick a resource from the list of all resources gathered by the askQuery
          */
         var autoCompleteCallback = function () {
-            toggleAutoComplete(dialogInstance);
+            setAutoCompleteEnabled(dialogInstance, dialogInstance.getAutoCompleteStateForMode(dialogInstance.dialogMode));
         };
 
         //Execute the askQuery in order to gather all resources
@@ -713,7 +729,7 @@ function setDisabledDialogElements(dialogInstance, value) {
  * @param {int[]} exclude - The indices of the fields in the fieldset that should not be cleared
  * @param {String[]} inputTypeExclude - An array of the names of types of fields that should not be cleared
  */
-function clearInputFields(fieldset, exclude, inputTypeExclude) {
+function clearInputFields(fieldset, exclude, inputTypeExclude) { //TODO rewrite this function
     if (exclude != null) {
         for (var i = 0; i < fieldset.getItems().length; i++) {
             var ex = false;
@@ -723,7 +739,10 @@ function clearInputFields(fieldset, exclude, inputTypeExclude) {
             if (!ex) {
                 //Make sure the fieldlayout doens't contain a field of the given types
                 if ($.inArray(fieldset.getItems()[i].getField().constructor.name, inputTypeExclude) == -1) {
-                    fieldset.getItems()[i].getField().setValue("");
+                    if ((fieldset.getItems()[i].getField() instanceof OO.ui.SelectFileWidget))
+                        fieldset.getItems()[i].getField().setValue(null);
+                    else
+                        fieldset.getItems()[i].getField().setValue("");
                 }
             }
         }
@@ -732,7 +751,10 @@ function clearInputFields(fieldset, exclude, inputTypeExclude) {
         for (var i = 0; i < fieldset.getItems().length; i++) {
             //Make sure the fieldlayout doens't contain just a field of the given types
             if ($.inArray(fieldset.getItems()[i].getField().constructor.name, inputTypeExclude) == -1) {
-                fieldset.getItems()[i].getField().setValue("");
+                if ((fieldset.getItems()[i].getField() instanceof OO.ui.SelectFileWidget))
+                    fieldset.getItems()[i].getField().setValue(null);
+                else
+                    fieldset.getItems()[i].getField().setValue("");
             }
         }
     }
@@ -761,17 +783,18 @@ function semanticCreateWithFormQuery(query, callback, target, form) {
 /**
  * Grabs the text that is selected (outside the dialog) and inserts it into the presentationtitle field inside the dialog
  * @param {OO.ui.TextInputWidget} inputObject - The field in which the selected text should be inserted
- * @returns {ve.Range}
+ * @returns {Object}
  */
 function grabSelectedText(inputObject) {
     var surfaceModel = ve.init.target.getSurface().getModel();
-    var selected = "";
+    var whiteSpaces = 0;
+    var string = "";
     if (surfaceModel.getFragment().selection.range) {
         for (var i = surfaceModel.getFragment().selection.range.start; i < surfaceModel.getFragment().selection.range.end; i++) {
             var node = ve.init.target.getSurface().getModel().getDocument().getDocumentNode().getNodeFromOffset(i);
             if (node.getType() == "mwTransclusionInline") {
-                //fixme kijken of alle inline transclusions een 'name' parameter hebben
-                selected += node.element.attributes.mw.parts[0].template.params.name.wt;
+                //fixme hier moet nog geverifieerd worden of het om een cite gaat?
+                string += node.element.attributes.mw.parts[0].template.params.name.wt;
                 continue;
             }
             var element = surfaceModel.getFragment().document.data.data[i];
@@ -781,15 +804,19 @@ function grabSelectedText(inputObject) {
             var toAdd = element;
             if (element[0])
                 toAdd = element[0];
-            selected += toAdd;
+            string += toAdd;
         }
-        if (selected.length > 0)
-            inputObject.setValue(selected);
-        return new ve.Range(surfaceModel.getFragment().selection.range.start, surfaceModel.getFragment().selection.range.end);
+        if (string.length > 0)
+            while (string.charAt(string.length - 1) == " ") {
+                string = string.substring(0, string.length - 1);
+                whiteSpaces++;
+            }
+        var range = surfaceModel.getFragment().selection.range;
+        inputObject.setValue(string);
+        return new ve.Range(range.start, range.end - whiteSpaces);
     }
-    else {
+    else
         return new ve.Range(0, 0);
-    }
 }
 
 /**
@@ -801,10 +828,12 @@ function initAutoComplete(data, dialogInstance) {
     var inputField = $(dialogInstance.titleField.$element).find("input");
     $(inputField).autocomplete({
         lookup: data,
+        triggerSelectOnValidInput: false,
         onSelect: function (suggestion) {
             dialogInstance.suggestion = suggestion;
             dialogInstance.isExistingResource = true;
             dialogInstance.fillFields();
+            dialogInstance.testAndChangeDialogMode();
         },
         appendTo: inputField.parentElement,
         maxHeight: 300
@@ -813,7 +842,7 @@ function initAutoComplete(data, dialogInstance) {
 
 /**
  * Hides the autocomplete suggestion box.
- * @param {JQuery} element - JQuery element that has autocomplete functionality.
+ * @param {$} element - JQuery element that has autocomplete functionality.
  */
 function hideAutoComplete(element) {
     if (element.autocomplete() != null)
@@ -821,21 +850,8 @@ function hideAutoComplete(element) {
 }
 
 /**
- * Depending on the mode the dialog is in, this function activates or deactivates the autoComplete dropdown.
- * @param {EMMDialog} dialogInstance - The dialog for which the autoComplete dropdown should be activated or deactivated.
- */
-function toggleAutoComplete(dialogInstance) {
-    if (dialogInstance.dialogMode > 0) {
-        setAutoCompleteEnabled(dialogInstance, false);
-    }
-    else {
-        setAutoCompleteEnabled(dialogInstance, true);
-    }
-}
-
-/**
  * Enables or disables the autocomplete functionality of a given element depending on the given value.
- * @param {JQuery} element - Jquery element containing autoComplete functionality.
+ * @param {EMMDialog} dialogInstance - Jquery element containing autoComplete functionality.
  * @param {Boolean} value - Boolean value that decides the state of the autoComplete. true = enabled, false = disabled.
  */
 function setAutoCompleteEnabled(dialogInstance, value) {

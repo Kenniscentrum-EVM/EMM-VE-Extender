@@ -33,11 +33,14 @@ var VEETemplateProtection = function () {
         var copyBase = ve.ce.Surface.prototype.onCopy;
         ve.ce.Surface.prototype.onCopy = function (e) {
             var selection = this.getModel().getSelection();
-            for (var i = selection.range.start; i < selection.range.end; i++) {
-                var node = this.getModel().getDocument().getDocumentNode().getNodeFromOffset(i);
-                if (node.type == "mwTransclusionBlock" && protectedTemplates[getTemplate(node)] != null) {
-                    mw.notify(OO.ui.deferMsg("visualeditor-emm-notification-template-copy")(), {title: OO.ui.deferMsg("visualeditor-emm-notification-template-title")()});
-                    return;
+            if(selection.range != null)
+            {
+                for (var i = selection.range.start; i < selection.range.end; i++) {
+                    var node = this.getModel().getDocument().getDocumentNode().getNodeFromOffset(i);
+                    if (node.type == "mwTransclusionBlock" && protectedTemplates[getTemplate(node)] != null) {
+                        mw.notify(OO.ui.deferMsg("visualeditor-emm-notification-template-copy")(), {title: OO.ui.deferMsg("visualeditor-emm-notification-template-title")()});
+                        return;
+                    }
                 }
             }
             return copyBase.call(this, e);
@@ -129,6 +132,7 @@ var VEETemplateProtection = function () {
                 titles: templateName,
                 formatversion: 2
             }).done(function (data) {
+                if(data.query == null) return;
                 var page = data.query.pages[0]; // we're only asking for a single page.
                 for (var y = 0; y < page.categories.length; y++) {
                     //Does the template have the 'System' template?
@@ -163,16 +167,11 @@ var VEETemplateProtection = function () {
      * @returns {String} - Template name.
      */
     function getTemplate(node) {
-        if (node.type == "mwTransclusionBlock") {
-            for (var z = 0; z < node.element.attributes.mw.parts.length; z++) {
-                if (typeof node.element.attributes.mw.parts[z] === "object")
+        if (node.type == "mwTransclusionBlock")
+            for (var z = 0; z < node.element.attributes.mw.parts.length; z++)
+                if (typeof node.element.attributes.mw.parts[z] === "object" && node.element.attributes.mw.parts[z].template.target.href != null)
                     return node.element.attributes.mw.parts[z].template.target.href.split("./").pop();
-            }
-            return null;
-        }
-        return node.element.attributes.mw.parts[0].template.target.href.split("./").pop();
+        return null;
     }
-
-
 };
 

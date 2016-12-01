@@ -13,6 +13,7 @@ function createExternalLinkDialog(LightResourceDialog) {
     /**
      * Calls the constructor of it's super class, EMMLightResourceDialog. Also defines some queries used to get information
      * about external links.
+     * @extends EMMLightResourceDialog
      * @constructor
      */
     var EMMExternalLinkDialog = function () {
@@ -99,8 +100,10 @@ function createExternalLinkDialog(LightResourceDialog) {
     };
 
     /**
-     * Executes a dialog mode change.
-     * @param {Number} mode - Dialog mode to switch to (defined in modeEnum).
+     * Method that switches the dialog to a given mode.
+     * This method preforms all necessary operations to visually and logically switch the state of the dialog to a different mode.
+     * Dialog modes are defined in the modeEnum variable (which is defined in EMMDialog) this enum should always be used when switching modes.
+     * @param {number} mode - Dialog mode to switch to.
      */
     EMMExternalLinkDialog.prototype.executeModeChange = function (mode) {
         this.dialogMode = mode;
@@ -138,12 +141,12 @@ function createExternalLinkDialog(LightResourceDialog) {
                 break;
         }
         this.validator.cleanUpForm();
-        toggleAutoComplete(this);
+        setAutoCompleteEnabled(this, this.getAutoCompleteStateForMode(mode));
     };
 
     /**
-     * Checks the dialog variables to determine if a mode-change is needed.
-     * If one is needed, execute it.
+     * This method is responsible for determining necessary mode changes and executing them.
+     * The method is executed every time the state of the link field or title field changes.
      */
     EMMExternalLinkDialog.prototype.testAndChangeDialogMode = function () {
         switch (this.dialogMode) {
@@ -156,9 +159,6 @@ function createExternalLinkDialog(LightResourceDialog) {
                     this.executeModeChange(this.modeEnum.INSERT_EXISTING);
                 break;
             case this.modeEnum.EDIT_EXISTING:
-                if (!this.isExistingResource) {
-                    //Can't switch mode when editing an existing link
-                }
                 break;
         }
     };
