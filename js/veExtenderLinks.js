@@ -746,13 +746,14 @@ function semanticCreateWithFormQuery(query, callback, target, form) {
  */
 function grabSelectedText(inputObject) {
     var surfaceModel = ve.init.target.getSurface().getModel();
-    var selected = "";
+    var whiteSpaces = 0;
+    var string = "";
     if (surfaceModel.getFragment().selection.range) {
         for (var i = surfaceModel.getFragment().selection.range.start; i < surfaceModel.getFragment().selection.range.end; i++) {
             var node = ve.init.target.getSurface().getModel().getDocument().getDocumentNode().getNodeFromOffset(i);
             if (node.getType() == "mwTransclusionInline") {
                 //fixme hier moet nog geverifieerd worden of het om een cite gaat?
-                selected += node.element.attributes.mw.parts[0].template.params.name.wt;
+                string += node.element.attributes.mw.parts[0].template.params.name.wt;
                 continue;
             }
             var element = surfaceModel.getFragment().document.data.data[i];
@@ -762,14 +763,16 @@ function grabSelectedText(inputObject) {
             var toAdd = element;
             if (element[0])
                 toAdd = element[0];
-            selected += toAdd;
+            string += toAdd;
         }
-        if (selected.length > 0)
-            while (selected.charAt(selected.length - 1) == " ")
-                selected = selected.substring(0, selected.length - 1);
+        if (string.length > 0)
+            while (string.charAt(string.length - 1) == " ") {
+                string = string.substring(0, string.length - 1);
+                whiteSpaces++;
+            }
         var range = surfaceModel.getFragment().selection.range;
-        inputObject.setValue(selected);
-        return new ve.Range(range.start, range.start + selected.length);
+        inputObject.setValue(string);
+        return new ve.Range(range.start, range.end - whiteSpaces);
     }
     else
         return new ve.Range(0, 0);
