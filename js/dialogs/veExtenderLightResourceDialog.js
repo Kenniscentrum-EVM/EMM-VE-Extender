@@ -150,7 +150,10 @@ function createLightResourceDialog(EMMDialog, resourceType) {
             return createExternalLinkDialog(EMMLightResourceDialog);
             break;
         default:
-            mw.notify(OO.ui.deferMsg("visualeditor-emm-dialog-error"));
+            mw.notify(OO.ui.deferMsg("visualeditor-emm-dialog-error")(), {
+                autoHide: false,
+                type: "error"
+            });
             return null;
     }
 }

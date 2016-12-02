@@ -326,51 +326,84 @@ function createFileDialog(LightResourceDialog) {
         var dialogInstance = this;
         switch (status) {
             case "duplicate":
-                mw.notify(OO.ui.deferMsg("visualeditor-emm-file-upload-duplicate")());
+                mw.notify(OO.ui.deferMsg("visualeditor-emm-file-upload-duplicate")(), {
+                    autoHide: false,
+                    type: "error"
+                });
                 setDisabledDialogElements(dialogInstance, false);
                 break;
             case "exists":
-                mw.notify(OO.ui.deferMsg("visualeditor-emm-file-upload-exists")());
+                mw.notify(OO.ui.deferMsg("visualeditor-emm-file-upload-exists")(), {
+                    autoHide: false,
+                    type: "error"
+                });
                 setDisabledDialogElements(dialogInstance, false);
                 break;
             case "verification-error":
-                mw.notify(OO.ui.deferMsg("visualeditor-emm-file-upload-verification-error")() + "\n" + exceptionobject.error.info);
+                mw.notify(OO.ui.deferMsg("visualeditor-emm-file-upload-verification-error")() + "\n" + exceptionobject.error.info, {
+                    autoHide: false,
+                    type: "error"
+                });
                 setDisabledDialogElements(dialogInstance, false);
                 break;
             case "file-too-large":
-                mw.notify(OO.ui.deferMsg("visualeditor-emm-file-upload-file-too-large")());
+                mw.notify(OO.ui.deferMsg("visualeditor-emm-file-upload-file-too-large")(), {
+                    autoHide: false,
+                    type: "error"
+                });
                 setDisabledDialogElements(dialogInstance, false);
                 break;
             case "empty-file":
-                mw.notify(OO.ui.deferMsg("visualeditor-emm-file-upload-empty-file")());
+                mw.notify(OO.ui.deferMsg("visualeditor-emm-file-upload-empty-file")(), {
+                    autoHide: false,
+                    type: "error"
+                });
                 setDisabledDialogElements(dialogInstance, false);
                 break;
             case "filetype-banned":
-                mw.notify(OO.ui.deferMsg("visualeditor-emm-file-upload-filetype-banned")());
+                mw.notify(OO.ui.deferMsg("visualeditor-emm-file-upload-filetype-banned")(), {
+                    autoHide: false,
+                    type: "error"
+                });
                 setDisabledDialogElements(dialogInstance, false);
                 break;
             case "mustbeloggedin":
-                mw.notify(OO.ui.deferMsg("visualeditor-emm-file-upload-not-logged-in")());
+                mw.notify(OO.ui.deferMsg("visualeditor-emm-file-upload-not-logged-in")(), {
+                    autoHide: false,
+                    type: "error"
+                });
                 setDisabledDialogElements(dialogInstance, false);
                 break;
             case "http":
                 switch (exceptionobject.textStatus) {
                     case "timeout":
-                        mw.notify(OO.ui.deferMsg("visualeditor-emm-file-upload-timeout")());
+                        mw.notify(OO.ui.deferMsg("visualeditor-emm-file-upload-timeout")(), {
+                            autoHide: false,
+                            type: "error"
+                        });
                         setDisabledDialogElements(dialogInstance, false);
                         break;
                     case "parsererror":
-                        mw.notify(OO.ui.deferMsg("visualeditor-emm-file-upload-parsererror")());
+                        mw.notify(OO.ui.deferMsg("visualeditor-emm-file-upload-parsererror")(), {
+                            autoHide: false,
+                            type: "error"
+                        });
                         setDisabledDialogElements(dialogInstance, false);
                         break;
                     default:
                         //unknown eroror
-                        mw.notify("An unknown error of the type " + exceptionobject.exception + " has occurred.");
+                        mw.notify("An unknown error of the type " + exceptionobject.exception + " has occurred.", {
+                            autoHide: false,
+                            type: "error"
+                        });
                         setDisabledDialogElements(dialogInstance, false);
                 }
                 break;
             default:
-                mw.notify("An unknown error of the type " + status + " has occurred.");
+                mw.notify("An unknown error of the type " + status + " has occurred.", {
+                    autoHide: false,
+                    type: "error"
+                });
                 setDisabledDialogElements(dialogInstance, false);
         }
     };

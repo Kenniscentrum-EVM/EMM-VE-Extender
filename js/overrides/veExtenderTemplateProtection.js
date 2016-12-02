@@ -14,7 +14,11 @@ var VEETemplateProtection = function () {
         var onEditButtonClickBase = ve.ui.LinearContextItem.prototype.onEditButtonClick;
         ve.ui.LinearContextItem.prototype.onEditButtonClick = function () {
             if (this.model.type == "mwTransclusionBlock" && protectedTemplates[getTemplate(this.model)] != null) {
-                mw.notify(OO.ui.deferMsg("visualeditor-emm-notification-template-edit")(), {title: OO.ui.deferMsg("visualeditor-emm-notification-template-title")()});
+                mw.notify(OO.ui.deferMsg("visualeditor-emm-notification-template-edit")(), {
+                    title: OO.ui.deferMsg("visualeditor-emm-notification-template-title")(),
+                    autoHide: false,
+                    type: "error"
+                });
                 return;
             }
             return onEditButtonClickBase.call(this);
@@ -24,7 +28,11 @@ var VEETemplateProtection = function () {
         var getCommandForNodeBase = ve.ui.CommandRegistry.prototype.getCommandForNode;
         ve.ui.CommandRegistry.prototype.getCommandForNode = function (node) {
             if (node.type == "mwTransclusionBlock" && protectedTemplates[getTemplate(node.model)] != null) {
-                mw.notify(OO.ui.deferMsg("visualeditor-emm-notification-template-edit")(), {title: OO.ui.deferMsg("visualeditor-emm-notification-template-title")()});
+                mw.notify(OO.ui.deferMsg("visualeditor-emm-notification-template-edit")(), {
+                    title: OO.ui.deferMsg("visualeditor-emm-notification-template-title")(),
+                    autoHide: false,
+                    type: "error"
+                });
                 return "";
             }
             return getCommandForNodeBase.call(this, node);
@@ -33,12 +41,15 @@ var VEETemplateProtection = function () {
         var copyBase = ve.ce.Surface.prototype.onCopy;
         ve.ce.Surface.prototype.onCopy = function (e) {
             var selection = this.getModel().getSelection();
-            if(selection.range != null)
-            {
+            if (selection.range != null) {
                 for (var i = selection.range.start; i < selection.range.end; i++) {
                     var node = this.getModel().getDocument().getDocumentNode().getNodeFromOffset(i);
                     if (node.type == "mwTransclusionBlock" && protectedTemplates[getTemplate(node)] != null) {
-                        mw.notify(OO.ui.deferMsg("visualeditor-emm-notification-template-copy")(), {title: OO.ui.deferMsg("visualeditor-emm-notification-template-title")()});
+                        mw.notify(OO.ui.deferMsg("visualeditor-emm-notification-template-copy")(), {
+                            title: OO.ui.deferMsg("visualeditor-emm-notification-template-title")(),
+                            autoHide: false,
+                            type: "error"
+                        });
                         return;
                     }
                 }
@@ -89,7 +100,11 @@ var VEETemplateProtection = function () {
             if (protect) {
                 ve.dm.nodeFactory.registry[doc.data.getType(x)].static.isDeletable = false;
                 returnValue = base.call(thisContext, doc, removeStart, x - 1, removeMetadata);
-                mw.notify(OO.ui.deferMsg("visualeditor-emm-notification-template-body")(), {title: OO.ui.deferMsg("visualeditor-emm-notification-template-title")()});
+                mw.notify(OO.ui.deferMsg("visualeditor-emm-notification-template-body")(), {
+                    title: OO.ui.deferMsg("visualeditor-emm-notification-template-title")(),
+                    autoHide: false,
+                    type: "error"
+                });
                 ve.dm.nodeFactory.registry[doc.data.getType(x)].static.isDeletable = true;
             }
             else
@@ -132,7 +147,7 @@ var VEETemplateProtection = function () {
                 titles: templateName,
                 formatversion: 2
             }).done(function (data) {
-                if(data.query == null) return;
+                if (data.query == null) return;
                 var page = data.query.pages[0]; // we're only asking for a single page.
                 for (var y = 0; y < page.categories.length; y++) {
                     //Does the template have the 'System' template?

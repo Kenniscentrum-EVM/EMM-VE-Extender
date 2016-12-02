@@ -260,7 +260,11 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                         }
                         var suggestion = dialogInstance.processSingleQueryResult(row, res);
                         if (suggestion == null) {
-                            mw.notify(OO.ui.deferMsg("visualeditor-emm-notification-err-invalidlink-body")(), {title: OO.ui.deferMsg("visualeditor-emm-notification-err-invalidlink-title")()});
+                            mw.notify(OO.ui.deferMsg("visualeditor-emm-notification-err-invalidlink-body")(), {
+                                title: OO.ui.deferMsg("visualeditor-emm-notification-err-invalidlink-title")(),
+                                autoHide: false,
+                                type: "error"
+                            });
                             dialogInstance.close();
                             return;
                         }
@@ -447,7 +451,10 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
             dialog = createInternalLinkDialog(EMMDialog);
             break;
         default:
-            mw.notify(OO.ui.deferMsg("visualeditor-emm-dialog-error"));
+            mw.notify(OO.ui.deferMsg("visualeditor-emm-dialog-error")(), {
+                autoHide: false,
+                type: "error"
+            });
     }
     ve.ui.windowFactory.register(dialog);
 
