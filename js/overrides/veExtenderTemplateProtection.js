@@ -150,8 +150,8 @@ var VEETemplateProtection = function () {
 
     /**
      * Retrieves transclusion nodes from a node.
-     * @param {vm.dm.Node} node - Node to get the tranclusions from.
-     * @returns {vm.dm.Node[]} - Array of transclusion nodes.
+     * @param {ve.dm.Node} node - Node to get the tranclusions from.
+     * @returns {ve.dm.Node[]} - Array of transclusion nodes.
      */
     function getTransclusions(node) {
         var transclusions = [];
@@ -163,7 +163,7 @@ var VEETemplateProtection = function () {
 
     /**
      * Retrieves the template name from a transclusion node.
-     * @param {vm.dm.Node} node - Node to retrieve the template name from.
+     * @param {ve.dm.Node} node - Node to retrieve the template name from.
      * @returns {String} - Template name.
      */
     function getTemplate(node) {

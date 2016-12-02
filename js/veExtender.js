@@ -25,9 +25,9 @@ function redefineMenu() {
         }
     //add options to menu if they are not already there
     var toAdd = ["file", "linkpage", "linkwebsite"];
-    for (var i = 0; i < toAdd.length; i++)
-        if (force.indexOf(toAdd[i]) < 0)
-            force.push(toAdd[i]);
+    for (var l = 0; l < toAdd.length; l++)
+        if (force.indexOf(toAdd[l]) < 0)
+            force.push(toAdd[l]);
 }
 
 /**

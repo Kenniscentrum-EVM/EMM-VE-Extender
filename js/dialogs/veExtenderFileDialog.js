@@ -215,7 +215,6 @@ function createFileDialog(LightResourceDialog) {
      */
     EMMFileDialog.prototype.executeQuery = function (query, insertCallback, linkdata, upload, newUploadVersion) {
         console.log("query: ", query);
-        var dialogInstance = this;
         var target = "";
         //Set the target of the api-call to the internal title of an existing file, if the file already exists.
         if (this.isExistingResource) {

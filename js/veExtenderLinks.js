@@ -298,15 +298,15 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
      * created resource. Will be executed directly, or after the query has finished processing if a query was executed.
      * @param {String} currentPageID - The ID of the page that is currently being edited, can only contain alphanumeric
      * characters and whitespace
-     * @param {String} linkdata - In case of an existing resource, linkdata contains the internal name of the resource
-     * in order to let the api know what existing resource should be edited. Otherwise linkdata is just an empty string.
+     * @param {String} linkData - In case of an existing resource, linkData contains the internal name of the resource
+     * in order to let the api know what existing resource should be edited. Otherwise linkData is just an empty string.
      */
-    EMMDialog.prototype.executeInsertAction = function (insertCallback, currentPageID, linkdata) {
+    EMMDialog.prototype.executeInsertAction = function (insertCallback, currentPageID, linkData) {
         if (!this.isExistingResource) {
             //In this case, dialoginstance.suggestion is empty, so build and execute the query
-            this.buildAndExecuteQuery(currentPageID, insertCallback, linkdata);
+            this.buildAndExecuteQuery(currentPageID, insertCallback, linkData);
         } else if (this.isEdit()) { //dealing with an existing resource, so isEdit exists, otherwise isEdit would crash.
-            this.buildAndExecuteQuery(currentPageID, insertCallback, linkdata);
+            this.buildAndExecuteQuery(currentPageID, insertCallback, linkData);
         }
         else {
             insertCallback(this.suggestion.data);
@@ -533,7 +533,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
             //Get the name of the current page and replace any underscores with whitespaces to prevent errors later on.
             var currentPageID = mw.config.get("wgPageName").replace(/_/g, " ");
             //Check some variables and decide what has to be done
-            dialogInstance.executeInsertAction(insertCallback, currentPageID, linkdata);
+            dialogInstance.executeInsertAction(insertCallback, currentPageID, linkData);
             dialogInstance.close();
             setDisabledDialogElements(dialogInstance, false);
         };
@@ -748,13 +748,13 @@ function clearInputFields(fieldset, exclude, inputTypeExclude) { //TODO rewrite 
         }
     }
     else {
-        for (var i = 0; i < fieldset.getItems().length; i++) {
+        for (var j = 0; j < fieldset.getItems().length; j++) {
             //Make sure the fieldlayout doens't contain just a field of the given types
-            if ($.inArray(fieldset.getItems()[i].getField().constructor.name, inputTypeExclude) == -1) {
-                if ((fieldset.getItems()[i].getField() instanceof OO.ui.SelectFileWidget))
-                    fieldset.getItems()[i].getField().setValue(null);
+            if ($.inArray(fieldset.getItems()[j].getField().constructor.name, inputTypeExclude) == -1) {
+                if ((fieldset.getItems()[j].getField() instanceof OO.ui.SelectFileWidget))
+                    fieldset.getItems()[j].getField().setValue(null);
                 else
-                    fieldset.getItems()[i].getField().setValue("");
+                    fieldset.getItems()[j].getField().setValue("");
             }
         }
     }
