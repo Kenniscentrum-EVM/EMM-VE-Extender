@@ -501,6 +501,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
 
                 dialogInstance.semanticAskQuery(dialogInstance.getAutocompleteQuery(),
                     function () {
+                        setAutoCompleteEnabled(dialogInstance, false);
                         setAutoCompleteEnabled(dialogInstance, dialogInstance.getAutoCompleteStateForMode(dialogInstance.dialogMode));
                     });
                 var surfaceModel = ve.init.target.getSurface().getModel();
