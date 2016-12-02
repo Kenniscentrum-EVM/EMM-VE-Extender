@@ -457,10 +457,6 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
      * Creates all visual items inside the dialog and adds the necessary logic to it
      */
     EMMDialog.prototype.initialize = function () {
-        mw.hook('postEdit').fire({
-            message: "test"
-        });
-        mw.notify("test", {autoHide: false, type: "error"});
         /*Put the dialog in a variable for easier use
          This is also necessary because in certain cases the meaning of the this keyword changes, even though you want
          to be able to keep accessing the dialogInstance*/
@@ -711,7 +707,6 @@ function setDisabledDialogElements(dialogInstance, value) {
     dialogInstance.actions.forEach(null, function (action) {
         action.setDisabled(value);
     });
-    console.log("wat is loos", value);
     if (value) {
         var progressBar = new OO.ui.ProgressBarWidget({
             progress: false
