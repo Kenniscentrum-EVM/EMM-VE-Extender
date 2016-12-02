@@ -18,4 +18,4 @@ Testcommit
 
 ## Changelog
 
-Found [here](https://bitbucket.org/expertisemanagement/emm-ve-extender/src/9b4074794adbe65c79091b666097bd3a6145a7bf/README.md?at=master&fileviewer=file-view-default)
+Found [here](https://bitbucket.org/expertisemanagement/emm-ve-extender/src/5c48a88ad1d8c74a26ae4b37ea3c23bffbc2ea35/ChangeLog.md?at=master&fileviewer=file-view-default)
