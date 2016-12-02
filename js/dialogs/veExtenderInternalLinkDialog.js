@@ -178,7 +178,7 @@ function createInternalLinkDialog(EMMDialog) {
                     query += "&Light Context[Topcontext]=" + topContext;
                     dialogInstance.executeQuery(query, insertCallback, linkdata, "Light Context");
                 } else {
-                    alert(OO.ui.deferMsg("visualeditor-emm-topcontext-error")());
+                    mw.notify(OO.ui.deferMsg("visualeditor-emm-topcontext-error")());
                     setDisabledDialogElements(dialogInstance,false);
                 }
             });

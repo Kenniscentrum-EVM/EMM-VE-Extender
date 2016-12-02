@@ -180,15 +180,12 @@ function createFileDialog(LightResourceDialog) {
      */
     EMMFileDialog.prototype.buildAndExecuteQuery = function (currentPageID, insertCallback, linkdata, upload, newUploadVersion, newResourcePage) {
         //First call the method of the parent to build the basic query for a light resource
-        console.log("upload is: ", upload);
-        console.log("newUploadVersion is: ", newUploadVersion);
         var query = LightResourceDialog.prototype.buildQuery.call(this, currentPageID);
         if (newResourcePage) {
             //In this case we should be dealing with an existing resource description that needs to be 'copied' over to
             //a new page, and should contain currentpageID in the query.
             query += "&Resource Description[created in page]=" + currentPageID;
         }
-        console.log("Net na de buildquery van lightresourcedialog is de query: ", query);
         //Gather the filename in different ways depending on whether it is an existing file or not.
         var filename = "";
         if (upload) {
@@ -198,7 +195,6 @@ function createFileDialog(LightResourceDialog) {
         }
         //Expand the existing query with a file-specific part.
         query += "&Resource Description[file name]=" + filename;
-        console.log("de query is: ", query);
         this.executeQuery(query, insertCallback, linkdata, upload, newUploadVersion);
     }
     ;
@@ -214,7 +210,6 @@ function createFileDialog(LightResourceDialog) {
      * @param {boolean} newUploadVersion - True if the upload is a new version of an existing file
      */
     EMMFileDialog.prototype.executeQuery = function (query, insertCallback, linkdata, upload, newUploadVersion) {
-        console.log("query: ", query);
         var target = "";
         //Set the target of the api-call to the internal title of an existing file, if the file already exists.
         if (this.isExistingResource) {
@@ -237,7 +232,6 @@ function createFileDialog(LightResourceDialog) {
      * @returns {boolean} - Whether the user is editing the selected resource
      */
     EMMFileDialog.prototype.isEdit = function () {
-        console.log("in filefield zit:", this.fileField.getValue());
         return LightResourceDialog.prototype.isEdit.call(this);
     };
 
@@ -288,23 +282,12 @@ function createFileDialog(LightResourceDialog) {
     EMMFileDialog.prototype.executeInsertAction = function (insertCallback, currentPageID, linkdata) {
         //See the documentation wiki for a visual representation of this if/else mess
         var dialogInstance = this;
-        console.log("isexistingresource", this.isExistingResource);
-        console.log("filefield null", this.fileField.getValue() == null);
-        console.log("filefield lege string", this.fileField.getValue() == "");
-        if (this.suggestion != null) {
-            console.log("isEdit", this.isEdit());
-            if (this.fileField.getValue() != null) {
-                console.log("filefield", this.fileField.getValue().name, "suggestion", this.suggestion.filename.replace("Bestand:", "").replace("File:", "").toLowerCase());
-                console.log("filefield gelijk aan suggestion", this.fileField.getValue().name == this.suggestion.filename);
-            }
-        }
         if (this.isExistingResource) {
-            if (this.fileField.getValue() != null && this.fileField.getValue() != "") {
+            if (this.fileField.getValue() != null) {
                 if (this.fileField.getValue().name != this.suggestion.filename.replace("Bestand:", "").replace("File:", "").toLowerCase()) {
                     //Upload new file and create a new resource, because the file has a diffrent name.
                     //A diffrent filename will lead to a diffrent internal name for the File.
                     //Linkdata is left empty on purpose
-                    console.log("current page ID: ", currentPageID);
                     this.buildAndExecuteQuery(currentPageID, insertCallback, "", true, false, true);
                 } else {
                     if (!this.isEdit()) {
@@ -343,51 +326,51 @@ function createFileDialog(LightResourceDialog) {
         var dialogInstance = this;
         switch (status) {
             case "duplicate":
-                alert(OO.ui.deferMsg("visualeditor-emm-file-upload-duplicate")());
+                mw.notify(OO.ui.deferMsg("visualeditor-emm-file-upload-duplicate")());
                 setDisabledDialogElements(dialogInstance, false);
                 break;
             case "exists":
-                alert(OO.ui.deferMsg("visualeditor-emm-file-upload-exists")());
+                mw.notify(OO.ui.deferMsg("visualeditor-emm-file-upload-exists")());
                 setDisabledDialogElements(dialogInstance, false);
                 break;
             case "verification-error":
-                alert(OO.ui.deferMsg("visualeditor-emm-file-upload-verification-error")() + "\n" + exceptionobject.error.info);
+                mw.notify(OO.ui.deferMsg("visualeditor-emm-file-upload-verification-error")() + "\n" + exceptionobject.error.info);
                 setDisabledDialogElements(dialogInstance, false);
                 break;
             case "file-too-large":
-                alert(OO.ui.deferMsg("visualeditor-emm-file-upload-file-too-large")());
+                mw.notify(OO.ui.deferMsg("visualeditor-emm-file-upload-file-too-large")());
                 setDisabledDialogElements(dialogInstance, false);
                 break;
             case "empty-file":
-                alert(OO.ui.deferMsg("visualeditor-emm-file-upload-empty-file")());
+                mw.notify(OO.ui.deferMsg("visualeditor-emm-file-upload-empty-file")());
                 setDisabledDialogElements(dialogInstance, false);
                 break;
             case "filetype-banned":
-                alert(OO.ui.deferMsg("visualeditor-emm-file-upload-filetype-banned")());
+                mw.notify(OO.ui.deferMsg("visualeditor-emm-file-upload-filetype-banned")());
                 setDisabledDialogElements(dialogInstance, false);
                 break;
             case "mustbeloggedin":
-                alert(OO.ui.deferMsg("visualeditor-emm-file-upload-not-logged-in")());
+                mw.notify(OO.ui.deferMsg("visualeditor-emm-file-upload-not-logged-in")());
                 setDisabledDialogElements(dialogInstance, false);
                 break;
             case "http":
                 switch (exceptionobject.textStatus) {
                     case "timeout":
-                        alert(OO.ui.deferMsg("visualeditor-emm-file-upload-timeout")());
+                        mw.notify(OO.ui.deferMsg("visualeditor-emm-file-upload-timeout")());
                         setDisabledDialogElements(dialogInstance, false);
                         break;
                     case "parsererror":
-                        alert(OO.ui.deferMsg("visualeditor-emm-file-upload-parsererror")());
+                        mw.notify(OO.ui.deferMsg("visualeditor-emm-file-upload-parsererror")());
                         setDisabledDialogElements(dialogInstance, false);
                         break;
                     default:
                         //unknown eroror
-                        alert("An unknown error of the type " + exceptionobject.exception + " has occurred.");
+                        mw.notify("An unknown error of the type " + exceptionobject.exception + " has occurred.");
                         setDisabledDialogElements(dialogInstance, false);
                 }
                 break;
             default:
-                alert("An unknown error of the type " + status + " has occurred.");
+                mw.notify("An unknown error of the type " + status + " has occurred.");
                 setDisabledDialogElements(dialogInstance, false);
         }
     };
@@ -399,8 +382,6 @@ function createFileDialog(LightResourceDialog) {
      */
     EMMFileDialog.prototype.uploadFile = function (newUploadVersion, postUploadFunction) {
         var dialogInstance = this;
-        console.log(this.fileField);
-        console.log(this.fileField.getValue());
         var ignorewarnings = newUploadVersion ? 1 : 0;
         var file = this.fileField.getValue();
         var filedata = {
@@ -410,7 +391,6 @@ function createFileDialog(LightResourceDialog) {
         new mw.Api().upload(file, filedata).fail(function (status, exceptionobject) {
             //Handle possible error messages and display them in a way the user understands them.
             if (newUploadVersion && status == "exists") {
-                console.log("suggestion is in upload", dialogInstance.suggestion);
                 postUploadFunction();
             } else {
                 dialogInstance.handleUploadFail(status, exceptionobject);

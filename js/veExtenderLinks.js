@@ -108,7 +108,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
      */
     var EMMDialog = function () {
         OO.ui.ProcessDialog.call(this);
-        this.noEditFieldTypes = ["OoUiLabelWidget","OoUiProgressBarWidget"];
+        this.noEditFieldTypes = ["OoUiLabelWidget", "OoUiProgressBarWidget"];
         this.suggestion = null;
         this.isExistingResource = false;
         /**
@@ -287,6 +287,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                 dialogInstance.validator.validateWidget(dialogInstance.presentationTitleField);
             }
         }
+
         //Add the two functions above to the queue of processes that will be executed when a dialog is opened
         return EMMDialog.super.prototype.getReadyProcess.call(this, data).first(openEditDialog, data).next(grabAndValidateText);
     };
@@ -446,7 +447,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
             dialog = createInternalLinkDialog(EMMDialog);
             break;
         default:
-            alert(OO.ui.deferMsg("visualeditor-emm-dialog-error"));
+            mw.notify(OO.ui.deferMsg("visualeditor-emm-dialog-error"));
     }
     ve.ui.windowFactory.register(dialog);
 
@@ -456,6 +457,10 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
      * Creates all visual items inside the dialog and adds the necessary logic to it
      */
     EMMDialog.prototype.initialize = function () {
+        mw.hook('postEdit').fire({
+            message: "test"
+        });
+        mw.notify("test", {autoHide: false, type: "error"});
         /*Put the dialog in a variable for easier use
          This is also necessary because in certain cases the meaning of the this keyword changes, even though you want
          to be able to keep accessing the dialogInstance*/
@@ -529,13 +534,14 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                 var newRange = transaction.getModifiedRange();
                 surfaceModel.change(transaction, newRange ? new ve.dm.LinearSelection(surfaceModel.getDocument(), newRange) : new ve.dm.NullSelection(surfaceModel.getDocument()));
                 surfaceModel.setNullSelection();
+                dialogInstance.close();
+                setDisabledDialogElements(dialogInstance, false);
             };
+
             //Get the name of the current page and replace any underscores with whitespaces to prevent errors later on.
             var currentPageID = mw.config.get("wgPageName").replace(/_/g, " ");
             //Check some variables and decide what has to be done
             dialogInstance.executeInsertAction(insertCallback, currentPageID, linkData);
-            dialogInstance.close();
-            setDisabledDialogElements(dialogInstance, false);
         };
 
         /**
@@ -590,7 +596,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
             dialogInstance.fieldset.$element.css({width: dim.width - 10});
             this.$frame.css({
                 width: dim.width + 250 || "",
-                height: this.getContentHeight() + 20 || ""
+                height: this.getContentHeight() + 30 || ""
             });
             dialogInstance.fieldset.$element.css("width", "100%");
             for (var i = 0; i < dialogInstance.fieldset.getItems().length; i++) {
@@ -705,21 +711,20 @@ function setDisabledDialogElements(dialogInstance, value) {
     dialogInstance.actions.forEach(null, function (action) {
         action.setDisabled(value);
     });
-    if(value) {
+    console.log("wat is loos", value);
+    if (value) {
         var progressBar = new OO.ui.ProgressBarWidget({
             progress: false
         });
         var progressbarFieldLayout = new OO.ui.FieldLayout(progressBar);
         dialogInstance.fieldset.addItems([progressbarFieldLayout]);
-        dialogInstance.updateSize();
         progressbarFieldLayout.$element.find(".oo-ui-fieldLayout-field").css("width", "100%");
         progressbarFieldLayout.$element.find(".oo-ui-fieldLayout-body").css("width", "100%");
         progressbarFieldLayout.$element.find(".oo-ui-progressBarWidget").css("max-width", "100%");
         progressbarFieldLayout.$element.find(".oo-ui-progressBarWidget-bar").css("background-color", "#347bff");
     }
     else {
-        dialogInstance.fieldset.removeItems([dialogInstance.fieldset.getItems()[dialogInstance.fieldset.getItems().length-1]]);
-        dialogInstance.updateSize();
+        dialogInstance.fieldset.removeItems([dialogInstance.fieldset.getItems()[dialogInstance.fieldset.getItems().length - 1]]);
     }
 }
 
