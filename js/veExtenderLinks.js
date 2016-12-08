@@ -648,6 +648,8 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                 if (!res.hasOwnProperty(row)) {
                     continue;
                 }
+                //var row = res.row;
+                //var previoussuggestionrow = res[previoussuggestionrow]
                 var singleQueryResult = dialogInstance.processSingleQueryResult(row, res, previousSuggestion);
                 if (previousSuggestion != null)
                     arr.push(previousSuggestion);

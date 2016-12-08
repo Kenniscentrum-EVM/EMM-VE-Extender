@@ -232,6 +232,8 @@ function createInternalLinkDialog(EMMDialog) {
         suggestionObject.category = resultSet[row].printouts.Category;
         suggestionObject.suffix = resultSet[row].printouts["Supercontext"];
 
+        //TODO suggestionObject.resultRow = resultSet[row]; <- Perhaps this is better?
+
         if(previousSuggestion != null)
         {
             if(previousSuggestion.semanticTitle == suggestionObject.semanticTitle && previousSuggestion.value == previousSuggestion.semanticTitle)
