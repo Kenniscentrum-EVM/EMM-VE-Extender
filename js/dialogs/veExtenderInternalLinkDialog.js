@@ -19,7 +19,7 @@ function createInternalLinkDialog(EMMDialog) {
      */
     var EMMInternalLinkDialog = function () {
         EMMDialog.call(this);
-        this.autoCompleteQuery = "[[Category:Light Context||Project]]|?Semantic title|?Category=Category|limit=10000";
+        this.autoCompleteQuery = "[[Category:Light Context||Project||Projecten]]|?Semantic title|?Category=Category|?Supercontext|sort=Semantic title|order=asc|limit=10000";
         this.editQuery = "[[PAGENAMEPARAMETER]] |?Semantic title|?Category=Category";
     };
     OO.inheritClass(EMMInternalLinkDialog, EMMDialog);
@@ -221,17 +221,29 @@ function createInternalLinkDialog(EMMDialog) {
 
     /**
      * Processes part of the result of an ask query. Expands an existing suggestionObject by adding internal link-specific
-     * data from the queryresult to the suggestionObject. Currently this function is empty, because an EMMInternalLinkDialog
-     * does not contain any other fields beyond the basic fields of an EMMDialog.
-     * @param {Object} singleResult - A single row from the result of the api-call that contains all the information
-     * about an internal link that was asked for in the query.
-     * @param {Object} suggestionObject - A single suggestion for the autocomplete dropdown that should be expanded.
-     * Should already contain data of generic resource and a lightResource.
-     * @returns {Object} - An updated suggestionObject, or null when the singleresult is invalid
+     * data from the resultSet to the suggestionObject.
+     * @param {String} row - String index of a row in the resultSet associative array.
+     * @param {Object[]} resultSet - Associative array which functions like a dictionary, using strings as indexes, contains the result of a query.
+     * @param {Object} previousSuggestion - A suggestion object that contains the information about the previous processed suggestion, useful for comparing and sorting.
+     * @returns {Object} - An updated suggestionObject, or null when the categories are invalid.
      */
-    EMMInternalLinkDialog.prototype.processDialogSpecificQueryResult = function (singleResult, suggestionObject) {
-        suggestionObject.category = singleResult.printouts.Category;
-        return suggestionObject;
+    EMMInternalLinkDialog.prototype.processSingleQueryResult = function (row, resultSet, previousSuggestion) {
+        var suggestionObject = EMMDialog.prototype.processSingleQueryResult.call(this, row, resultSet, previousSuggestion);
+        suggestionObject.category = resultSet[row].printouts.Category;
+        suggestionObject.suffix = resultSet[row].printouts["Supercontext"];
+
+        if(previousSuggestion != null)
+        {
+            if(previousSuggestion.semanticTitle == suggestionObject.semanticTitle && previousSuggestion.value == previousSuggestion.semanticTitle)
+                previousSuggestion.value = checkAndPrintSuffix(previousSuggestion, resultSet[previousSuggestion.suffix[0].fulltext]);
+            if (previousSuggestion.semanticTitle == suggestionObject.value)
+                suggestionObject.value = checkAndPrintSuffix(suggestionObject, resultSet[suggestionObject.suffix[0].fulltext]);
+        }
+        for(var i = 0; i < suggestionObject.category.length; i++)
+            if(/:\bLight Context\b/.test(suggestionObject.category[i].fulltext) || /:\bProject\b/.test(suggestionObject.category[i].fulltext))
+                return suggestionObject;
+
+        return null;
     };
 
     /**
@@ -242,6 +254,14 @@ function createInternalLinkDialog(EMMDialog) {
     EMMInternalLinkDialog.prototype.findTemplateToUse = function () {
         return "Internal link";
     };
+
+    function checkAndPrintSuffix(suggestionObject, suffix)
+    {
+        if(suffix != null)
+            return suggestionObject.value + " (" + suffix.printouts["Semantic title"][0] + ")";
+        else
+            return suggestionObject.value + " " + OO.ui.deferMsg("visualeditor-emm-suggestion-err-no-supercontext")();
+    }
 
     //Return the entire 'class' in order to pass this definition to the window factory.
     return EMMInternalLinkDialog;

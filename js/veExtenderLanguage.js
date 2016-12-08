@@ -94,7 +94,9 @@ function defineTranslations() {
             "visualeditor-emm-notification-template-edit": "You are attempting to edit a system template, this is not allowed.",
 
             "visualeditor-emm-notification-err-invalidlink-body": "Could not retrieve page information for the selected reference, was the page deleted?",
-            "visualeditor-emm-notification-err-invalidlink-title": "Invalid reference"
+            "visualeditor-emm-notification-err-invalidlink-title": "Invalid reference",
+
+            "visualeditor-emm-suggestion-err-no-supercontext": "Missing supercontext"
         },
         nl: {
             "visualeditor-emm-add-file": "Toevoegen bestands",
@@ -186,7 +188,9 @@ function defineTranslations() {
             "visualeditor-emm-notification-template-edit": "U probeert een systeemtemplate te bewerken, dit is niet toegestaan.",
 
             "visualeditor-emm-notification-err-invalidlink-body": "De paginacontextinformatie van de geselecteerde referentie kon niet worden opgehaald, is de pagina verwijderd?",
-            "visualeditor-emm-notification-err-invalidlink-title": "Ongeldige verwijzing"
+            "visualeditor-emm-notification-err-invalidlink-title": "Ongeldige verwijzing",
+
+            "visualeditor-emm-suggestion-err-no-supercontext": "Geen supercontext"
         }
     };
     var userLanguage = mw.config.get("wgUserLanguage");
