@@ -117,7 +117,6 @@ function createFileDialog(LightResourceDialog) {
         var input = null;
         switch (mode) {
             case this.modeEnum.INSERT_EXISTING:
-                this.fieldset.items[1].$element.show();
                 this.$element.find(".oo-ui-processDialog-title").text(OO.ui.deferMsg("visualeditor-emm-dialogfiletitle")());
                 input = this.titleField.$element.find("input");
                 input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-filedialog-titlefield-placeholder-def")());
@@ -322,57 +321,29 @@ function createFileDialog(LightResourceDialog) {
      * @param status {String} - The status of the error
      * @param exceptionobject {Object} - In case of some errors there is a more specific exception object with more information
      */
+    //todo double check
     EMMFileDialog.prototype.handleUploadFail = function (status, exceptionobject) {
-        var dialogInstance = this;
-        switch (status) {
-            case "duplicate":
-                mw.notify(OO.ui.deferMsg("visualeditor-emm-file-upload-duplicate")());
-                setDisabledDialogElements(dialogInstance, false);
-                break;
-            case "exists":
-                mw.notify(OO.ui.deferMsg("visualeditor-emm-file-upload-exists")());
-                setDisabledDialogElements(dialogInstance, false);
-                break;
-            case "verification-error":
-                mw.notify(OO.ui.deferMsg("visualeditor-emm-file-upload-verification-error")() + "\n" + exceptionobject.error.info);
-                setDisabledDialogElements(dialogInstance, false);
-                break;
-            case "file-too-large":
-                mw.notify(OO.ui.deferMsg("visualeditor-emm-file-upload-file-too-large")());
-                setDisabledDialogElements(dialogInstance, false);
-                break;
-            case "empty-file":
-                mw.notify(OO.ui.deferMsg("visualeditor-emm-file-upload-empty-file")());
-                setDisabledDialogElements(dialogInstance, false);
-                break;
-            case "filetype-banned":
-                mw.notify(OO.ui.deferMsg("visualeditor-emm-file-upload-filetype-banned")());
-                setDisabledDialogElements(dialogInstance, false);
-                break;
-            case "mustbeloggedin":
-                mw.notify(OO.ui.deferMsg("visualeditor-emm-file-upload-not-logged-in")());
-                setDisabledDialogElements(dialogInstance, false);
-                break;
-            case "http":
-                switch (exceptionobject.textStatus) {
-                    case "timeout":
-                        mw.notify(OO.ui.deferMsg("visualeditor-emm-file-upload-timeout")());
-                        setDisabledDialogElements(dialogInstance, false);
-                        break;
-                    case "parsererror":
-                        mw.notify(OO.ui.deferMsg("visualeditor-emm-file-upload-parsererror")());
-                        setDisabledDialogElements(dialogInstance, false);
-                        break;
-                    default:
-                        //unknown eroror
-                        mw.notify("An unknown error of the type " + exceptionobject.exception + " has occurred.");
-                        setDisabledDialogElements(dialogInstance, false);
-                }
-                break;
-            default:
-                mw.notify("An unknown error of the type " + status + " has occurred.");
-                setDisabledDialogElements(dialogInstance, false);
+        var dialogInstance = this; //todo is this needed?
+
+        if(status != "http") //todo this may be too risky
+            mw.notify(OO.ui.deferMsg("visualeditor-emm-file-upload-" + status)());
+        else {
+            switch (exceptionobject.textStatus) {
+                case "timeout":
+                    mw.notify(OO.ui.deferMsg("visualeditor-emm-file-upload-timeout")());
+                    setDisabledDialogElements(dialogInstance, false);
+                    break;
+                case "parsererror":
+                    mw.notify(OO.ui.deferMsg("visualeditor-emm-file-upload-parsererror")());
+                    setDisabledDialogElements(dialogInstance, false);
+                    break;
+                default:
+                    //unknown eroror
+                    mw.notify("An unknown error of the type " + exceptionobject.exception + " has occurred.");
+                    setDisabledDialogElements(dialogInstance, false);
+            }
         }
+        setDisabledDialogElements(dialogInstance, false);
     };
 
     /**
@@ -399,7 +370,6 @@ function createFileDialog(LightResourceDialog) {
             postUploadFunction();
         });
     };
-
 
     //Return the entire 'class' in order to pass this definition to the window factory.
     return EMMFileDialog;
