@@ -493,7 +493,6 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                 var surfaceModel = ve.init.target.getSurface().getModel();
                 var transaction = ve.dm.Transaction.newFromReplacement(surfaceModel.getDocument(), dialogInstance.selectedTextObject, myTemplate);
 
-                console.log(transaction);
                 var newRange = transaction.getModifiedRange(surfaceModel.getDocument());
                 surfaceModel.change(transaction, newRange ? new ve.dm.LinearSelection(surfaceModel.getDocument(), newRange) : new ve.dm.NullSelection(surfaceModel.getDocument()));
                 surfaceModel.setNullSelection();
