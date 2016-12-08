@@ -487,12 +487,14 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
 
                 dialogInstance.semanticAskQuery(dialogInstance.getAutocompleteQuery(),
                     function () {
-                        console.log("WEW");
+                        setAutoCompleteEnabled(dialogInstance, false);
                         setAutoCompleteEnabled(dialogInstance, dialogInstance.getAutoCompleteStateForMode(dialogInstance.dialogMode));
                     });
                 var surfaceModel = ve.init.target.getSurface().getModel();
                 var transaction = ve.dm.Transaction.newFromReplacement(surfaceModel.getDocument(), dialogInstance.selectedTextObject, myTemplate);
-                var newRange = transaction.getModifiedRange();
+
+                console.log(transaction);
+                var newRange = transaction.getModifiedRange(surfaceModel.getDocument());
                 surfaceModel.change(transaction, newRange ? new ve.dm.LinearSelection(surfaceModel.getDocument(), newRange) : new ve.dm.NullSelection(surfaceModel.getDocument()));
                 surfaceModel.setNullSelection();
             };
