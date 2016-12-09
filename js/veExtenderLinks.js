@@ -307,13 +307,12 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
      * in order to let the api know what existing resource should be edited. Otherwise linkData is just an empty string.
      */
     EMMDialog.prototype.executeInsertAction = function (insertCallback, currentPageID, linkData) {
-        if (!this.isExistingResource) {
-            //In this case, dialoginstance.suggestion is empty, so build and execute the query
+        //IsEdit can only be executed for an existing resource. Because of lazy evaluation the second part of the
+        //OR-statement will only be evaluated once the first part is true. That's why this doesn't crash.
+        if (!this.isExistingResource || this.isEdit()) {
             this.buildAndExecuteQuery(currentPageID, insertCallback, linkData);
-        } else if (this.isEdit()) { //dealing with an existing resource, so isEdit exists, otherwise isEdit would crash.
-            this.buildAndExecuteQuery(currentPageID, insertCallback, linkData);
-        }
-        else {
+        } else {
+            //If we're not editing an existing resource or creating a new one, we just insert a link inside the page.
             insertCallback(this.suggestion.data);
         }
     };
