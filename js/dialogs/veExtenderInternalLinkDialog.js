@@ -89,7 +89,6 @@ function createInternalLinkDialog(EMMDialog) {
     };
 
     /**
-     * @abstract
      * Retrieves the auto complete state for a given dialog mode.
      * @param {modeEnum} mode - dialog mode to get the auto complete state for.
      * @returns {boolean} - The value the auto complete should be set to.

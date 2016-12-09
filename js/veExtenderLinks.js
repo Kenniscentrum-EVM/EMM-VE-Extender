@@ -333,20 +333,20 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
      These functions are an attempt to emulate the idea of an abstract method as seen in other Object Oriented languages*/
 
     /**
-     * @abstract
      * Abstract method that needs to be overridden, displays an error message if this is not the case.
      * Expected behavior when overriding:
      * Creates all the inputfields of a dialog that are not yet created in the constructor of the general EMMDialog.
+     * @abstract
      */
     EMMDialog.prototype.createFields = function () {
         displayOverloadError("createFields");
     };
 
     /**
-     * @abstract
      * Abstract method that needs to be overridden, displays an error message if this is not the case.
      * Expected behavior when overriding:
      * Preforms the a mode change, this may include visual changes to a dialog.
+     * @abstract
      * @param {modeEnum} mode - Mode to be switched to.
      */
     EMMDialog.prototype.executeModeChange = function (mode) {
@@ -354,17 +354,16 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
     };
 
     /**
-     * @abstract
      * Abstract method that needs to be overridden, displays an error message if this is not the case.
      * Expected behavior when overriding:
      * Checks the status of the dialog and changes the dialogmode if necessary.
+     * @abstract
      */
     EMMDialog.prototype.testAndChangeDialogMode = function () {
         displayOverloadError("testAndChangeDialogMode");
     };
 
     /**
-     * @abstract
      * Abstract method that needs to be overridden, displays an error message if this is not the case.
      * Expected behavior and parameters when overriding:
      * Builds and executes a query that creates a new resource or edits an existing one with the sfautoedit api-calll.
@@ -375,16 +374,17 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
      * an existing one was changed. This function handles inserting a link into the current page.
      * @param {String} linkData - In case of an existing resource, linkData contains the internal name of the resource
      * in order to let the api know what existing resource should be edited. Otherwise linkData is just an empty string.
+     * @abstract
      */
     EMMDialog.prototype.buildAndExecuteQuery = function (currentPageID, insertCallback, linkData) {
         displayOverloadError("buildAndExecuteQuery");
     };
 
     /**
-     * @abstract
      * Abstract method that needs to be overridden, displays an error message if this is not the case.
      * Expected behavior and parameters when overriding:
      * Executes a query by using the mediawiki api. This query either creates a new resource or updates an existing one
+     * @abstract
      * @param {String} query - The query that should be executed. The query should be suitable for an sfautoedit api call.
      * @param {function} insertCallback - A function that handles inserting a link to the newly created or edited resource
      * into the current page. This is executed after the api has finished processing the request.
@@ -396,21 +396,21 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
     };
 
     /**
-     * @abstract
      * Abstract method that needs to be overridden, displays an error message if this is not the case.
      * Expected behavior and parameters when overriding:
      * Fill the fields of the dialog based on a resource the user has selected from the autocomplete dropdown.
+     * @abstract
      */
     EMMDialog.prototype.fillFields = function () {
         displayOverloadError("fillFields");
     };
 
     /**
-     * @abstract
      * Abstract method that needs to be overridden, displays an error message if this is not the case.
      * Expected behavior and parameters when overriding:
      * Processes part of the result of an ask query. Expands an existing suggestionobject by adding dialog-specific
      * data from the result to the suggestionObject.
+     * @abstract
      * @param {Object} singleResult - A single row from the result of the api-call that contains all the information
      * asked for in the query.
      * @param {Object} suggestionObject - A single suggestion that should be expanded. Should already contain
@@ -421,11 +421,11 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
     };
 
     /**
-     * @abstract
      * Abstract method that needs to be overridden, displays an error message if this is not the case.
      * Expected behavior and parameters when overriding:
      * Depending on the type of resource and choices made by the user in the dialog, links to different types of resources
      * are created in the current page with different types of templates. This function returns what template type to use.
+     * @abstract
      * @returns {String} - Null in the abstract case, but should be a String containing the type of template to use.
      */
     EMMDialog.prototype.findTemplateToUse = function () {
@@ -434,8 +434,8 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
     };
 
     /**
-     * @abstract
      * Retrieves the auto complete state for a given dialog mode.
+     * @abstract
      * @param {modeEnum} mode - dialog mode to get the auto complete state for.
      * @returns {boolean} - The value the auto complete should be set to.
      */
