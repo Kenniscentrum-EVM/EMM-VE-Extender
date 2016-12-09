@@ -10,11 +10,9 @@ but not limited to:
 * The ability to give a template a certain category which prevents a user from deleting and copying a template in the visual editor.
 
 ## Changelog
-
 Found [here](https://bitbucket.org/expertisemanagement/emm-ve-extender/src/5c48a88ad1d8c74a26ae4b37ea3c23bffbc2ea35/ChangeLog.md?at=master&fileviewer=file-view-default)
 
 ## Instellen van extender op test-server
-
 Voorlopig moeten de volgende aanpassingen gemaakt in de volgende bestanden
 //Toevoegen aan pagina MediaWiki:Common.js
 mw.loader.using( 'ext.EMMVEExtension', function () {
