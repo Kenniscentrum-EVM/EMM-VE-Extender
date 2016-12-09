@@ -184,6 +184,7 @@ function createFileDialog(LightResourceDialog) {
         if (newResourcePage) {
             //In this case we should be dealing with an existing resource description that needs to be 'copied' over to
             //a new page, and should contain currentpageID in the query.
+            //For completely new resources this happens in the buildAndExecuteQuery of EMMLightResourceDialog
             query += "&Resource Description[created in page]=" + currentPageID;
         }
         //Gather the filename in different ways depending on whether it is an existing file or not.
@@ -211,15 +212,15 @@ function createFileDialog(LightResourceDialog) {
      */
     EMMFileDialog.prototype.executeQuery = function (query, insertCallback, linkdata, upload, newUploadVersion) {
         var target = "";
-        //Set the target of the api-call to the internal title of an existing file, if the file already exists.
+        //Set the target of the api-call to the internal title of an existing file resource, if the file already exists.
         if (this.isExistingResource) {
             target = linkdata;
         }
-        //Set the target of the api-call to the internal title of an existing file resource, if the file resource already exists
+        //Handle uploading of a new file or new version of a file.
         if (upload) {
             this.uploadFile(newUploadVersion, function () {
                 semanticCreateWithFormQuery(query, insertCallback, target, "Resource Light");
-            }, linkdata);
+            });
         }
         else {
             semanticCreateWithFormQuery(query, insertCallback, target, "Resource Light");
@@ -430,7 +431,7 @@ function createFileDialog(LightResourceDialog) {
         };
         new mw.Api().upload(file, filedata).fail(function (status, exceptionobject) {
             //Handle possible error messages and display them in a way the user understands them.
-            //If we're uploading a new version and the file already exists, ignore the error and upload anyway
+            //If we're uploading a new version and the file already exists, ignore the error and insert a link anyway.
             if (newUploadVersion && (status == "exists" || status == "exists-normalized")) {
                 postUploadFunction();
             } else {
