@@ -67,7 +67,7 @@ function createInternalLinkDialog(EMMDialog) {
      * This method preforms all necessary operations to visually and logically switch the state of the dialog to a different mode.
      *
      * Dialog modes are defined in the modeEnum variable (which is defined in EMMDialog) this enum should always be used when switching modes.
-     * @param {number} mode - Dialog mode to switch to.
+     * @param {modeEnum} mode - Dialog mode to switch to.
      */
     EMMInternalLinkDialog.prototype.executeModeChange = function (mode) {
         this.dialogMode = mode;

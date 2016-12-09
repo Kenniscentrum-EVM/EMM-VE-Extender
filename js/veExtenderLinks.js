@@ -204,7 +204,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
 
     /**
      * Returns the query that is used to gather the information about a single resource.
-     * @param internalPageName - The internal name of the page where a certain resource is described.
+     * @param {string} internalPageName - The internal name of the page where a certain resource is described.
      * @return {string} - An ask-query that gathers information about a single existing resource with a given pageName
      */
     EMMDialog.prototype.getEditQuery = function (internalPageName) {
@@ -347,7 +347,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
      * Abstract method that needs to be overridden, displays an error message if this is not the case.
      * Expected behavior when overriding:
      * Preforms the a mode change, this may include visual changes to a dialog.
-     * @param {number} mode - Mode to be switched to.
+     * @param {modeEnum} mode - Mode to be switched to.
      */
     EMMDialog.prototype.executeModeChange = function (mode) {
         displayOverloadError("executeModeChange");

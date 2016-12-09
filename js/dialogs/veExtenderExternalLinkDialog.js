@@ -103,7 +103,7 @@ function createExternalLinkDialog(LightResourceDialog) {
      * Method that switches the dialog to a given mode.
      * This method preforms all necessary operations to visually and logically switch the state of the dialog to a different mode.
      * Dialog modes are defined in the modeEnum variable (which is defined in EMMDialog) this enum should always be used when switching modes.
-     * @param {number} mode - Dialog mode to switch to.
+     * @param {modeEnum} mode - Dialog mode to switch to.
      */
     EMMExternalLinkDialog.prototype.executeModeChange = function (mode) {
         this.dialogMode = mode;
@@ -216,15 +216,6 @@ function createExternalLinkDialog(LightResourceDialog) {
         this.linkField.setValue(this.suggestion.hyperlink);
         this.validator.validateAll();
     };
-
-    /**
-     * Processes part of the result of an ask query. Expands an existing suggestionobject by adding external link-specific
-     * data from the queryresult to the suggestionObject.
-     * @param {Object} singleResult - A single row from the result of the api-call that contains all the information
-     * about an external link that was asked for in the query.
-     * @param {Object} suggestionObject - A single suggestion for the autocomplete dropdown that should be expanded.
-     * Should already contain data of generic resource and a lightResource.
-     */
 
     /**
      * Processes part of the result of an ask query. Expands an existing suggestionobject by adding external link-specific
