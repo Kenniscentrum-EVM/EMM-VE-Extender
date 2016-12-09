@@ -9,6 +9,9 @@ but not limited to:
 * A custom edit-window in order to edit existing links already on a page;
 * The ability to give a template a certain category which prevents a user from deleting and copying a template in the visual editor.
 
+## Changelog
+
+Found [here](https://bitbucket.org/expertisemanagement/emm-ve-extender/src/5c48a88ad1d8c74a26ae4b37ea3c23bffbc2ea35/ChangeLog.md?at=master&fileviewer=file-view-default)
 
 ## Instellen van extender op test-server
 
@@ -19,7 +22,3 @@ mw.loader.using( 'ext.EMMVEExtension', function () {
 
 aanpassen in bestand veExtender.js:
 Heading nl vervangen door: Semantic title
-
-## Changelog
-
-Found [here](https://bitbucket.org/expertisemanagement/emm-ve-extender/src/5c48a88ad1d8c74a26ae4b37ea3c23bffbc2ea35/ChangeLog.md?at=master&fileviewer=file-view-default)
