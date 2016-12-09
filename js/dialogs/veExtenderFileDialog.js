@@ -339,6 +339,13 @@ function createFileDialog(LightResourceDialog) {
                 });
                 setDisabledDialogElements(dialogInstance, false);
                 break;
+            case "exists-normalized":
+                mw.notify(OO.ui.deferMsg("visualeditor-emm-file-upload-exists")(), {
+                    autoHide: false,
+                    type: "error"
+                });
+                setDisabledDialogElements(dialogInstance, false);
+                break;
             case "verification-error":
                 mw.notify(OO.ui.deferMsg("visualeditor-emm-file-upload-verification-error")() + "\n" + exceptionobject.error.info, {
                     autoHide: false,
@@ -423,7 +430,8 @@ function createFileDialog(LightResourceDialog) {
         };
         new mw.Api().upload(file, filedata).fail(function (status, exceptionobject) {
             //Handle possible error messages and display them in a way the user understands them.
-            if (newUploadVersion && status == "exists") {
+            //If we're uploading a new version and the file already exists, ignore the error and upload anyway
+            if (newUploadVersion && (status == "exists" || status == "exists-normalized")) {
                 postUploadFunction();
             } else {
                 dialogInstance.handleUploadFail(status, exceptionobject);

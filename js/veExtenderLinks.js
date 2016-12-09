@@ -195,6 +195,8 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
 
     /**
      * Returns the query that is used to gather information for all existing resources of a certain type.
+     * Depends on what kind of resource this is.
+     * @return {string|string|string} - An ask-query that gathers information for all existing resource of a given type.
      */
     EMMDialog.prototype.getAutocompleteQuery = function () {
         return this.autoCompleteQuery;
@@ -203,6 +205,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
     /**
      * Returns the query that is used to gather the information about a single resource.
      * @param internalPageName - The internal name of the page where a certain resource is described.
+     * @return {string} - An ask-query that gathers information about a single existing resource with a given pageName
      */
     EMMDialog.prototype.getEditQuery = function (internalPageName) {
         return this.editQuery.replace(/PAGENAMEPARAMETER/g, internalPageName);
@@ -789,7 +792,7 @@ function semanticCreateWithFormQuery(query, callback, target, form) {
 /**
  * Grabs the text that is selected (outside the dialog) and inserts it into the presentationtitle field inside the dialog
  * @param {OO.ui.TextInputWidget} inputObject - The field in which the selected text should be inserted
- * @returns {Object}
+ * @returns {Object} - Returns a range object
  */
 function grabSelectedText(inputObject) {
     var surfaceModel = ve.init.target.getSurface().getModel();
