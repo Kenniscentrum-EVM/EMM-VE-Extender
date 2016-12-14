@@ -247,6 +247,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                 dialogInstance.executeModeChange(dialogInstance.modeEnum.EDIT_EXISTING);
                 toggleInputFields(dialogInstance.fieldset, true);
                 data.source = data.source.replace(/ /g, "_"); //convert whitespaces to underscores
+                console.log(data.source);
                 var api = new mw.Api();
                 var query = dialogInstance.getEditQuery(data.source); //getEditQuery retrieves the correct query for us.
                 api.get({
