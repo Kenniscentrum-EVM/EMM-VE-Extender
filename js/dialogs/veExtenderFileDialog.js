@@ -120,6 +120,9 @@ function createFileDialog(LightResourceDialog) {
                 this.$element.find(".oo-ui-processDialog-title").text(OO.ui.deferMsg("visualeditor-emm-dialogfiletitle")());
                 input = this.titleField.$element.find("input");
                 input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-filedialog-titlefield-placeholder-def")());
+
+
+
                 clearInputFields(this.fieldset, [1, 2], this.noEditFieldTypes);
                 break;
             case this.modeEnum.INSERT_NEW:
@@ -160,7 +163,15 @@ function createFileDialog(LightResourceDialog) {
                 break;
             case this.modeEnum.EDIT_EXISTING:
                 break;
+            case this.modeEnum.INSERT_AND_EDIT_EXISTING:
+                break;
         }
+
+        //todo this is done every keystroke, you'd much rather try to do this only once.
+        if(this.isExistingResource)
+            this.fileField.$element.find(".oo-ui-selectFileWidget-dropLabel").text(OO.ui.deferMsg("visualeditor-emm-filedialog-uploadnf")());
+        else
+            this.fileField.$element.find(".oo-ui-selectFileWidget-dropLabel").text(OO.ui.deferMsg("ooui-selectfile-dragdrop-placeholder")());
     };
 
     /**
@@ -180,7 +191,7 @@ function createFileDialog(LightResourceDialog) {
     EMMFileDialog.prototype.buildAndExecuteQuery = function (currentPageID, insertCallback, linkdata, upload, newUploadVersion, newResourcePage) {
         //First call the method of the parent to build the basic query for a light resource
         var query = LightResourceDialog.prototype.buildQuery.call(this, currentPageID);
-        if (newResourcePage) {
+        if (newResourcePage) { //todo this.dialogMode == this.modeEnum.INSERT_EXISTING?
             //In this case we should be dealing with an existing resource description that needs to be 'copied' over to
             //a new page, and should contain currentpageID in the query.
             query += "&Resource Description[created in page]=" + currentPageID;

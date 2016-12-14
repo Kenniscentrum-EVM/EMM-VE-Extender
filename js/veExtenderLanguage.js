@@ -91,6 +91,7 @@ function defineTranslations() {
             "visualeditor-emm-filedialog-title-edit": "Edit link to file",
             "visualeditor-emm-filedialog-titlefield-placeholder-def": "Search for link to file",
             "visualeditor-emm-filedialog-titlefield-placeholder-new": "Title of new link to file",
+            "visualeditor-emm-filedialog-uploadnf": "Upload new file version of file.",
             "visualeditor-emm-required": "*Required",
 
             "visualeditor-emm-notification-template-title": "Illegal operation",
@@ -187,6 +188,7 @@ function defineTranslations() {
             "visualeditor-emm-filedialog-title-edit": "Aanpassen koppeling naar bestand",
             "visualeditor-emm-filedialog-titlefield-placeholder-def": "Zoeken naar een bestandskoppeling",
             "visualeditor-emm-filedialog-titlefield-placeholder-new": "Titel nieuwe bestandskoppeling",
+            "visualeditor-emm-filedialog-uploadnf": "Upload nieuwe versie van bestand",
             "visualeditor-emm-required": "*Vereist",
 
             "visualeditor-emm-notification-template-title": "Actie niet toegestaan",

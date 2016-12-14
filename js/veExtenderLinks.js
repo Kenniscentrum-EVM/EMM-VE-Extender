@@ -213,7 +213,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
      * the resource.
      * @returns {boolean} - Whether the user is editing the selected resource
      */
-    EMMDialog.prototype.isEdit = function () {
+    EMMDialog.prototype.isEdit = function () { // todo Wat is dit?
         return this.titleField.getValue() != this.suggestion.value;
     };
 
