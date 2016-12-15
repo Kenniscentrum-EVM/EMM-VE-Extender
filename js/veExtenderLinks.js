@@ -53,6 +53,23 @@ function addEMMLinks() {
             };
         }
     );
+
+    //Create a bibliographic reference dialog and add a menu item for the dialog
+    loadEMMDialog("Bibliographic reference", "bibliographicreference", OO.ui.deferMsg("visualeditor-emm-menubibliographicreferencetitle")(), OO.ui.deferMsg("visualeditor-emm-bibliographicreferencetitle")(),
+        function (nameData, linkData) {
+            return {
+                resource: {
+                    wt: linkData
+                },
+                name: {
+                    wt: nameData
+                },
+                dialog: {
+                    wt: "process-bibliographicreference-dialog"
+                }
+            };
+        }
+    );
 }
 
 /**
@@ -410,6 +427,9 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
             break;
         case "Internal link":
             dialog = createInternalLinkDialog(EMMDialog);
+            break;
+        case "Bibliographic reference":
+            dialog = createLightResourceDialog(EMMDialog, resourceType);
             break;
         default:
             alert(OO.ui.deferMsg("visualeditor-emm-dialog-error"));

@@ -24,7 +24,7 @@ function redefineMenu() {
             break;
         }
     //add options to menu if they are not already there
-    var toAdd = ["file", "linkpage", "linkwebsite"];
+    var toAdd = ["file", "linkpage", "linkwebsite", "bibliographicreference"];
     for (var i = 0; i < toAdd.length; i++)
         if (force.indexOf(toAdd[i]) < 0)
             force.push(toAdd[i]);

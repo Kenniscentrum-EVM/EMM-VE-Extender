@@ -150,6 +150,9 @@ function createLightResourceDialog(EMMDialog, resourceType) {
         case "External link":
             return createExternalLinkDialog(EMMLightResourceDialog);
             break;
+        case "Bibliographic reference":
+            return createBibliographicReferenceDialog(EMMLightResourceDialog);
+            break;
         default:
             alert(OO.ui.deferMsg("visualeditor-emm-dialog-error"));
             return null;
