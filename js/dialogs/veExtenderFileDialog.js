@@ -120,9 +120,6 @@ function createFileDialog(LightResourceDialog) {
                 this.$element.find(".oo-ui-processDialog-title").text(OO.ui.deferMsg("visualeditor-emm-dialogfiletitle")());
                 input = this.titleField.$element.find("input");
                 input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-filedialog-titlefield-placeholder-def")());
-
-
-
                 clearInputFields(this.fieldset, [1, 2], this.noEditFieldTypes);
                 break;
             case this.modeEnum.INSERT_NEW:
@@ -206,8 +203,7 @@ function createFileDialog(LightResourceDialog) {
         //Expand the existing query with a file-specific part.
         query += "&Resource Description[file name]=" + filename;
         this.executeQuery(query, insertCallback, linkdata, upload, newUploadVersion);
-    }
-    ;
+    };
 
     /**
      * Executes an sf-autoedit api call by using the mediawiki api. This call either creates a new file resource or updates an existing one.
@@ -222,7 +218,7 @@ function createFileDialog(LightResourceDialog) {
     EMMFileDialog.prototype.executeQuery = function (query, insertCallback, linkdata, upload, newUploadVersion) {
         var target = "";
         //Set the target of the api-call to the internal title of an existing file, if the file already exists.
-        if (this.isExistingResource) {
+        if (this.isExistingResource) { //todo isExistingResource is better than modes because we only have to check one variable that way.
             target = linkdata;
         }
         //Set the target of the api-call to the internal title of an existing file resource, if the file resource already exists
@@ -292,15 +288,16 @@ function createFileDialog(LightResourceDialog) {
     EMMFileDialog.prototype.executeInsertAction = function (insertCallback, currentPageID, linkdata) {
         //See the documentation wiki for a visual representation of this if/else mess
         var dialogInstance = this;
-        if (this.isExistingResource) {
+        if (this.isExistingResource) { //todo isExistingResource is better imo, but it could be substituted by dialogMode = INSERT_EXISTING || INSERT_AND_EDIT_EXISTING
             if (this.fileField.getValue() != null) {
+                //todo we've seen strings getting stripped of their quiet a bunch, perhaps we can make a function for it?
                 if (this.fileField.getValue().name != this.suggestion.filename.replace("Bestand:", "").replace("File:", "").toLowerCase()) {
                     //Upload new file and create a new resource, because the file has a diffrent name.
                     //A diffrent filename will lead to a diffrent internal name for the File.
                     //Linkdata is left empty on purpose
                     this.buildAndExecuteQuery(currentPageID, insertCallback, "", true, false, true);
                 } else {
-                    if (!this.isEdit()) {
+                    if (!this.isEdit()) { //todo I don't really understand what this does, but it could possibly be substituted by dialogMode = INSERT_AND_EDIT_EXISTING?
                         //Uplaod a new version of the file
                         this.uploadFile(true, function () {
                             insertCallback(dialogInstance.suggestion.data);
@@ -312,7 +309,7 @@ function createFileDialog(LightResourceDialog) {
                     }
                 }
             } else {
-                if (this.isEdit()) {
+                if (this.isEdit()) { // todo same as line 300
                     //Just update the resource, don't upload anything
                     this.buildAndExecuteQuery(currentPageID, insertCallback, linkdata, false, false, false);
                 } else {
