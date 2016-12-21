@@ -685,37 +685,30 @@ function toggleInputFields(fieldSet, value) {
 /**
  * Clears the input fields of a given fieldset
  * @param {OO.ui.FieldsetLayout} fieldset - The fieldset whose input fields should be emptied
- * @param {int[]} exclude - The indices of the fields in the fieldset that should not be cleared
- * @param {String[]} inputTypeExclude - An array of the names of types of fields that should not be cleared
+ * @param {int[]} excludeNum - The indices of the fields in the fieldset that should not be cleared
+ * @param {String[]} excludeType - An array of the names of types of fields that should not be cleared
  */
-function clearInputFields(fieldset, exclude, inputTypeExclude) { //TODO rewrite this function
-    if (exclude != null) {
-        for (var i = 0; i < fieldset.getItems().length; i++) {
-            var ex = false;
-            for (var x = 0; x < exclude.length; x++)
-                if (i == exclude[x])
-                    ex = true;
-            if (!ex) {
-                //Make sure the fieldlayout doesn't contain a field of the given types
-                if ($.inArray(fieldset.getItems()[i].getField().constructor.name, inputTypeExclude) == -1) {
-                    if ((fieldset.getItems()[i].getField() instanceof OO.ui.SelectFileWidget))
-                        fieldset.getItems()[i].getField().setValue(null);
-                    else
-                        fieldset.getItems()[i].getField().setValue("");
-                }
-            }
-        }
-    }
-    else {
-        for (var i = 0; i < fieldset.getItems().length; i++) {
-            //Make sure the fieldlayout doesn't contain just a field of the given types
-            if ($.inArray(fieldset.getItems()[i].getField().constructor.name, inputTypeExclude) == -1) {
-                if ((fieldset.getItems()[i].getField() instanceof OO.ui.SelectFileWidget))
-                    fieldset.getItems()[i].getField().setValue(null);
-                else
-                    fieldset.getItems()[i].getField().setValue("");
-            }
-        }
+function clearInputFields(fieldset, excludeNum, excludeType)
+{
+    main:
+    for(var i = 0; i < fieldset.getItems().length; i++)
+    {
+        if(excludeNum != null)
+            for(var x = 0; x < excludeNum.length; x++) //todo dynamically resize this array?
+                if(x == i)
+                    continue main;
+        if(excludeType != null)
+            for(var y = 0; y < excludeType.length; y++)
+                if(fieldset.getItems()[i].getField().constructor.name == excludeType[y])
+                    continue main;
+
+        //Apparently we also go trough some LabelWidgets in this loop, these things will break IE9, IE10 and possibly edge when .setValue(x) is called on them.
+        if(fieldset.getItems()[i].getField() instanceof OO.ui.SelectFileWidget)
+            fieldset.getItems()[i].getField().setValue(null);
+        else if(fieldset.getItems()[i].getField() instanceof OO.ui.CheckboxInputWidget)
+            fieldset.getItems()[i].getField().setSelected(true);
+        else if (fieldset.getItems()[i].getField() instanceof OO.ui.TextInputWidget)
+            fieldset.getItems()[i].getField().setValue("");
     }
 }
 
