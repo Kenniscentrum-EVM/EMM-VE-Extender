@@ -11,7 +11,7 @@ but not limited to:
 
 ## Changelog
 
-Found [here](https://bitbucket.org/expertisemanagement/emm-ve-extender/src/5c48a88ad1d8c74a26ae4b37ea3c23bffbc2ea35/ChangeLog.md?at=master&fileviewer=file-view-default)
+Found [here](https://bitbucket.org/expertisemanagement/emm-ve-extender/src/5c48a88ad1d8c74a26ae4b37ea3c23bffbc2ea35/ChangeLog.md?at=master&fileviewer=file-view-default) (Dutch)
 
 ## Instellen van extender op test-server
 
