@@ -244,7 +244,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
             var data = this;
             if (data.source != null) //are we editing?
             {
-                dialogInstance.executeModeChange(dialogInstance.modeEnum.EDIT_EXISTING);
+                dialogInstance.executeModeChange(dialogInstance.modeEnum.EDIT_EXISTING, false);
                 toggleInputFields(dialogInstance.fieldset, true);
                 data.source = data.source.replace(/ /g, "_"); //convert whitespaces to underscores
                 var api = new mw.Api();
@@ -322,8 +322,9 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
      * Expected behavior when overriding:
      * Preforms the a mode change, this may include visual changes to a dialog.
      * @param {number} mode - Mode to be switched to.
+     * @param {boolean} clearInputFields - If true the input fields of the dialog will be cleared.
      */
-    EMMDialog.prototype.executeModeChange = function (mode) {
+    EMMDialog.prototype.executeModeChange = function (mode, clearInputFields) {
         displayOverloadError("executeModeChange");
     };
 
@@ -584,9 +585,11 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
             function cleanUpDialog() {
                 hideAutoComplete(dialogInstance.titleField.$element.find("input"));
                 dialogInstance.validator.disable();
-                clearInputFields(dialogInstance.fieldset, null, ["OoUiLabelWidget"]);
+                dialogInstance.validator.disableOnChange();
+                clearInputFields(dialogInstance.fieldset, null);
                 dialogInstance.dialogMode = dialogInstance.modeEnum.INSERT_EXISTING;
-                dialogInstance.executeModeChange(dialogInstance.modeEnum.INSERT_EXISTING);
+                dialogInstance.executeModeChange(dialogInstance.modeEnum.INSERT_EXISTING, false);
+                dialogInstance.validator.enableOnChange();
                 dialogInstance.validator.enable();
                 dialogInstance.isExistingResource = false;
                 dialogInstance.suggestion = null;
@@ -654,8 +657,9 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                 previousSuggestion = singleQueryResult;
             }
             //Add the final row.
-            if (previousSuggestion != null)
+            if (previousSuggestion != null) {
                 arr.push(dialogInstance.processSingleQueryResult(row, res, previousSuggestion));
+            }
             //todo investigate ASK query possibilities and restrictions, this may possibly be unnecessary.
             arr.sort(function (a, b) {
                 if (a.value.toUpperCase() > b.value.toUpperCase()) {
@@ -688,28 +692,27 @@ function toggleInputFields(fieldSet, value) {
  * @param {int[]} excludeNum - The indices of the fields in the fieldset that should not be cleared
  * @param {String[]} excludeType - An array of the names of types of fields that should not be cleared
  */
-function clearInputFields(fieldset, excludeNum, excludeType)
-{
+function clearInputFields(fieldset, excludeNum) {
     main:
-    for(var i = 0; i < fieldset.getItems().length; i++)
-    {
-        if(excludeNum != null)
-            for(var x = 0; x < excludeNum.length; x++) //todo dynamically resize this array?
-                if(x == i)
-                    continue main;
-        if(excludeType != null)
-            for(var y = 0; y < excludeType.length; y++)
-                if(fieldset.getItems()[i].getField().constructor.name == excludeType[y])
-                    continue main;
+        for (var i = 0; i < fieldset.getItems().length; i++) {
+            if (excludeNum != null && excludeNum.length != 0) {
+                for (var x = 0; x < excludeNum.length; x++) { //todo dynamically resize this array?
+                    if (excludeNum[x] == i) {
+                        excludeNum.splice(x, 1);
+                        continue main;
+                    }
+                }
+            }
 
-        //Apparently we also go trough some LabelWidgets in this loop, these things will break IE9, IE10 and possibly edge when .setValue(x) is called on them.
-        if(fieldset.getItems()[i].getField() instanceof OO.ui.SelectFileWidget)
-            fieldset.getItems()[i].getField().setValue(null);
-        else if(fieldset.getItems()[i].getField() instanceof OO.ui.CheckboxInputWidget)
-            fieldset.getItems()[i].getField().setSelected(true);
-        else if (fieldset.getItems()[i].getField() instanceof OO.ui.TextInputWidget)
-            fieldset.getItems()[i].getField().setValue("");
-    }
+            //Apparently we also go trough some LabelWidgets in this loop, these things will break IE9 and IE10 .setValue(x) is called on them.
+            if (fieldset.getItems()[i].getField() instanceof OO.ui.SelectFileWidget) {
+                fieldset.getItems()[i].getField().setValue(null);
+            } else if (fieldset.getItems()[i].getField() instanceof OO.ui.CheckboxInputWidget) {
+                fieldset.getItems()[i].getField().setSelected(true);
+            } else if (fieldset.getItems()[i].getField().supports("setValue")) {
+                fieldset.getItems()[i].getField().setValue("");
+            }
+        }
 }
 
 /**

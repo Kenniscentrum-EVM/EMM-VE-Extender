@@ -114,8 +114,9 @@ function createFileDialog(LightResourceDialog) {
      *
      * Dialog modes are defined in the modeEnum variable (which is defined in EMMDialog) this enum should always be used when switching modes.
      * @param {number} mode - Dialog mode to switch to.
+     * @param {boolean} clearInputFields - If true the input fields of the dialog will be cleared.
      */
-    EMMFileDialog.prototype.executeModeChange = function (mode) {
+    EMMFileDialog.prototype.executeModeChange = function (mode, clearInputFieldsBool) {
         this.dialogMode = mode;
         var input = null;
         switch (mode) {
@@ -124,21 +125,25 @@ function createFileDialog(LightResourceDialog) {
                 this.$element.find(".oo-ui-processDialog-title").text(OO.ui.deferMsg("visualeditor-emm-dialogfiletitle")());
                 input = this.titleField.$element.find("input");
                 input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-filedialog-titlefield-placeholder-def")());
-                clearInputFields(this.fieldset, [1, 2], ["OoUiLabelWidget"]);
+                if (clearInputFieldsBool) {
+                    clearInputFields(this.fieldset, [1, 2]);
+                }
                 break;
             case this.modeEnum.INSERT_NEW:
                 this.$element.find(".oo-ui-processDialog-title").text(OO.ui.deferMsg("visualeditor-emm-filedialog-title-npage")());
                 input = this.titleField.$element.find('input');
                 input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-filedialog-titlefield-placeholder-new")());
-                if (this.suggestion != null) {
-                    if (this.suggestion.value != this.titleField.value) {
-                        clearInputFields(this.fieldset, [0, 1, 2], ["OoUiLabelWidget"]);
+                if (clearInputFieldsBool) {
+                    if (this.suggestion != null) {
+                        if (this.suggestion.value != this.titleField.value) {
+                            clearInputFields(this.fieldset, [0, 1, 2]);
+                        } else {
+                            clearInputFields(this.fieldset, [1, 2]);
+                        }
+                    } else {
+                        clearInputFields(this.fieldset, [1, 2]);
                     }
-                    else
-                        clearInputFields(this.fieldset, [1, 2], ["OoUiLabelWidget"]);
                 }
-                else
-                    clearInputFields(this.fieldset, [1, 2], ["OoUiLabelWidget"]);
                 break;
             case this.modeEnum.EDIT_EXISTING:
                 this.$element.find(".oo-ui-processDialog-title").text(OO.ui.deferMsg("visualeditor-emm-filedialog-title-edit")());
@@ -156,11 +161,11 @@ function createFileDialog(LightResourceDialog) {
         switch (this.dialogMode) {
             case this.modeEnum.INSERT_EXISTING:
                 if ((!this.isExistingResource && this.fileField.getValue() != null))
-                    this.executeModeChange(this.modeEnum.INSERT_NEW);
+                    this.executeModeChange(this.modeEnum.INSERT_NEW, true);
                 break;
             case this.modeEnum.INSERT_NEW:
                 if (this.fileField.getValue() == null)
-                    this.executeModeChange(this.modeEnum.INSERT_EXISTING);
+                    this.executeModeChange(this.modeEnum.INSERT_EXISTING, true);
                 break;
             case this.modeEnum.EDIT_EXISTING:
                 break;
@@ -282,10 +287,12 @@ function createFileDialog(LightResourceDialog) {
     EMMFileDialog.prototype.processSingleQueryResult = function (row, resultSet, previousSuggestion) {
         var suggestionObject = LightResourceDialog.prototype.processSingleQueryResult.call(this, row, resultSet, previousSuggestion);
         suggestionObject.filename = resultSet[row].printouts["File name"][0].fulltext.replace("Bestand:", "").replace("File:", "");
-        if(previousSuggestion != null && previousSuggestion.semanticTitle == suggestionObject.semanticTitle && previousSuggestion.value == previousSuggestion.semanticTitle)
-        previousSuggestion.value = previousSuggestion.value + " (" + previousSuggestion.filename + ")";
-        if(previousSuggestion != null && previousSuggestion.semanticTitle == suggestionObject.value)
-            suggestionObject.value = suggestionObject.value + " (" + suggestionObject.filename + ")";
+        if (previousSuggestion != null) {
+            if (previousSuggestion.semanticTitle.toLowerCase() == suggestionObject.semanticTitle.toLowerCase() && previousSuggestion.value == previousSuggestion.semanticTitle)
+                previousSuggestion.value = previousSuggestion.value + " (" + previousSuggestion.filename + ")";
+            if (previousSuggestion.semanticTitle.toLowerCase() == suggestionObject.value.toLowerCase())
+                suggestionObject.value = suggestionObject.value + " (" + suggestionObject.filename + ")";
+        }
         return suggestionObject;
     };
 
