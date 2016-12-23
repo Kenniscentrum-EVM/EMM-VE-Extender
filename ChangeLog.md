@@ -3,6 +3,7 @@
 
 ## Versie 0.7.5
 Uitgebracht op vrijdag 23 december
+
 * ​Het is weer mogelijk om links in te voegen in Internet Explorer 10 en 11
 * Bij dubbele semantische titels in de keuze-lijst bij het invoegen van een link komt er nu extra informatie achter te staan. Bij een bestand de bestandsnaam, bij een interne link de naam van de supercontext en bij een hyperlink de URL van de pagina waar naar gelinkt wordt.
 
