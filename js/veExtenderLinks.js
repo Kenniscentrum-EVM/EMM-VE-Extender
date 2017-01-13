@@ -55,7 +55,7 @@ function addEMMLinks() {
     );
 
     //Create a bibliographic reference dialog and add a menu item for the dialog
-    loadEMMDialog("Bibliographic reference", "bibliographicreference", OO.ui.deferMsg("visualeditor-emm-menubibliographicreferencetitle")(), OO.ui.deferMsg("visualeditor-emm-bibliographicreferencetitle")(),
+    loadEMMDialog("Bibliographic reference", "bibliographicreference", OO.ui.deferMsg("visualeditor-emm-menubibliographicreferencetitle")(), OO.ui.deferMsg("visualeditor-emm-dialogbibliographicreferencetitle")(),
         function (nameData, linkData) {
             return {
                 resource: {
@@ -567,7 +567,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
          * The user will be able to pick a resource from the list of all resources gathered by the askQuery
          * @param {Object[]} queryResults - An array containing all the possible options for the autocomplete dropdown
          */
-        var autoCompleteCallback = function () {
+        var autoCompleteCallback = function (queryResults) {
             setAutoCompleteEnabled(dialogInstance, dialogInstance.getAutoCompleteStateForMode(dialogInstance.dialogMode));
         };
 
@@ -586,9 +586,9 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
             });
             dialogInstance.fieldset.$element.css("width", "100%");
             for (var i = 0; i < dialogInstance.fieldset.getItems().length; i++) {
-                dialogInstance.fieldset.getItems()[i].$element.find(".oo-ui-labelElement-label").not(".oo-ui-selectFileWidget-label").css("margin-right", 0).css("float", "left").css("width", "30%");
+                dialogInstance.fieldset.getItems()[i].$element.find(".oo-ui-fieldLayout-body > .oo-ui-labelElement-label").not(".oo-ui-selectFileWidget-label").css("margin-right", 0).css("float", "left").css("width", "30%");
                 dialogInstance.fieldset.getItems()[i].$element.find(".oo-ui-fieldLayout-field").css("width", "70%");
-                dialogInstance.fieldset.getItems()[i].$element.find(".oo-ui-fieldLayout-body").css("width", "100%").css("overflow", "hidden");
+                dialogInstance.fieldset.getItems()[i].$element.find(".oo-ui-fieldLayout-body").css("width", "100%");
             }
         };
 
@@ -661,6 +661,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
             query: query
         }).done(function (data) {
             var res = data.query.results;
+            console.log(res);
             var arr = []; //array to store the results
             var previousSuggestion = null;
             var row;

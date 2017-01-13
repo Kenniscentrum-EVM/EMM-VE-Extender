@@ -50,6 +50,22 @@ function defineTranslations() {
             "visualeditor-emm-file-upload-file-too-large": "The file is too large. The maximum size of a file is 64MB",
             "visualeditor-emm-file-upload-empty-file": "The file that was uploaded is empty",
 
+            "visualeditor-emm-bibref-bibtex-type" : "Document type*:",
+            "visualeditor-emm-bibref-bibtex-type-select" : "Select a document type",
+            "visualeditor-emm-bibref-titlefield-placeholder-def": "Search for a bibliographic reference",
+
+            "visualeditor-emm-bibref-bibtex-type-article" : "Article",
+            "visualeditor-emm-bibref-bibtex-type-book": "Book",
+            "visualeditor-emm-bibref-bibtex-type-booklet": "Booklet (no publisher)",
+            "visualeditor-emm-bibref-bibtex-type-incollection": "Part of a Book",
+            "visualeditor-emm-bibref-bibtex-type-inproceedings": "Article from conference proceedings",
+            "visualeditor-emm-bibref-bibtex-type-manual": "Manual",
+            "visualeditor-emm-bibref-bibtex-type-mastersthesis": "Master thesis",
+            "visualeditor-emm-bibref-bibtex-type-phdthesis": "PhD thesis",
+            "visualeditor-emm-bibref-bibtex-type-proceedings": "Conference proceedings",
+            "visualeditor-emm-bibref-bibtex-type-techreport": "Technical report",
+            "visualeditor-emm-bibref-bibtex-type-unpublished": "Unpublished Resource",
+
 
             "visualeditor-emm-cancel": "Cancel",
             "visualeditor-emm-insert": "Insert",
@@ -145,6 +161,22 @@ function defineTranslations() {
             "svg, png, gif, jpg, jpeg, ppt, pptx, pdf, mp3, mp4, xls, xlsx, doc, docx, odt, odc, odp, odg, txt",
             "visualeditor-emm-file-upload-file-too-large": "Het bestand is te groot. De maximale grootte van een bestand is 64MB",
             "visualeditor-emm-file-upload-empty-file": "Het opgegeven bestand is leeg.",
+
+            "visualeditor-emm-bibref-bibtex-type": "Documentsoort*:",
+            "visualeditor-emm-bibref-bibtex-type-select": "Selecteer een documentsoort",
+            "visualeditor-emm-bibref-titlefield-placeholder-def": "Zoeken naar een naslagwerk",
+
+            "visualeditor-emm-bibref-bibtex-type-article": "Artikel",
+            "visualeditor-emm-bibref-bibtex-type-book": "Boek",
+            "visualeditor-emm-bibref-bibtex-type-booklet": "Boekje (zonder uitgever)",
+            "visualeditor-emm-bibref-bibtex-type-incollection": "Deel van een boek",
+            "visualeditor-emm-bibref-bibtex-type-inproceedings": "Artikel uit een conferentiebundel",
+            "visualeditor-emm-bibref-bibtex-type-manual": "Handleiding",
+            "visualeditor-emm-bibref-bibtex-type-mastersthesis": "Masterscriptie",
+            "visualeditor-emm-bibref-bibtex-type-phdthesis": "Proefschrift",
+            "visualeditor-emm-bibref-bibtex-type-proceedings": "Conferentiebundel",
+            "visualeditor-emm-bibref-bibtex-type-techreport": "Onderzoeksrapport",
+            "visualeditor-emm-bibref-bibtex-type-unpublished": "Onuitgegeven stuk",
 
             "visualeditor-emm-cancel": "Annuleer",
             "visualeditor-emm-insert": "Voeg in",

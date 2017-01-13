@@ -222,15 +222,6 @@ function createExternalLinkDialog(LightResourceDialog) {
     /**
      * Processes part of the result of an ask query. Expands an existing suggestionobject by adding external link-specific
      * data from the queryresult to the suggestionObject.
-     * @param {Object} singleResult - A single row from the result of the api-call that contains all the information
-     * about an external link that was asked for in the query.
-     * @param {Object} suggestionObject - A single suggestion for the autocomplete dropdown that should be expanded.
-     * Should already contain data of generic resource and a lightResource.
-     */
-
-    /**
-     * Processes part of the result of an ask query. Expands an existing suggestionobject by adding external link-specific
-     * data from the queryresult to the suggestionObject.
      * @param {String} row - String index of a row in the resultSet associative array.
      * @param {Object[]} resultSet - Associative array which functions like a dictionary, using strings as indexes, contains the result of a query.
      * @param {Object} previousSuggestion - A suggestion object that contains the information about the previous processed suggestion, useful for comparing and sorting.
@@ -239,6 +230,7 @@ function createExternalLinkDialog(LightResourceDialog) {
     EMMExternalLinkDialog.prototype.processSingleQueryResult = function (row, resultSet, previousSuggestion) {
         var suggestionObject = LightResourceDialog.prototype.processSingleQueryResult.call(this, row, resultSet, previousSuggestion);
 
+        //fixme dirty hack
         if (/Bestand:|File:/ig.test(suggestionObject.data)) {
             return null;
         }
