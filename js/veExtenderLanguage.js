@@ -66,6 +66,11 @@ function defineTranslations() {
             "visualeditor-emm-bibref-bibtex-type-techreport": "Technical report",
             "visualeditor-emm-bibref-bibtex-type-unpublished": "Unpublished Resource",
 
+            "visualeditor-emm-bibref-title-insert": "Insert existing bibliographic reference",
+            "visualeditor-emm-bibref-title-insert-edit": "Insert and edit existing bibliographic reference",
+            "visualeditor-emm-bibref-title-new": "Create new bibliographic reference",
+            "visualeditor-emm-bibref-title-edit": "Edit existing bibliographic reference",
+
 
             "visualeditor-emm-cancel": "Cancel",
             "visualeditor-emm-insert": "Insert",
@@ -177,6 +182,11 @@ function defineTranslations() {
             "visualeditor-emm-bibref-bibtex-type-proceedings": "Conferentiebundel",
             "visualeditor-emm-bibref-bibtex-type-techreport": "Onderzoeksrapport",
             "visualeditor-emm-bibref-bibtex-type-unpublished": "Onuitgegeven stuk",
+
+            "visualeditor-emm-bibref-title-insert": "Voeg referentie naar bestaand naslagwerk in",
+            "visualeditor-emm-bibref-title-insert-edit": "Bewerk en voeg referentie naar bestaand naslagwerk in",
+            "visualeditor-emm-bibref-title-new": "Maak nieuw naslagwerk aan",
+            "visualeditor-emm-bibref-title-edit": "Bewerk bestaande referentie naar naslagwerk",
 
             "visualeditor-emm-cancel": "Annuleer",
             "visualeditor-emm-insert": "Voeg in",

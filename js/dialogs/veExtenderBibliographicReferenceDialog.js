@@ -151,37 +151,18 @@ function createBibliographicReferenceDialog(LightResourceDialog) {
      */
     EMMBibliographicReferenceDialog.prototype.executeModeChange = function (mode) {
         this.dialogMode = mode;
-        var input = null;
         switch (mode) {
             case this.modeEnum.INSERT_EXISTING:
-                this.$element.find(".oo-ui-processDialog-title").text(OO.ui.deferMsg("visualeditor-emm-dialogexternallinktitle")());
-                input = this.titleField.$element.find("input");
-                input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-def")());
-                clearInputFields(this.fieldset, [2], ["OoUiLabelWidget"]);
+                this.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-bibref-title-insert")());
+                break;
+            case this.modeEnum.INSERT_AND_EDIT_EXISTING:
+                this.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-bibref-title-insert-edit")());
                 break;
             case this.modeEnum.INSERT_NEW:
-                if (this.suggestion != null) {
-                    if (this.suggestion.hyperlink == this.linkField.value) {
-                        clearInputFields(this.fieldset, [0, 2], ["OoUiLabelWidget"]);
-                        this.validator.cleanUpForm();
-                        return;
-                    }
-                    else {
-                        clearInputFields(this.fieldset, [0, 1, 2], ["OoUiLabelWidget"]);
-                    }
-                }
-                else {
-                    clearInputFields(this.fieldset, [0, 1, 2], ["OoUiLabelWidget"]);
-                }
-                this.$element.find(".oo-ui-processDialog-title").text(OO.ui.deferMsg("visualeditor-emm-linkdialog-title-npage")());
-                input = this.titleField.$element.find("input");
-                input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-new")());
+                this.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-bibref-title-new")());
                 break;
             case this.modeEnum.EDIT_EXISTING:
-                this.$element.find(".oo-ui-processDialog-title").text(OO.ui.deferMsg("visualeditor-emm-linkdialog-title-edit")());
-                input = this.titleField.$element.find("input");
-                input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-def")());
-                clearInputFields(this.fieldset, [2], ["OoUiLabelWidget"]);
+                this.$element.find('.oo-ui-processDialog-title').text(OO.ui.deferMsg("visualeditor-emm-bibref-title-edit")());
                 break;
         }
         this.validator.cleanUpForm();
@@ -190,20 +171,45 @@ function createBibliographicReferenceDialog(LightResourceDialog) {
 
 
     /**
+     * @abstract
+     * Retrieves the auto complete state for a given dialog mode.
+     * @param {modeEnum} mode - dialog mode to get the auto complete state for.
+     * @returns {boolean} - The value the auto complete should be set to.
+     */
+    EMMBibliographicReferenceDialog.prototype.getAutoCompleteStateForMode = function (mode) {
+        switch (mode) {
+            case this.modeEnum.INSERT_EXISTING:
+                return true;
+            case this.modeEnum.INSERT_AND_EDIT_EXISTING:
+                return false;
+            case this.modeEnum.INSERT_NEW:
+                return true;
+            case this.modeEnum.EDIT_EXISTING:
+                return false;
+            default:
+                return false;
+        }
+    };
+
+    /**
      * This method is responsible for determining necessary mode changes and executing them.
      * The method is executed every time the state of the link field or title field changes.
      */
     EMMBibliographicReferenceDialog.prototype.testAndChangeDialogMode = function () {
         switch (this.dialogMode) {
             case this.modeEnum.INSERT_EXISTING:
-                if (!this.isExistingResource && this.linkField.value.length != 0)
+                if (this.isExistingResource && this.titleField.getValue() != this.suggestion.value)
+                    this.executeModeChange(this.modeEnum.INSERT_AND_EDIT_EXISTING);
+                if (!this.isExistingResource && this.titleField.getValue().length > 0)
                     this.executeModeChange(this.modeEnum.INSERT_NEW);
                 break;
             case this.modeEnum.INSERT_NEW:
-                if (this.linkField.value.length == 0)
+                if (this.isExistingResource || this.titleField.getValue().length == 0)
                     this.executeModeChange(this.modeEnum.INSERT_EXISTING);
                 break;
-            case this.modeEnum.EDIT_EXISTING:
+            case this.modeEnum.INSERT_AND_EDIT_EXISTING:
+                if ((this.isExistingResource && this.titleField.getValue() == this.suggestion.value) || this.titleField.getValue().length == 0)
+                    this.executeModeChange(this.modeEnum.INSERT_EXISTING);
                 break;
         }
     };
@@ -222,7 +228,7 @@ function createBibliographicReferenceDialog(LightResourceDialog) {
         //First call the method of the parent to build the basic query for a light resource
         var query = LightResourceDialog.prototype.buildQuery.call(this, currentPageID);
         //Expand the sfautoedit query
-        query += "&Resource Description[hyperlink]=" + this.linkField.getValue();
+        query += "&Resource Description[Bibtex type]=" + this.bibtexField.getValue();
         this.executeQuery(query, insertCallback, linkdata);
     };
 
@@ -240,7 +246,7 @@ function createBibliographicReferenceDialog(LightResourceDialog) {
         if (this.isExistingResource) {
             target = linkdata;
         }
-        semanticCreateWithFormQuery(query, insertCallback, target, "Resource Hyperlink");
+        semanticCreateWithFormQuery(query, insertCallback, target, "Resource Bibliographic Reference");
     };
 
     /**
@@ -250,20 +256,20 @@ function createBibliographicReferenceDialog(LightResourceDialog) {
      */
     EMMBibliographicReferenceDialog.prototype.isEdit = function () {
         return LightResourceDialog.prototype.isEdit.call(this) ||
-            this.linkField.getValue() != this.suggestion.hyperlink;
+            this.bibtexField.getValue() != this.suggestion["Bibtex type"];
     };
 
     /**
-     * Fill the fields of the dialog based on an external link the user has selected from the autocomplete dropdown.
+     * Fill the fields of the dialog based on a bibliographic reference the user has selected from the autocomplete dropdown.
      */
     EMMBibliographicReferenceDialog.prototype.fillFields = function () {
         LightResourceDialog.prototype.fillFields.call(this);
-        this.linkField.setValue(this.suggestion.hyperlink);
+        this.bibtexField.getMenu().selectItemByData(this.suggestion["Bibtex type"]);
         this.validator.validateAll();
     };
 
     /**
-     * Processes part of the result of an ask query. Expands an existing suggestionobject by adding external link-specific
+     * Processes part of the result of an ask query. Expands an existing suggestionobject by adding bibliographic reference-specific
      * data from the queryresult to the suggestionObject.
      * @param {String} row - String index of a row in the resultSet associative array.
      * @param {Object[]} resultSet - Associative array which functions like a dictionary, using strings as indexes, contains the result of a query.
@@ -275,22 +281,19 @@ function createBibliographicReferenceDialog(LightResourceDialog) {
 
         if (previousSuggestion != null && previousSuggestion.semanticTitle == suggestionObject.semanticTitle && previousSuggestion.value == previousSuggestion.semanticTitle)
             previousSuggestion.value = previousSuggestion.value + " (" + previousSuggestion.hyperlink + ")";
-        suggestionObject.hyperlink = resultSet[row].printouts.Hyperlink[0];
+        suggestionObject["Bibtex type"] = resultSet[row].printouts["Bibtex type"][0];
         if (previousSuggestion != null && previousSuggestion.semanticTitle == suggestionObject.value)
             suggestionObject.value = suggestionObject.value + " (" + suggestionObject.hyperlink + ")";
         return suggestionObject;
     };
 
     /**
-     * Returns what type of template to insert into the existing page in order to create an external link. For an external
-     * link this can either be a cite or an external link, depending on the state of the checkbox at the bottom of the dialog.
+     * Returns what type of template to insert into the existing page in order to create a bibliographic reference.
+     * For a bibliographic reference this will always be a Cite.
      * @returns {String} - A string containing either "Cite" or "External link"
      */
     EMMBibliographicReferenceDialog.prototype.findTemplateToUse = function () {
-        if (this.addToResourcesField.isSelected()) {
-            return "Cite";
-        }
-        return "External link";
+        return "Cite";
     };
     //Return the entire 'class' in order to pass this definition to the window factory.
     return EMMBibliographicReferenceDialog;
