@@ -110,14 +110,13 @@ function createFileDialog(LightResourceDialog) {
      * This method preforms all necessary operations to visually and logically switch the state of the dialog to a different mode.
      *
      * Dialog modes are defined in the modeEnum variable (which is defined in EMMDialog) this enum should always be used when switching modes.
-     * @param {modeEnum} mode - Dialog mode to switch to.
+     * @param {number} mode - Dialog mode to switch to.
      */
     EMMFileDialog.prototype.executeModeChange = function (mode) {
         this.dialogMode = mode;
         var input = null;
         switch (mode) {
             case this.modeEnum.INSERT_EXISTING:
-                this.fieldset.items[1].$element.show();
                 this.$element.find(".oo-ui-processDialog-title").text(OO.ui.deferMsg("visualeditor-emm-dialogfiletitle")());
                 input = this.titleField.$element.find("input");
                 input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-filedialog-titlefield-placeholder-def")());
@@ -161,7 +160,15 @@ function createFileDialog(LightResourceDialog) {
                 break;
             case this.modeEnum.EDIT_EXISTING:
                 break;
+            case this.modeEnum.INSERT_AND_EDIT_EXISTING:
+                break;
         }
+
+        //todo this is done every keystroke, you'd much rather try to do this only once.
+        if(this.isExistingResource)
+            this.fileField.$element.find(".oo-ui-selectFileWidget-dropLabel").text(OO.ui.deferMsg("visualeditor-emm-filedialog-uploadnf")());
+        else
+            this.fileField.$element.find(".oo-ui-selectFileWidget-dropLabel").text(OO.ui.deferMsg("ooui-selectfile-dragdrop-placeholder")());
     };
 
     /**
@@ -181,7 +188,7 @@ function createFileDialog(LightResourceDialog) {
     EMMFileDialog.prototype.buildAndExecuteQuery = function (currentPageID, insertCallback, linkdata, upload, newUploadVersion, newResourcePage) {
         //First call the method of the parent to build the basic query for a light resource
         var query = LightResourceDialog.prototype.buildQuery.call(this, currentPageID);
-        if (newResourcePage) {
+        if (newResourcePage) { //todo this.dialogMode == this.modeEnum.INSERT_EXISTING?
             //In this case we should be dealing with an existing resource description that needs to be 'copied' over to
             //a new page, and should contain currentpageID in the query.
             //For completely new resources this happens in the buildAndExecuteQuery of EMMLightResourceDialog
@@ -197,8 +204,7 @@ function createFileDialog(LightResourceDialog) {
         //Expand the existing query with a file-specific part.
         query += "&Resource Description[file name]=" + filename;
         this.executeQuery(query, insertCallback, linkdata, upload, newUploadVersion);
-    }
-    ;
+    };
 
     /**
      * Executes an sf-autoedit api call by using the mediawiki api. This call either creates a new file resource or updates an existing one.
@@ -213,7 +219,7 @@ function createFileDialog(LightResourceDialog) {
     EMMFileDialog.prototype.executeQuery = function (query, insertCallback, linkdata, upload, newUploadVersion) {
         var target = "";
         //Set the target of the api-call to the internal title of an existing file resource, if the file already exists.
-        if (this.isExistingResource) {
+        if (this.isExistingResource) { //todo isExistingResource is better than modes because we only have to check one variable that way.
             target = linkdata;
         }
         //Handle uploading of a new file or new version of a file.
@@ -283,15 +289,16 @@ function createFileDialog(LightResourceDialog) {
     EMMFileDialog.prototype.executeInsertAction = function (insertCallback, currentPageID, linkdata) {
         //See the documentation wiki for a visual representation of this if/else mess
         var dialogInstance = this;
-        if (this.isExistingResource) {
+        if (this.isExistingResource) { //todo isExistingResource is better imo, but it could be substituted by dialogMode = INSERT_EXISTING || INSERT_AND_EDIT_EXISTING
             if (this.fileField.getValue() != null) {
+                //todo we've seen strings getting stripped of their quiet a bunch, perhaps we can make a function for it?
                 if (this.fileField.getValue().name != this.suggestion.filename.replace("Bestand:", "").replace("File:", "").toLowerCase()) {
                     //Upload new file and create a new resource, because the file has a diffrent name.
                     //A diffrent filename will lead to a diffrent internal name for the File.
                     //Linkdata is left empty on purpose
                     this.buildAndExecuteQuery(currentPageID, insertCallback, "", true, false, true);
                 } else {
-                    if (!this.isEdit()) {
+                    if (!this.isEdit()) { //todo I don't really understand what this does, but it could possibly be substituted by dialogMode = INSERT_AND_EDIT_EXISTING?
                         //Uplaod a new version of the file
                         this.uploadFile(true, function () {
                             insertCallback(dialogInstance.suggestion.data);
@@ -303,7 +310,7 @@ function createFileDialog(LightResourceDialog) {
                     }
                 }
             } else {
-                if (this.isEdit()) {
+                if (this.isEdit()) { // todo same as line 300
                     //Just update the resource, don't upload anything
                     this.buildAndExecuteQuery(currentPageID, insertCallback, linkdata, false, false, false);
                 } else {
@@ -323,6 +330,7 @@ function createFileDialog(LightResourceDialog) {
      * @param status {String} - The status of the error
      * @param exceptionobject {Object} - In case of some errors there is a more specific exception object with more information
      */
+    //todo double check
     EMMFileDialog.prototype.handleUploadFail = function (status, exceptionobject) {
         var dialogInstance = this;
         switch (status) {
@@ -441,7 +449,6 @@ function createFileDialog(LightResourceDialog) {
             postUploadFunction();
         });
     };
-
 
     //Return the entire 'class' in order to pass this definition to the window factory.
     return EMMFileDialog;

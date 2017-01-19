@@ -52,7 +52,7 @@ function defineTranslations() {
             "visualeditor-emm-file-upload-empty-file": "The file that was uploaded is empty",
             "visualeditor-emm-file-upload-filetype-banned": "The file extension is invalid, only the following extensions are allowed: \n" +
             "svg, png, gif, jpg, jpeg, ppt, pptx, pdf, mp3, mp4, xls, xlsx, doc, docx, odt, odc, odp, odg, txt",
-            "visualeditor-emm-file-upload-not-logged-in": "You need to be logged in to perform this action. Please make sure you are logged in and try again",
+            "visualeditor-emm-file-upload-mustbeloggedin": "You need to be logged in to perform this action. Please make sure you are logged in and try again",
 
 
             "visualeditor-emm-cancel": "Cancel",
@@ -91,6 +91,7 @@ function defineTranslations() {
             "visualeditor-emm-filedialog-title-edit": "Edit link to file",
             "visualeditor-emm-filedialog-titlefield-placeholder-def": "Search for link to file",
             "visualeditor-emm-filedialog-titlefield-placeholder-new": "Title of new link to file",
+            "visualeditor-emm-filedialog-uploadnf": "Upload new file version of file.",
             "visualeditor-emm-required": "*Required",
 
             "visualeditor-emm-notification-template-title": "Illegal operation",
@@ -148,7 +149,7 @@ function defineTranslations() {
             "visualeditor-emm-file-upload-empty-file": "Het opgegeven bestand is leeg.",
             "visualeditor-emm-file-upload-filetype-banned": "Het bestandstype is ongeldig, enkel de volgende bestandstypen zijn toegestaan: \n" +
             "svg, png, gif, jpg, jpeg, ppt, pptx, pdf, mp3, mp4, xls, xlsx, doc, docx, odt, odc, odp, odg, txt",
-            "visualeditor-emm-file-upload-not-logged-in": "U moet ingelogd zijn om deze actie uit te voeren. Controleer of u bent ingelogd en probeer het opnieuw.",
+            "visualeditor-emm-file-upload-mustbeloggedin": "U moet ingelogd zijn om deze actie uit te voeren. Controleer of u bent ingelogd en probeer het opnieuw.",
 
             "visualeditor-emm-cancel": "Annuleer",
             "visualeditor-emm-insert": "Voeg in",
@@ -187,6 +188,7 @@ function defineTranslations() {
             "visualeditor-emm-filedialog-title-edit": "Aanpassen koppeling naar bestand",
             "visualeditor-emm-filedialog-titlefield-placeholder-def": "Zoeken naar een bestandskoppeling",
             "visualeditor-emm-filedialog-titlefield-placeholder-new": "Titel nieuwe bestandskoppeling",
+            "visualeditor-emm-filedialog-uploadnf": "Upload nieuwe versie van bestand",
             "visualeditor-emm-required": "*Vereist",
 
             "visualeditor-emm-notification-template-title": "Actie niet toegestaan",
