@@ -50,10 +50,8 @@ function createExternalLinkDialog(LightResourceDialog) {
          * Checks the titlefield and sets existingresource to false if the titlefield changed to empty from a full field
          */
         var testSuggestedLink = function () {
-            if (this.isExistingResource && this.dialogMode != 2) {
-                if (dialogInstance.titleField.value.length == 0) {
-                    this.isExistingResource = false;
-                }
+            if (this.isExistingResource && this.dialogMode != 2 && dialogInstance.titleField.value.length == 0) {
+                this.isExistingResource = false;
             }
         };
 

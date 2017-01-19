@@ -47,7 +47,7 @@ function createFileDialog(LightResourceDialog) {
         LightResourceDialog.prototype.createDialogLayout.call(this);
         var dialogInstance = this;
         //Temporary hack method in order to still activate the validator and onChangeFunctions for fileField.
-        //Fixme dirty hack, temporary problem
+        //Fixme dirty hack, temporary problem validatie toevoegen voor file veld
         this.fileField.validation = [function (value, sender) {
             return "";
         }];
@@ -62,11 +62,8 @@ function createFileDialog(LightResourceDialog) {
          * Checks the titlefield and sets existingresource to false if the titlefield changed to empty from a full field
          */
         var testSuggestedLink = function () {
-            //todo replace this temporary thing with something better.
-            if (this.isExistingResource && this.dialogMode != 2) {
-                if (dialogInstance.titleField.value.length == 0) {
-                    this.isExistingResource = false;
-                }
+            if (this.isExistingResource && this.dialogMode != 2 && dialogInstance.titleField.value.length == 0) {
+                this.isExistingResource = false;
             }
         };
 
@@ -164,8 +161,8 @@ function createFileDialog(LightResourceDialog) {
                 break;
         }
 
-        //todo this is done every keystroke, you'd much rather try to do this only once.
-        if(this.isExistingResource)
+        //todo this is done every keystroke, you'd much rather try to do this only once. Potential fix: add a new mode for when the dialog intially opens.
+        if (this.isExistingResource)
             this.fileField.$element.find(".oo-ui-selectFileWidget-dropLabel").text(OO.ui.deferMsg("visualeditor-emm-filedialog-uploadnf")());
         else
             this.fileField.$element.find(".oo-ui-selectFileWidget-dropLabel").text(OO.ui.deferMsg("ooui-selectfile-dragdrop-placeholder")());
@@ -219,7 +216,7 @@ function createFileDialog(LightResourceDialog) {
     EMMFileDialog.prototype.executeQuery = function (query, insertCallback, linkdata, upload, newUploadVersion) {
         var target = "";
         //Set the target of the api-call to the internal title of an existing file resource, if the file already exists.
-        if (this.isExistingResource) { //todo isExistingResource is better than modes because we only have to check one variable that way.
+        if (this.isExistingResource) {
             target = linkdata;
         }
         //Handle uploading of a new file or new version of a file.
@@ -231,15 +228,6 @@ function createFileDialog(LightResourceDialog) {
         else {
             semanticCreateWithFormQuery(query, insertCallback, target, "Resource Light");
         }
-    };
-
-    /**
-     * Checks if the current contents of the dialog match the last picked suggestion. If they don't the user is editing
-     * the resource.
-     * @returns {boolean} - Whether the user is editing the selected resource
-     */
-    EMMFileDialog.prototype.isEdit = function () {
-        return LightResourceDialog.prototype.isEdit.call(this);
     };
 
     /**
@@ -289,16 +277,16 @@ function createFileDialog(LightResourceDialog) {
     EMMFileDialog.prototype.executeInsertAction = function (insertCallback, currentPageID, linkdata) {
         //See the documentation wiki for a visual representation of this if/else mess
         var dialogInstance = this;
-        if (this.isExistingResource) { //todo isExistingResource is better imo, but it could be substituted by dialogMode = INSERT_EXISTING || INSERT_AND_EDIT_EXISTING
+        if (this.isExistingResource) {
             if (this.fileField.getValue() != null) {
-                //todo we've seen strings getting stripped of their quiet a bunch, perhaps we can make a function for it?
+                //todo create a function for stripping a filename of "Bestand:" and "File:". Also make sure this is language independent
                 if (this.fileField.getValue().name != this.suggestion.filename.replace("Bestand:", "").replace("File:", "").toLowerCase()) {
                     //Upload new file and create a new resource, because the file has a diffrent name.
                     //A diffrent filename will lead to a diffrent internal name for the File.
                     //Linkdata is left empty on purpose
                     this.buildAndExecuteQuery(currentPageID, insertCallback, "", true, false, true);
                 } else {
-                    if (!this.isEdit()) { //todo I don't really understand what this does, but it could possibly be substituted by dialogMode = INSERT_AND_EDIT_EXISTING?
+                    if (!this.isEdit()) {
                         //Uplaod a new version of the file
                         this.uploadFile(true, function () {
                             insertCallback(dialogInstance.suggestion.data);
@@ -310,7 +298,7 @@ function createFileDialog(LightResourceDialog) {
                     }
                 }
             } else {
-                if (this.isEdit()) { // todo same as line 300
+                if (this.isEdit()) {
                     //Just update the resource, don't upload anything
                     this.buildAndExecuteQuery(currentPageID, insertCallback, linkdata, false, false, false);
                 } else {
@@ -330,7 +318,6 @@ function createFileDialog(LightResourceDialog) {
      * @param status {String} - The status of the error
      * @param exceptionobject {Object} - In case of some errors there is a more specific exception object with more information
      */
-    //todo double check
     EMMFileDialog.prototype.handleUploadFail = function (status, exceptionobject) {
         var dialogInstance = this;
         switch (status) {

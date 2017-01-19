@@ -216,7 +216,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
      * the resource.
      * @returns {boolean} - Whether the user is editing the selected resource
      */
-    EMMDialog.prototype.isEdit = function () { // todo Wat is dit?
+    EMMDialog.prototype.isEdit = function () {
         return this.titleField.getValue() != this.suggestion.value;
     };
 
@@ -739,7 +739,7 @@ function setDisabledDialogElements(dialogInstance, value) {
  * @param {int[]} exclude - The indices of the fields in the fieldset that should not be cleared
  * @param {String[]} inputTypeExclude - An array of the names of types of fields that should not be cleared
  */
-function clearInputFields(fieldset, exclude, inputTypeExclude) { //TODO rewrite this function
+function clearInputFields(fieldset, exclude, inputTypeExclude) {
     if (exclude != null) {
         for (var i = 0; i < fieldset.getItems().length; i++) {
             var ex = false;
@@ -803,14 +803,12 @@ function grabSelectedText(inputObject) {
         for (var i = surfaceModel.getFragment().selection.range.start; i < surfaceModel.getFragment().selection.range.end; i++) {
             var node = ve.init.target.getSurface().getModel().getDocument().getDocumentNode().getNodeFromOffset(i);
             if (node.getType() == "mwTransclusionInline") {
-                //fixme hier moet nog geverifieerd worden of het om een cite gaat?
                 string += node.element.attributes.mw.parts[0].template.params.name.wt;
                 continue;
             }
             var element = surfaceModel.getFragment().document.data.data[i];
             if (typeof element[0] === "undefined")
                 continue;
-            //todo moet dit?
             var toAdd = element;
             if (element[0])
                 toAdd = element[0];
