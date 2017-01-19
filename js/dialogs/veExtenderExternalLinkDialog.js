@@ -18,7 +18,7 @@ function createExternalLinkDialog(LightResourceDialog) {
      */
     var EMMExternalLinkDialog = function () {
         LightResourceDialog.call(this);
-        this.autoCompleteQuery = "[[Category:Resource Description]] [[Hyperlink::+]]|?Semantic title|?Hyperlink|?Dct:creator|?Dct:date|?Organization|?Dct:subject|limit=10000";
+        this.autoCompleteQuery = "[[Category:Resource Description]] [[Hyperlink::+]]|?Semantic title|?Hyperlink|?Dct:creator|?Dct:date|?Organization|?Dct:subject|sort=Semantic title|order=asc|limit=10000";
         this.editQuery = "[[PAGENAMEPARAMETER]] |?Semantic title|?Hyperlink|?Dct:creator|?Dct:date|?Organization|?Dct:subject";
     };
     OO.inheritClass(EMMExternalLinkDialog, LightResourceDialog);
@@ -101,9 +101,10 @@ function createExternalLinkDialog(LightResourceDialog) {
      * Method that switches the dialog to a given mode.
      * This method preforms all necessary operations to visually and logically switch the state of the dialog to a different mode.
      * Dialog modes are defined in the modeEnum variable (which is defined in EMMDialog) this enum should always be used when switching modes.
-     * @param {modeEnum} mode - Dialog mode to switch to.
+     * @param {number} mode - Dialog mode to switch to.
+     * @param {boolean} clearInputFieldsBool - If true the input fields of the dialog will be cleared.
      */
-    EMMExternalLinkDialog.prototype.executeModeChange = function (mode) {
+    EMMExternalLinkDialog.prototype.executeModeChange = function (mode, clearInputFieldsBool) {
         this.dialogMode = mode;
         var input = null;
         switch (mode) {
@@ -111,21 +112,29 @@ function createExternalLinkDialog(LightResourceDialog) {
                 this.$element.find(".oo-ui-processDialog-title").text(OO.ui.deferMsg("visualeditor-emm-dialogexternallinktitle")());
                 input = this.titleField.$element.find("input");
                 input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-def")());
-                clearInputFields(this.fieldset, [2], this.noEditFieldTypes);
+                if (clearInputFieldsBool) {
+                    clearInputFields(this.fieldset, [2]);
+                }
                 break;
             case this.modeEnum.INSERT_NEW:
                 if (this.suggestion != null) {
                     if (this.suggestion.hyperlink == this.linkField.value) {
-                        clearInputFields(this.fieldset, [0, 2], this.noEditFieldTypes);
+                        if (clearInputFieldsBool) {
+                            clearInputFields(this.fieldset, [0, 2]);
+                        }
                         this.validator.cleanUpForm();
                         return;
                     }
                     else {
-                        clearInputFields(this.fieldset, [0, 1, 2], this.noEditFieldTypes);
+                        if (clearInputFieldsBool) {
+                            clearInputFields(this.fieldset, [0, 1, 2]);
+                        }
                     }
                 }
                 else {
-                    clearInputFields(this.fieldset, [0, 1, 2], this.noEditFieldTypes);
+                    if (clearInputFieldsBool) {
+                        clearInputFields(this.fieldset, [0, 1, 2]);
+                    }
                 }
                 this.$element.find(".oo-ui-processDialog-title").text(OO.ui.deferMsg("visualeditor-emm-linkdialog-title-npage")());
                 input = this.titleField.$element.find("input");
@@ -135,7 +144,6 @@ function createExternalLinkDialog(LightResourceDialog) {
                 this.$element.find(".oo-ui-processDialog-title").text(OO.ui.deferMsg("visualeditor-emm-linkdialog-title-edit")());
                 input = this.titleField.$element.find("input");
                 input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-def")());
-                clearInputFields(this.fieldset, [2], this.noEditFieldTypes);
                 break;
         }
         this.validator.cleanUpForm();
@@ -150,11 +158,11 @@ function createExternalLinkDialog(LightResourceDialog) {
         switch (this.dialogMode) {
             case this.modeEnum.INSERT_EXISTING:
                 if (!this.isExistingResource && this.linkField.value.length != 0)
-                    this.executeModeChange(this.modeEnum.INSERT_NEW);
+                    this.executeModeChange(this.modeEnum.INSERT_NEW, true);
                 break;
             case this.modeEnum.INSERT_NEW:
                 if (this.linkField.value.length == 0)
-                    this.executeModeChange(this.modeEnum.INSERT_EXISTING);
+                    this.executeModeChange(this.modeEnum.INSERT_EXISTING, true);
                 break;
             case this.modeEnum.EDIT_EXISTING:
                 break;
@@ -218,19 +226,23 @@ function createExternalLinkDialog(LightResourceDialog) {
     /**
      * Processes part of the result of an ask query. Expands an existing suggestionobject by adding external link-specific
      * data from the queryresult to the suggestionObject.
-     * @param {Object} singleResult - A single row from the result of the api-call that contains all the information
-     * about an external link that was asked for in the query.
-     * @param {Object} suggestionObject - A single suggestion for the autocomplete dropdown that should be expanded.
-     * Should already contain data of generic resource and a lightResource.
-     * @returns {Object} - An updated suggestionObject, or null when the singleresult is invalid
+     * @param {String} row - String index of a row in the resultSet associative array.
+     * @param {Object[]} resultSet - Associative array which functions like a dictionary, using strings as indexes, contains the result of a query.
+     * @param {Object} previousSuggestion - A suggestion object that contains the information about the previous processed suggestion, useful for comparing and sorting.
+     * @returns {Object} - An updated suggestionObject, or null when the object is invalid.
      */
-    EMMExternalLinkDialog.prototype.processDialogSpecificQueryResult = function (singleResult, suggestionObject) {
+    EMMExternalLinkDialog.prototype.processSingleQueryResult = function (row, resultSet, previousSuggestion) {
+        var suggestionObject = LightResourceDialog.prototype.processSingleQueryResult.call(this, row, resultSet, previousSuggestion);
+
         if (/Bestand:|File:/ig.test(suggestionObject.data)) {
             return null;
         }
         else {
-            suggestionObject = LightResourceDialog.prototype.processDialogSpecificQueryResult.call(this, singleResult, suggestionObject);
-            suggestionObject.hyperlink = singleResult.printouts.Hyperlink[0];
+            if (previousSuggestion != null && previousSuggestion.semanticTitle.toLowerCase() == suggestionObject.semanticTitle.toLowerCase() && previousSuggestion.value == previousSuggestion.semanticTitle)
+                previousSuggestion.value = previousSuggestion.value + " (" + previousSuggestion.hyperlink + ")";
+            suggestionObject.hyperlink = resultSet[row].printouts.Hyperlink[0];
+            if (previousSuggestion != null && previousSuggestion.semanticTitle.toLowerCase() == suggestionObject.value.toLowerCase())
+                suggestionObject.value = suggestionObject.value + " (" + suggestionObject.hyperlink + ")";
             return suggestionObject;
         }
     };

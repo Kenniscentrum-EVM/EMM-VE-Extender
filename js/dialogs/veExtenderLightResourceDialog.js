@@ -117,18 +117,19 @@ function createLightResourceDialog(EMMDialog, resourceType) {
      * resources of a certain type. May need to be further expanded for filling specific fields only present in more
      * specific types of Light Resource. This expands a suggestion object that already contains generic information for
      * an EMMDialog.
-     * @param {Object} singleResult - A single row from the result of the api-call that contains all the information
-     * about a Light Resource that was asked for in the query.
-     * @param {Object} suggestionObject - A single suggestion for the autocomplete dropdown that should be expanded.
-     * Should already contain data that every resource has.
-     * @returns {Object} - An updated suggestionObject, or null when the singleresult is invalid
+     * @param {String} row - String index of a row in the resultSet associative array.
+     * @param {Object[]} resultSet - Associative array which functions like a dictionary, using strings as indexes, contains the result of a query.
+     * @param {Object} previousSuggestion - A suggestion object that contains the information about the previous processed suggestion, useful for comparing and sorting.
+     * @returns {Object} - An updated suggestionObject.
      */
-    EMMLightResourceDialog.prototype.processDialogSpecificQueryResult = function (singleResult, suggestionObject) {
-        suggestionObject.creator = singleResult.printouts["Dct:creator"][0];
-        suggestionObject.date = singleResult.printouts["Dct:date"][0];
-        suggestionObject.organization = singleResult.printouts.Organization[0];
+    EMMLightResourceDialog.prototype.processSingleQueryResult = function (row, resultSet, previousSuggestion) {
+        var suggestionObject = EMMDialog.prototype.processSingleQueryResult.call(this, row, resultSet, previousSuggestion);
+
+        suggestionObject.creator = resultSet[row].printouts["Dct:creator"][0];
+        suggestionObject.date = resultSet[row].printouts["Dct:date"][0];
+        suggestionObject.organization = resultSet[row].printouts.Organization[0];
         suggestionObject.subjects = "";
-        var querySubjects = singleResult.printouts["Dct:subject"];
+        var querySubjects = resultSet[row].printouts["Dct:subject"];
         //Gathers all subjects and creates a single string which contains the fulltext name of all the subjects,
         //separated by a ,
         for (var j = 0; j < querySubjects.length; j++) {

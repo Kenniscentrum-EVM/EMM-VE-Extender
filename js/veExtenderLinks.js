@@ -104,11 +104,11 @@ function loadEMMDialog(resourceType, toolId, menuText, dialogText, templateResul
 function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
     /**
      * Constructor for EMMDialog, all relevant fields are initiated, mostly with default null or 0 values.
+     * @extends OO.ui.ProcessDialog
      * @constructor
      */
     var EMMDialog = function () {
         OO.ui.ProcessDialog.call(this);
-        this.noEditFieldTypes = ["OoUiLabelWidget", "OoUiProgressBarWidget"];
         this.suggestion = null;
         this.isExistingResource = false;
         /**
@@ -245,7 +245,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
             var data = this;
             if (data.source != null) //are we editing?
             {
-                dialogInstance.executeModeChange(dialogInstance.modeEnum.EDIT_EXISTING);
+                dialogInstance.executeModeChange(dialogInstance.modeEnum.EDIT_EXISTING, false);
                 setDisabledInputFields(dialogInstance.fieldset, true);
                 data.source = data.source.replace(/ /g, "_"); //convert whitespaces to underscores
                 var api = new mw.Api();
@@ -343,13 +343,14 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
     };
 
     /**
+     * @abstract
      * Abstract method that needs to be overridden, displays an error message if this is not the case.
      * Expected behavior when overriding:
      * Preforms the a mode change, this may include visual changes to a dialog.
-     * @abstract
-     * @param {modeEnum} mode - Mode to be switched to.
+     * @param {number} mode - Mode to be switched to.
+     * @param {boolean} clearInputFields - If true the input fields of the dialog will be cleared.
      */
-    EMMDialog.prototype.executeModeChange = function (mode) {
+    EMMDialog.prototype.executeModeChange = function (mode, clearInputFields) {
         displayOverloadError("executeModeChange");
     };
 
@@ -403,21 +404,6 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
      */
     EMMDialog.prototype.fillFields = function () {
         displayOverloadError("fillFields");
-    };
-
-    /**
-     * Abstract method that needs to be overridden, displays an error message if this is not the case.
-     * Expected behavior and parameters when overriding:
-     * Processes part of the result of an ask query. Expands an existing suggestionobject by adding dialog-specific
-     * data from the result to the suggestionObject.
-     * @abstract
-     * @param {Object} singleResult - A single row from the result of the api-call that contains all the information
-     * asked for in the query.
-     * @param {Object} suggestionObject - A single suggestion that should be expanded. Should already contain
-     * dialog-independent data.
-     */
-    EMMDialog.prototype.processDialogSpecificQueryResult = function (singleResult, suggestionObject) {
-        displayOverloadError("processQueryResult");
     };
 
     /**
@@ -537,7 +523,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                     });
                 var surfaceModel = ve.init.target.getSurface().getModel();
                 var transaction = ve.dm.Transaction.newFromReplacement(surfaceModel.getDocument(), dialogInstance.selectedTextObject, myTemplate);
-                var newRange = transaction.getModifiedRange();
+                var newRange = transaction.getModifiedRange(surfaceModel.getDocument());
                 surfaceModel.change(transaction, newRange ? new ve.dm.LinearSelection(surfaceModel.getDocument(), newRange) : new ve.dm.NullSelection(surfaceModel.getDocument()));
                 surfaceModel.setNullSelection();
                 dialogInstance.close();
@@ -624,9 +610,11 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
             function cleanUpDialog() {
                 hideAutoComplete(dialogInstance.titleField.$element.find("input"));
                 dialogInstance.validator.disable();
-                clearInputFields(dialogInstance.fieldset, null, dialogInstance.noEditFieldTypes);
+                dialogInstance.validator.disableOnChange();
+                clearInputFields(dialogInstance.fieldset, null);
                 dialogInstance.dialogMode = dialogInstance.modeEnum.INSERT_EXISTING;
-                dialogInstance.executeModeChange(dialogInstance.modeEnum.INSERT_EXISTING);
+                dialogInstance.executeModeChange(dialogInstance.modeEnum.INSERT_EXISTING, false);
+                dialogInstance.validator.enableOnChange();
                 dialogInstance.validator.enable();
                 dialogInstance.isExistingResource = false;
                 dialogInstance.suggestion = null;
@@ -641,20 +629,21 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
      * Processes a single query result into a suggestion object.
      * @param {String} row - String index of a row in the resultSet associative array.
      * @param {Object[]} resultSet - Associative array which functions like a dictionary, using strings as indexes, contains the result of a query.
+     * @param {Object} previousSuggestion - A suggestion object that contains the information about the previous processed suggestion, useful for comparing and sorting.
      * @returns {Object} suggestionObject - A suggestion object, containing relevant information about a particular page which can be used by various functions fillFields.
      */
-    EMMDialog.prototype.processSingleQueryResult = function (row, resultSet) {
+    EMMDialog.prototype.processSingleQueryResult = function (row, resultSet, previousSuggestion) {
         var suggestionObject = {};
-        var singleResultRow = resultSet[row];
-        suggestionObject.data = singleResultRow.fulltext;
+        suggestionObject.data = resultSet[row].fulltext;
         suggestionObject.value = "";
-        var semanticTitle = singleResultRow.printouts["Semantic title"][0];
+        var semanticTitle = resultSet[row].printouts["Semantic title"][0];
         if (semanticTitle) {
             suggestionObject.value = semanticTitle;
         } else {
             suggestionObject.value = suggestionObject.data;
         }
-        return this.processDialogSpecificQueryResult(singleResultRow, suggestionObject);
+        suggestionObject.semanticTitle = suggestionObject.value;
+        return suggestionObject;
     };
 
     /**  semanticAskQuery
@@ -672,20 +661,27 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
         }).done(function (data) {
             var res = data.query.results;
             var arr = []; //array to store the results
-            for (var row in res) {
+            var previousSuggestion = null;
+            var row;
+            for (row in res) {
                 if (!res.hasOwnProperty(row)) {
                     continue;
                 }
-                var singleQueryResult = dialogInstance.processSingleQueryResult(row, res);
-                if (singleQueryResult != null) {
-                    arr.push(singleQueryResult);
-                }
+                var singleQueryResult = dialogInstance.processSingleQueryResult(row, res, previousSuggestion);
+                if (previousSuggestion != null)
+                    arr.push(previousSuggestion);
+                previousSuggestion = singleQueryResult;
             }
+            //Add the final row.
+            if (previousSuggestion != null) {
+                arr.push(dialogInstance.processSingleQueryResult(row, res, previousSuggestion));
+            }
+            //todo investigate ASK query possibilities and restrictions, this may possibly be unnecessary.
             arr.sort(function (a, b) {
-                if (a.value > b.value) {
+                if (a.value.toUpperCase() > b.value.toUpperCase()) {
                     return 1;
                 }
-                if (a.value < b.value) {
+                if (a.value.toUpperCase() < b.value.toUpperCase()) {
                     return -1;
                 }
                 return 0;
@@ -736,38 +732,28 @@ function setDisabledDialogElements(dialogInstance, value) {
 /**
  * Clears the input fields of a given fieldset
  * @param {OO.ui.FieldsetLayout} fieldset - The fieldset whose input fields should be emptied
- * @param {int[]} exclude - The indices of the fields in the fieldset that should not be cleared
- * @param {String[]} inputTypeExclude - An array of the names of types of fields that should not be cleared
+ * @param {int[]} excludeNum - The indices of the fields in the fieldset that should not be cleared
  */
-function clearInputFields(fieldset, exclude, inputTypeExclude) {
-    if (exclude != null) {
+function clearInputFields(fieldset, excludeNum) {
+    main:
         for (var i = 0; i < fieldset.getItems().length; i++) {
-            var ex = false;
-            for (var x = 0; x < exclude.length; x++)
-                if (i == exclude[x])
-                    ex = true;
-            if (!ex) {
-                //Make sure the fieldlayout doens't contain a field of the given types
-                if ($.inArray(fieldset.getItems()[i].getField().constructor.name, inputTypeExclude) == -1) {
-                    if ((fieldset.getItems()[i].getField() instanceof OO.ui.SelectFileWidget))
-                        fieldset.getItems()[i].getField().setValue(null);
-                    else
-                        fieldset.getItems()[i].getField().setValue("");
+            if (excludeNum != null && excludeNum.length != 0) {
+                for (var x = 0; x < excludeNum.length; x++) { //todo dynamically resize this array?
+                    if (excludeNum[x] == i) {
+                        excludeNum.splice(x, 1);
+                        continue main;
+                    }
                 }
             }
-        }
-    }
-    else {
-        for (var j = 0; j < fieldset.getItems().length; j++) {
-            //Make sure the fieldlayout doens't contain just a field of the given types
-            if ($.inArray(fieldset.getItems()[j].getField().constructor.name, inputTypeExclude) == -1) {
-                if ((fieldset.getItems()[j].getField() instanceof OO.ui.SelectFileWidget))
-                    fieldset.getItems()[j].getField().setValue(null);
-                else
-                    fieldset.getItems()[j].getField().setValue("");
+            //Apparently we also go trough some LabelWidgets in this loop, these things will break IE9 and IE10 .setValue(x) is called on them.
+            if (fieldset.getItems()[i].getField() instanceof OO.ui.SelectFileWidget) {
+                fieldset.getItems()[i].getField().setValue(null);
+            } else if (fieldset.getItems()[i].getField() instanceof OO.ui.CheckboxInputWidget) {
+                fieldset.getItems()[i].getField().setSelected(true);
+            } else if (fieldset.getItems()[i].getField().supports("setValue")) {
+                fieldset.getItems()[i].getField().setValue("");
             }
         }
-    }
 }
 
 /**
@@ -840,7 +826,9 @@ function initAutoComplete(data, dialogInstance) {
         onSelect: function (suggestion) {
             dialogInstance.suggestion = suggestion;
             dialogInstance.isExistingResource = true;
-            dialogInstance.fillFields();
+            dialogInstance.titleField.setValue(suggestion.semanticTitle);
+            inputField.blur();
+            dialogInstance.fillFields(suggestion);
             dialogInstance.testAndChangeDialogMode();
         },
         appendTo: inputField.parentElement,
