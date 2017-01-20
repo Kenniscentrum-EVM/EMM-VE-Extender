@@ -31,7 +31,6 @@ function createBibliographicReferenceDialog(LightResourceDialog) {
         LightResourceDialog.prototype.createFields.call(this);
         //Create input fields unique for a bibliographic reference dialog
         this.bibtexField = new OO.ui.DropdownWidget({
-            label: OO.ui.deferMsg("visualeditor-emm-bibref-bibtex-type-select")(),
             menu: {
                 items: [
                     new OO.ui.MenuOptionWidget({
@@ -81,6 +80,7 @@ function createBibliographicReferenceDialog(LightResourceDialog) {
                 ]
             }
         });
+        this.bibtexField.getMenu().selectItemByData("Article");
         //Set the placeholder of titleField
         this.titleField.$element.find("input").prop("placeholder", OO.ui.deferMsg("visualeditor-emm-bibref-titlefield-placeholder-def")());
     };

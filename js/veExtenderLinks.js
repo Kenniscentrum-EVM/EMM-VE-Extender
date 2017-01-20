@@ -773,6 +773,8 @@ function clearInputFields(fieldset, excludeNum) {
                 fieldset.getItems()[i].getField().setSelected(true);
             } else if (fieldset.getItems()[i].getField().supports("setValue")) {
                 fieldset.getItems()[i].getField().setValue("");
+            } else if (fieldset.getItems()[i].getField().supports("getMenu")) {
+                fieldset.getItems()[i].getField().getMenu().selectItemByData("Article");
             }
         }
 }
