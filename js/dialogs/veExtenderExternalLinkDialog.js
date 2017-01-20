@@ -50,10 +50,8 @@ function createExternalLinkDialog(LightResourceDialog) {
          * Checks the titlefield and sets existingresource to false if the titlefield changed to empty from a full field
          */
         var testSuggestedLink = function () {
-            if (this.isExistingResource && this.dialogMode != 2) {
-                if (dialogInstance.titleField.value.length == 0) {
-                    this.isExistingResource = false;
-                }
+            if (this.isExistingResource && this.dialogMode != 2 && dialogInstance.titleField.value.length == 0) {
+                this.isExistingResource = false;
             }
         };
 
@@ -102,11 +100,11 @@ function createExternalLinkDialog(LightResourceDialog) {
     /**
      * Method that switches the dialog to a given mode.
      * This method preforms all necessary operations to visually and logically switch the state of the dialog to a different mode.
-     *
      * Dialog modes are defined in the modeEnum variable (which is defined in EMMDialog) this enum should always be used when switching modes.
      * @param {number} mode - Dialog mode to switch to.
+     * @param {boolean} clearInputFieldsBool - If true the input fields of the dialog will be cleared.
      */
-    EMMExternalLinkDialog.prototype.executeModeChange = function (mode) {
+    EMMExternalLinkDialog.prototype.executeModeChange = function (mode, clearInputFieldsBool) {
         this.dialogMode = mode;
         var input = null;
         switch (mode) {
@@ -114,21 +112,29 @@ function createExternalLinkDialog(LightResourceDialog) {
                 this.$element.find(".oo-ui-processDialog-title").text(OO.ui.deferMsg("visualeditor-emm-dialogexternallinktitle")());
                 input = this.titleField.$element.find("input");
                 input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-def")());
-                clearInputFields(this.fieldset, [2], ["OoUiLabelWidget"]);
+                if (clearInputFieldsBool) {
+                    clearInputFields(this.fieldset, [2]);
+                }
                 break;
             case this.modeEnum.INSERT_NEW:
                 if (this.suggestion != null) {
                     if (this.suggestion.hyperlink == this.linkField.value) {
-                        clearInputFields(this.fieldset, [0, 2], ["OoUiLabelWidget"]);
+                        if (clearInputFieldsBool) {
+                            clearInputFields(this.fieldset, [0, 2]);
+                        }
                         this.validator.cleanUpForm();
                         return;
                     }
                     else {
-                        clearInputFields(this.fieldset, [0, 1, 2], ["OoUiLabelWidget"]);
+                        if (clearInputFieldsBool) {
+                            clearInputFields(this.fieldset, [0, 1, 2]);
+                        }
                     }
                 }
                 else {
-                    clearInputFields(this.fieldset, [0, 1, 2], ["OoUiLabelWidget"]);
+                    if (clearInputFieldsBool) {
+                        clearInputFields(this.fieldset, [0, 1, 2]);
+                    }
                 }
                 this.$element.find(".oo-ui-processDialog-title").text(OO.ui.deferMsg("visualeditor-emm-linkdialog-title-npage")());
                 input = this.titleField.$element.find("input");
@@ -138,13 +144,11 @@ function createExternalLinkDialog(LightResourceDialog) {
                 this.$element.find(".oo-ui-processDialog-title").text(OO.ui.deferMsg("visualeditor-emm-linkdialog-title-edit")());
                 input = this.titleField.$element.find("input");
                 input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-linkdialog-titlefield-placeholder-def")());
-                clearInputFields(this.fieldset, [2], ["OoUiLabelWidget"]);
                 break;
         }
         this.validator.cleanUpForm();
         setAutoCompleteEnabled(this, this.getAutoCompleteStateForMode(mode));
     };
-
 
     /**
      * This method is responsible for determining necessary mode changes and executing them.
@@ -154,11 +158,11 @@ function createExternalLinkDialog(LightResourceDialog) {
         switch (this.dialogMode) {
             case this.modeEnum.INSERT_EXISTING:
                 if (!this.isExistingResource && this.linkField.value.length != 0)
-                    this.executeModeChange(this.modeEnum.INSERT_NEW);
+                    this.executeModeChange(this.modeEnum.INSERT_NEW, true);
                 break;
             case this.modeEnum.INSERT_NEW:
                 if (this.linkField.value.length == 0)
-                    this.executeModeChange(this.modeEnum.INSERT_EXISTING);
+                    this.executeModeChange(this.modeEnum.INSERT_EXISTING, true);
                 break;
             case this.modeEnum.EDIT_EXISTING:
                 break;
@@ -235,10 +239,10 @@ function createExternalLinkDialog(LightResourceDialog) {
             return null;
         }
         else {
-            if (previousSuggestion != null && previousSuggestion.semanticTitle == suggestionObject.semanticTitle && previousSuggestion.value == previousSuggestion.semanticTitle)
+            if (previousSuggestion != null && previousSuggestion.semanticTitle.toLowerCase() == suggestionObject.semanticTitle.toLowerCase() && previousSuggestion.value == previousSuggestion.semanticTitle)
                 previousSuggestion.value = previousSuggestion.value + " (" + previousSuggestion.hyperlink + ")";
             suggestionObject.hyperlink = resultSet[row].printouts.Hyperlink[0];
-            if (previousSuggestion != null && previousSuggestion.semanticTitle == suggestionObject.value)
+            if (previousSuggestion != null && previousSuggestion.semanticTitle.toLowerCase() == suggestionObject.value.toLowerCase())
                 suggestionObject.value = suggestionObject.value + " (" + suggestionObject.hyperlink + ")";
             return suggestionObject;
         }

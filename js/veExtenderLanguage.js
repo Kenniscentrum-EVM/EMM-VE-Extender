@@ -41,6 +41,8 @@ function defineTranslations() {
             "visualeditor-emm-file-date": "Date*:",
             "visualeditor-emm-file-organization": "Organization:",
             "visualeditor-emm-file-subject": "Keywords:",
+            "visualeditor-emm-file-changing-empty-file" : "An error occured: the file you are attempting to change does not exist",
+
             "visualeditor-emm-file-upload-timeout": "Your file upload request timed out. Please make sure the file isn't too large, check your connection and try again.",
             "visualeditor-emm-file-upload-duplicate": "Another file with the same content already exists",
             "visualeditor-emm-file-upload-exists": "Another file with the same name already exists",
@@ -49,6 +51,9 @@ function defineTranslations() {
             "svg, png, gif, jpg, jpeg, ppt, pptx, pdf, mp3, mp4, xls, xlsx, doc, docx, odt, odc, odp, odg, txt",
             "visualeditor-emm-file-upload-file-too-large": "The file is too large. The maximum size of a file is 64MB",
             "visualeditor-emm-file-upload-empty-file": "The file that was uploaded is empty",
+            "visualeditor-emm-file-upload-filetype-banned": "The file extension is invalid, only the following extensions are allowed: \n" +
+            "svg, png, gif, jpg, jpeg, ppt, pptx, pdf, mp3, mp4, xls, xlsx, doc, docx, odt, odc, odp, odg, txt",
+            "visualeditor-emm-file-upload-mustbeloggedin": "You need to be logged in to perform this action. Please make sure you are logged in and try again",
 
             "visualeditor-emm-bibref-bibtex-type" : "Document type*:",
             "visualeditor-emm-bibref-bibtex-type-select" : "Select a document type",
@@ -109,6 +114,7 @@ function defineTranslations() {
             "visualeditor-emm-filedialog-title-edit": "Edit link to file",
             "visualeditor-emm-filedialog-titlefield-placeholder-def": "Search for link to file",
             "visualeditor-emm-filedialog-titlefield-placeholder-new": "Title of new link to file",
+            "visualeditor-emm-filedialog-uploadnf": "Upload new file version of file.",
             "visualeditor-emm-required": "*Required",
 
             "visualeditor-emm-notification-template-title": "Illegal operation",
@@ -157,6 +163,7 @@ function defineTranslations() {
             "visualeditor-emm-file-date": "Datum*:",
             "visualeditor-emm-file-organization": "Organisatie:",
             "visualeditor-emm-file-subject": "Trefwoorden:",
+            "visualeditor-emm-file-changing-empty-file" : "Er is een fout opgetreden: Het bestand dat u probeert aan te passen bestaat al.",
 
             "visualeditor-emm-file-upload-timeout": "Het verzoek om een bestand te uploaden is verlopen. Controleer of het bestand niet te groot is, controleer de verbinding en probeer opnieuw.",
             "visualeditor-emm-file-upload-duplicate": "Er bestaat al een bestand met dezelfde inhoud",
@@ -166,6 +173,9 @@ function defineTranslations() {
             "svg, png, gif, jpg, jpeg, ppt, pptx, pdf, mp3, mp4, xls, xlsx, doc, docx, odt, odc, odp, odg, txt",
             "visualeditor-emm-file-upload-file-too-large": "Het bestand is te groot. De maximale grootte van een bestand is 64MB",
             "visualeditor-emm-file-upload-empty-file": "Het opgegeven bestand is leeg.",
+            "visualeditor-emm-file-upload-filetype-banned": "Het bestandstype is ongeldig, enkel de volgende bestandstypen zijn toegestaan: \n" +
+            "svg, png, gif, jpg, jpeg, ppt, pptx, pdf, mp3, mp4, xls, xlsx, doc, docx, odt, odc, odp, odg, txt",
+            "visualeditor-emm-file-upload-mustbeloggedin": "U moet ingelogd zijn om deze actie uit te voeren. Controleer of u bent ingelogd en probeer het opnieuw.",
 
             "visualeditor-emm-bibref-bibtex-type": "Documentsoort*:",
             "visualeditor-emm-bibref-bibtex-type-select": "Selecteer een documentsoort",
@@ -226,6 +236,7 @@ function defineTranslations() {
             "visualeditor-emm-filedialog-title-edit": "Aanpassen koppeling naar bestand",
             "visualeditor-emm-filedialog-titlefield-placeholder-def": "Zoeken naar een bestandskoppeling",
             "visualeditor-emm-filedialog-titlefield-placeholder-new": "Titel nieuwe bestandskoppeling",
+            "visualeditor-emm-filedialog-uploadnf": "Upload nieuwe versie van bestand",
             "visualeditor-emm-required": "*Vereist",
 
             "visualeditor-emm-notification-template-title": "Actie niet toegestaan",

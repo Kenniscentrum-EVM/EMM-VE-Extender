@@ -68,8 +68,9 @@ function createInternalLinkDialog(EMMDialog) {
      *
      * Dialog modes are defined in the modeEnum variable (which is defined in EMMDialog) this enum should always be used when switching modes.
      * @param {number} mode - Dialog mode to switch to.
+     * @param {boolean} clearInputFieldsBool - If true the input fields of the dialog will be cleared.
      */
-    EMMInternalLinkDialog.prototype.executeModeChange = function (mode) {
+    EMMInternalLinkDialog.prototype.executeModeChange = function (mode, clearInputFieldsBool) {
         this.dialogMode = mode;
         switch (mode) {
             case this.modeEnum.INSERT_EXISTING:
@@ -89,7 +90,6 @@ function createInternalLinkDialog(EMMDialog) {
     };
 
     /**
-     * @abstract
      * Retrieves the auto complete state for a given dialog mode.
      * @param {modeEnum} mode - dialog mode to get the auto complete state for.
      * @returns {boolean} - The value the auto complete should be set to.
@@ -117,17 +117,17 @@ function createInternalLinkDialog(EMMDialog) {
         switch (this.dialogMode) {
             case this.modeEnum.INSERT_EXISTING:
                 if (this.isExistingResource && this.titleField.getValue() != this.suggestion.value)
-                    this.executeModeChange(this.modeEnum.INSERT_AND_EDIT_EXISTING);
+                    this.executeModeChange(this.modeEnum.INSERT_AND_EDIT_EXISTING, true);
                 if (!this.isExistingResource && this.titleField.getValue().length > 0)
-                    this.executeModeChange(this.modeEnum.INSERT_NEW);
+                    this.executeModeChange(this.modeEnum.INSERT_NEW, true);
                 break;
             case this.modeEnum.INSERT_NEW:
                 if (this.isExistingResource || this.titleField.getValue().length == 0)
-                    this.executeModeChange(this.modeEnum.INSERT_EXISTING);
+                    this.executeModeChange(this.modeEnum.INSERT_EXISTING, true);
                 break;
             case this.modeEnum.INSERT_AND_EDIT_EXISTING:
                 if ((this.isExistingResource && this.titleField.getValue() == this.suggestion.value) || this.titleField.getValue().length == 0)
-                    this.executeModeChange(this.modeEnum.INSERT_EXISTING);
+                    this.executeModeChange(this.modeEnum.INSERT_EXISTING, true);
                 break;
         }
     };
@@ -178,7 +178,11 @@ function createInternalLinkDialog(EMMDialog) {
                     query += "&Light Context[Topcontext]=" + topContext;
                     dialogInstance.executeQuery(query, insertCallback, linkdata, "Light Context");
                 } else {
-                    alert(OO.ui.deferMsg("visualeditor-emm-topcontext-error")());
+                    mw.notify(OO.ui.deferMsg("visualeditor-emm-topcontext-error")(), {
+                        autoHide: false,
+                        type: "error"
+                    });
+                    setDisabledDialogElements(dialogInstance, false);
                 }
             });
         }
@@ -232,15 +236,14 @@ function createInternalLinkDialog(EMMDialog) {
         suggestionObject.category = resultSet[row].printouts.Category;
         suggestionObject.suffix = resultSet[row].printouts["Supercontext"];
 
-        if(previousSuggestion != null)
-        {
-            if(previousSuggestion.semanticTitle == suggestionObject.semanticTitle && previousSuggestion.value == previousSuggestion.semanticTitle)
+        if (previousSuggestion != null) {
+            if (previousSuggestion.semanticTitle.toLowerCase() == suggestionObject.semanticTitle.toLowerCase() && previousSuggestion.value == previousSuggestion.semanticTitle)
                 previousSuggestion.value = checkAndPrintSuffix(previousSuggestion, resultSet[previousSuggestion.suffix[0].fulltext]);
-            if (previousSuggestion.semanticTitle == suggestionObject.value)
+            if (previousSuggestion.semanticTitle.toLowerCase() == suggestionObject.value.toLowerCase())
                 suggestionObject.value = checkAndPrintSuffix(suggestionObject, resultSet[suggestionObject.suffix[0].fulltext]);
         }
-        for(var i = 0; i < suggestionObject.category.length; i++)
-            if(/:\bLight Context\b/.test(suggestionObject.category[i].fulltext) || /:\bProject\b/.test(suggestionObject.category[i].fulltext))
+        for (var i = 0; i < suggestionObject.category.length; i++)
+            if (/:\bLight Context\b/.test(suggestionObject.category[i].fulltext) || /:\bProject\b/.test(suggestionObject.category[i].fulltext))
                 return suggestionObject;
 
         return null;
@@ -255,9 +258,8 @@ function createInternalLinkDialog(EMMDialog) {
         return "Internal link";
     };
 
-    function checkAndPrintSuffix(suggestionObject, suffix)
-    {
-        if(suffix != null)
+    function checkAndPrintSuffix(suggestionObject, suffix) {
+        if (suffix != null)
             return suggestionObject.value + " (" + suffix.printouts["Semantic title"][0] + ")";
         else
             return suggestionObject.value + " " + OO.ui.deferMsg("visualeditor-emm-suggestion-err-no-supercontext")();

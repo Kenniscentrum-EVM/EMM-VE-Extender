@@ -94,7 +94,6 @@ function loadEMMDialog(resourceType, toolId, menuText, dialogText, templateResul
         this.$element.addClass("oo-ui-tool-name-extratemplate");
     };
 
-
     //More configuration for the menu-item
     OO.inheritClass(tool, ve.ui.Tool);
     tool.static.name = toolId;
@@ -120,7 +119,6 @@ function loadEMMDialog(resourceType, toolId, menuText, dialogText, templateResul
  * @param {function} templateResult - A function that transforms the inserted data into the required format for inserting the links as a template
  */
 function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
-
     /**
      * Constructor for EMMDialog, all relevant fields are initiated, mostly with default null or 0 values.
      * @extends OO.ui.ProcessDialog
@@ -214,6 +212,8 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
 
     /**
      * Returns the query that is used to gather information for all existing resources of a certain type.
+     * Depends on what kind of resource this is.
+     * @return {string|string|string} - An ask-query that gathers information for all existing resource of a given type.
      */
     EMMDialog.prototype.getAutocompleteQuery = function () {
         return this.autoCompleteQuery;
@@ -221,7 +221,8 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
 
     /**
      * Returns the query that is used to gather the information about a single resource.
-     * @param internalPageName - The internal name of the page where a certain resource is described.
+     * @param {string} internalPageName - The internal name of the page where a certain resource is described.
+     * @return {string} - An ask-query that gathers information about a single existing resource with a given pageName
      */
     EMMDialog.prototype.getEditQuery = function (internalPageName) {
         return this.editQuery.replace(/PAGENAMEPARAMETER/g, internalPageName);
@@ -256,13 +257,13 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
          * Checks if the user is trying to edit an existing link to a resource. If this is the case, information about
          * the resource is gathered and an edit dialog is opened with the fields already filled in.
          */
-        function checkIfEdit() {
+        function openEditDialog() {
             //When being queued by the first method of OO.ui.process the scope of 'this' is set.
             var data = this;
             if (data.source != null) //are we editing?
             {
-                dialogInstance.executeModeChange(dialogInstance.modeEnum.EDIT_EXISTING);
-                toggleInputFields(dialogInstance.fieldset, true);
+                dialogInstance.executeModeChange(dialogInstance.modeEnum.EDIT_EXISTING, false);
+                setDisabledInputFields(dialogInstance.fieldset, true);
                 data.source = data.source.replace(/ /g, "_"); //convert whitespaces to underscores
                 var api = new mw.Api();
                 var query = dialogInstance.getEditQuery(data.source); //getEditQuery retrieves the correct query for us.
@@ -279,14 +280,18 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                         }
                         var suggestion = dialogInstance.processSingleQueryResult(row, res);
                         if (suggestion == null) {
-                            mw.notify(OO.ui.deferMsg("visualeditor-emm-notification-err-invalidlink-body")(), {title: OO.ui.deferMsg("visualeditor-emm-notification-err-invalidlink-title")()});
+                            mw.notify(OO.ui.deferMsg("visualeditor-emm-notification-err-invalidlink-body")(), {
+                                title: OO.ui.deferMsg("visualeditor-emm-notification-err-invalidlink-title")(),
+                                autoHide: false,
+                                type: "error"
+                            });
                             dialogInstance.close();
                             return;
                         }
 
                         dialogInstance.suggestion = suggestion;
                         dialogInstance.titleField.setValue(suggestion.value);
-                        toggleInputFields(dialogInstance.fieldset, false);
+                        setDisabledInputFields(dialogInstance.fieldset, false);
                         dialogInstance.fillFields(); //fill our dialog.
                         dialogInstance.isExistingResource = true;
                     }
@@ -308,7 +313,28 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
         }
 
         //Add the two functions above to the queue of processes that will be executed when a dialog is opened
-        return EMMDialog.super.prototype.getReadyProcess.call(this, data).first(checkIfEdit, data).next(grabAndValidateText);
+        return EMMDialog.super.prototype.getReadyProcess.call(this, data).first(openEditDialog, data).next(grabAndValidateText);
+    };
+
+    /**
+     * Checks what should happen after a user has pressed the insert button. Depending on what the user was trying to do
+     * we either need to call a query, or simply only link to the selected resource.
+     * @param {function} insertCallback - The callback function that creates a link on the wiki page to the selected or
+     * created resource. Will be executed directly, or after the query has finished processing if a query was executed.
+     * @param {String} currentPageID - The ID of the page that is currently being edited, can only contain alphanumeric
+     * characters and whitespace
+     * @param {String} linkData - In case of an existing resource, linkData contains the internal name of the resource
+     * in order to let the api know what existing resource should be edited. Otherwise linkData is just an empty string.
+     */
+    EMMDialog.prototype.executeInsertAction = function (insertCallback, currentPageID, linkData) {
+        //IsEdit can only be executed for an existing resource. Because of lazy evaluation the second part of the
+        //OR-statement will only be evaluated once the first part is true. That's why this doesn't crash.
+        if (!this.isExistingResource || this.isEdit()) {
+            this.buildAndExecuteQuery(currentPageID, insertCallback, linkData);
+        } else {
+            //If we're not editing an existing resource or creating a new one, we just insert a link inside the page.
+            insertCallback(this.suggestion.data);
+        }
     };
 
     /**
@@ -324,10 +350,10 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
      These functions are an attempt to emulate the idea of an abstract method as seen in other Object Oriented languages*/
 
     /**
-     * @abstract
      * Abstract method that needs to be overridden, displays an error message if this is not the case.
      * Expected behavior when overriding:
      * Creates all the inputfields of a dialog that are not yet created in the constructor of the general EMMDialog.
+     * @abstract
      */
     EMMDialog.prototype.createFields = function () {
         displayOverloadError("createFields");
@@ -339,23 +365,23 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
      * Expected behavior when overriding:
      * Preforms the a mode change, this may include visual changes to a dialog.
      * @param {number} mode - Mode to be switched to.
+     * @param {boolean} clearInputFields - If true the input fields of the dialog will be cleared.
      */
-    EMMDialog.prototype.executeModeChange = function (mode) {
+    EMMDialog.prototype.executeModeChange = function (mode, clearInputFields) {
         displayOverloadError("executeModeChange");
     };
 
     /**
-     * @abstract
      * Abstract method that needs to be overridden, displays an error message if this is not the case.
      * Expected behavior when overriding:
      * Checks the status of the dialog and changes the dialogmode if necessary.
+     * @abstract
      */
     EMMDialog.prototype.testAndChangeDialogMode = function () {
         displayOverloadError("testAndChangeDialogMode");
     };
 
     /**
-     * @abstract
      * Abstract method that needs to be overridden, displays an error message if this is not the case.
      * Expected behavior and parameters when overriding:
      * Builds and executes a query that creates a new resource or edits an existing one with the sfautoedit api-calll.
@@ -366,16 +392,17 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
      * an existing one was changed. This function handles inserting a link into the current page.
      * @param {String} linkData - In case of an existing resource, linkData contains the internal name of the resource
      * in order to let the api know what existing resource should be edited. Otherwise linkData is just an empty string.
+     * @abstract
      */
     EMMDialog.prototype.buildAndExecuteQuery = function (currentPageID, insertCallback, linkData) {
         displayOverloadError("buildAndExecuteQuery");
     };
 
     /**
-     * @abstract
      * Abstract method that needs to be overridden, displays an error message if this is not the case.
      * Expected behavior and parameters when overriding:
      * Executes a query by using the mediawiki api. This query either creates a new resource or updates an existing one
+     * @abstract
      * @param {String} query - The query that should be executed. The query should be suitable for an sfautoedit api call.
      * @param {function} insertCallback - A function that handles inserting a link to the newly created or edited resource
      * into the current page. This is executed after the api has finished processing the request.
@@ -387,21 +414,21 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
     };
 
     /**
-     * @abstract
      * Abstract method that needs to be overridden, displays an error message if this is not the case.
      * Expected behavior and parameters when overriding:
      * Fill the fields of the dialog based on a resource the user has selected from the autocomplete dropdown.
+     * @abstract
      */
     EMMDialog.prototype.fillFields = function () {
         displayOverloadError("fillFields");
     };
 
     /**
-     * @abstract
      * Abstract method that needs to be overridden, displays an error message if this is not the case.
      * Expected behavior and parameters when overriding:
      * Depending on the type of resource and choices made by the user in the dialog, links to different types of resources
      * are created in the current page with different types of templates. This function returns what template type to use.
+     * @abstract
      * @returns {String} - Null in the abstract case, but should be a String containing the type of template to use.
      */
     EMMDialog.prototype.findTemplateToUse = function () {
@@ -410,8 +437,8 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
     };
 
     /**
-     * @abstract
      * Retrieves the auto complete state for a given dialog mode.
+     * @abstract
      * @param {modeEnum} mode - dialog mode to get the auto complete state for.
      * @returns {boolean} - The value the auto complete should be set to.
      */
@@ -432,7 +459,10 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
             dialog = createLightResourceDialog(EMMDialog, resourceType);
             break;
         default:
-            alert(OO.ui.deferMsg("visualeditor-emm-dialog-error"));
+            mw.notify(OO.ui.deferMsg("visualeditor-emm-dialog-error")(), {
+                autoHide: false,
+                type: "error"
+            });
     }
     ve.ui.windowFactory.register(dialog);
 
@@ -469,6 +499,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
          * Define what should happen when the insert button is clicked.
          */
         var insertButtonHandler = function () {
+            setDisabledDialogElements(dialogInstance, true);
             var nameData = dialogInstance.presentationTitleField.getValue();
             if (dialogInstance.suggestion != null) {
                 var linkData = dialogInstance.suggestion.data.length > 0 ? dialogInstance.suggestion.data : "";
@@ -512,21 +543,17 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                     });
                 var surfaceModel = ve.init.target.getSurface().getModel();
                 var transaction = ve.dm.Transaction.newFromReplacement(surfaceModel.getDocument(), dialogInstance.selectedTextObject, myTemplate);
-
                 var newRange = transaction.getModifiedRange(surfaceModel.getDocument());
                 surfaceModel.change(transaction, newRange ? new ve.dm.LinearSelection(surfaceModel.getDocument(), newRange) : new ve.dm.NullSelection(surfaceModel.getDocument()));
                 surfaceModel.setNullSelection();
+                dialogInstance.close();
+                setDisabledDialogElements(dialogInstance, false);
             };
+
             //Get the name of the current page and replace any underscores with whitespaces to prevent errors later on.
             var currentPageID = mw.config.get("wgPageName").replace(/_/g, " ");
-
-            if (!dialogInstance.isExistingResource || dialogInstance.isEdit()) {
-                //In this case, dialoginstance.suggestion is empty, so build and execute the query
-                dialogInstance.buildAndExecuteQuery(currentPageID, insertCallback, linkData);
-            }
-            else
-                insertCallback(dialogInstance.suggestion.data);
-            dialogInstance.close();
+            //Check some variables and decide what has to be done
+            dialogInstance.executeInsertAction(insertCallback, currentPageID, linkData);
         };
 
         /**
@@ -565,7 +592,6 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
          * A function that should be called after the askQuery is done gathering all available resources of a specified type
          * This function initiates the autocomplete library for the resource input field
          * The user will be able to pick a resource from the list of all resources gathered by the askQuery
-         * @param {Object[]} queryResults - An array containing all the possible options for the autocomplete dropdown
          */
         var autoCompleteCallback = function (queryResults) {
             setAutoCompleteEnabled(dialogInstance, dialogInstance.getAutoCompleteStateForMode(dialogInstance.dialogMode));
@@ -582,7 +608,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
             dialogInstance.fieldset.$element.css({width: dim.width - 10});
             this.$frame.css({
                 width: dim.width + 250 || "",
-                height: this.getContentHeight() + 20 || ""
+                height: this.getContentHeight() + 30 || ""
             });
             dialogInstance.fieldset.$element.css("width", "100%");
             for (var i = 0; i < dialogInstance.fieldset.getItems().length; i++) {
@@ -604,9 +630,11 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
             function cleanUpDialog() {
                 hideAutoComplete(dialogInstance.titleField.$element.find("input"));
                 dialogInstance.validator.disable();
-                clearInputFields(dialogInstance.fieldset, null, ["OoUiLabelWidget"]);
+                dialogInstance.validator.disableOnChange();
+                clearInputFields(dialogInstance.fieldset, null);
                 dialogInstance.dialogMode = dialogInstance.modeEnum.INSERT_EXISTING;
-                dialogInstance.executeModeChange(dialogInstance.modeEnum.INSERT_EXISTING);
+                dialogInstance.executeModeChange(dialogInstance.modeEnum.INSERT_EXISTING, false);
+                dialogInstance.validator.enableOnChange();
                 dialogInstance.validator.enable();
                 dialogInstance.isExistingResource = false;
                 dialogInstance.suggestion = null;
@@ -615,14 +643,6 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
             //Execute the original getTeardownProcess, but add our cleanup function to the process that is executed on closing.
             return EMMDialog.super.prototype.getTeardownProcess.call(this).next(cleanUpDialog)
         }
-    };
-
-    /**
-     * Getter function for the fieldset of the dialog
-     * @returns {OO.ui.FieldsetLayout} - The fieldset corresponding to this dialog
-     */
-    EMMDialog.prototype.getFieldset = function () {
-        return this.fieldset;
     };
 
     /**
@@ -636,7 +656,6 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
         var suggestionObject = {};
         suggestionObject.data = resultSet[row].fulltext;
         suggestionObject.value = "";
-
         var semanticTitle = resultSet[row].printouts["Semantic title"][0];
         if (semanticTitle) {
             suggestionObject.value = semanticTitle;
@@ -675,8 +694,9 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                 previousSuggestion = singleQueryResult;
             }
             //Add the final row.
-            if (previousSuggestion != null)
+            if (previousSuggestion != null) {
                 arr.push(dialogInstance.processSingleQueryResult(row, res, previousSuggestion));
+            }
             //todo investigate ASK query possibilities and restrictions, this may possibly be unnecessary.
             arr.sort(function (a, b) {
                 if (a.value.toUpperCase() > b.value.toUpperCase()) {
@@ -698,46 +718,63 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
  * @param {OO.ui.FieldsetLayout} fieldSet - FieldSet to disable or enable.
  * @param {boolean} value - Boolean instruction, true = disable, false = enable.
  */
-function toggleInputFields(fieldSet, value) {
-    for (var i = 0; i < fieldSet.getItems().length; i++)
+function setDisabledInputFields(fieldSet, value) {
+    for (var i = 0; i < fieldSet.getItems().length; i++) {
         fieldSet.getItems()[i].getField().setDisabled(value);
+    }
+}
+
+/**
+ * Enables or disables all clickable items of a dialog. Also adds or removes a progress bar.
+ * @param {OO.ui.EMMDialog} dialogInstance - FieldSet to disable or enable.
+ * @param {boolean} value - Boolean instruction, true = disable, false = enable.
+ */
+function setDisabledDialogElements(dialogInstance, value) {
+    setDisabledInputFields(dialogInstance.fieldset, value);
+    dialogInstance.actions.forEach(null, function (action) {
+        action.setDisabled(value);
+    });
+    if (value) {
+        var progressBar = new OO.ui.ProgressBarWidget({
+            progress: false
+        });
+        var progressbarFieldLayout = new OO.ui.FieldLayout(progressBar);
+        dialogInstance.fieldset.addItems([progressbarFieldLayout]);
+        progressbarFieldLayout.$element.find(".oo-ui-fieldLayout-field").css("width", "100%");
+        progressbarFieldLayout.$element.find(".oo-ui-fieldLayout-body").css("width", "100%");
+        progressbarFieldLayout.$element.find(".oo-ui-progressBarWidget").css("max-width", "100%");
+        progressbarFieldLayout.$element.find(".oo-ui-progressBarWidget-bar").css("background-color", "#347bff");
+    }
+    else {
+        dialogInstance.fieldset.removeItems([dialogInstance.fieldset.getItems()[dialogInstance.fieldset.getItems().length - 1]]);
+    }
 }
 
 /**
  * Clears the input fields of a given fieldset
  * @param {OO.ui.FieldsetLayout} fieldset - The fieldset whose input fields should be emptied
- * @param {int[]} exclude - The indices of the fields in the fieldset that should not be cleared
- * @param {String[]} inputTypeExclude - An array of the names of types of fields that should not be cleared
+ * @param {int[]} excludeNum - The indices of the fields in the fieldset that should not be cleared
  */
-function clearInputFields(fieldset, exclude, inputTypeExclude) { //TODO rewrite this function
-    if (exclude != null) {
+function clearInputFields(fieldset, excludeNum) {
+    main:
         for (var i = 0; i < fieldset.getItems().length; i++) {
-            var ex = false;
-            for (var x = 0; x < exclude.length; x++)
-                if (i == exclude[x])
-                    ex = true;
-            if (!ex) {
-                //Make sure the fieldlayout doesn't contain a field of the given types
-                if ($.inArray(fieldset.getItems()[i].getField().constructor.name, inputTypeExclude) == -1) {
-                    if ((fieldset.getItems()[i].getField() instanceof OO.ui.SelectFileWidget))
-                        fieldset.getItems()[i].getField().setValue(null);
-                    else
-                        fieldset.getItems()[i].getField().setValue("");
+            if (excludeNum != null && excludeNum.length != 0) {
+                for (var x = 0; x < excludeNum.length; x++) { //todo dynamically resize this array?
+                    if (excludeNum[x] == i) {
+                        excludeNum.splice(x, 1);
+                        continue main;
+                    }
                 }
             }
-        }
-    }
-    else {
-        for (var i = 0; i < fieldset.getItems().length; i++) {
-            //Make sure the fieldlayout doesn't contain just a field of the given types
-            if ($.inArray(fieldset.getItems()[i].getField().constructor.name, inputTypeExclude) == -1) {
-                if ((fieldset.getItems()[i].getField() instanceof OO.ui.SelectFileWidget))
-                    fieldset.getItems()[i].getField().setValue(null);
-                else
-                    fieldset.getItems()[i].getField().setValue("");
+            //Apparently we also go trough some LabelWidgets in this loop, these things will break IE9 and IE10 .setValue(x) is called on them.
+            if (fieldset.getItems()[i].getField() instanceof OO.ui.SelectFileWidget) {
+                fieldset.getItems()[i].getField().setValue(null);
+            } else if (fieldset.getItems()[i].getField() instanceof OO.ui.CheckboxInputWidget) {
+                fieldset.getItems()[i].getField().setSelected(true);
+            } else if (fieldset.getItems()[i].getField().supports("setValue")) {
+                fieldset.getItems()[i].getField().setValue("");
             }
         }
-    }
 }
 
 /**
@@ -760,11 +797,10 @@ function semanticCreateWithFormQuery(query, callback, target, form) {
     });
 }
 
-
 /**
  * Grabs the text that is selected (outside the dialog) and inserts it into the presentationtitle field inside the dialog
  * @param {OO.ui.TextInputWidget} inputObject - The field in which the selected text should be inserted
- * @returns {Object}
+ * @returns {Object} - Returns a range object
  */
 function grabSelectedText(inputObject) {
     var surfaceModel = ve.init.target.getSurface().getModel();
@@ -774,14 +810,12 @@ function grabSelectedText(inputObject) {
         for (var i = surfaceModel.getFragment().selection.range.start; i < surfaceModel.getFragment().selection.range.end; i++) {
             var node = ve.init.target.getSurface().getModel().getDocument().getDocumentNode().getNodeFromOffset(i);
             if (node.getType() == "mwTransclusionInline") {
-                //fixme hier moet nog geverifieerd worden of het om een cite gaat?
                 string += node.element.attributes.mw.parts[0].template.params.name.wt;
                 continue;
             }
             var element = surfaceModel.getFragment().document.data.data[i];
             if (typeof element[0] === "undefined")
                 continue;
-            //todo moet dit?
             var toAdd = element;
             if (element[0])
                 toAdd = element[0];

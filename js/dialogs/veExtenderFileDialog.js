@@ -20,8 +20,6 @@ function createFileDialog(LightResourceDialog) {
         LightResourceDialog.call(this);
         this.autoCompleteQuery = "[[Category:Resource Description]] [[file name::+]] |?Semantic title|?Dct:creator|?Dct:date|?Organization|?Dct:subject|?file name|sort=Semantic title|order=asc|limit=10000";
         this.editQuery = "[[PAGENAMEPARAMETER]] |?Semantic title|?Dct:creator|?Dct:date|?Organization|?Dct:subject|?file name";
-        //Define a new upload object to handle file uploads
-        this.upload = new mw.Upload({parameters: {ignorewarnings: true}});
     };
     OO.inheritClass(EMMFileDialog, LightResourceDialog);
 
@@ -49,7 +47,7 @@ function createFileDialog(LightResourceDialog) {
         LightResourceDialog.prototype.createDialogLayout.call(this);
         var dialogInstance = this;
         //Temporary hack method in order to still activate the validator and onChangeFunctions for fileField.
-        //Fixme dirty hack
+        //Fixme dirty hack, temporary problem validatie toevoegen voor file veld
         this.fileField.validation = [function (value, sender) {
             return "";
         }];
@@ -64,12 +62,8 @@ function createFileDialog(LightResourceDialog) {
          * Checks the titlefield and sets existingresource to false if the titlefield changed to empty from a full field
          */
         var testSuggestedLink = function () {
-            //todo replace this temporary thing with something better.
-            if (this.isExistingResource && this.dialogMode != 2) {
-                if (dialogInstance.titleField.value.length == 0) {
-                    this.isExistingResource = false;
-                    fileFieldLayout.$element.show();
-                }
+            if (this.isExistingResource && this.dialogMode != 2 && dialogInstance.titleField.value.length == 0) {
+                this.isExistingResource = false;
             }
         };
 
@@ -114,31 +108,35 @@ function createFileDialog(LightResourceDialog) {
      *
      * Dialog modes are defined in the modeEnum variable (which is defined in EMMDialog) this enum should always be used when switching modes.
      * @param {number} mode - Dialog mode to switch to.
+     * @param {boolean} clearInputFieldsBool - If true the input fields of the dialog will be cleared.
      */
-    EMMFileDialog.prototype.executeModeChange = function (mode) {
+    EMMFileDialog.prototype.executeModeChange = function (mode, clearInputFieldsBool) {
         this.dialogMode = mode;
         var input = null;
         switch (mode) {
             case this.modeEnum.INSERT_EXISTING:
-                this.fieldset.items[1].$element.show();
                 this.$element.find(".oo-ui-processDialog-title").text(OO.ui.deferMsg("visualeditor-emm-dialogfiletitle")());
                 input = this.titleField.$element.find("input");
                 input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-filedialog-titlefield-placeholder-def")());
-                clearInputFields(this.fieldset, [1, 2], ["OoUiLabelWidget"]);
+                if (clearInputFieldsBool) {
+                    clearInputFields(this.fieldset, [1, 2]);
+                }
                 break;
             case this.modeEnum.INSERT_NEW:
                 this.$element.find(".oo-ui-processDialog-title").text(OO.ui.deferMsg("visualeditor-emm-filedialog-title-npage")());
                 input = this.titleField.$element.find('input');
                 input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-filedialog-titlefield-placeholder-new")());
-                if (this.suggestion != null) {
-                    if (this.suggestion.value != this.titleField.value) {
-                        clearInputFields(this.fieldset, [0, 1, 2], ["OoUiLabelWidget"]);
+                if (clearInputFieldsBool) {
+                    if (this.suggestion != null) {
+                        if (this.suggestion.value != this.titleField.value) {
+                            clearInputFields(this.fieldset, [0, 1, 2]);
+                        } else {
+                            clearInputFields(this.fieldset, [1, 2]);
+                        }
+                    } else {
+                        clearInputFields(this.fieldset, [1, 2]);
                     }
-                    else
-                        clearInputFields(this.fieldset, [1, 2], ["OoUiLabelWidget"]);
                 }
-                else
-                    clearInputFields(this.fieldset, [1, 2], ["OoUiLabelWidget"]);
                 break;
             case this.modeEnum.EDIT_EXISTING:
                 this.$element.find(".oo-ui-processDialog-title").text(OO.ui.deferMsg("visualeditor-emm-filedialog-title-edit")());
@@ -156,15 +154,23 @@ function createFileDialog(LightResourceDialog) {
         switch (this.dialogMode) {
             case this.modeEnum.INSERT_EXISTING:
                 if ((!this.isExistingResource && this.fileField.getValue() != null))
-                    this.executeModeChange(this.modeEnum.INSERT_NEW);
+                    this.executeModeChange(this.modeEnum.INSERT_NEW, true);
                 break;
             case this.modeEnum.INSERT_NEW:
                 if (this.fileField.getValue() == null)
-                    this.executeModeChange(this.modeEnum.INSERT_EXISTING);
+                    this.executeModeChange(this.modeEnum.INSERT_EXISTING, true);
                 break;
             case this.modeEnum.EDIT_EXISTING:
                 break;
+            case this.modeEnum.INSERT_AND_EDIT_EXISTING:
+                break;
         }
+
+        //todo this is done every keystroke, you'd much rather try to do this only once. Potential fix: add a new mode for when the dialog intially opens.
+        if (this.isExistingResource)
+            this.fileField.$element.find(".oo-ui-selectFileWidget-dropLabel").text(OO.ui.deferMsg("visualeditor-emm-filedialog-uploadnf")());
+        else
+            this.fileField.$element.find(".oo-ui-selectFileWidget-dropLabel").text(OO.ui.deferMsg("ooui-selectfile-dragdrop-placeholder")());
     };
 
     /**
@@ -176,20 +182,30 @@ function createFileDialog(LightResourceDialog) {
      * an existing one was changed. This function handles inserting a clickable link to the file in the current page.
      * @param {String} linkdata - In case of an existing file, linkdata contains the internal name of the file
      * in order to let the api know what file link should be edited. Otherwise linkdata is just an empty string.
+     * @param {boolean} upload - If a new file or a new version of that file should be uploaded.
+     * @param {boolean} newUploadVersion - True if the upload is a new version of an existing file
+     * @param {boolean} newResourcePage - True if we are creating a new resource page, mainly used for adding created in page
+     * to the query even when we are 'editing' an existing resource.
      */
-    EMMFileDialog.prototype.buildAndExecuteQuery = function (currentPageID, insertCallback, linkdata) {
+    EMMFileDialog.prototype.buildAndExecuteQuery = function (currentPageID, insertCallback, linkdata, upload, newUploadVersion, newResourcePage) {
         //First call the method of the parent to build the basic query for a light resource
         var query = LightResourceDialog.prototype.buildQuery.call(this, currentPageID);
+        if (newResourcePage) {
+            //In this case we should be dealing with an existing resource description that needs to be 'copied' over to
+            //a new page, and should contain currentpageID in the query.
+            //For completely new resources this happens in the buildAndExecuteQuery of EMMLightResourceDialog
+            query += "&Resource Description[created in page]=" + currentPageID;
+        }
         //Gather the filename in different ways depending on whether it is an existing file or not.
         var filename = "";
-        if (this.isExistingResource) {
-            filename = this.suggestion.data.replace("Bestand:", "").replace("File:", "");
-        } else if (this.fileField.getValue() != null) {
+        if (upload) {
             filename = this.fileField.getValue().name;
+        } else {
+            filename = this.suggestion.data.replace("Bestand:", "").replace("File:", "");
         }
         //Expand the existing query with a file-specific part.
         query += "&Resource Description[file name]=" + filename;
-        this.executeQuery(query, insertCallback, linkdata);
+        this.executeQuery(query, insertCallback, linkdata, upload, newUploadVersion);
     };
 
     /**
@@ -199,52 +215,18 @@ function createFileDialog(LightResourceDialog) {
      * This is executed after the api has finished processing the request.
      * @param {String} linkdata - The internal title of a file resource. Should be set to the internal title of the file resource
      * you want to edit, or be empty when creating a new file resource.
+     * @param {boolean} upload - If a new file or new version of that file should be uploaded.
+     * @param {boolean} newUploadVersion - True if the upload is a new version of an existing file
      */
-    EMMFileDialog.prototype.executeQuery = function (query, insertCallback, linkdata) {
+    EMMFileDialog.prototype.executeQuery = function (query, insertCallback, linkdata, upload, newUploadVersion) {
         var target = "";
-        //Set the target of the api-call to the internal title of an existing file resource, if the file resource already exists
+        //Set the target of the api-call to the internal title of an existing file resource, if the file already exists.
         if (this.isExistingResource) {
             target = linkdata;
         }
-        if (!this.isExistingResource) {
-            //Upload a new file
-            this.upload.setFile(this.fileField.getValue());
-            this.upload.setFilename(this.fileField.getValue().name);
-            this.upload.upload().fail(function (status, exceptionobject) {
-                //Handle possible error messages and display them in a way the user understands them.
-                switch (status) {
-                    case "duplicate":
-                        alert(OO.ui.deferMsg("visualeditor-emm-file-upload-duplicate")());
-                        break;
-                    case "exists":
-                        alert(OO.ui.deferMsg("visualeditor-emm-file-upload-exists")());
-                        break;
-                    case "verification-error":
-                        alert(OO.ui.deferMsg("visualeditor-emm-file-upload-verification-error")() + "\n" + exceptionobject.error.info);
-                        break;
-                    case "file-too-large":
-                        alert(OO.ui.deferMsg("visualeditor-emm-file-upload-file-too-large")());
-                        break;
-                    case "empty-file":
-                        alert(OO.ui.deferMsg("visualeditor-emm-file-upload-empty-file")());
-                        break;
-                    case "http":
-                        switch (exceptionobject.textStatus) {
-                            case "timeout":
-                                alert(OO.ui.deferMsg("visualeditor-emm-file-upload-timeout")());
-                                break;
-                            case "parsererror":
-                                alert(OO.ui.deferMsg("visualeditor-emm-file-upload-parsererror")());
-                                break;
-                            default:
-                                //unknown eroror
-                                alert("An unknown error of the type " + exceptionobject.exception + " has occurred.");
-                        }
-                        break;
-                    default:
-                        alert("An unknown error of the type " + status + " has occurred.");
-                }
-            }).done(function () {
+        //Handle uploading of a new file or new version of a file.
+        if (upload) {
+            this.uploadFile(newUploadVersion, function () {
                 semanticCreateWithFormQuery(query, insertCallback, target, "Resource Light");
             });
         }
@@ -254,19 +236,9 @@ function createFileDialog(LightResourceDialog) {
     };
 
     /**
-     * Checks if the current contents of the dialog match the last picked suggestion. If they don't the user is editing
-     * the resource.
-     * @returns {boolean} - Whether the user is editing the selected resource
-     */
-    EMMFileDialog.prototype.isEdit = function () {
-        return LightResourceDialog.prototype.isEdit.call(this);
-    };
-
-    /**
      * Fill the fields of the dialog based on a file the user has selected from the autocomplete dropdown.
      */
     EMMFileDialog.prototype.fillFields = function () {
-        this.fieldset.items[1].$element.hide();
         LightResourceDialog.prototype.fillFields.call(this);
         this.validator.validateAll();
     };
@@ -282,10 +254,12 @@ function createFileDialog(LightResourceDialog) {
     EMMFileDialog.prototype.processSingleQueryResult = function (row, resultSet, previousSuggestion) {
         var suggestionObject = LightResourceDialog.prototype.processSingleQueryResult.call(this, row, resultSet, previousSuggestion);
         suggestionObject.filename = resultSet[row].printouts["File name"][0].fulltext.replace("Bestand:", "").replace("File:", "");
-        if(previousSuggestion != null && previousSuggestion.semanticTitle == suggestionObject.semanticTitle && previousSuggestion.value == previousSuggestion.semanticTitle)
-        previousSuggestion.value = previousSuggestion.value + " (" + previousSuggestion.filename + ")";
-        if(previousSuggestion != null && previousSuggestion.semanticTitle == suggestionObject.value)
-            suggestionObject.value = suggestionObject.value + " (" + suggestionObject.filename + ")";
+        if (previousSuggestion != null) {
+            if (previousSuggestion.semanticTitle.toLowerCase() == suggestionObject.semanticTitle.toLowerCase() && previousSuggestion.value == previousSuggestion.semanticTitle)
+                previousSuggestion.value = previousSuggestion.value + " (" + previousSuggestion.filename + ")";
+            if (previousSuggestion.semanticTitle.toLowerCase() == suggestionObject.value.toLowerCase())
+                suggestionObject.value = suggestionObject.value + " (" + suggestionObject.filename + ")";
+        }
         return suggestionObject;
     };
 
@@ -296,6 +270,181 @@ function createFileDialog(LightResourceDialog) {
      */
     EMMFileDialog.prototype.findTemplateToUse = function () {
         return "Cite";
+    };
+
+    /**
+     * @override
+     * Overrides the original function by defining its own behavior for picking what to do after the insert button is pressed.
+     * Checks what should happen after a user has pressed the insert button. Depending on what the user was trying to do
+     * we either need to call a query, or simply only link to the selected resource.
+     * @param {function} insertCallback - The callback function that creates a link on the wiki page to the selected or
+     * created resource. Will be executed directly, or after the query has finished processing if a query was executed.
+     * @param {String} currentPageID - The ID of the page that is currently being edited, can only contain alphanumeric
+     * characters and whitespace
+     * @param {String} linkdata - In case of an existing resource, linkdata contains the internal name of the resource
+     * in order to let the api know what existing resource should be edited. Otherwise linkdata is just an empty string.
+     */
+    EMMFileDialog.prototype.executeInsertAction = function (insertCallback, currentPageID, linkdata) {
+        //See the documentation wiki for a visual representation of this if/else mess
+        var dialogInstance = this;
+        if (this.isExistingResource) {
+            if (this.fileField.getValue() != null) {
+                //todo create a function for stripping a filename of "Bestand:" and "File:". Also make sure this is language independent
+                if (this.fileField.getValue().name != this.suggestion.filename.replace("Bestand:", "").replace("File:", "").toLowerCase()) {
+                    //Upload new file and create a new resource, because the file has a diffrent name.
+                    //A diffrent filename will lead to a diffrent internal name for the File.
+                    //Linkdata is left empty on purpose
+                    this.buildAndExecuteQuery(currentPageID, insertCallback, "", true, false, true);
+                } else {
+                    if (!this.isEdit()) {
+                        //Uplaod a new version of the file
+                        this.uploadFile(true, function () {
+                            insertCallback(dialogInstance.suggestion.data);
+                        })
+                    }
+                    else {
+                        //Upload a new version of the file and edit the existing resource
+                        this.buildAndExecuteQuery(currentPageID, insertCallback, linkdata, true, true, false);
+                    }
+                }
+            } else {
+                if (this.isEdit()) {
+                    //Just update the resource, don't upload anything
+                    this.buildAndExecuteQuery(currentPageID, insertCallback, linkdata, false, false, false);
+                } else {
+                    //Only insert a link to the file, don't change anything
+                    insertCallback(dialogInstance.suggestion.data);
+                }
+            }
+        } else {
+            //Insert a new resource and upload a new file
+            this.buildAndExecuteQuery(currentPageID, insertCallback, linkdata, true, false, false);
+        }
+    };
+
+    /**
+     * Error handling for when the upload of a file fails, should be passed the first two parameters of the .fail method
+     * for a JQuery promise.
+     * @param status {String} - The status of the error
+     * @param exceptionobject {Object} - In case of some errors there is a more specific exception object with more information
+     */
+    EMMFileDialog.prototype.handleUploadFail = function (status, exceptionobject) {
+        var dialogInstance = this;
+        switch (status) {
+            case "duplicate":
+                mw.notify(OO.ui.deferMsg("visualeditor-emm-file-upload-duplicate")(), {
+                    autoHide: false,
+                    type: "error"
+                });
+                setDisabledDialogElements(dialogInstance, false);
+                break;
+            case "exists":
+                mw.notify(OO.ui.deferMsg("visualeditor-emm-file-upload-exists")(), {
+                    autoHide: false,
+                    type: "error"
+                });
+                setDisabledDialogElements(dialogInstance, false);
+                break;
+            case "exists-normalized":
+                mw.notify(OO.ui.deferMsg("visualeditor-emm-file-upload-exists")(), {
+                    autoHide: false,
+                    type: "error"
+                });
+                setDisabledDialogElements(dialogInstance, false);
+                break;
+            case "verification-error":
+                mw.notify(OO.ui.deferMsg("visualeditor-emm-file-upload-verification-error")() + "\n" + exceptionobject.error.info, {
+                    autoHide: false,
+                    type: "error"
+                });
+                setDisabledDialogElements(dialogInstance, false);
+                break;
+            case "file-too-large":
+                mw.notify(OO.ui.deferMsg("visualeditor-emm-file-upload-file-too-large")(), {
+                    autoHide: false,
+                    type: "error"
+                });
+                setDisabledDialogElements(dialogInstance, false);
+                break;
+            case "empty-file":
+                mw.notify(OO.ui.deferMsg("visualeditor-emm-file-upload-empty-file")(), {
+                    autoHide: false,
+                    type: "error"
+                });
+                setDisabledDialogElements(dialogInstance, false);
+                break;
+            case "filetype-banned":
+                mw.notify(OO.ui.deferMsg("visualeditor-emm-file-upload-filetype-banned")(), {
+                    autoHide: false,
+                    type: "error"
+                });
+                setDisabledDialogElements(dialogInstance, false);
+                break;
+            case "mustbeloggedin":
+                mw.notify(OO.ui.deferMsg("visualeditor-emm-file-upload-not-logged-in")(), {
+                    autoHide: false,
+                    type: "error"
+                });
+                setDisabledDialogElements(dialogInstance, false);
+                break;
+            case "http":
+                switch (exceptionobject.textStatus) {
+                    case "timeout":
+                        mw.notify(OO.ui.deferMsg("visualeditor-emm-file-upload-timeout")(), {
+                            autoHide: false,
+                            type: "error"
+                        });
+                        setDisabledDialogElements(dialogInstance, false);
+                        break;
+                    case "parsererror":
+                        mw.notify(OO.ui.deferMsg("visualeditor-emm-file-upload-parsererror")(), {
+                            autoHide: false,
+                            type: "error"
+                        });
+                        setDisabledDialogElements(dialogInstance, false);
+                        break;
+                    default:
+                        //unknown eroror
+                        mw.notify("An unknown error of the type " + exceptionobject.exception + " has occurred.", {
+                            autoHide: false,
+                            type: "error"
+                        });
+                        setDisabledDialogElements(dialogInstance, false);
+                }
+                break;
+            default:
+                mw.notify("An unknown error of the type " + status + " has occurred.", {
+                    autoHide: false,
+                    type: "error"
+                });
+                setDisabledDialogElements(dialogInstance, false);
+        }
+    };
+
+    /**
+     * Uploads a file to the wiki and executes the correct action after succeeding or failing
+     * @param {boolean} newUploadVersion - True if the upload is a new version of an existing file
+     * @param {function} postUploadFunction - Function that will be executed after successfully executing the query.
+     */
+    EMMFileDialog.prototype.uploadFile = function (newUploadVersion, postUploadFunction) {
+        var dialogInstance = this;
+        var ignorewarnings = newUploadVersion ? 1 : 0;
+        var file = this.fileField.getValue();
+        var filedata = {
+            filename: file.name,
+            ignorewarnings: ignorewarnings
+        };
+        new mw.Api().upload(file, filedata).fail(function (status, exceptionobject) {
+            //Handle possible error messages and display them in a way the user understands them.
+            //If we're uploading a new version and the file already exists, ignore the error and insert a link anyway.
+            if (newUploadVersion && (status == "exists" || status == "exists-normalized")) {
+                postUploadFunction();
+            } else {
+                dialogInstance.handleUploadFail(status, exceptionobject);
+            }
+        }).done(function () {
+            postUploadFunction();
+        });
     };
 
     //Return the entire 'class' in order to pass this definition to the window factory.

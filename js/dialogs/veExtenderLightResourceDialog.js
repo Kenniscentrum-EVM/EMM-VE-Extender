@@ -81,8 +81,8 @@ function createLightResourceDialog(EMMDialog, resourceType) {
     };
 
     /**
-     * @abstract
      * Retrieves the auto complete state for a given dialog mode.
+     * @abstract
      * @param {modeEnum} mode - dialog mode to get the auto complete state for.
      * @returns {boolean} - The value the auto complete should be set to.
      */
@@ -154,7 +154,10 @@ function createLightResourceDialog(EMMDialog, resourceType) {
             return createBibliographicReferenceDialog(EMMLightResourceDialog);
             break;
         default:
-            alert(OO.ui.deferMsg("visualeditor-emm-dialog-error"));
+            mw.notify(OO.ui.deferMsg("visualeditor-emm-dialog-error")(), {
+                autoHide: false,
+                type: "error"
+            });
             return null;
     }
 }
