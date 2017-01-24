@@ -18,8 +18,9 @@ function createBibliographicReferenceDialog(LightResourceDialog) {
      */
     var EMMBibliographicReferenceDialog = function () {
         LightResourceDialog.call(this);
-        this.autoCompleteQuery = "[[Category:Resource Description]][[Bibtex type::!Misc]]|?Semantic title|?Dct:creator|?Dct:date|?Organization|?Dct:subject|?Bibtex type|sort=Semantic title|order=asc|limit=10000";
-        this.editQuery = "[[PAGENAMEPARAMETER]] |?Semantic title|?Dct:creator|?Dct:date|?Organization|?Dct:subject|?Bibtex type";
+        this.autoCompleteQuery = "[[Category:Resource Description]]|?Semantic title|?Dct:creator|?Dct:date|?Organization|?Dct:subject|?file name|?Hyperlink|sort=Semantic title|order=asc|limit=10000";
+        //Get all resources, filtering is applied during the creation of the autocomplete list
+        this.editQuery = "[[PAGENAMEPARAMETER]] |?Semantic title|?Dct:creator|?Dct:date|?Organization|?Dct:subject|?file name|?Hyperlink";
     };
     OO.inheritClass(EMMBibliographicReferenceDialog, LightResourceDialog);
 
@@ -29,59 +30,6 @@ function createBibliographicReferenceDialog(LightResourceDialog) {
      */
     EMMBibliographicReferenceDialog.prototype.createFields = function () {
         LightResourceDialog.prototype.createFields.call(this);
-        //Create input fields unique for a bibliographic reference dialog
-        this.bibtexField = new OO.ui.DropdownWidget({
-            menu: {
-                items: [
-                    new OO.ui.MenuOptionWidget({
-                        data: "Article",
-                        label: OO.ui.deferMsg("visualeditor-emm-bibref-bibtex-type-article")()
-                    }),
-                    new OO.ui.MenuOptionWidget({
-                        data: "Book",
-                        label: OO.ui.deferMsg("visualeditor-emm-bibref-bibtex-type-book")()
-                    }),
-                    new OO.ui.MenuOptionWidget({
-                        data: "Booklet",
-                        label: OO.ui.deferMsg("visualeditor-emm-bibref-bibtex-type-booklet")()
-                    }),
-                    new OO.ui.MenuOptionWidget({
-                        data: "InCollection",
-                        label: OO.ui.deferMsg("visualeditor-emm-bibref-bibtex-type-incollection")()
-                    }),
-                    new OO.ui.MenuOptionWidget({
-                        data: "InProceedings",
-                        label: OO.ui.deferMsg("visualeditor-emm-bibref-bibtex-type-inproceedings")()
-                    }),
-                    new OO.ui.MenuOptionWidget({
-                        data: "Manual",
-                        label: OO.ui.deferMsg("visualeditor-emm-bibref-bibtex-type-manual")()
-                    }),
-                    new OO.ui.MenuOptionWidget({
-                        data: "MastersThesis",
-                        label: OO.ui.deferMsg("visualeditor-emm-bibref-bibtex-type-mastersthesis")()
-                    }),
-                    new OO.ui.MenuOptionWidget({
-                        data: "PhDThesis",
-                        label: OO.ui.deferMsg("visualeditor-emm-bibref-bibtex-type-phdthesis")()
-                    }),
-                    new OO.ui.MenuOptionWidget({
-                        data: "Proceedings",
-                        label: OO.ui.deferMsg("visualeditor-emm-bibref-bibtex-type-proceedings")()
-                    }),
-                    new OO.ui.MenuOptionWidget({
-                        data: "TechReport",
-                        label: OO.ui.deferMsg("visualeditor-emm-bibref-bibtex-type-techreport")()
-                    }),
-                    new OO.ui.MenuOptionWidget({
-                        data: "Unpublished",
-                        label: OO.ui.deferMsg("visualeditor-emm-bibref-bibtex-type-unpublished")()
-                    })
-                ]
-            }
-        });
-        this.bibtexField.getMenu().selectItemByData("Article");
-        //Set the placeholder of titleField
         this.titleField.$element.find("input").prop("placeholder", OO.ui.deferMsg("visualeditor-emm-bibref-titlefield-placeholder-def")());
     };
 
@@ -117,10 +65,6 @@ function createBibliographicReferenceDialog(LightResourceDialog) {
             }),
             new OO.ui.FieldLayout(this.presentationTitleField, {
                 label: OO.ui.deferMsg("visualeditor-emm-link-presentationtitle"),
-                align: "left"
-            }),
-            new OO.ui.FieldLayout(this.bibtexField, {
-                label: OO.ui.deferMsg("visualeditor-emm-bibref-bibtex-type"),
                 align: "left"
             }),
             new OO.ui.FieldLayout(this.creatorField, {
@@ -227,8 +171,6 @@ function createBibliographicReferenceDialog(LightResourceDialog) {
     EMMBibliographicReferenceDialog.prototype.buildAndExecuteQuery = function (currentPageID, insertCallback, linkdata) {
         //First call the method of the parent to build the basic query for a light resource
         var query = LightResourceDialog.prototype.buildQuery.call(this, currentPageID);
-        //Expand the sfautoedit query
-        query += "&Resource Description[Bibtex type]=" + this.bibtexField.getValue();
         this.executeQuery(query, insertCallback, linkdata);
     };
 
@@ -255,8 +197,8 @@ function createBibliographicReferenceDialog(LightResourceDialog) {
      * @returns {boolean} - Whether the user is editing the selected resource
      */
     EMMBibliographicReferenceDialog.prototype.isEdit = function () {
-        return LightResourceDialog.prototype.isEdit.call(this) ||
-            this.bibtexField.getValue() != this.suggestion["Bibtex type"];
+        return LightResourceDialog.prototype.isEdit.call(this);
+        //Left in for potential further expansion, does nothing diffrent from it's parent for now.
     };
 
     /**
@@ -264,26 +206,28 @@ function createBibliographicReferenceDialog(LightResourceDialog) {
      */
     EMMBibliographicReferenceDialog.prototype.fillFields = function () {
         LightResourceDialog.prototype.fillFields.call(this);
-        this.bibtexField.getMenu().selectItemByData(this.suggestion["Bibtex type"]);
         this.validator.validateAll();
     };
 
     /**
      * Processes part of the result of an ask query. Expands an existing suggestionobject by adding bibliographic reference-specific
-     * data from the queryresult to the suggestionObject.
+     * data from the queryresult to the suggestionObject. Also filters out light resources with a filename or a hyperlink.
      * @param {String} row - String index of a row in the resultSet associative array.
      * @param {Object[]} resultSet - Associative array which functions like a dictionary, using strings as indexes, contains the result of a query.
      * @param {Object} previousSuggestion - A suggestion object that contains the information about the previous processed suggestion, useful for comparing and sorting.
      * @returns {Object} - An updated suggestionObject, or null when the object is invalid.
      */
     EMMBibliographicReferenceDialog.prototype.processSingleQueryResult = function (row, resultSet, previousSuggestion) {
+        if (resultSet[row]["printouts"]["Hyperlink"].length > 0 || resultSet[row]["printouts"]["File name"].length > 0) {
+            return null;
+        }
+
         var suggestionObject = LightResourceDialog.prototype.processSingleQueryResult.call(this, row, resultSet, previousSuggestion);
 
-        if (previousSuggestion != null && previousSuggestion.semanticTitle == suggestionObject.semanticTitle && previousSuggestion.value == previousSuggestion.semanticTitle)
-            previousSuggestion.value = previousSuggestion.value + " (" + previousSuggestion.hyperlink + ")";
-        suggestionObject["Bibtex type"] = resultSet[row].printouts["Bibtex type"][0];
-        if (previousSuggestion != null && previousSuggestion.semanticTitle == suggestionObject.value)
-            suggestionObject.value = suggestionObject.value + " (" + suggestionObject.hyperlink + ")";
+        if (previousSuggestion != null && previousSuggestion.semanticTitle.toLowerCase() == suggestionObject.semanticTitle.toLowerCase() && previousSuggestion.value == previousSuggestion.semanticTitle)
+            previousSuggestion.value = previousSuggestion.value + " (" + previousSuggestion.creator + ", " + (new Date(suggestionObject.date.timestamp * 1000)).toLocaleDateString() + ")";
+        if (previousSuggestion != null && previousSuggestion.semanticTitle.toLowerCase() == suggestionObject.value.toLowerCase())
+            suggestionObject.value = suggestionObject.value + " (" + suggestionObject.creator + ", " + (new Date(suggestionObject.date.timestamp * 1000)).toLocaleDateString() + ")";
         return suggestionObject;
     };
 

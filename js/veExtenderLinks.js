@@ -680,7 +680,6 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
             query: query
         }).done(function (data) {
             var res = data.query.results;
-            console.log(res);
             var arr = []; //array to store the results
             var previousSuggestion = null;
             var row;
