@@ -234,6 +234,7 @@ function createExternalLinkDialog(LightResourceDialog) {
     EMMExternalLinkDialog.prototype.processSingleQueryResult = function (row, resultSet, previousSuggestion) {
         var suggestionObject = LightResourceDialog.prototype.processSingleQueryResult.call(this, row, resultSet, previousSuggestion);
 
+        //fixme dirty hack
         if (/Bestand:|File:/ig.test(suggestionObject.data)) {
             return null;
         }

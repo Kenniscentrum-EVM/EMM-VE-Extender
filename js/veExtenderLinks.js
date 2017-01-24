@@ -53,6 +53,23 @@ function addEMMLinks() {
             };
         }
     );
+
+    //Create a bibliographic reference dialog and add a menu item for the dialog
+    loadEMMDialog("Bibliographic reference", "bibliographicreference", OO.ui.deferMsg("visualeditor-emm-menubibliographicreferencetitle")(), OO.ui.deferMsg("visualeditor-emm-dialogbibliographicreferencetitle")(),
+        function (nameData, linkData) {
+            return {
+                resource: {
+                    wt: linkData
+                },
+                name: {
+                    wt: nameData
+                },
+                dialog: {
+                    wt: "process-bibliographicreference-dialog"
+                }
+            };
+        }
+    );
 }
 
 /**
@@ -438,6 +455,9 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
         case "Internal link":
             dialog = createInternalLinkDialog(EMMDialog);
             break;
+        case "Bibliographic reference":
+            dialog = createLightResourceDialog(EMMDialog, resourceType);
+            break;
         default:
             mw.notify(OO.ui.deferMsg("visualeditor-emm-dialog-error")(), {
                 autoHide: false,
@@ -573,7 +593,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
          * This function initiates the autocomplete library for the resource input field
          * The user will be able to pick a resource from the list of all resources gathered by the askQuery
          */
-        var autoCompleteCallback = function () {
+        var autoCompleteCallback = function (queryResults) {
             setAutoCompleteEnabled(dialogInstance, dialogInstance.getAutoCompleteStateForMode(dialogInstance.dialogMode));
         };
 
@@ -592,9 +612,9 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
             });
             dialogInstance.fieldset.$element.css("width", "100%");
             for (var i = 0; i < dialogInstance.fieldset.getItems().length; i++) {
-                dialogInstance.fieldset.getItems()[i].$element.find(".oo-ui-labelElement-label").not(".oo-ui-selectFileWidget-label").css("margin-right", 0).css("float", "left").css("width", "30%");
+                dialogInstance.fieldset.getItems()[i].$element.find(".oo-ui-fieldLayout-body > .oo-ui-labelElement-label").not(".oo-ui-selectFileWidget-label").css("margin-right", 0).css("float", "left").css("width", "30%");
                 dialogInstance.fieldset.getItems()[i].$element.find(".oo-ui-fieldLayout-field").css("width", "70%");
-                dialogInstance.fieldset.getItems()[i].$element.find(".oo-ui-fieldLayout-body").css("width", "100%").css("overflow", "hidden");
+                dialogInstance.fieldset.getItems()[i].$element.find(".oo-ui-fieldLayout-body").css("width", "100%");
             }
         };
 
@@ -752,6 +772,8 @@ function clearInputFields(fieldset, excludeNum) {
                 fieldset.getItems()[i].getField().setSelected(true);
             } else if (fieldset.getItems()[i].getField().supports("setValue")) {
                 fieldset.getItems()[i].getField().setValue("");
+            } else if (fieldset.getItems()[i].getField().supports("getMenu")) {
+                fieldset.getItems()[i].getField().getMenu().selectItemByData("Article");
             }
         }
 }
