@@ -77,7 +77,7 @@ function createLightResourceDialog(EMMDialog, resourceType) {
             this.creatorField.getValue() != this.suggestion.creator ||
             this.dateField.getValue() != fixDate(this.suggestion.date) ||
             (this.organizationField.getValue() != this.suggestion.organization && !(this.organizationField.getValue() == "" && this.suggestion.organization == null)) ||
-            (this.subjectField.getValue() != this.suggestion.subjects && !(this.organizationField.getValue() == "" && this.suggestion.organization == null));
+            (this.subjectField.getValue() != this.suggestion.subjects && !(this.subjectField.getValue() == "" && this.suggestion.subjects == null));
     };
 
     /**

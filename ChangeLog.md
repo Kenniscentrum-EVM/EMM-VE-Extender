@@ -1,6 +1,13 @@
 #Changelog EMMVEExtender
 
 
+## Versie 0.8.0 (voorlopig)
+Op acceptatie geplaatst op dinsdag 24 januari
+
+* Het is nu mogelijk om een nieuwe versie van een bestaande file te uploaden;
+* De dialoog sluit pas wanneer het aanpassen van de resource op de achtergrond echt klaar is. Er is hierbij ook een laadbalk te zien. Wanneer de dialoog sluit kan de gebruiker meteen verder werken. Hij hoeft nu niet meer te wachten tot de link echt geplaatst is;
+* Het is nu mogelijk om een naslagwerk (bibliographic reference) in te voegen, aan te passen en aan te maken.
+
 ## Versie 0.7.5
 Uitgebracht op vrijdag 23 december
 
