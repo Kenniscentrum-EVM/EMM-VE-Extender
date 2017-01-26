@@ -4,6 +4,10 @@
 var VEETemplateProtection = function () {
     //Make our list containing the templates that are to be protected.
     var protectedTemplates = {};
+
+    //template types to process
+    var templateTypes = ["mwTransclusionBlock"]; //"mwTransclusionInline"
+
     //fill the list.
     evaluateTransclusions();
 
@@ -13,7 +17,7 @@ var VEETemplateProtection = function () {
     function overrides() {
         var onEditButtonClickBase = ve.ui.LinearContextItem.prototype.onEditButtonClick;
         ve.ui.LinearContextItem.prototype.onEditButtonClick = function () {
-            if (this.model.type == "mwTransclusionBlock" && protectedTemplates[getTemplate(this.model)] != null) {
+            if (isCorrectTemplateType(this.model.type) && protectedTemplates[getTemplate(this.model)] != null) {
                 mw.notify(OO.ui.deferMsg("visualeditor-emm-notification-template-edit")(), {
                     title: OO.ui.deferMsg("visualeditor-emm-notification-template-title")(),
                     autoHide: false,
@@ -27,7 +31,7 @@ var VEETemplateProtection = function () {
         //double click edit
         var getCommandForNodeBase = ve.ui.CommandRegistry.prototype.getCommandForNode;
         ve.ui.CommandRegistry.prototype.getCommandForNode = function (node) {
-            if (node.type == "mwTransclusionBlock" && protectedTemplates[getTemplate(node.model)] != null) {
+            if (isCorrectTemplateType(node.type) && protectedTemplates[getTemplate(node.model)] != null) {
                 mw.notify(OO.ui.deferMsg("visualeditor-emm-notification-template-edit")(), {
                     title: OO.ui.deferMsg("visualeditor-emm-notification-template-title")(),
                     autoHide: false,
@@ -44,7 +48,7 @@ var VEETemplateProtection = function () {
             if (selection.range != null) {
                 for (var i = selection.range.start; i < selection.range.end; i++) {
                     var node = this.getModel().getDocument().getDocumentNode().getNodeFromOffset(i);
-                    if (node.type == "mwTransclusionBlock" && protectedTemplates[getTemplate(node)] != null) {
+                    if (isCorrectTemplateType(node.type) && protectedTemplates[getTemplate(node)] != null) {
                         mw.notify(OO.ui.deferMsg("visualeditor-emm-notification-template-copy")(), {
                             title: OO.ui.deferMsg("visualeditor-emm-notification-template-title")(),
                             autoHide: false,
@@ -85,12 +89,19 @@ var VEETemplateProtection = function () {
          * @returns {number} - End offset of the removal.
          */
         function removeRange(doc, removeStart, removeEnd, removeMetadata, thisContext) {
-            var x;
+            var x, y;
+            if(removeStart > removeEnd)
+            {
+                x = removeStart;
+                y = removeEnd;
+                removeStart = y;
+                removeEnd = x;
+            }
             var protect = false;
             for (x = removeStart; x < removeEnd; x++) {
                 var node = doc.getDocumentNode().getNodeFromOffset(x);
                 if (node.type != null)
-                    if (node.type == "mwTransclusionBlock" && protectedTemplates[getTemplate(node)] != null) {
+                    if (isCorrectTemplateType(node.type) && protectedTemplates[getTemplate(node)] != null) {
                         protect = true;
                         //removeRange(doc, x + 1, removeEnd, removeMetadata, thisContext); //fixme does not work, wrong index probably.
                         break;
@@ -111,7 +122,6 @@ var VEETemplateProtection = function () {
                 returnValue = base.call(thisContext, doc, removeStart, removeEnd, removeMetadata);
             return returnValue;
         }
-
         /**
          * Adds a replace op to remove the desired range and, where required, splices in retain ops
          * to prevent the deletion of undeletable nodes.
@@ -153,7 +163,7 @@ var VEETemplateProtection = function () {
                     //Does the template have the 'System' template?
                     if (page.categories[y].title.split(":").pop() == "EMont core protected") {
                         //if so, add it to our list of protected templates.
-                        protectedTemplates[templateName] = true;
+                        protectedTemplates[page.title.replace(/ /g,"_")] = true;
                     }
                 }
                 if (Object.keys(protectedTemplates).length > 0)
@@ -171,7 +181,7 @@ var VEETemplateProtection = function () {
     function getTransclusions(node) {
         var transclusions = [];
         for (var i = 0; i < node.children.length; i++)
-            if (node.children[i].type == "mwTransclusionBlock")
+            if (isCorrectTemplateType(node.children[i].type))
                 transclusions.push(node.children[i]);
         return transclusions;
     }
@@ -182,11 +192,22 @@ var VEETemplateProtection = function () {
      * @returns {String} - Template name.
      */
     function getTemplate(node) {
-        if (node.type == "mwTransclusionBlock")
+        if (isCorrectTemplateType(node.type))
             for (var z = 0; z < node.element.attributes.mw.parts.length; z++)
                 if (typeof node.element.attributes.mw.parts[z] === "object" && node.element.attributes.mw.parts[z].template.target.href != null)
                     return node.element.attributes.mw.parts[z].template.target.href.split("./").pop();
         return null;
     }
-};
 
+    /**
+     * Determines if the given type is in the list of allowed template types.
+     * @param type
+     * @returns {boolean}
+     */
+    function isCorrectTemplateType(type) {
+        for (var x = 0; x < templateTypes.length; x++)
+            if (type == templateTypes[x])
+                return true;
+        return false;
+    }
+};
