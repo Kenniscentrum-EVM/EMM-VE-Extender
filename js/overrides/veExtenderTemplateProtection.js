@@ -8,6 +8,8 @@ var VEETemplateProtection = function () {
     //template types to process
     var templateTypes = ["mwTransclusionBlock"]; //"mwTransclusionInline"
 
+    var overriden = false;
+
     //fill the list.
     evaluateTransclusions();
 
@@ -166,8 +168,10 @@ var VEETemplateProtection = function () {
                         protectedTemplates[page.title.replace(/ /g,"_")] = true;
                     }
                 }
-                if (Object.keys(protectedTemplates).length > 0)
+                if (Object.keys(protectedTemplates).length > 0 && overriden == false) {
                     overrides();
+                    overriden = true;
+                }
             })
         }
     }
