@@ -45,6 +45,27 @@ function createLightResourceDialog(EMMDialog, resourceType) {
     };
 
     /**
+     * Retrieves the auto complete state for a given dialog mode.
+     * @abstract
+     * @param {modeEnum} mode - dialog mode to get the auto complete state for.
+     * @returns {boolean} - The value the auto complete should be set to.
+     */
+    EMMLightResourceDialog.prototype.getAutoCompleteStateForMode = function (mode) {
+        switch (mode) {
+            case this.modeEnum.INSERT_EXISTING:
+                return true;
+            case this.modeEnum.INSERT_AND_EDIT_EXISTING:
+                return false;
+            case this.modeEnum.INSERT_NEW:
+                return false;
+            case this.modeEnum.EDIT_EXISTING:
+                return false;
+            default:
+                return false;
+        }
+    };
+
+    /**
      * Builds a generic query for editing or creating a light resource, should be expanded on in classes that extend this class.
      * @param {String} currentPageID - The internal name of the current page
      * @returns {string} - Returns a basic query for editing or creating a light resource, should be expanded on for
@@ -78,27 +99,6 @@ function createLightResourceDialog(EMMDialog, resourceType) {
             this.dateField.getValue() != fixDate(this.suggestion.date) ||
             (this.organizationField.getValue() != this.suggestion.organization && !(this.organizationField.getValue() == "" && this.suggestion.organization == null)) ||
             (this.subjectField.getValue() != this.suggestion.subjects && !(this.subjectField.getValue() == "" && this.suggestion.subjects == null));
-    };
-
-    /**
-     * Retrieves the auto complete state for a given dialog mode.
-     * @abstract
-     * @param {modeEnum} mode - dialog mode to get the auto complete state for.
-     * @returns {boolean} - The value the auto complete should be set to.
-     */
-    EMMLightResourceDialog.prototype.getAutoCompleteStateForMode = function (mode) {
-        switch (mode) {
-            case this.modeEnum.INSERT_EXISTING:
-                return true;
-            case this.modeEnum.INSERT_AND_EDIT_EXISTING:
-                return false;
-            case this.modeEnum.INSERT_NEW:
-                return false;
-            case this.modeEnum.EDIT_EXISTING:
-                return false;
-            default:
-                return false;
-        }
     };
 
     /**

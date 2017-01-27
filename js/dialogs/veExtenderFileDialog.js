@@ -264,15 +264,6 @@ function createFileDialog(LightResourceDialog) {
     };
 
     /**
-     * Returns what type of template to insert into the existing page in order to create a link to the file.
-     * In case of a file this will always be a template of the "Cite" type.
-     * @returns {String} - A string containing "Cite"
-     */
-    EMMFileDialog.prototype.findTemplateToUse = function () {
-        return "Cite";
-    };
-
-    /**
      * @override
      * Overrides the original function by defining its own behavior for picking what to do after the insert button is pressed.
      * Checks what should happen after a user has pressed the insert button. Depending on what the user was trying to do
@@ -445,6 +436,15 @@ function createFileDialog(LightResourceDialog) {
         }).done(function () {
             postUploadFunction();
         });
+    };
+
+    /**
+     * Returns what type of template to insert into the existing page in order to create a link to the file.
+     * In case of a file this will always be a template of the "Cite" type.
+     * @returns {String} - A string containing "Cite"
+     */
+    EMMFileDialog.prototype.findTemplateToUse = function () {
+        return "Cite";
     };
 
     //Return the entire 'class' in order to pass this definition to the window factory.

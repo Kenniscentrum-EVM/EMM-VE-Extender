@@ -186,7 +186,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
     //Define EMMDialog as a subclass of OO.ui.ProcessDialog
     OO.inheritClass(EMMDialog, OO.ui.ProcessDialog);
 
-    //Set static properties of the dialog
+    //Set static properties of the dialogDi
     EMMDialog.static.name = dialogName;
     EMMDialog.static.title = dialogMessage;
     //Define what actions the dialog should have, these are represented as buttons on the top-side of the dialog.
@@ -365,9 +365,9 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
      * Expected behavior when overriding:
      * Preforms the a mode change, this may include visual changes to a dialog.
      * @param {number} mode - Mode to be switched to.
-     * @param {boolean} clearInputFields - If true the input fields of the dialog will be cleared.
+     * @param {boolean} clearInputFieldsBool - If true the input fields of the dialog will be cleared.
      */
-    EMMDialog.prototype.executeModeChange = function (mode, clearInputFields) {
+    EMMDialog.prototype.executeModeChange = function (mode, clearInputFieldsBool) {
         displayOverloadError("executeModeChange");
     };
 
@@ -567,7 +567,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
         /**
          * Link event handling functions to the buttons of the dialog
          * @param {String} action - The symbolic name of the action for which we need a process
-         * @returns {function} - Returns the parent function in case an action that isn't related to an EMMDialog happens
+         * @returns {OO.ui.Process} - Returns the parent function in case an action that isn't related to an EMMDialog happens
          */
         EMMDialog.prototype.getActionProcess = function (action) {
             if (action === "insert") {

@@ -55,7 +55,6 @@ function createBibliographicReferenceDialog(LightResourceDialog) {
 
         //Defines what should happen when the content of the titlefield changes
         this.titleField.onChangeFunctions = [testSuggestedLink, this.testAndChangeDialogMode];
-        //Defines what should happen when the content of the linkfield changes
 
         //Add all the fields to the fieldset, configuring the order in which they appear in the dialog.
         this.fieldset.addItems([
@@ -92,8 +91,9 @@ function createBibliographicReferenceDialog(LightResourceDialog) {
      *
      * Dialog modes are defined in the modeEnum variable (which is defined in EMMDialog) this enum should always be used when switching modes.
      * @param {number} mode - Dialog mode to switch to.
+     * @param {boolean} clearInputFieldsBool - If true the input fields of the dialog will be cleared.
      */
-    EMMBibliographicReferenceDialog.prototype.executeModeChange = function (mode) {
+    EMMBibliographicReferenceDialog.prototype.executeModeChange = function (mode, clearInputFieldsBool) {
         this.dialogMode = mode;
         switch (mode) {
             case this.modeEnum.INSERT_EXISTING:
