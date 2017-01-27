@@ -1,8 +1,8 @@
 #Changelog EMMVEExtender
 
 
-## Versie 0.8.0 (voorlopig)
-Op acceptatie geplaatst op dinsdag 24 januari
+## Versie 0.8.0
+Uitgebracht op vrijdag 27 januari
 
 * Het is nu mogelijk om een nieuwe versie van een bestaande file te uploaden;
 * De dialoog sluit pas wanneer het aanpassen van de resource op de achtergrond echt klaar is. Er is hierbij ook een laadbalk te zien. Wanneer de dialoog sluit kan de gebruiker meteen verder werken. Hij hoeft nu niet meer te wachten tot de link echt geplaatst is;
