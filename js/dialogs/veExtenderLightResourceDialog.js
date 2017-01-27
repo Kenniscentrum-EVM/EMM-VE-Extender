@@ -73,7 +73,9 @@ function createLightResourceDialog(EMMDialog, resourceType) {
      */
     EMMLightResourceDialog.prototype.buildQuery = function (currentPageID) {
         var query = "";
-        query += "Resource Description[title]=" + this.titleField.getValue() +
+        var heading = this.titleField.getValue();
+        heading = heading.replace(/&/g,"%26"); //Escape the and-character
+        query += "Resource Description[title]=" + heading +
             "&Resource Description[creator]=" + this.creatorField.getValue() +
             "&Resource Description[date]=" + this.dateField.getValue();
         if (this.organizationField.getValue().length > 0) {

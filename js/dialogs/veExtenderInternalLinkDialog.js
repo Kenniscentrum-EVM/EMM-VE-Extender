@@ -163,7 +163,9 @@ function createInternalLinkDialog(EMMDialog) {
             }
         } else {
             //Start building the sfautoedit query
-            query += "Light Context[Heading]=" + this.titleField.getValue();
+            var heading = this.titleField.getValue();
+            heading = heading.replace(/&/g,"%26"); //Escape the and-character
+            query += "Light Context[Heading]=" + heading;
             query += "&Light Context[Supercontext]=" + currentPageID;
             //Find the topcontext of the current page
             var api = new mw.Api();
