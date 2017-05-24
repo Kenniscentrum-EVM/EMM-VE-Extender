@@ -248,6 +248,7 @@ function createExternalLinkDialog(LightResourceDialog) {
                 return suggestionObject;
             }
         } catch (e){
+            //error in previousSuggestion?
             return null;
         }
     };
