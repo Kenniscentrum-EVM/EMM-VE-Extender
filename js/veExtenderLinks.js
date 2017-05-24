@@ -1,5 +1,242 @@
 "use strict";
 
+String.prototype.replaceAll = function (search, replacement) {
+    var target = this;
+    return target.replace(new RegExp(search, 'g'), replacement);
+};
+
+function SPARQLStore() {
+    this.datastore="portfolios";
+    this.sparqlActive=true;
+    this.getsuperresult=null;
+    this.getsemanticresult=null;
+    var self=this;
+
+    this.uristart=window.location.href.split("/index.php/")[0];
+    this.prefix="PREFIX wiki: <#uristart#/index.php/Speciaal:URIResolver/>"+
+        "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>"+
+        "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>"+
+        "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>"+
+        "PREFIX owl: <http://www.w3.org/2002/07/owl#>"+
+        "PREFIX swivt: <http://semantic-mediawiki.org/swivt/1.0#>"+
+        "PREFIX category: <#uristart#/index.php/Speciaal:URIResolver/Category-3A>"+
+        "PREFIX property: <#uristart#/index.php/Speciaal:URIResolver/Property-3A>"+
+        "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>";
+
+    /**
+     * exectue sparql-query on Sparql-store
+     * @param sparqlquery has to contain ?Self as output
+     * @param callQuery
+     * @param getSemanticPrintouts
+     */
+    this.callSparqlPrintout = function (sparqlquery, callQuery,setvar) {
+        sparqlquery=
+            this.prefix+sparqlquery;
+        console.log("query:" + this.uristart+" ; "+sparqlquery);
+        sparqlquery=sparqlquery.replaceAll("#uristart#",this.uristart);+
+
+
+            console.log("query:" + sparqlquery);
+        var proxy = location.href.substring(0, window.location.href.lastIndexOf("/")) + '/Special:MyProxy';//Special Page Proxy
+        //add query to address
+        var url = proxy + '?' + "query=" + encodeURIComponent(sparqlquery) + "&dataset="+this.datastore;
+        console.log("url:" + url);
+        $.get(url, function (json){
+            var table = json.results.bindings;
+            console.log(table);
+            var results={};
+            for (var i =0;i<table.length;i++) {
+                var line = table[i];
+                var id = self.pageName(line.Self.value).replaceAll("_"," ");
+                //type  :    "uri"-->"Supercontext":[{fulltext:self.pageName(line.Supercontext.value)}]
+                //datatype:"http://www.w3.org/2001/XMLSchema#double", type: "typed-literal"-->printouts["Sequence number"]=[cNum((line.Sequence_number.value))];
+                //type:"literal"-->"Semantic title":[line.Semantic_title.value]
+                //auto fields-recognition
+                var printouts1={};
+                //console.log("line1:",line);
+                for (var id1 in line){
+                    var single=false;
+                    var id11=id1;
+                    if (id1.indexOf("_Single_Value_") > -1){
+                        single=true;
+                        id11=id1.replace("_Single_Value_","");
+                    }
+                    var id11=id11.replaceAll("__",":").replaceAll("_"," ");
+                    var id2 = line[id1].value.replace("-3A",":");
+                    if (false){
+                        var value = (id2).split(":");
+                        value = value[value.length - 1];
+
+                        printouts1[id11]= value;
+                    }else
+                    if (line[id1]["type"]=="uri"){
+                        printouts1[id11]=[{fulltext:self.pageName(id2), fullurl:id2}];
+                    } else
+                    if (line[id1]["type"]=="typed-literal"){
+                        printouts1[id11]=[cNum((id2))];
+                    } else
+                    if (line[id1]["type"]=="literal"){
+                        printouts1[id11]=[self.pageName(id2).replace("-3A",":")];
+                    }
+                }
+                //console.log("auto:"+id1,printouts1);
+
+                results[id.replaceAll("-3A",":").replaceAll("__",":").replaceAll("_"," ")]={printouts:printouts1};//-3A
+            }
+            var queryresults={query:{results:results}};
+            console.log(queryresults);
+            setvar(queryresults);
+
+            if (sparqlStore.sparqlActive)
+                callQuery(queryresults)
+
+        });
+    };
+
+    this.getResources=function(callQuery){
+        /*
+         SELECT ?Self  ?Semantic_title ?Dct__creator ?Dct__subject ?File_name ?Organization WHERE {
+         ?Self  rdf:type category:Resource_Description.
+         ?Self swivt:wikiNamespace 6.
+         ?Self property:Dct-3Acreator ?Dct__creator.
+         ?Self property:Dct-3Asubject ?Dct__subject.
+         ?Self property:Semantic_title ?Semantic_title.
+         ?Self property:Organization ?Organization.
+         ?Self property:File_name ?File_name.
+         } order by ?Semantic_title
+         */
+
+        var sparqlquery=
+            "SELECT ?Self  ?Semantic_title ?Dct__creator ?Dct__subject ?Dct__date ?File_name ?Organization WHERE {"+
+            "?Self  rdf:type category:Resource_Description."+
+            "?Self swivt:wikiNamespace 6."+
+            "?Self property:Dct-3Acreator ?Dct__creator."+
+            "?Self property:Dct-3Asubject ?Dct__subject."+
+            "?Self property:Dct-3Adate ?Dct__date."+
+            "?Self property:Semantic_title ?Semantic_title."+
+            "?Self property:Organization ?Organization."+
+            "?Self property:File_name ?File_name."+
+            "}";
+
+        this.callSparqlPrintout(sparqlquery, callQuery,function(queryresults){});
+    };
+    //[[Category:Light Context||Project||Projecten]]|?Semantic title|?Category=Category|?Supercontext|sort=Semantic title
+    this.getLinkPages=function(callQuery){
+        var sparqlquery=
+            "SELECT ?Self  ?Semantic_title ?Category ?Supercontext WHERE {{"+
+            "?Self  rdf:type category:Light_Context."+
+            "?Self property:Semantic_title ?Semantic_title."+
+            "BIND (category:Light_Context AS ?Category)."+
+            "?Self property:Supercontext ?Supercontext.} union "+
+            "{"+
+            "?Self  rdf:type category:Project."+
+            "?Self property:Semantic_title ?Semantic_title."+
+            "BIND (category:Project AS ?Category)."+
+            "?Self property:Supercontext ?Supercontext.} union "+
+            "{"+
+            "?Self  rdf:type category:Projecten."+
+            "?Self property:Semantic_title ?Semantic_title."+
+            "BIND (category:Projecten AS ?Category)."+
+            "?Self property:Supercontext ?Supercontext.}"+
+            "} order by ?Semantic_title";
+
+        this.callSparqlPrintout(sparqlquery, callQuery,function(queryresults){});
+    };
+    //[[Category:Resource Description]] [[Hyperlink::+]]|?Semantic title|?Hyperlink|?Dct:creator|?Dct:date|?Organization|?Dct:subject|sort=Semantic title|order=asc|limit=10000
+    this.getHyperLinkPages=function(callQuery){
+        var sparqlquery=
+            "SELECT ?Self  ?Semantic_title ?Dct__creator ?Dct__subject ?Dct__date ?Hyperlink ?Organization WHERE {"+
+            "?Self  rdf:type category:Resource_Description."+
+            "?Self property:Semantic_title ?Semantic_title."+
+            "?Self property:Hyperlink ?Hyperlink."+
+            "optional {?Self property:Dct-3Acreator ?Dct__creator1."+
+            "?Self property:Dct-3Asubject ?Dct__subject1."+
+            "?Self property:Dct-3Adate ?Dct__date1."+
+            "?Self property:Organization ?Other.}"+
+            "BIND ( IF (BOUND (?Dct__date1), ?Dct__date1, 0 )  as ?Dct__date  ) ."+
+            "BIND ( IF (BOUND (?Dct__subject1), ?Dct__subject1, \"None\" )  as ?Dct__subject  ) ."+
+            "BIND ( IF (BOUND (?Dct__creator1), ?Dct__creator1, \"None\" )  as ?Dct__creator  ) ."+
+                "BIND ( IF (BOUND (?Other), ?Other, \"None\" )  as ?Organization  ) ."+
+            //"?Self swivt:wikiNamespace 6."+
+            ""+
+            "} order by ?Semantic_title";
+
+        this.callSparqlPrintout(sparqlquery, callQuery,function(queryresults){});
+    };
+    /**
+     * gets the id of the sparql-url. That is the last part of the uri
+     * @param id
+     * @returns {string}
+     */
+    this.pageName=function(id) {
+        id = id.split("/");
+        id = id[id.length - 1];
+        return id.replaceAll("-2D","-").replaceAll("_"," ");
+    };
+    /**
+     * get semantic title for context
+     * @param topContext
+     * @param callQuery
+     */
+    this.getSemanticTitle=function(topContext,callQuery){
+        if (sparqlStore.getsemanticresult!=null){
+            callQuery(sparqlStore.getsemanticresult)
+            return;
+        }
+        var s="wiki:"+topContext.replaceAll(" ","_");
+        var sparqlquery=
+            "SELECT ?Semantic_title ?Self WHERE {"+
+            s+" property:Semantic_title ?Semantic_title."+
+            s+" property:Self ?Self."+//add self
+            "}";
+
+        this.callSparqlPrintout(sparqlquery, callQuery,function(queryresults){sparqlStore.getsemanticresult=queryresults});
+    };
+
+    //[[Category:Light Context||Project]]
+    this.getProjects=function(callQuery) {
+        //De sparql-query om dit uit te voeren is dan:
+        var sparqlquery =
+            "SELECT ?Semantic_title ?Self WHERE {{" +
+            "?Self rdf:type category:Light_Context." +
+            "?Self property:Semantic_title ?Semantic_title." +
+            "} union {" +
+            "?Self rdf:type category:Project." +
+            "?Self property:Semantic_title ?Semantic_title." +
+            "}}";
+
+        this.callSparqlPrintout(sparqlquery, callQuery,function(queryresults){});
+    };
+
+    /**
+     * get supercontext for all Light Context's under top-context
+     * @param topContext
+     * @param callQuery
+     */
+    this.getSuper=function(topContext,callQuery) {
+        if (sparqlStore.getsuperresult!=null){
+            callQuery(sparqlStore.getsuperresult);
+            return;
+        }
+
+        //De sparql-query om dit uit te voeren is dan:
+        var sparqlquery =
+            "SELECT ?Semantic_title ?Sequence_number ?Toppage ?Self ?Supercontext WHERE {" +
+            "?s rdf:type category:Light_Context." +
+            "?s property:Topcontext wiki:" + /*PR_SSM_00050."*/topContext.replaceAll(" ", "_") + "." +
+            "?s property:Semantic_title ?Semantic_title." +
+            " OPTIONAL { ?s property:Sequence_number ?Sequence_number.} " +
+            "?s property:Supercontext ?Supercontext." +
+            "?s property:Toppage ?Toppage." +
+            "?s property:Self ?Self." +
+            "} order by ?Semantic_title";
+
+        this.callSparqlPrintout(sparqlquery, callQuery,function(queryresults){sparqlStore.getsuperresult=queryresults;});
+        this.getProjects(function(data){console.log("data:",data);});
+    };
+}
+var sparqlStore = new SPARQLStore();
+
 /**
  * This method is executed when the extension is loaded and is responsible for passing the correct information to the loadEMMDialog method
  * At the moment it calls loadEMMDialog to create three dialogs and menu items: File, Internal link and External link
@@ -267,7 +504,10 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                 data.source = data.source.replace(/ /g, "_"); //convert whitespaces to underscores
                 var api = new mw.Api();
                 var query = dialogInstance.getEditQuery(data.source); //getEditQuery retrieves the correct query for us.
-                var processQueryData=function (queryData) {
+                api.get({
+                    action: "ask",
+                    query: query
+                }).done(function (queryData) {
                     dialogInstance.validator.disable(); //completely disable validation before we're going to fill the dialog.
                     dialogInstance.validator.disableOnChange();
                     var res = queryData.query.results;
@@ -295,11 +535,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                     dialogInstance.validator.enable(); //enable validation again.
                     dialogInstance.validator.validateAll();
                     dialogInstance.validator.enableOnChange();
-                }
-                api.get({
-                    action: "ask",
-                    query: query
-                }).done(processQueryData(queryData));
+                });
             }
         }
 
@@ -675,12 +911,10 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
     EMMDialog.prototype.semanticAskQuery = function (query, callback) {
         var dialogInstance = this;
         var api = new mw.Api();
-        api.get({
-            action: "ask",
-            parameters: "limit:10000",
-            query: query
-        }).done(function (data) {
+        console.log("query:",query);
+        var processQueryResults=function (data) {
             var res = data.query.results;
+            console.log("results:",data);
             var arr = []; //array to store the results
             var previousSuggestion = null;
             var row;
@@ -709,7 +943,36 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
             });
             dialogInstance.suggestionCache = arr;
             callback();
-        });
+        };
+        if (sparqlStore.sparqlActive){
+            //[[Category:Resource Description]] [[file name::+]] |?Semantic title|?Dct:creator|?Dct:date|?Organization|?Dct:subject|?file name|sort=Semantic title|order=asc|limit=10000
+            if (query.indexOf("Category:Resource Description]] [[file name::+]]") !== -1){
+                sparqlStore.getResources(function(data){
+                    console.log("sparql-result:",data);
+                    processQueryResults(data);
+                })
+            }
+            if (query.indexOf("Category:Light Context||Project||Projecten") !== -1){
+                sparqlStore.getLinkPages(function(data){
+                    console.log("sparql-result:",data);
+                    processQueryResults(data);
+                })
+            }
+            if (query.indexOf("[[Category:Resource Description]] [[Hyperlink::+]]") !== -1){
+                sparqlStore.getHyperLinkPages(function(data){
+                    console.log("sparql-result:",data);
+                    processQueryResults(data);
+                })
+            }
+
+
+
+        } else
+        api.get({
+            action: "ask",
+            parameters: "limit:10000",
+            query: query
+        }).done(processQueryResults);
     };
 }
 
