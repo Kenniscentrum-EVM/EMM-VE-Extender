@@ -248,7 +248,7 @@ function createExternalLinkDialog(LightResourceDialog) {
                 return suggestionObject;
             }
         } catch (e){
-            //error in previousSuggestion?
+            //fixme dirty hack:error in previousSuggestion?
             return null;
         }
     };
