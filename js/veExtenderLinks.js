@@ -267,10 +267,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                 data.source = data.source.replace(/ /g, "_"); //convert whitespaces to underscores
                 var api = new mw.Api();
                 var query = dialogInstance.getEditQuery(data.source); //getEditQuery retrieves the correct query for us.
-                api.get({
-                    action: "ask",
-                    query: query
-                }).done(function (queryData) {
+                var processQueryData=function (queryData) {
                     dialogInstance.validator.disable(); //completely disable validation before we're going to fill the dialog.
                     dialogInstance.validator.disableOnChange();
                     var res = queryData.query.results;
@@ -298,7 +295,11 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                     dialogInstance.validator.enable(); //enable validation again.
                     dialogInstance.validator.validateAll();
                     dialogInstance.validator.enableOnChange();
-                });
+                }
+                api.get({
+                    action: "ask",
+                    query: query
+                }).done(processQueryData(queryData));
             }
         }
 
