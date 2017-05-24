@@ -53,7 +53,7 @@ function SPARQLStore() {
                 //type  :    "uri"-->"Supercontext":[{fulltext:self.pageName(line.Supercontext.value)}]
                 //datatype:"http://www.w3.org/2001/XMLSchema#double", type: "typed-literal"-->printouts["Sequence number"]=[cNum((line.Sequence_number.value))];
                 //type:"literal"-->"Semantic title":[line.Semantic_title.value]
-                //auto fields-recognition:
+                //auto fields-recognition
                 var printouts1={};
                 //console.log("line1:",line);
                 for (var id1 in line){
