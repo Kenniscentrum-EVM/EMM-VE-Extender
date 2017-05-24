@@ -4,7 +4,9 @@ String.prototype.replaceAll = function (search, replacement) {
     var target = this;
     return target.replace(new RegExp(search, 'g'), replacement);
 };
-
+function isString (obj) {
+    return (Object.prototype.toString.call(obj) === '[object String]');
+}
 function SPARQLStore() {
     this.datastore="portfolios";
     this.sparqlActive=true;
@@ -63,12 +65,7 @@ function SPARQLStore() {
                     }
                     var id11=id11.replaceAll("__",":").replaceAll("_"," ");
                     var id2 = line[id1].value.replace("-3A",":");
-                    if (false){
-                        var value = (id2).split(":");
-                        value = value[value.length - 1];
 
-                        printouts1[id11]= value;
-                    }else
                     if (line[id1]["type"]=="uri"){
                         printouts1[id11]=[{fulltext:self.pageName(id2), fullurl:id2}];
                     } else
@@ -77,6 +74,10 @@ function SPARQLStore() {
                     } else
                     if (line[id1]["type"]=="literal"){
                         printouts1[id11]=[self.pageName(id2).replace("-3A",":")];
+                    }
+                    if (id11=="Semantic title"&&!(isString(printouts1[id11][0]))){
+                        printouts1[id11][0] ="";
+                        console.log("change type of Semantic title!");
                     }
                 }
                 //console.log("auto:"+id1,printouts1);
@@ -149,14 +150,14 @@ function SPARQLStore() {
             "?Self  rdf:type category:Resource_Description."+
             "?Self property:Semantic_title ?Semantic_title."+
             "?Self property:Hyperlink ?Hyperlink."+
-            "optional {?Self property:Dct-3Acreator ?Dct__creator1."+
-            "?Self property:Dct-3Asubject ?Dct__subject1."+
-            "?Self property:Dct-3Adate ?Dct__date1."+
-            "?Self property:Organization ?Other.}"+
-            "BIND ( IF (BOUND (?Dct__date1), ?Dct__date1, 0 )  as ?Dct__date  ) ."+
-            "BIND ( IF (BOUND (?Dct__subject1), ?Dct__subject1, \"None\" )  as ?Dct__subject  ) ."+
-            "BIND ( IF (BOUND (?Dct__creator1), ?Dct__creator1, \"None\" )  as ?Dct__creator  ) ."+
-                "BIND ( IF (BOUND (?Other), ?Other, \"None\" )  as ?Organization  ) ."+
+            "?Self property:Dct-3Acreator ?Dct__creator."+
+            "?Self property:Dct-3Asubject ?Dct__subject."+
+            "?Self property:Dct-3Adate ?Dct__date."+
+            "?Self property:Organization ?Organization."+
+            //"BIND ( IF (BOUND (?Dct__date1), ?Dct__date1, 0 )  as ?Dct__date  ) ."+
+            //"BIND ( IF (BOUND (?Dct__subject1), ?Dct__subject1, \"None\" )  as ?Dct__subject  ) ."+
+            //"BIND ( IF (BOUND (?Dct__creator1), ?Dct__creator1, \"None\" )  as ?Dct__creator  ) ."+
+            //    "BIND ( IF (BOUND (?Other), ?Other, \"None\" )  as ?Organization  ) ."+
             //"?Self swivt:wikiNamespace 6."+
             ""+
             "} order by ?Semantic_title";
@@ -933,12 +934,17 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
             }
             //todo investigate ASK query possibilities and restrictions, this may possibly be unnecessary.
             arr.sort(function (a, b) {
-                if (a.value.toUpperCase() > b.value.toUpperCase()) {
-                    return 1;
-                }
-                if (a.value.toUpperCase() < b.value.toUpperCase()) {
+                try {
+                    if (a.value.toUpperCase() > b.value.toUpperCase()) {
+                        return 1;
+                    }
+                    if (a.value.toUpperCase() < b.value.toUpperCase()) {
+                        return -1;
+                    }
+                } catch(e) {
                     return -1;
                 }
+
                 return 0;
             });
             dialogInstance.suggestionCache = arr;
