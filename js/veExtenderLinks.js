@@ -66,6 +66,9 @@ function SPARQLStore() {
                     var id11=id11.replaceAll("__",":").replaceAll("_"," ");
                     var id2 = line[id1].value.replace("-3A",":");
 
+                    if (id1=="Hyperlink"){
+                        printouts1[id11]=[id2.replace("-3A",":")];
+                    } else
                     if (line[id1]["type"]=="uri"){
                         printouts1[id11]=[{fulltext:self.pageName(id2), fullurl:id2}];
                     } else
