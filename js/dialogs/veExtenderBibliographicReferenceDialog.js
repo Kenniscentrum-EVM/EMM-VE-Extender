@@ -218,6 +218,7 @@ function createBibliographicReferenceDialog(LightResourceDialog) {
      * @returns {Object} - An updated suggestionObject, or null when the object is invalid.
      */
     EMMBibliographicReferenceDialog.prototype.processSingleQueryResult = function (row, resultSet, previousSuggestion) {
+        //todo: find out why these resources are skipped, while they are the only items in the list. So the list is empty!
         if (resultSet[row]["printouts"]["Hyperlink"].length > 0 || resultSet[row]["printouts"]["File name"].length > 0) {
             return null;
         }
