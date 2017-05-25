@@ -210,7 +210,6 @@ function SPARQLStore() {
             //"BIND ( IF (BOUND (?Dct__creator1), ?Dct__creator1, \"None\" )  as ?Dct__creator  ) ."+
             //    "BIND ( IF (BOUND (?Organization1), ?Organization1, \"None\" )  as ?Organization  ) ."+
             //"?Self swivt:wikiNamespace 6."+
-            ""+
             "}";
 
         this.callSparqlPrintout(sparqlquery, callQuery,function(queryresults){},
