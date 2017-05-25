@@ -126,7 +126,7 @@ function SPARQLStore() {
                     }
                 }
                 try {
-                    console.log("auto:", printouts1["Semantic title"][0] + " - "+printouts1["Hyperlink"][0]);
+                    console.log("auto:", printouts1["Semantic title"][0] + " -  "+printouts1["Hyperlink"][0]);
                 }catch(e){}
 
                 results[id.replaceAll("-3A",":").replaceAll("__",":").replaceAll("_"," ")]={printouts:printouts1};//-3A
