@@ -36,11 +36,9 @@ function SPARQLStore() {
         //so: printouts1=defaults;
         sparqlquery=
             this.prefix+sparqlquery;
-        console.log("query:" + this.uristart+" ; "+sparqlquery);
-        sparqlquery=sparqlquery.replaceAll("#uristart#",this.uristart);+
-
-
-            console.log("query:" + sparqlquery);
+        //console.log("query:" + this.uristart+" ; "+sparqlquery);
+        sparqlquery=sparqlquery.replaceAll("#uristart#",this.uristart);
+        console.log("query:" + sparqlquery);
         var proxy = location.href.substring(0, window.location.href.lastIndexOf("/")) + '/Special:MyProxy';//Special Page Proxy
         //add query to address
         var url = proxy + '?' + "query=" + encodeURIComponent(sparqlquery) + "&dataset="+this.datastore;
@@ -52,11 +50,10 @@ function SPARQLStore() {
             for (var i =0;i<table.length;i++) {
                 var line = table[i];
                 var id = self.pageName(line.Self.value).replaceAll("_"," ");
-                //type  :    "uri"-->"Supercontext":[{fulltext:self.pageName(line.Supercontext.value)}]
-                //datatype:"http://www.w3.org/2001/XMLSchema#double", type: "typed-literal"-->printouts["Sequence number"]=[cNum((line.Sequence_number.value))];
-                //type:"literal"-->"Semantic title":[line.Semantic_title.value]
-                //auto fields-recognition
-                var printouts1=printoutsDefault;
+
+                //do a clone of object
+                var printouts1 = JSON.parse( JSON.stringify( printoutsDefault ) );
+
                 //console.log("line1:",line);
                 for (var id1 in line){
                     var single=false;
@@ -89,34 +86,6 @@ function SPARQLStore() {
                             var id3=parseInt((new Date(id2).getTime() / 1000).toFixed(0));
                             printouts1[id11]=[{raw:"1/"+id2,timestamp:id3.toString()}];
                         } else
-                        /*
-
-                         datatype
-                         :
-                         "http://www.w3.org/2001/XMLSchema#gYear"
-                         type
-                         :
-                         "typed-literal"
-                         value
-                         :
-                         "2010"
-                         of
-                         datatype
-                         :
-                         "http://www.w3.org/2001/XMLSchema#date"
-                         type
-                         :
-                         "typed-literal"
-                         value
-                         :
-                         "2015-10-30Z" -->
-                         raw
-                         :
-                         "1/2016/12/19"
-                         timestamp
-                         :
-                         "1482105600"
-                         */
                         printouts1[id11]=[cNum((id2))];
                     } else
                     if (line[id1]["type"]=="literal"){
@@ -144,17 +113,6 @@ function SPARQLStore() {
     };
 
     this.getResources=function(callQuery){
-        /*
-         SELECT ?Self  ?Semantic_title ?Dct__creator ?Dct__subject ?File_name ?Organization WHERE {
-         ?Self  rdf:type category:Resource_Description.
-         ?Self swivt:wikiNamespace 6.
-         ?Self property:Dct-3Acreator ?Dct__creator.
-         ?Self property:Dct-3Asubject ?Dct__subject.
-         ?Self property:Semantic_title ?Semantic_title.
-         ?Self property:Organization ?Organization.
-         ?Self property:File_name ?File_name.
-         } order by ?Semantic_title
-         */
 
         var sparqlquery=
             "SELECT ?Self  ?Semantic_title ?Dct__creator ?Dct__subject ?Dct__date ?File_name ?Organization WHERE {"+
@@ -201,10 +159,10 @@ function SPARQLStore() {
             "?Self  rdf:type category:Resource_Description."+
             "?Self property:Semantic_title ?Semantic_title."+
             "?Self property:Hyperlink ?Hyperlink."+
-            "optional {?Self property:Dct-3Acreator ?Dct__creator1."+
-            "?Self property:Dct-3Asubject ?Dct__subject1."+
-            "?Self property:Dct-3Adate ?Dct__date1."+
-            "?Self property:Organization ?Organization1.}"+
+            "optional {?Self property:Dct-3Acreator ?Dct__creator."+
+            "?Self property:Dct-3Asubject ?Dct__subject."+
+            "?Self property:Dct-3Adate ?Dct__date."+
+            "?Self property:Organization ?Organization.}"+
             //"BIND ( IF (BOUND (?Dct__date1), ?Dct__date1, \"1968-10-30\"^^xsd:date )  as ?Dct__date  ) ."+
             //"BIND ( IF (BOUND (?Dct__subject1), ?Dct__subject1, \"None\" )  as ?Dct__subject  ) ."+
             //"BIND ( IF (BOUND (?Dct__creator1), ?Dct__creator1, \"None\" )  as ?Dct__creator  ) ."+
