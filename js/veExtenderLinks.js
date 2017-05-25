@@ -66,6 +66,7 @@ function SPARQLStore() {
                     var id11=id11.replaceAll("__",":").replaceAll("_"," ");
                     var id2 = line[id1].value.replace("-3A",":");
 
+
                     if (id1=="Hyperlink"){
                         printouts1[id11]=[id2.replace("-3A",":")];
                     } else
@@ -73,6 +74,47 @@ function SPARQLStore() {
                         printouts1[id11]=[{fulltext:self.pageName(id2), fullurl:id2}];
                     } else
                     if (line[id1]["type"]=="typed-literal"){
+                        if (line[id1]["datatype"]=="http://www.w3.org/2001/XMLSchema#gYear"){
+                            id2=id2+"/01/01";
+                            console.log(id2);
+                            var id3=parseInt((new Date(id2).getTime() / 1000).toFixed(0));
+                            printouts1[id11]=[{raw:"1/"+id2,timestamp:id3.toString()}];
+                        } else
+                        if (line[id1]["datatype"]=="http://www.w3.org/2001/XMLSchema#date"){
+                            id2=id2.replaceAll("-","/").replace("Z","");
+                            console.log(id2);
+                            if (id2.length<5)id2=id2+"/01/01";
+                            var id3=parseInt((new Date(id2).getTime() / 1000).toFixed(0));
+                            printouts1[id11]=[{raw:"1/"+id2,timestamp:id3.toString()}];
+                        } else
+                        /*
+
+                         datatype
+                         :
+                         "http://www.w3.org/2001/XMLSchema#gYear"
+                         type
+                         :
+                         "typed-literal"
+                         value
+                         :
+                         "2010"
+                         of
+                         datatype
+                         :
+                         "http://www.w3.org/2001/XMLSchema#date"
+                         type
+                         :
+                         "typed-literal"
+                         value
+                         :
+                         "2015-10-30Z" -->
+                         raw
+                         :
+                         "1/2016/12/19"
+                         timestamp
+                         :
+                         "1482105600"
+                         */
                         printouts1[id11]=[cNum((id2))];
                     } else
                     if (line[id1]["type"]=="literal"){
@@ -153,14 +195,14 @@ function SPARQLStore() {
             "?Self  rdf:type category:Resource_Description."+
             "?Self property:Semantic_title ?Semantic_title."+
             "?Self property:Hyperlink ?Hyperlink."+
-            "?Self property:Dct-3Acreator ?Dct__creator."+
-            "?Self property:Dct-3Asubject ?Dct__subject."+
-            "?Self property:Dct-3Adate ?Dct__date."+
-            "?Self property:Organization ?Organization."+
-            //"BIND ( IF (BOUND (?Dct__date1), ?Dct__date1, 0 )  as ?Dct__date  ) ."+
-            //"BIND ( IF (BOUND (?Dct__subject1), ?Dct__subject1, \"None\" )  as ?Dct__subject  ) ."+
-            //"BIND ( IF (BOUND (?Dct__creator1), ?Dct__creator1, \"None\" )  as ?Dct__creator  ) ."+
-            //    "BIND ( IF (BOUND (?Other), ?Other, \"None\" )  as ?Organization  ) ."+
+            "optional {?Self property:Dct-3Acreator ?Dct__creator1."+
+            "?Self property:Dct-3Asubject ?Dct__subject1."+
+            "?Self property:Dct-3Adate ?Dct__date1."+
+            "?Self property:Organization ?Organization1.}"+
+            "BIND ( IF (BOUND (?Dct__date1), ?Dct__date1, \"1968-10-30\"^^xsd:date )  as ?Dct__date  ) ."+
+            "BIND ( IF (BOUND (?Dct__subject1), ?Dct__subject1, \"None\" )  as ?Dct__subject  ) ."+
+            "BIND ( IF (BOUND (?Dct__creator1), ?Dct__creator1, \"None\" )  as ?Dct__creator  ) ."+
+                "BIND ( IF (BOUND (?Organization1), ?Organization1, \"None\" )  as ?Organization  ) ."+
             //"?Self swivt:wikiNamespace 6."+
             ""+
             "} order by ?Semantic_title";

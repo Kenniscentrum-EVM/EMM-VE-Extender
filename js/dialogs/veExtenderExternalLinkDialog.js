@@ -249,7 +249,9 @@ function createExternalLinkDialog(LightResourceDialog) {
             }
         } catch (e){
             //fixme dirty hack:error in previousSuggestion?
-            return null;
+            suggestionObject.hyperlink = resultSet[row].printouts.Hyperlink[0];
+            suggestionObject.value = suggestionObject.value + " (" + suggestionObject.hyperlink + ")";
+            return suggestionObject;
         }
     };
 
