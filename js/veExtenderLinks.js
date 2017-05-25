@@ -68,7 +68,7 @@ function SPARQLStore() {
 
 
                     if (id1=="Hyperlink"){
-                        printouts1[id11]=[id2.replace("-3A",":")];
+                        printouts1[id11]=[decodeURI(id2.replace("-3A",":").replace("%3B",";"))];
                     } else
                     if (line[id1]["type"]=="uri"){
                         printouts1[id11]=[{fulltext:self.pageName(id2), fullurl:id2}];
@@ -76,13 +76,13 @@ function SPARQLStore() {
                     if (line[id1]["type"]=="typed-literal"){
                         if (line[id1]["datatype"]=="http://www.w3.org/2001/XMLSchema#gYear"){
                             id2=id2+"/01/01";
-                            console.log(id2);
+                            //console.log(id2);
                             var id3=parseInt((new Date(id2).getTime() / 1000).toFixed(0));
                             printouts1[id11]=[{raw:"1/"+id2,timestamp:id3.toString()}];
                         } else
                         if (line[id1]["datatype"]=="http://www.w3.org/2001/XMLSchema#date"){
                             id2=id2.replaceAll("-","/").replace("Z","");
-                            console.log(id2);
+                            //console.log(id2);
                             if (id2.length<5)id2=id2+"/01/01";
                             var id3=parseInt((new Date(id2).getTime() / 1000).toFixed(0));
                             printouts1[id11]=[{raw:"1/"+id2,timestamp:id3.toString()}];
@@ -125,7 +125,9 @@ function SPARQLStore() {
                         console.log("change type of Semantic title!");
                     }
                 }
-                //console.log("auto:"+id1,printouts1);
+                try {
+                    console.log("auto:", printouts1["Semantic title"][0] + " - "+printouts1["Hyperlink"][0]);
+                }catch(e){}
 
                 results[id.replaceAll("-3A",":").replaceAll("__",":").replaceAll("_"," ")]={printouts:printouts1};//-3A
             }

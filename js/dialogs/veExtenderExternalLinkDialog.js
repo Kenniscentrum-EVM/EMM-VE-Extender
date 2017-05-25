@@ -235,18 +235,18 @@ function createExternalLinkDialog(LightResourceDialog) {
         var suggestionObject = LightResourceDialog.prototype.processSingleQueryResult.call(this, row, resultSet, previousSuggestion);
 
         try {
-            //fixme dirty hack
-            if (/Bestand:|File:/ig.test(suggestionObject.data)) {
-                return null;
-            }
-            else {
+            //fixme dirty hack: following three lines commented out by anton
+            //if (/Bestand:|File:/ig.test(suggestionObject.data)) {
+            //    return null;
+            //}
+            //else {
                 if (previousSuggestion != null && previousSuggestion.semanticTitle.toLowerCase() == suggestionObject.semanticTitle.toLowerCase() && previousSuggestion.value == previousSuggestion.semanticTitle)
                     previousSuggestion.value = previousSuggestion.value + " (" + previousSuggestion.hyperlink + ")";
                 suggestionObject.hyperlink = resultSet[row].printouts.Hyperlink[0];
                 if (previousSuggestion != null && previousSuggestion.semanticTitle.toLowerCase() == suggestionObject.value.toLowerCase())
                     suggestionObject.value = suggestionObject.value + " (" + suggestionObject.hyperlink + ")";
                 return suggestionObject;
-            }
+            //}
         } catch (e){
             //fixme dirty hack:error in previousSuggestion?
             suggestionObject.hyperlink = resultSet[row].printouts.Hyperlink[0];
