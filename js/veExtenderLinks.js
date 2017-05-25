@@ -1016,8 +1016,6 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                 })
             }
 
-
-
         } else
         api.get({
             action: "ask",
