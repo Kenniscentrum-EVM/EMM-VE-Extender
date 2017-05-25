@@ -31,7 +31,9 @@ function SPARQLStore() {
      * @param callQuery
      * @param getSemanticPrintouts
      */
-    this.callSparqlPrintout = function (sparqlquery, callQuery,setvar) {
+    this.callSparqlPrintout = function (sparqlquery, callQuery,setvar,printoutsDefault) {
+        //extra: start with default. Contains all fields of the result, the loop changes default values eventually
+        //so: printouts1=defaults;
         sparqlquery=
             this.prefix+sparqlquery;
         console.log("query:" + this.uristart+" ; "+sparqlquery);
@@ -42,7 +44,7 @@ function SPARQLStore() {
         var proxy = location.href.substring(0, window.location.href.lastIndexOf("/")) + '/Special:MyProxy';//Special Page Proxy
         //add query to address
         var url = proxy + '?' + "query=" + encodeURIComponent(sparqlquery) + "&dataset="+this.datastore;
-        console.log("url:" + url);
+        //console.log("url:" + url);
         $.get(url, function (json){
             var table = json.results.bindings;
             console.log(table);
@@ -54,7 +56,7 @@ function SPARQLStore() {
                 //datatype:"http://www.w3.org/2001/XMLSchema#double", type: "typed-literal"-->printouts["Sequence number"]=[cNum((line.Sequence_number.value))];
                 //type:"literal"-->"Semantic title":[line.Semantic_title.value]
                 //auto fields-recognition
-                var printouts1={};
+                var printouts1=printoutsDefault;
                 //console.log("line1:",line);
                 for (var id1 in line){
                     var single=false;
@@ -126,7 +128,7 @@ function SPARQLStore() {
                     }
                 }
                 try {
-                    console.log("auto:", printouts1["Semantic title"][0] + " -  "+printouts1["Hyperlink"][0]);
+                    //console.log("auto:", printouts1["Semantic title"][0] + " -  "+printouts1["Hyperlink"][0]);
                 }catch(e){}
 
                 results[id.replaceAll("-3A",":").replaceAll("__",":").replaceAll("_"," ")]={printouts:printouts1};//-3A
@@ -158,15 +160,17 @@ function SPARQLStore() {
             "SELECT ?Self  ?Semantic_title ?Dct__creator ?Dct__subject ?Dct__date ?File_name ?Organization WHERE {"+
             "?Self  rdf:type category:Resource_Description."+
             "?Self swivt:wikiNamespace 6."+
-            "?Self property:Dct-3Acreator ?Dct__creator."+
+            "?Self property:Semantic_title ?Semantic_title."+
+            "?Self property:File_name ?File_name."+
+            "optional {?Self property:Dct-3Acreator ?Dct__creator."+
             "?Self property:Dct-3Asubject ?Dct__subject."+
             "?Self property:Dct-3Adate ?Dct__date."+
-            "?Self property:Semantic_title ?Semantic_title."+
-            "?Self property:Organization ?Organization."+
-            "?Self property:File_name ?File_name."+
+            "?Self property:Organization ?Organization.}"+
             "}";
 
-        this.callSparqlPrintout(sparqlquery, callQuery,function(queryresults){});
+        this.callSparqlPrintout(sparqlquery, callQuery,function(queryresults){},
+            {"Semantic title":[""],"Organization":[""],"Dct:date":[{raw:"1/1970/01/01",timestamp:"0"}],
+                "Dct:creator":[""],"Dct:subject":[""],"Self":[{fullurl:"",fulltext:""}]});
     };
     //[[Category:Light Context||Project||Projecten]]|?Semantic title|?Category=Category|?Supercontext|sort=Semantic title
     this.getLinkPages=function(callQuery){
@@ -188,7 +192,7 @@ function SPARQLStore() {
             "?Self property:Supercontext ?Supercontext.}"+
             "} order by ?Semantic_title";
 
-        this.callSparqlPrintout(sparqlquery, callQuery,function(queryresults){});
+        this.callSparqlPrintout(sparqlquery, callQuery,function(queryresults){},{});
     };
     //[[Category:Resource Description]] [[Hyperlink::+]]|?Semantic title|?Hyperlink|?Dct:creator|?Dct:date|?Organization|?Dct:subject|sort=Semantic title|order=asc|limit=10000
     this.getHyperLinkPages=function(callQuery){
@@ -201,15 +205,42 @@ function SPARQLStore() {
             "?Self property:Dct-3Asubject ?Dct__subject1."+
             "?Self property:Dct-3Adate ?Dct__date1."+
             "?Self property:Organization ?Organization1.}"+
-            "BIND ( IF (BOUND (?Dct__date1), ?Dct__date1, \"1968-10-30\"^^xsd:date )  as ?Dct__date  ) ."+
-            "BIND ( IF (BOUND (?Dct__subject1), ?Dct__subject1, \"None\" )  as ?Dct__subject  ) ."+
-            "BIND ( IF (BOUND (?Dct__creator1), ?Dct__creator1, \"None\" )  as ?Dct__creator  ) ."+
-                "BIND ( IF (BOUND (?Organization1), ?Organization1, \"None\" )  as ?Organization  ) ."+
+            //"BIND ( IF (BOUND (?Dct__date1), ?Dct__date1, \"1968-10-30\"^^xsd:date )  as ?Dct__date  ) ."+
+            //"BIND ( IF (BOUND (?Dct__subject1), ?Dct__subject1, \"None\" )  as ?Dct__subject  ) ."+
+            //"BIND ( IF (BOUND (?Dct__creator1), ?Dct__creator1, \"None\" )  as ?Dct__creator  ) ."+
+            //    "BIND ( IF (BOUND (?Organization1), ?Organization1, \"None\" )  as ?Organization  ) ."+
             //"?Self swivt:wikiNamespace 6."+
             ""+
-            "} order by ?Semantic_title";
+            "}";
 
-        this.callSparqlPrintout(sparqlquery, callQuery,function(queryresults){});
+        this.callSparqlPrintout(sparqlquery, callQuery,function(queryresults){},
+            {"Semantic title":[""],"Hyperlink":[""],"Organization":[""],"Dct:date":[{raw:"1/1970/01/01",timestamp:"0"}],
+                "Dct:creator":[""],"Dct:subject":[""],"Self":[{fullurl:"",fulltext:""}]});
+    };
+    //query: [[Category:Resource Description]]|?Semantic title|?Dct:creator|?Dct:date|?Organization|?Dct:subject|?file name|?Hyperlink|sort=Semantic title|order=asc|limit=10000
+    this.getReferencePages=function(callQuery){
+        var sparqlquery=
+            "SELECT ?Self  ?Semantic_title ?Dct__creator ?Dct__subject ?Dct__date ?Hyperlink ?File_name ?Organization WHERE {"+
+            "?Self  rdf:type category:Resource_Description."+
+            "?Self property:Semantic_title ?Semantic_title."+
+            "?Self property:File_name ?File_name."+
+            "optional {?Self property:Hyperlink ?Hyperlink."+
+            "?Self property:Dct-3Acreator ?Dct__creator."+
+            "?Self property:Dct-3Asubject ?Dct__subject."+
+            "?Self property:Dct-3Adate ?Dct__date."+
+            "?Self property:Organization ?Organization.}"+
+            //"BIND ( IF (BOUND (?Dct__date1), ?Dct__date1, \"1968-10-30\"^^xsd:date )  as ?Dct__date  ) ."+
+            //"BIND ( IF (BOUND (?Dct__subject1), ?Dct__subject1, \"None\" )  as ?Dct__subject  ) ."+
+            //"BIND ( IF (BOUND (?Dct__creator1), ?Dct__creator1, \"None\" )  as ?Dct__creator  ) ."+
+            //"BIND ( IF (BOUND (?Organization1), ?Organization1, \"None\" )  as ?Organization  ) ."+
+            //"BIND ( IF (BOUND (?Hyperlink1), ?Hyperlink1, \"\" )  as ?Hyperlink  ) ."+
+            //"?Self swivt:wikiNamespace 6."+
+            ""+
+            "}";
+
+        this.callSparqlPrintout(sparqlquery, callQuery,function(queryresults){},
+            {"Semantic title":[""],"Hyperlink":[""],"File name":[""],"Organization":[""],"Dct:date":[{raw:"1/1970/01/01",timestamp:"0"}],
+                "Dct:creator":[""],"Dct:subject":[""],"Self":[{fullurl:"",fulltext:""}]});
     };
     /**
      * gets the id of the sparql-url. That is the last part of the uri
@@ -238,7 +269,7 @@ function SPARQLStore() {
             s+" property:Self ?Self."+//add self
             "}";
 
-        this.callSparqlPrintout(sparqlquery, callQuery,function(queryresults){sparqlStore.getsemanticresult=queryresults});
+        this.callSparqlPrintout(sparqlquery, callQuery,function(queryresults){sparqlStore.getsemanticresult=queryresults},{});
     };
 
     //[[Category:Light Context||Project]]
@@ -253,7 +284,7 @@ function SPARQLStore() {
             "?Self property:Semantic_title ?Semantic_title." +
             "}}";
 
-        this.callSparqlPrintout(sparqlquery, callQuery,function(queryresults){});
+        this.callSparqlPrintout(sparqlquery, callQuery,function(queryresults){},{});
     };
 
     /**
@@ -279,8 +310,8 @@ function SPARQLStore() {
             "?s property:Self ?Self." +
             "} order by ?Semantic_title";
 
-        this.callSparqlPrintout(sparqlquery, callQuery,function(queryresults){sparqlStore.getsuperresult=queryresults;});
-        this.getProjects(function(data){console.log("data:",data);});
+        this.callSparqlPrintout(sparqlquery, callQuery,function(queryresults){sparqlStore.getsuperresult=queryresults;},{});
+        //this.getProjects(function(data){console.log("data:",data);});
     };
 }
 var sparqlStore = new SPARQLStore();
@@ -1014,6 +1045,12 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
             if (query.indexOf("[[Category:Resource Description]] [[Hyperlink::+]]") !== -1){
                 sparqlStore.getHyperLinkPages(function(data){
                     console.log("sparql-result:",data);
+                    processQueryResults(data);
+                })
+            }
+            if (query.indexOf("[[Category:Resource Description]]|") !== -1) {
+                sparqlStore.getReferencePages(function (data) {
+                    console.log("sparql-result:", data);
                     processQueryResults(data);
                 })
             }
