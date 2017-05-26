@@ -32,10 +32,13 @@ function SPARQLStore() {
      * @param getSemanticPrintouts
      */
     this.callSparqlPrintout = function (sparqlquery, callQuery,setvar,printoutsDefault) {
+        this.callSparqlPrintoutOrgOpt(sparqlquery, callQuery,setvar,printoutsDefault,true);
+    };
+    this.callSparqlPrintoutOrgOpt = function (sparqlquery, callQuery,setvar,printoutsDefault, useOrganizationForSelf) {
         //extra: start with default. Contains all fields of the result, the loop changes default values eventually
         //so: printouts1=defaults;
         sparqlquery=
-            this.prefix+sparqlquery;
+            this.prefix+sparqlquery;true
         //console.log("query:" + this.uristart+" ; "+sparqlquery);
         sparqlquery=sparqlquery.replaceAll("#uristart#",this.uristart);
         console.log("query:" + sparqlquery);
@@ -95,12 +98,14 @@ function SPARQLStore() {
                         printouts1[id11][0] ="";
                         console.log("change type of Semantic title!");
                     }
+                    if(useOrganizationForSelf)
+                        printouts1["Organization"]=[printouts1["Self"][0]["fulltext"]];
                 }
                 try {
                     //console.log("auto:", printouts1["Semantic title"][0] + " -  "+printouts1["Hyperlink"][0]);
                 }catch(e){}
 
-                results[id.replaceAll("-3A",":").replaceAll("__",":").replaceAll("_"," ")]={printouts:printouts1};//-3A
+                results[id.replaceAll("-3A",":").replaceAll("__",":").replaceAll("_"," ")]={printouts:printouts1,fulltext:id};//-3A
             }
             var queryresults={query:{results:results}};
             console.log(queryresults);
@@ -120,10 +125,10 @@ function SPARQLStore() {
             "?Self swivt:wikiNamespace 6."+
             "?Self property:Semantic_title ?Semantic_title."+
             "?Self property:File_name ?File_name."+
-            "optional {?Self property:Dct-3Acreator ?Dct__creator."+
-            "?Self property:Dct-3Asubject ?Dct__subject."+
-            "?Self property:Dct-3Adate ?Dct__date."+
-            "?Self property:Organization ?Organization.}"+
+            //"optional {?Self property:Dct-3Acreator ?Dct__creator. } optional {"+
+            //"?Self property:Dct-3Asubject ?Dct__subject. } optional {"+
+            //"?Self property:Dct-3Adate ?Dct__date. } optional {"+
+            //"?Self property:Organization ?Organization.}"+
             "}";
 
         this.callSparqlPrintout(sparqlquery, callQuery,function(queryresults){},
@@ -143,6 +148,7 @@ function SPARQLStore() {
             "?Self property:Semantic_title ?Semantic_title."+
             "BIND (category:Project AS ?Category)."+
             "?Self property:Supercontext ?Supercontext.} union "+
+                //todo: het lijkt erop dat in de lijst de Projecten er weer uitgefilterd worden. Dan kan de onderstaande union weg. Checken bij Hans!
             "{"+
             "?Self  rdf:type category:Projecten."+
             "?Self property:Semantic_title ?Semantic_title."+
@@ -152,6 +158,24 @@ function SPARQLStore() {
 
         this.callSparqlPrintout(sparqlquery, callQuery,function(queryresults){},{});
     };
+    this.getLightContextProperties=function(page,callQuery){
+        //page=encodeURIComponent(page.replaceAll(" ","_")).replaceAll("%","-");
+        var sparqlquery=
+            ("SELECT ?Self  ?Dct__creator ?Dct__subject ?Dct__date ?Organization ?Semantic_title ?Hyperlink ?File_name WHERE "+
+            "{?Self wiki:Property-3APagename \""+page+"\". "+
+            "optional {?Self property:Dct-3Acreator ?Dct__creator.  } optional {"+
+            "?Self  property:Dct-3Asubject ?Dct__subject.  } optional {"+
+            "?Self  property:Dct-3Adate ?Dct__date.  } optional {"+
+            "?Self  property:Dct-3Adate ?Dct__date.  } optional {"+
+            "?Self  property:Semantic_title ?Semantic_title.  } optional {"+
+            "?Self  property:Hyperlink ?Hyperlink.  } optional {"+
+            "?Self  property:File_name ?File_name.  } optional {"+
+            "?Self  property:Organization ?Organization.}}");//"File_name"
+
+        this.callSparqlPrintoutOrgOpt(sparqlquery, callQuery,function(queryresults){},
+            {"File name":[""],"Hyperlink":[""],"Semantic title":[""],"Organization":[""],"Dct:date":[{raw:"1/1970/01/01",timestamp:"0"}],
+                "Dct:creator":[""],"Dct:subject":[""],"Self":[{fullurl:"",fulltext:""}]},false);
+    };
     //[[Category:Resource Description]] [[Hyperlink::+]]|?Semantic title|?Hyperlink|?Dct:creator|?Dct:date|?Organization|?Dct:subject|sort=Semantic title|order=asc|limit=10000
     this.getHyperLinkPages=function(callQuery){
         var sparqlquery=
@@ -159,15 +183,10 @@ function SPARQLStore() {
             "?Self  rdf:type category:Resource_Description."+
             "?Self property:Semantic_title ?Semantic_title."+
             "?Self property:Hyperlink ?Hyperlink."+
-            "optional {?Self property:Dct-3Acreator ?Dct__creator."+
-            "?Self property:Dct-3Asubject ?Dct__subject."+
-            "?Self property:Dct-3Adate ?Dct__date."+
-            "?Self property:Organization ?Organization.}"+
-            //"BIND ( IF (BOUND (?Dct__date1), ?Dct__date1, \"1968-10-30\"^^xsd:date )  as ?Dct__date  ) ."+
-            //"BIND ( IF (BOUND (?Dct__subject1), ?Dct__subject1, \"None\" )  as ?Dct__subject  ) ."+
-            //"BIND ( IF (BOUND (?Dct__creator1), ?Dct__creator1, \"None\" )  as ?Dct__creator  ) ."+
-            //    "BIND ( IF (BOUND (?Organization1), ?Organization1, \"None\" )  as ?Organization  ) ."+
-            //"?Self swivt:wikiNamespace 6."+
+            //"optional {?Self property:Dct-3Acreator ?Dct__creator."+
+            //"?Self property:Dct-3Asubject ?Dct__subject."+
+            //"?Self property:Dct-3Adate ?Dct__date."+
+            //"?Self property:Organization ?Organization.}"+
             "}";
 
         this.callSparqlPrintout(sparqlquery, callQuery,function(queryresults){},
@@ -181,18 +200,11 @@ function SPARQLStore() {
             "?Self  rdf:type category:Resource_Description."+
             "?Self property:Semantic_title ?Semantic_title."+
             "?Self property:File_name ?File_name."+
-            "optional {?Self property:Hyperlink ?Hyperlink."+
-            "?Self property:Dct-3Acreator ?Dct__creator."+
-            "?Self property:Dct-3Asubject ?Dct__subject."+
-            "?Self property:Dct-3Adate ?Dct__date."+
-            "?Self property:Organization ?Organization.}"+
-            //"BIND ( IF (BOUND (?Dct__date1), ?Dct__date1, \"1968-10-30\"^^xsd:date )  as ?Dct__date  ) ."+
-            //"BIND ( IF (BOUND (?Dct__subject1), ?Dct__subject1, \"None\" )  as ?Dct__subject  ) ."+
-            //"BIND ( IF (BOUND (?Dct__creator1), ?Dct__creator1, \"None\" )  as ?Dct__creator  ) ."+
-            //"BIND ( IF (BOUND (?Organization1), ?Organization1, \"None\" )  as ?Organization  ) ."+
-            //"BIND ( IF (BOUND (?Hyperlink1), ?Hyperlink1, \"\" )  as ?Hyperlink  ) ."+
-            //"?Self swivt:wikiNamespace 6."+
-            ""+
+            //"optional {?Self property:Hyperlink ?Hyperlink."+
+            //"?Self property:Dct-3Acreator ?Dct__creator."+
+            //"?Self property:Dct-3Asubject ?Dct__subject."+
+            //"?Self property:Dct-3Adate ?Dct__date."+
+            //"?Self property:Organization ?Organization.}"+
             "}";
 
         this.callSparqlPrintout(sparqlquery, callQuery,function(queryresults){},
@@ -926,6 +938,9 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
      * @returns {Object} suggestionObject - A suggestion object, containing relevant information about a particular page which can be used by various functions fillFields.
      */
     EMMDialog.prototype.processSingleQueryResult = function (row, resultSet, previousSuggestion) {
+        console.log("row binnen:",row);
+        console.log("resultset binnen:",resultSet);
+        console.log("resultsetrow binnen:",resultSet[row]);
         var suggestionObject = {};
         suggestionObject.data = resultSet[row].fulltext;
         suggestionObject.value = "";

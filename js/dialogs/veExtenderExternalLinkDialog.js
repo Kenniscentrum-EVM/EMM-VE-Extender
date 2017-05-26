@@ -218,9 +218,16 @@ function createExternalLinkDialog(LightResourceDialog) {
      * Fill the fields of the dialog based on an external link the user has selected from the autocomplete dropdown.
      */
     EMMExternalLinkDialog.prototype.fillFields = function () {
-        LightResourceDialog.prototype.fillFields.call(this);
-        this.linkField.setValue(this.suggestion.hyperlink);
-        this.validator.validateAll();
+        //call query
+        //with results query:
+        //this.suggestion=processSingleQueryResult = function (row, resultSet, previousSuggestion)
+        //adres zit in: this.suggestion.organization
+        //doe dat in: EMMLightResourceDialog.prototype.fillFields = function () {
+
+        var thatdialog=this;
+            LightResourceDialog.prototype.fillFields.call(thatdialog);
+            thatdialog.linkField.setValue(thatdialog.suggestion.hyperlink);
+            thatdialog.validator.validateAll();
     };
 
     /**
