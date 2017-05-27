@@ -922,9 +922,6 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
      * @returns {Object} suggestionObject - A suggestion object, containing relevant information about a particular page which can be used by various functions fillFields.
      */
     EMMDialog.prototype.processSingleQueryResult = function (row, resultSet, previousSuggestion) {
-        console.log("row binnen:",row);
-        console.log("resultset binnen:",resultSet);
-        console.log("resultsetrow binnen:",resultSet[row]);
         var suggestionObject = {};
         suggestionObject.data = resultSet[row].fulltext;
         suggestionObject.value = "";
@@ -989,32 +986,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
             callback();
         };
         if (sparqlStore.sparqlActive){
-            //[[Category:Resource Description]] [[file name::+]] |?Semantic title|?Dct:creator|?Dct:date|?Organization|?Dct:subject|?file name|sort=Semantic title|order=asc|limit=10000
-            if (query.indexOf("Category:Resource Description]] [[file name::+]]") !== -1){
-                sparqlStore.getResources(function(data){
-                    console.log("sparql-result:",data);
-                    processQueryResults(data);
-                })
-            }
-            if (query.indexOf("Category:Light Context||Project||Projecten") !== -1){
-                sparqlStore.getLinkPages(function(data){
-                    console.log("sparql-result:",data);
-                    processQueryResults(data);
-                })
-            }
-            if (query.indexOf("[[Category:Resource Description]] [[Hyperlink::+]]") !== -1){
-                sparqlStore.getHyperLinkPages(function(data){
-                    console.log("sparql-result:",data);
-                    processQueryResults(data);
-                })
-            }
-            if (query.indexOf("[[Category:Resource Description]]|") !== -1) {
-                sparqlStore.getReferencePages(function (data) {
-                    console.log("sparql-result:", data);
-                    processQueryResults(data);
-                })
-            }
-
+            this.processSparql(processQueryResults);
         } else
         api.get({
             action: "ask",

@@ -23,6 +23,10 @@ function createFileDialog(LightResourceDialog) {
     };
     OO.inheritClass(EMMFileDialog, LightResourceDialog);
 
+    EMMFileDialog.prototype.processSparql = function (sparqlFunction) {
+        sparqlStore.getResources(sparqlFunction)
+    };
+
     /**
      * Creates the input fields unique for a FileDialog, calls its parent method to create more generic fields.
      * The most generic fields are created in the constructor of EMMDialog.

@@ -23,6 +23,10 @@ function createExternalLinkDialog(LightResourceDialog) {
     };
     OO.inheritClass(EMMExternalLinkDialog, LightResourceDialog);
 
+    EMMExternalLinkDialog.prototype.processSparql = function (sparqlFunction) {
+        sparqlStore.getHyperLinkPages(sparqlFunction)
+    };
+
     /**
      * Creates the input fields unique for an ExternalLinkDialog, calls its parent method to create more generic fields.
      * The most generic fields are created in the constructor of EMMDialog.

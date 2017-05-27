@@ -24,6 +24,10 @@ function createInternalLinkDialog(EMMDialog) {
     };
     OO.inheritClass(EMMInternalLinkDialog, EMMDialog);
 
+    EMMInternalLinkDialog.prototype.processSparql = function (sparqlFunction) {
+        sparqlStore.getLinkPages(sparqlFunction)
+    };
+
     /**
      * Creates the input fields unique for a EMMInternalLinkDialog.
      * The generic fields are created in the constructor of EMMDialog.

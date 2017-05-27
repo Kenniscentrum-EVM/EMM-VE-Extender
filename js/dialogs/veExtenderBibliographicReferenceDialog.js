@@ -24,6 +24,10 @@ function createBibliographicReferenceDialog(LightResourceDialog) {
     };
     OO.inheritClass(EMMBibliographicReferenceDialog, LightResourceDialog);
 
+    EMMBibliographicReferenceDialog.prototype.processSparql = function (sparqlFunction) {
+        sparqlStore.getReferencePages(sparqlFunction)
+    };
+
     /**
      * Creates the input fields unique for a BibliographicReferenceDialog, calls its parent method to create more generic fields.
      * The most generic fields are created in the constructor of EMMDialog.
@@ -219,9 +223,9 @@ function createBibliographicReferenceDialog(LightResourceDialog) {
      */
     EMMBibliographicReferenceDialog.prototype.processSingleQueryResult = function (row, resultSet, previousSuggestion) {
         //todo: find out why these resources are skipped, while they are the only items in the list. So the list is empty!
-        if (resultSet[row]["printouts"]["Hyperlink"].length > 0 || resultSet[row]["printouts"]["File name"].length > 0) {
-            return null;
-        }
+        //if (resultSet[row]["printouts"]["Hyperlink"].length > 0 || resultSet[row]["printouts"]["File name"].length > 0) {
+        //    return null;
+        //}
 
         var suggestionObject = LightResourceDialog.prototype.processSingleQueryResult.call(this, row, resultSet, previousSuggestion);
 
