@@ -172,7 +172,7 @@ function SPARQLStore() {
 
         this.callSparqlPrintout(sparqlquery, callQuery,function(queryresults){},
             {"File name":[""],"Hyperlink":[""],"Semantic title":[""],"Organization":[""],"Dct:date":[{raw:"1/1970/01/01",timestamp:"0"}],
-                "Dct:creator":[""],"Dct:subject":[""],"Self":[{fullurl:"",fulltext:""}]});
+                "Dct:creator":[""],"Dct:subject":[{fullurl:"",fulltext:""}],"Self":[{fullurl:"",fulltext:""}]});
     };
     //[[Category:Resource Description]] [[Hyperlink::+]]|?Semantic title|?Hyperlink|?Dct:creator|?Dct:date|?Organization|?Dct:subject|sort=Semantic title|order=asc|limit=10000
     this.getHyperLinkPages=function(callQuery){
