@@ -115,19 +115,14 @@ function createLightResourceDialog(EMMDialog, resourceType) {
             thatdialog.organizationField.setValue(thatdialog.suggestion.organization);
             thatdialog.subjectField.setValue(thatdialog.suggestion.subjects);
         };
-        console.log("fillsuggestion:",this.suggestion);
+
         if (sparqlStore.sparqlActive){
-            sparqlStore.getLightContextProperties(this.suggestion.organization,function(data){
-                console.log("data:",data);
+            sparqlStore.getLightContextProperties(this.suggestion.self,function(data){
                 var resultSet=data.query.results;
                 var row=Object.keys(resultSet)[0];
-                console.log("resultSet:",resultSet);
-                console.log("row:",row);
-                console.log("resultSetrow:",resultSet[row].fulltext);
                 thatdialog.suggestion = thatdialog.processSingleQueryResult( row, resultSet, null);
                 callFillFields();
             });
-            //call query:SELECT ?Self  ?Dct__creator ?Dct__subject ?Dct__date ?Organization WHERE {BIND (wiki:Bestand-3AGeloof44944674_s.jpg AS ?Self).optional {wiki:Bestand-3AGeloof44944674_s.jpg property:Dct-3Acreator ?Dct__creator.wiki:Bestand-3AGeloof44944674_s.jpg property:Dct-3Asubject ?Dct__subject.wiki:Bestand-3AGeloof44944674_s.jpg property:Dct-3Adate ?Dct__date.wiki:Bestand-3AGeloof44944674_s.jpg property:Organization ?Organization.}}
 
         }
         else {

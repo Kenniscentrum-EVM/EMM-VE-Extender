@@ -32,13 +32,8 @@ function SPARQLStore() {
      * @param getSemanticPrintouts
      */
     this.callSparqlPrintout = function (sparqlquery, callQuery,setvar,printoutsDefault) {
-        this.callSparqlPrintoutOrgOpt(sparqlquery, callQuery,setvar,printoutsDefault,true);
-    };
-    this.callSparqlPrintoutOrgOpt = function (sparqlquery, callQuery,setvar,printoutsDefault, useOrganizationForSelf) {
-        //extra: start with default. Contains all fields of the result, the loop changes default values eventually
-        //so: printouts1=defaults;
         sparqlquery=
-            this.prefix+sparqlquery;true
+            this.prefix+sparqlquery;
         //console.log("query:" + this.uristart+" ; "+sparqlquery);
         sparqlquery=sparqlquery.replaceAll("#uristart#",this.uristart);
         console.log("query:" + sparqlquery);
@@ -58,52 +53,41 @@ function SPARQLStore() {
                 var printouts1 = JSON.parse( JSON.stringify( printoutsDefault ) );
 
                 //console.log("line1:",line);
-                for (var id1 in line){
-                    var single=false;
-                    var id11=id1;
-                    if (id1.indexOf("_Single_Value_") > -1){
-                        single=true;
-                        id11=id1.replace("_Single_Value_","");
-                    }
-                    var id11=id11.replaceAll("__",":").replaceAll("_"," ");
-                    var id2 = line[id1].value.replace("-3A",":");
+                for (var oldid in line){
+                    var newid=oldid;
+
+                    newid=newid.replaceAll("__",":").replaceAll("_"," ");
+                    var value2 = line[oldid].value.replace("-3A",":");
 
 
-                    if (id1=="Hyperlink"){
-                        printouts1[id11]=[decodeURI(id2.replace("-3A",":").replace("%3B",";"))];
+                    if (oldid=="Hyperlink"){
+                        printouts1[newid]=[decodeURI(value2.replace("-3A",":").replace("%3B",";"))];
                     } else
-                    if (line[id1]["type"]=="uri"){
-                        printouts1[id11]=[{fulltext:self.pageName(id2), fullurl:id2}];
+                    if (line[oldid]["type"]=="uri"){
+                        printouts1[newid]=[{fulltext:self.pageName(value2), fullurl:value2}];
                     } else
-                    if (line[id1]["type"]=="typed-literal"){
-                        if (line[id1]["datatype"]=="http://www.w3.org/2001/XMLSchema#gYear"){
-                            id2=id2+"/01/01";
-                            //console.log(id2);
-                            var id3=parseInt((new Date(id2).getTime() / 1000).toFixed(0));
-                            printouts1[id11]=[{raw:"1/"+id2,timestamp:id3.toString()}];
+                    if (line[oldid]["type"]=="typed-literal"){
+                        if (line[oldid]["datatype"]=="http://www.w3.org/2001/XMLSchema#gYear"){
+                            value2=value2+"/01/01";
+                            var timestamp=parseInt((new Date(value2).getTime() / 1000).toFixed(0));
+                            printouts1[newid]=[{raw:"1/"+value2,timestamp:timestamp.toString()}];
                         } else
-                        if (line[id1]["datatype"]=="http://www.w3.org/2001/XMLSchema#date"){
-                            id2=id2.replaceAll("-","/").replace("Z","");
-                            //console.log(id2);
-                            if (id2.length<5)id2=id2+"/01/01";
-                            var id3=parseInt((new Date(id2).getTime() / 1000).toFixed(0));
-                            printouts1[id11]=[{raw:"1/"+id2,timestamp:id3.toString()}];
+                        if (line[oldid]["datatype"]=="http://www.w3.org/2001/XMLSchema#date"){
+                            value2=value2.replaceAll("-","/").replace("Z","");
+                            if (value2.length<5)value2=value2+"/01/01";
+                            var id3=parseInt((new Date(value2).getTime() / 1000).toFixed(0));
+                            printouts1[newid]=[{raw:"1/"+value2,timestamp:id3.toString()}];
                         } else
-                        printouts1[id11]=[cNum((id2))];
+                        printouts1[newid]=[cNum((value2))];
                     } else
-                    if (line[id1]["type"]=="literal"){
-                        printouts1[id11]=[self.pageName(id2).replace("-3A",":")];
+                    if (line[oldid]["type"]=="literal"){
+                        printouts1[newid]=[self.pageName(value2).replace("-3A",":")];
                     }
-                    if (id11=="Semantic title"&&!(isString(printouts1[id11][0]))){
-                        printouts1[id11][0] ="";
+                    /*if (newid=="Semantic title"&&!(isString(printouts1[newid][0]))){
+                        printouts1[newid][0] ="";
                         console.log("change type of Semantic title!");
-                    }
-                    if(useOrganizationForSelf)
-                        printouts1["Organization"]=[printouts1["Self"][0]["fulltext"]];
+                    }*/
                 }
-                try {
-                    //console.log("auto:", printouts1["Semantic title"][0] + " -  "+printouts1["Hyperlink"][0]);
-                }catch(e){}
 
                 results[id.replaceAll("-3A",":").replaceAll("__",":").replaceAll("_"," ")]={printouts:printouts1,fulltext:id};//-3A
             }
@@ -172,9 +156,9 @@ function SPARQLStore() {
             "?Self  property:File_name ?File_name.  } optional {"+
             "?Self  property:Organization ?Organization.}}");//"File_name"
 
-        this.callSparqlPrintoutOrgOpt(sparqlquery, callQuery,function(queryresults){},
+        this.callSparqlPrintout(sparqlquery, callQuery,function(queryresults){},
             {"File name":[""],"Hyperlink":[""],"Semantic title":[""],"Organization":[""],"Dct:date":[{raw:"1/1970/01/01",timestamp:"0"}],
-                "Dct:creator":[""],"Dct:subject":[""],"Self":[{fullurl:"",fulltext:""}]},false);
+                "Dct:creator":[""],"Dct:subject":[""],"Self":[{fullurl:"",fulltext:""}]});
     };
     //[[Category:Resource Description]] [[Hyperlink::+]]|?Semantic title|?Hyperlink|?Dct:creator|?Dct:date|?Organization|?Dct:subject|sort=Semantic title|order=asc|limit=10000
     this.getHyperLinkPages=function(callQuery){
@@ -944,6 +928,10 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
         var suggestionObject = {};
         suggestionObject.data = resultSet[row].fulltext;
         suggestionObject.value = "";
+        if (sparqlStore.sparqlActive){
+            var self = resultSet[row].printouts["Self"][0].fulltext;
+            suggestionObject.self = self;
+        }
         var semanticTitle = resultSet[row].printouts["Semantic title"][0];
         if (semanticTitle) {
             suggestionObject.value = semanticTitle;
