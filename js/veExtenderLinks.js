@@ -45,6 +45,8 @@ function SPARQLStore() {
             var table = json.results.bindings;
             console.log(table);
             var results={};
+            var prevoldid="";
+            var previousprintouts={};
             for (var i =0;i<table.length;i++) {
                 var line = table[i];
                 var id = self.pageName(line.Self.value).replaceAll("_"," ");
@@ -88,8 +90,20 @@ function SPARQLStore() {
                         console.log("change type of Semantic title!");
                     }*/
                 }
+                //todo: check how to handle other multi-value fields. Now only works forr subject
+                if (prevoldid==id){
+                    previousprintouts["Dct:subject"].push(printouts1["Dct:subject"][0])
+                    console.log("oldid-equal:",printouts1);
+                } else {
 
-                results[id.replaceAll("-3A",":").replaceAll("__",":").replaceAll("_"," ")]={printouts:printouts1,fulltext:id};//-3A
+                    results[id.replaceAll("-3A", ":").replaceAll("__", ":").replaceAll("_", " ")] = {
+                        printouts: printouts1,
+                        fulltext: id
+                    };//-3A
+                    previousprintouts=printouts1
+
+                    prevoldid = id;
+                }
             }
             var queryresults={query:{results:results}};
             console.log(queryresults);
@@ -536,6 +550,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                 data.source = data.source.replace(/ /g, "_"); //convert whitespaces to underscores
                 var api = new mw.Api();
                 var query = dialogInstance.getEditQuery(data.source); //getEditQuery retrieves the correct query for us.
+                console.log("execute query in EMMDialog.prototype.getReadyProcess: ",query);
                 api.get({
                     action: "ask",
                     query: query
@@ -926,7 +941,9 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
         suggestionObject.data = resultSet[row].fulltext;
         suggestionObject.value = "";
         if (sparqlStore.sparqlActive){
-            var self = resultSet[row].printouts["Self"][0].fulltext;
+            //todo: check what other characters must be changed. Likely you have to use - --> %, and encodeURI
+            //then check if result does not contain more % than before.
+            var self = resultSet[row].printouts["Self"][0].fulltext.replace("-3A",":").replace("-27","'");
             suggestionObject.self = self;
         }
         var semanticTitle = resultSet[row].printouts["Semantic title"][0];
