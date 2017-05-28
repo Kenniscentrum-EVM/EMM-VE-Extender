@@ -25,6 +25,7 @@ function SPARQLStore() {
         "PREFIX property: <#uristart#/index.php/Speciaal:URIResolver/Property-3A>"+
         "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>";
 
+    this.standardLine="?Self wiki:Property-3APagename ?Pagename. ";
     /**
      * exectue sparql-query on Sparql-store
      * @param sparqlquery has to contain ?Self as output
@@ -45,8 +46,6 @@ function SPARQLStore() {
             var table = json.results.bindings;
             console.log(table);
             var results={};
-            var prevoldid="";
-            var previousprintouts={};
             for (var i =0;i<table.length;i++) {
                 var line = table[i];
                 var id = self.pageName(line.Self.value).replaceAll("_"," ");
@@ -90,8 +89,10 @@ function SPARQLStore() {
                         console.log("change type of Semantic title!");
                     }*/
                 }
-                //todo: add prevoldid to array, check if id part of array
-                if (prevoldid==id){
+                var myid=id.replaceAll("-3A", ":").replaceAll("__", ":").replaceAll("_", " ");
+                try{
+                    //check if there is a previous printout
+                    var previousprintouts=results[myid].printouts;
                     for (var key in previousprintouts){
                         var equal=false;
                         try{
@@ -103,20 +104,20 @@ function SPARQLStore() {
                         }catch(e){
                             equal=true;
                         }
-                        if (!equal)previousprintouts[key].push(printouts1[key][0])
+                        //use original array to add elements with multi-values
+                        if (!equal)
+                            results[myid].printouts[key].push(printouts1[key][0])
 
                     }
                     //previousprintouts["Dct:subject"].push(printouts1["Dct:subject"][0])
                     console.log("oldid-equal:",printouts1);
-                } else {
+                } catch(e) {
+                    //if not, create new element in results
 
-                    results[id.replaceAll("-3A", ":").replaceAll("__", ":").replaceAll("_", " ")] = {
+                    results[myid] = {
                         printouts: printouts1,
                         fulltext: id
                     };//-3A
-                    previousprintouts=printouts1
-
-                    prevoldid = id;
                 }
             }
             var queryresults={query:{results:results}};
@@ -132,7 +133,8 @@ function SPARQLStore() {
     this.getResources=function(callQuery){
 
         var sparqlquery=
-            "SELECT ?Self  ?Semantic_title ?Dct__creator ?Dct__subject ?Dct__date ?File_name ?Organization WHERE {"+
+            "SELECT ?Self  ?Semantic_title ?Dct__creator ?Dct__subject ?Dct__date ?File_name ?Organization ?Pagename WHERE {"+
+                this.standardLine+
             "?Self  rdf:type category:Resource_Description."+
             "?Self swivt:wikiNamespace 6."+
             "?Self property:Semantic_title ?Semantic_title."+
@@ -150,18 +152,21 @@ function SPARQLStore() {
     //[[Category:Light Context||Project||Projecten]]|?Semantic title|?Category=Category|?Supercontext|sort=Semantic title
     this.getLinkPages=function(callQuery){
         var sparqlquery=
-            "SELECT ?Self  ?Semantic_title ?Category ?Supercontext WHERE {{"+
+            "SELECT ?Self  ?Semantic_title ?Category ?Supercontext ?Pagename WHERE {{"+
             "?Self  rdf:type category:Light_Context."+
+            this.standardLine+
             "?Self property:Semantic_title ?Semantic_title."+
             "BIND (category:Light_Context AS ?Category)."+
             "?Self property:Supercontext ?Supercontext.} union "+
             "{"+
+            this.standardLine+
             "?Self  rdf:type category:Project."+
             "?Self property:Semantic_title ?Semantic_title."+
             "BIND (category:Project AS ?Category)."+
             "?Self property:Supercontext ?Supercontext.} union "+
                 //todo: het lijkt erop dat in de lijst de Projecten er weer uitgefilterd worden. Dan kan de onderstaande union weg. Checken bij Hans!
             "{"+
+            this.standardLine+
             "?Self  rdf:type category:Projecten."+
             "?Self property:Semantic_title ?Semantic_title."+
             "BIND (category:Projecten AS ?Category)."+
@@ -191,7 +196,8 @@ function SPARQLStore() {
     //[[Category:Resource Description]] [[Hyperlink::+]]|?Semantic title|?Hyperlink|?Dct:creator|?Dct:date|?Organization|?Dct:subject|sort=Semantic title|order=asc|limit=10000
     this.getHyperLinkPages=function(callQuery){
         var sparqlquery=
-            "SELECT ?Self  ?Semantic_title ?Dct__creator ?Dct__subject ?Dct__date ?Hyperlink ?Organization WHERE {"+
+            "SELECT ?Self  ?Semantic_title ?Dct__creator ?Dct__subject ?Dct__date ?Hyperlink ?Organization ?Pagename WHERE {"+
+            this.standardLine+
             "?Self  rdf:type category:Resource_Description."+
             "?Self property:Semantic_title ?Semantic_title."+
             "?Self property:Hyperlink ?Hyperlink."+
@@ -208,7 +214,8 @@ function SPARQLStore() {
     //query: [[Category:Resource Description]]|?Semantic title|?Dct:creator|?Dct:date|?Organization|?Dct:subject|?file name|?Hyperlink|sort=Semantic title|order=asc|limit=10000
     this.getReferencePages=function(callQuery){
         var sparqlquery=
-            "SELECT ?Self  ?Semantic_title ?Dct__creator ?Dct__subject ?Dct__date ?Hyperlink ?File_name ?Organization WHERE {"+
+            "SELECT ?Self  ?Semantic_title ?Dct__creator ?Dct__subject ?Dct__date ?Hyperlink ?File_name ?Organization ?Pagename WHERE {"+
+            this.standardLine+
             "?Self  rdf:type category:Resource_Description."+
             "?Self property:Semantic_title ?Semantic_title."+
             "?Self property:File_name ?File_name."+
@@ -958,6 +965,9 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
             //todo: check what other characters must be changed. Likely you have to use - --> %, and encodeURI
             //then check if result does not contain more % than before.
             var self = resultSet[row].printouts["Self"][0].fulltext.replace("-3A",":").replace("-27","'");
+            try{
+                self = resultSet[row].printouts["Pagename"][0];
+            }catch(e){}
             suggestionObject.self = self;
         }
         var semanticTitle = resultSet[row].printouts["Semantic title"][0];
