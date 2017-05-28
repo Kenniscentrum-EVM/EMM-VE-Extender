@@ -90,9 +90,23 @@ function SPARQLStore() {
                         console.log("change type of Semantic title!");
                     }*/
                 }
-                //todo: check how to handle other multi-value fields. Now only works forr subject
+                //todo: add prevoldid to array, check if id part of array
                 if (prevoldid==id){
-                    previousprintouts["Dct:subject"].push(printouts1["Dct:subject"][0])
+                    for (var key in previousprintouts){
+                        var equal=false;
+                        try{
+                            for (var k=0;k<previousprintouts[key].length;k++){
+                                if (previousprintouts[key][0].fulltext==printouts1[key][k].fulltext)
+                                    equal=true;
+                            }
+
+                        }catch(e){
+                            equal=true;
+                        }
+                        if (!equal)previousprintouts[key].push(printouts1[key][0])
+
+                    }
+                    //previousprintouts["Dct:subject"].push(printouts1["Dct:subject"][0])
                     console.log("oldid-equal:",printouts1);
                 } else {
 
