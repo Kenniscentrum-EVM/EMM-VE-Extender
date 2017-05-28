@@ -243,10 +243,32 @@ function createInternalLinkDialog(EMMDialog) {
         suggestionObject.suffix = resultSet[row].printouts["Supercontext"];
 
         if (previousSuggestion != null) {
-            if (previousSuggestion.semanticTitle.toLowerCase() == suggestionObject.semanticTitle.toLowerCase() && previousSuggestion.value == previousSuggestion.semanticTitle)
-                previousSuggestion.value = checkAndPrintSuffix(previousSuggestion, resultSet[previousSuggestion.suffix[0].fulltext]);
-            if (previousSuggestion.semanticTitle.toLowerCase() == suggestionObject.value.toLowerCase())
-                suggestionObject.value = checkAndPrintSuffix(suggestionObject, resultSet[suggestionObject.suffix[0].fulltext]);
+            if (previousSuggestion.semanticTitle.toLowerCase() == suggestionObject.semanticTitle.toLowerCase() && previousSuggestion.value == previousSuggestion.semanticTitle) {
+                try {
+                    previousSuggestion.value = checkAndPrintSuffix(previousSuggestion, resultSet[previousSuggestion.suffix[0].fulltext],previousSuggestion.suffix[0].fulltext);
+                    /*if (resultSet[previousSuggestion.suffix[0].fulltext] == undefined) {
+                        previousSuggestion.value=previousSuggestion.value + " (" + previousSuggestion.suffix[0].fulltext + ")";
+                        console.log("suffix:", previousSuggestion.suffix[0].fulltext);
+                        console.log("suffix:", resultSet[previousSuggestion.suffix[0].fulltext]);
+                    }*/
+                } catch(e){
+                    console.log("suffix:", previousSuggestion.suffix[0].fulltext);
+                    console.log("suffix:", resultSet[previousSuggestion.suffix[0].fulltext]);
+                }
+            }
+            if (previousSuggestion.semanticTitle.toLowerCase() == suggestionObject.value.toLowerCase()) {
+                try {
+                    suggestionObject.value = checkAndPrintSuffix(suggestionObject, resultSet[suggestionObject.suffix[0].fulltext],suggestionObject.suffix[0].fulltext);
+                    /*if (resultSet[suggestionObject.suffix[0].fulltext] == undefined) {
+                        console.log("suffix2:", suggestionObject.suffix[0].fulltext);
+                        console.log("suffix2:", resultSet[suggestionObject.suffix[0].fulltext]);
+                        suggestionObject.value = suggestionObject.value + " (" + suggestionObject.suffix[0].fulltext + ")";
+                    }*/
+                } catch(e){
+                    console.log("suffix2:", suggestionObject.suffix[0].fulltext);
+                    console.log("suffix2:", resultSet[suggestionObject.suffix[0].fulltext]);
+                }
+            }
         }
         for (var i = 0; i < suggestionObject.category.length; i++)
             if (/:\bLight Context\b/.test(suggestionObject.category[i].fulltext) || /:\bProject\b/.test(suggestionObject.category[i].fulltext))
@@ -264,9 +286,13 @@ function createInternalLinkDialog(EMMDialog) {
         return "Internal link";
     };
 
-    function checkAndPrintSuffix(suggestionObject, suffix) {
-        if (suffix != null)
-            return suggestionObject.value + " (" + suffix.printouts["Semantic title"][0] + ")";
+    function checkAndPrintSuffix(suggestionObject, suffix, deftext) {
+        if (suffix != null) {
+            var text=suffix.printouts["Semantic title"][0];
+            if (text.length==0)
+                text=deftext;
+            return suggestionObject.value + " (" + text + ")";
+        }
         else
             return suggestionObject.value + " " + OO.ui.deferMsg("visualeditor-emm-suggestion-err-no-supercontext")();
     }

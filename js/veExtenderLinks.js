@@ -25,7 +25,8 @@ function SPARQLStore() {
         "PREFIX property: <#uristart#/index.php/Speciaal:URIResolver/Property-3A>"+
         "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>";
 
-    this.standardLine="?Self wiki:Property-3APagename ?Pagename. ";
+    this.standardLine=" optional {?Self wiki:Property-3APagename ?Pagename. }"+
+        " optional {?Self property:Semantic_title ?Semantic_title.}";
     /**
      * exectue sparql-query on Sparql-store
      * @param sparqlquery has to contain ?Self as output
@@ -63,6 +64,9 @@ function SPARQLStore() {
 
                     if (oldid=="Hyperlink"){
                         printouts1[newid]=[decodeURI(value2.replace("-3A",":").replace("%3B",";"))];
+                    } else
+                    if (oldid=="Supercontext"){
+                        printouts1[newid]=[{fulltext:self.pageName(decodeURI(value2.replace("-3A",":").replace("%3B",";"))).replaceAll("_"," ")}];
                     } else
                     if (line[oldid]["type"]=="uri"){
                         printouts1[newid]=[{fulltext:self.pageName(value2), fullurl:value2}];
@@ -132,17 +136,12 @@ function SPARQLStore() {
 
     this.getResources=function(callQuery){
 
+        //resources that have a filename
         var sparqlquery=
-            "SELECT ?Self  ?Semantic_title ?Dct__creator ?Dct__subject ?Dct__date ?File_name ?Organization ?Pagename WHERE {"+
-                this.standardLine+
+            "SELECT ?Self  ?Semantic_title ?File_name ?Pagename WHERE {"+
             "?Self  rdf:type category:Resource_Description."+
-            "?Self swivt:wikiNamespace 6."+
-            "?Self property:Semantic_title ?Semantic_title."+
-            "?Self property:File_name ?File_name."+
-            //"optional {?Self property:Dct-3Acreator ?Dct__creator. } optional {"+
-            //"?Self property:Dct-3Asubject ?Dct__subject. } optional {"+
-            //"?Self property:Dct-3Adate ?Dct__date. } optional {"+
-            //"?Self property:Organization ?Organization.}"+
+            this.standardLine+
+            " ?Self property:File_name ?File_name."+
             "}";
 
         this.callSparqlPrintout(sparqlquery, callQuery,function(queryresults){},
@@ -155,25 +154,24 @@ function SPARQLStore() {
             "SELECT ?Self  ?Semantic_title ?Category ?Supercontext ?Pagename WHERE {{"+
             "?Self  rdf:type category:Light_Context."+
             this.standardLine+
-            "?Self property:Semantic_title ?Semantic_title."+
             "BIND (category:Light_Context AS ?Category)."+
-            "?Self property:Supercontext ?Supercontext.} union "+
+            " optional { ?Self property:Supercontext ?Supercontext.}} union "+
             "{"+
-            this.standardLine+
             "?Self  rdf:type category:Project."+
-            "?Self property:Semantic_title ?Semantic_title."+
-            "BIND (category:Project AS ?Category)."+
-            "?Self property:Supercontext ?Supercontext.} union "+
-                //todo: het lijkt erop dat in de lijst de Projecten er weer uitgefilterd worden. Dan kan de onderstaande union weg. Checken bij Hans!
-            "{"+
             this.standardLine+
+            "BIND (category:Project AS ?Category)."+
+            " optional { ?Self property:Supercontext ?Supercontext.}} union "+
+                //todo: het lijkt erop dat in de lijst de Projecten er weer uitgefilterd worden. Dan kan de onderstaande union weg. Checken bij Hans!
+                //antwoord: waarschijnlijk is dit een truc om alle supercontexten in de lijst te krijgen!
+            "{"+
             "?Self  rdf:type category:Projecten."+
-            "?Self property:Semantic_title ?Semantic_title."+
+            this.standardLine+
             "BIND (category:Projecten AS ?Category)."+
-            "?Self property:Supercontext ?Supercontext.}"+
-            "} order by ?Semantic_title";
+            " optional { ?Self property:Supercontext ?Supercontext.}}"+
+            "} order by ?Semantic_title ";
 
-        this.callSparqlPrintout(sparqlquery, callQuery,function(queryresults){},{});
+        this.callSparqlPrintout(sparqlquery, callQuery,function(queryresults){},{"Semantic title":[""],"Organization":[""],"Dct:date":[{raw:"1/1970/01/01",timestamp:"0"}],
+            "Dct:creator":[""],"Dct:subject":[""],"Self":[{fullurl:"",fulltext:""}],"Supercontext":[{fulltext:""}]});
     };
     this.getLightContextProperties=function(page,callQuery){
         //page=encodeURIComponent(page.replaceAll(" ","_")).replaceAll("%","-");
@@ -195,16 +193,12 @@ function SPARQLStore() {
     };
     //[[Category:Resource Description]] [[Hyperlink::+]]|?Semantic title|?Hyperlink|?Dct:creator|?Dct:date|?Organization|?Dct:subject|sort=Semantic title|order=asc|limit=10000
     this.getHyperLinkPages=function(callQuery){
+        //rezources that have a Hyperlink
         var sparqlquery=
             "SELECT ?Self  ?Semantic_title ?Dct__creator ?Dct__subject ?Dct__date ?Hyperlink ?Organization ?Pagename WHERE {"+
-            this.standardLine+
             "?Self  rdf:type category:Resource_Description."+
-            "?Self property:Semantic_title ?Semantic_title."+
+            this.standardLine+
             "?Self property:Hyperlink ?Hyperlink."+
-            //"optional {?Self property:Dct-3Acreator ?Dct__creator."+
-            //"?Self property:Dct-3Asubject ?Dct__subject."+
-            //"?Self property:Dct-3Adate ?Dct__date."+
-            //"?Self property:Organization ?Organization.}"+
             "}";
 
         this.callSparqlPrintout(sparqlquery, callQuery,function(queryresults){},
@@ -213,17 +207,12 @@ function SPARQLStore() {
     };
     //query: [[Category:Resource Description]]|?Semantic title|?Dct:creator|?Dct:date|?Organization|?Dct:subject|?file name|?Hyperlink|sort=Semantic title|order=asc|limit=10000
     this.getReferencePages=function(callQuery){
+        //resources that have no filename, and no hyperlink
         var sparqlquery=
             "SELECT ?Self  ?Semantic_title ?Dct__creator ?Dct__subject ?Dct__date ?Hyperlink ?File_name ?Organization ?Pagename WHERE {"+
-            this.standardLine+
             "?Self  rdf:type category:Resource_Description."+
-            "?Self property:Semantic_title ?Semantic_title."+
-            "?Self property:File_name ?File_name."+
-            //"optional {?Self property:Hyperlink ?Hyperlink."+
-            //"?Self property:Dct-3Acreator ?Dct__creator."+
-            //"?Self property:Dct-3Asubject ?Dct__subject."+
-            //"?Self property:Dct-3Adate ?Dct__date."+
-            //"?Self property:Organization ?Organization.}"+
+            this.standardLine+
+                " FILTER (NOT EXISTS {?Self property:File_name ?File_name.} && NOT EXISTS {?Self property:Hyperlink ?Hyperlink.}) "+
             "}";
 
         this.callSparqlPrintout(sparqlquery, callQuery,function(queryresults){},
@@ -967,7 +956,9 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
             var self = resultSet[row].printouts["Self"][0].fulltext.replace("-3A",":").replace("-27","'");
             try{
                 self = resultSet[row].printouts["Pagename"][0];
-            }catch(e){}
+            }catch(e){
+                console.log("No Pagename property, using Self");
+            }
             suggestionObject.self = self;
         }
         var semanticTitle = resultSet[row].printouts["Semantic title"][0];
