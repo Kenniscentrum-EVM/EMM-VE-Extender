@@ -25,7 +25,7 @@ function SPARQLStore() {
         "PREFIX property: <#uristart#/index.php/Speciaal:URIResolver/Property-3A>"+
         "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>";
 
-    this.standardLine=" optional {?Self wiki:Property-3APagename ?Pagename. }"+
+    this.standardLine="  ?Self swivt:page ?Pagename. "+
         " optional {?Self property:Semantic_title ?Semantic_title.}";
     /**
      * exectue sparql-query on Sparql-store
@@ -142,7 +142,7 @@ function SPARQLStore() {
             "?Self  rdf:type category:Resource_Description."+
             this.standardLine+
             " ?Self property:File_name ?File_name."+
-            "}";
+            "} order by ?Semantic_title";
 
         this.callSparqlPrintout(sparqlquery, callQuery,function(queryresults){},
             {"Semantic title":[""],"Organization":[""],"Dct:date":[{raw:"1/1970/01/01",timestamp:"0"}],
@@ -202,7 +202,7 @@ function SPARQLStore() {
             "?Self  rdf:type category:Resource_Description."+
             this.standardLine+
             "?Self property:Hyperlink ?Hyperlink."+
-            "}";
+            "} order by ?Semantic_title";
 
         this.callSparqlPrintout(sparqlquery, callQuery,function(queryresults){},
             {"Semantic title":[""],"Hyperlink":[""],"Organization":[""],"Dct:date":[{raw:"1/1970/01/01",timestamp:"0"}],
@@ -958,7 +958,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
             //then check if result does not contain more % than before.
             var self = resultSet[row].printouts["Self"][0].fulltext.replace("-3A",":").replace("-27","'");
             try{
-                self = resultSet[row].printouts["Pagename"][0];
+                self = decodeURIComponent(resultSet[row].printouts["Pagename"][0].fulltext);
             }catch(e){
                 console.log("No Pagename property, using Self");
             }
