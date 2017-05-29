@@ -49,7 +49,7 @@ function SPARQLStore() {
             var results={};
             for (var i =0;i<table.length;i++) {
                 var line = table[i];
-                var id = self.pageName(line.Self.value).replaceAll("_"," ").replace("-3A",":");
+                var id = decodeURIComponent(self.pageName(line.Pagename.value.replaceAll("_"," ")));//self.pageName(line.Self.value).replaceAll("_"," ").replace("-3A",":");
 
                 //do a clone of object
                 var printouts1 = JSON.parse( JSON.stringify( printoutsDefault ) );
@@ -182,10 +182,11 @@ function SPARQLStore() {
     this.getLightContextProperties=function(page,callQuery){
         //page=encodeURIComponent(page.replaceAll(" ","_")).replaceAll("%","-");
         var sparqlquery=
-            ("SELECT ?Self  ?Dct__creator ?Dct__subject ?Dct__date ?Organization ?Semantic_title ?Hyperlink ?File_name ?Supercontext WHERE "+
+            ("SELECT ?Self  ?Dct__creator ?Dct__subject ?Dct__date ?Organization ?Semantic_title ?Hyperlink ?File_name ?Supercontext  ?Pagename WHERE "+
             "{?Self wiki:Property-3APagename \""+page+"\". "+
             "optional {?Self property:Dct-3Acreator ?Dct__creator.  } optional {"+
             "?Self  property:Dct-3Asubject ?Dct__subject.  } optional {"+
+            "  ?Self swivt:page ?Pagename. "+
             "?Self  property:Dct-3Adate ?Dct__date.  } optional {"+
             "?Self  property:Dct-3Adate ?Dct__date.  } optional {"+
             "?Self  property:Semantic_title ?Semantic_title.  } optional {"+
