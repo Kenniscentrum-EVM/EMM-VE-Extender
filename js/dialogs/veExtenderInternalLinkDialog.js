@@ -242,6 +242,8 @@ function createInternalLinkDialog(EMMDialog) {
         suggestionObject.category = resultSet[row].printouts.Category;
         suggestionObject.suffix = resultSet[row].printouts["Supercontext"];
 
+        //todo: anton:volgende code werkt volgens mij niet goed als er geen semantic title is.
+        //en ik vind het simpeler om die supercontext uit te laten rekenen via de query zelf. Daar heb ik al een voorbeeld van bijgedaan bij de query-aanroep in sparql.
         if (previousSuggestion != null) {
             if (previousSuggestion.semanticTitle.toLowerCase() == suggestionObject.semanticTitle.toLowerCase() && previousSuggestion.value == previousSuggestion.semanticTitle) {
                 try {
