@@ -205,6 +205,7 @@ function createExternalLinkDialog(LightResourceDialog) {
         if (this.isExistingResource) {
             target = linkdata;
         }
+        console.log("Execute query",query, target);
         semanticCreateWithFormQuery(query, insertCallback, target, "Resource Hyperlink");
     };
 

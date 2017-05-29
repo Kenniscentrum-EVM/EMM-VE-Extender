@@ -49,7 +49,7 @@ function SPARQLStore() {
             var results={};
             for (var i =0;i<table.length;i++) {
                 var line = table[i];
-                var id = self.pageName(line.Self.value).replaceAll("_"," ");
+                var id = self.pageName(line.Self.value).replaceAll("_"," ").replace("-3A",":");
 
                 //do a clone of object
                 var printouts1 = JSON.parse( JSON.stringify( printoutsDefault ) );
@@ -176,10 +176,13 @@ function SPARQLStore() {
         this.callSparqlPrintout(sparqlquery, callQuery,function(queryresults){},{"Semantic title":[""],"Organization":[""],"Dct:date":[{raw:"1/1970/01/01",timestamp:"0"}],
             "Dct:creator":[""],"Dct:subject":[""],"Self":[{fullurl:"",fulltext:""}],"Supercontext":[{fulltext:""}]});
     };
+    this.getEditData=function(page,callQuery){
+        this.getLightContextProperties(page.replaceAll("-3A",":").replaceAll("_"," "),callQuery);
+    };
     this.getLightContextProperties=function(page,callQuery){
         //page=encodeURIComponent(page.replaceAll(" ","_")).replaceAll("%","-");
         var sparqlquery=
-            ("SELECT ?Self  ?Dct__creator ?Dct__subject ?Dct__date ?Organization ?Semantic_title ?Hyperlink ?File_name WHERE "+
+            ("SELECT ?Self  ?Dct__creator ?Dct__subject ?Dct__date ?Organization ?Semantic_title ?Hyperlink ?File_name ?Supercontext WHERE "+
             "{?Self wiki:Property-3APagename \""+page+"\". "+
             "optional {?Self property:Dct-3Acreator ?Dct__creator.  } optional {"+
             "?Self  property:Dct-3Asubject ?Dct__subject.  } optional {"+
@@ -187,12 +190,13 @@ function SPARQLStore() {
             "?Self  property:Dct-3Adate ?Dct__date.  } optional {"+
             "?Self  property:Semantic_title ?Semantic_title.  } optional {"+
             "?Self  property:Hyperlink ?Hyperlink.  } optional {"+
+            "?Self  property:Supercontext ?Supercontext.  } optional {"+
             "?Self  property:File_name ?File_name.  } optional {"+
             "?Self  property:Organization ?Organization.}}");//"File_name"
 
         this.callSparqlPrintout(sparqlquery, callQuery,function(queryresults){},
             {"File name":[""],"Hyperlink":[""],"Semantic title":[""],"Organization":[""],"Dct:date":[{raw:"1/1970/01/01",timestamp:"0"}],
-                "Dct:creator":[""],"Dct:subject":[{fullurl:"",fulltext:""}],"Self":[{fullurl:"",fulltext:""}]});
+                "Dct:creator":[""],"Dct:subject":[{fullurl:"",fulltext:""}],"Self":[{fullurl:"",fulltext:""}],"Supercontext":[{fulltext:""}]});
     };
     //[[Category:Resource Description]] [[Hyperlink::+]]|?Semantic title|?Hyperlink|?Dct:creator|?Dct:date|?Organization|?Dct:subject|sort=Semantic title|order=asc|limit=10000
     this.getHyperLinkPages=function(callQuery){
@@ -558,16 +562,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
             var data = this;
             if (data.source != null) //are we editing?
             {
-                dialogInstance.executeModeChange(dialogInstance.modeEnum.EDIT_EXISTING, false);
-                setDisabledInputFields(dialogInstance.fieldset, true);
-                data.source = data.source.replace(/ /g, "_"); //convert whitespaces to underscores
-                var api = new mw.Api();
-                var query = dialogInstance.getEditQuery(data.source); //getEditQuery retrieves the correct query for us.
-                console.log("execute query in EMMDialog.prototype.getReadyProcess: ",query);
-                api.get({
-                    action: "ask",
-                    query: query
-                }).done(function (queryData) {
+                var resultFunction=function (queryData) {
                     dialogInstance.validator.disable(); //completely disable validation before we're going to fill the dialog.
                     dialogInstance.validator.disableOnChange();
                     var res = queryData.query.results;
@@ -595,7 +590,20 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                     dialogInstance.validator.enable(); //enable validation again.
                     dialogInstance.validator.validateAll();
                     dialogInstance.validator.enableOnChange();
-                });
+                }
+                dialogInstance.executeModeChange(dialogInstance.modeEnum.EDIT_EXISTING, false);
+                setDisabledInputFields(dialogInstance.fieldset, true);
+                data.source = data.source.replace(/ /g, "_"); //convert whitespaces to underscores
+                var api = new mw.Api();
+                var query = dialogInstance.getEditQuery(data.source).replaceAll("-3A",":"); //getEditQuery retrieves the correct query for us.
+                console.log("execute query in EMMDialog.prototype.getReadyProcess: ",query);
+                if (sparqlStore.sparqlActive){
+                    sparqlStore.getEditData(data.source,resultFunction)
+                } else
+                    api.get({
+                        action: "ask",
+                        query: query
+                    }).done(resultFunction);
             }
         }
 
@@ -953,17 +961,20 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
         var suggestionObject = {};
         suggestionObject.data = resultSet[row].fulltext;
         suggestionObject.value = "";
-        if (sparqlStore.sparqlActive){
-            //todo: check what other characters must be changed. Likely you have to use - --> %, and encodeURI
-            //then check if result does not contain more % than before.
-            var self = resultSet[row].printouts["Self"][0].fulltext.replace("-3A",":").replace("-27","'");
-            try{
-                self = decodeURIComponent(resultSet[row].printouts["Pagename"][0].fulltext);
-            }catch(e){
-                console.log("No Pagename property, using Self");
+        try {
+            if (sparqlStore.sparqlActive) {
+                //todo: check what other characters must be changed. Likely you have to use - --> %, and encodeURI
+                //then check if result does not contain more % than before.
+                var self = resultSet[row].printouts["Self"][0].fulltext.replace("-3A", ":").replace("-27", "'");
+                try {
+                    self = decodeURIComponent(resultSet[row].printouts["Pagename"][0].fulltext);
+                } catch (e) {
+                    console.log("No Pagename property, using Self");
+                }
+                suggestionObject.self = self;
             }
-            suggestionObject.self = self;
-        }
+        } catch(e){}
+
         var semanticTitle = resultSet[row].printouts["Semantic title"][0];
         if (semanticTitle) {
             suggestionObject.value = semanticTitle;

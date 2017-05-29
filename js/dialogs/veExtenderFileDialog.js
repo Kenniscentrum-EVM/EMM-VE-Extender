@@ -228,6 +228,7 @@ function createFileDialog(LightResourceDialog) {
         if (this.isExistingResource) {
             target = linkdata;
         }
+        console.log("Execute query",query);
         //Handle uploading of a new file or new version of a file.
         if (upload) {
             this.uploadFile(newUploadVersion, function () {

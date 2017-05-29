@@ -172,11 +172,13 @@ function createInternalLinkDialog(EMMDialog) {
             query += "Light Context[Heading]=" + heading;
             query += "&Light Context[Supercontext]=" + currentPageID;
             //Find the topcontext of the current page
+            var myquery="[[" + currentPageID + "]]|?Topcontext|limit=10000";
+            console.log("ask internal:",myquery);
             var api = new mw.Api();
             api.get({
                 action: "ask",
                 parameters: "limit:10000",//check how to increase limit of ask-result; done in LocalSettings.php
-                query: "[[" + currentPageID + "]]|?Topcontext|limit=10000"//
+                query: myquery//
             }).done(function (data) {
                 var res = data.query.results;
                 if (res[currentPageID].printouts.Topcontext[0] != null) {
@@ -209,6 +211,8 @@ function createInternalLinkDialog(EMMDialog) {
         if (this.isExistingResource) {
             target = linkdata;
         }
+        console.log("Execute query",query, target);
+
         semanticCreateWithFormQuery(query, insertCallback, target, form);
     };
 

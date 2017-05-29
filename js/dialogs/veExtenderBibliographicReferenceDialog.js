@@ -175,6 +175,7 @@ function createBibliographicReferenceDialog(LightResourceDialog) {
     EMMBibliographicReferenceDialog.prototype.buildAndExecuteQuery = function (currentPageID, insertCallback, linkdata) {
         //First call the method of the parent to build the basic query for a light resource
         var query = LightResourceDialog.prototype.buildQuery.call(this, currentPageID);
+        console.log("Execute query",query);
         this.executeQuery(query, insertCallback, linkdata);
     };
 
@@ -192,6 +193,7 @@ function createBibliographicReferenceDialog(LightResourceDialog) {
         if (this.isExistingResource) {
             target = linkdata;
         }
+        console.log("Execute query",query, target);
         semanticCreateWithFormQuery(query, insertCallback, target, "Resource Bibliographic Reference");
     };
 
