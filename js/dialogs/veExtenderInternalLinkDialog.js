@@ -240,41 +240,51 @@ function createInternalLinkDialog(EMMDialog) {
     EMMInternalLinkDialog.prototype.processSingleQueryResult = function (row, resultSet, previousSuggestion) {
         var suggestionObject = EMMDialog.prototype.processSingleQueryResult.call(this, row, resultSet, previousSuggestion);
         suggestionObject.category = resultSet[row].printouts.Category;
-        suggestionObject.suffix = resultSet[row].printouts["Supercontext"];
+        if (!sparqlStore.sparqlActive) {
+            suggestionObject.suffix = resultSet[row].printouts["Supercontext"];
 
-        //todo: anton:volgende code werkt volgens mij niet goed als er geen semantic title is.
-        //en ik vind het simpeler om die supercontext uit te laten rekenen via de query zelf. Daar heb ik al een voorbeeld van bijgedaan bij de query-aanroep in sparql.
-        if (previousSuggestion != null) {
-            if (previousSuggestion.semanticTitle.toLowerCase() == suggestionObject.semanticTitle.toLowerCase() && previousSuggestion.value == previousSuggestion.semanticTitle) {
-                try {
-                    previousSuggestion.value = checkAndPrintSuffix(previousSuggestion, resultSet[previousSuggestion.suffix[0].fulltext],previousSuggestion.suffix[0].fulltext);
-                    /*if (resultSet[previousSuggestion.suffix[0].fulltext] == undefined) {
-                        previousSuggestion.value=previousSuggestion.value + " (" + previousSuggestion.suffix[0].fulltext + ")";
+            if (previousSuggestion != null) {
+                if (previousSuggestion.semanticTitle.toLowerCase() == suggestionObject.semanticTitle.toLowerCase() && previousSuggestion.value == previousSuggestion.semanticTitle) {
+                    try {
+                        previousSuggestion.value = checkAndPrintSuffix(previousSuggestion, resultSet[previousSuggestion.suffix[0].fulltext], previousSuggestion.suffix[0].fulltext);
+
+                    } catch (e) {
                         console.log("suffix:", previousSuggestion.suffix[0].fulltext);
                         console.log("suffix:", resultSet[previousSuggestion.suffix[0].fulltext]);
-                    }*/
-                } catch(e){
-                    console.log("suffix:", previousSuggestion.suffix[0].fulltext);
-                    console.log("suffix:", resultSet[previousSuggestion.suffix[0].fulltext]);
+                    }
                 }
-            }
-            if (previousSuggestion.semanticTitle.toLowerCase() == suggestionObject.value.toLowerCase()) {
-                try {
-                    suggestionObject.value = checkAndPrintSuffix(suggestionObject, resultSet[suggestionObject.suffix[0].fulltext],suggestionObject.suffix[0].fulltext);
-                    /*if (resultSet[suggestionObject.suffix[0].fulltext] == undefined) {
+                if (previousSuggestion.semanticTitle.toLowerCase() == suggestionObject.value.toLowerCase()) {
+                    try {
+                        suggestionObject.value = checkAndPrintSuffix(suggestionObject, resultSet[suggestionObject.suffix[0].fulltext], suggestionObject.suffix[0].fulltext);
+                    } catch (e) {
                         console.log("suffix2:", suggestionObject.suffix[0].fulltext);
                         console.log("suffix2:", resultSet[suggestionObject.suffix[0].fulltext]);
-                        suggestionObject.value = suggestionObject.value + " (" + suggestionObject.suffix[0].fulltext + ")";
-                    }*/
-                } catch(e){
-                    console.log("suffix2:", suggestionObject.suffix[0].fulltext);
-                    console.log("suffix2:", resultSet[suggestionObject.suffix[0].fulltext]);
+                    }
                 }
             }
+            for (var i = 0; i < suggestionObject.category.length; i++)
+                if (/:\bLight Context\b/.test(suggestionObject.category[i].fulltext) || /:\bProject\b/.test(suggestionObject.category[i].fulltext))
+                    return suggestionObject;
+        } else {
+            //anton:de hierbovestaande code werkt volgens mij niet goed als er geen semantic title is.
+            //en ik vind het simpeler om die supercontext uit te laten rekenen via de query zelf.
+            suggestionObject.suffix = resultSet[row].printouts["Supercontext"][0].fulltext;
+            try {
+                if (previousSuggestion != null) {
+                    if (previousSuggestion.semanticTitle.toLowerCase() == suggestionObject.semanticTitle.toLowerCase() && previousSuggestion.value == previousSuggestion.semanticTitle) {
+                            previousSuggestion.value = previousSuggestion.value+"("+previousSuggestion.suffix+")";
+                            suggestionObject.value = suggestionObject.value+"("+suggestionObject.suffix+")";
+
+                    }
+                    if (previousSuggestion.semanticTitle.toLowerCase() == suggestionObject.value.toLowerCase()) {
+                            suggestionObject.value = suggestionObject.value+"("+suggestionObject.suffix+")";
+                    }
+                }
+            } catch (e) {
+                console.log("error using suffix:", suggestionObject.suffix);
+            }
+            return suggestionObject;
         }
-        for (var i = 0; i < suggestionObject.category.length; i++)
-            if (/:\bLight Context\b/.test(suggestionObject.category[i].fulltext) || /:\bProject\b/.test(suggestionObject.category[i].fulltext))
-                return suggestionObject;
 
         return null;
     };

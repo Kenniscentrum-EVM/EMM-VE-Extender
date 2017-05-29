@@ -152,31 +152,25 @@ function SPARQLStore() {
     this.getLinkPages=function(callQuery){
         /*
         dit kan volgens mij met de query (2X):
-         SELECT ?Self  ?Semantic_title ?Category   (?s2 as ?Supercontext)  WHERE {?Self  rdf:type ?Category. filter (?Category=category:Project || ?Category=category:Light_Context) ?Self swivt:page ?Pagename.
-         optional {?Self property:Semantic_title ?Semantic_title.}. optional { ?Self property:Supercontext ?Supercontext1.
-         optional {?Supercontext1 property:Semantic_title ?Semantic_title2.} bind(if (!bound(?Semantic_title2),"unknown semantic title",?Semantic_title2) as ?s2)}
+         SELECT ?Self  ?Semantic_title ?Category ?Supercontext ?Pagename WHERE {
+         {?Self  rdf:type category:Light_Context. BIND (category:Light_Context AS ?Category).} union {?Self  rdf:type category:Project. BIND (category:Project AS ?Category). } union {?Self  rdf:type category:Projecten.    BIND (category:Projecten AS ?Category). }
+
+         optional { ?Self property:Supercontext ?Supercontext1.
+         ?Supercontext1 property:Semantic_title ?Semantic_title2. bind(if (!bound(?Semantic_title2),"unknown semantic title",?Semantic_title2) as ?Supercontext2)}
+         optional {?Self property:Semantic_title ?Semantic_title.}
+         optional {?Self wiki:Property-3APagename ?Pagename. }
+         bind (if (bound(?Supercontext2),?Supercontext2,if (bound(?Supercontext1),?Supercontext1,"no super")) as ?Supercontext)
+         } order by ?Semantic_title
 
          }
          */
         var sparqlquery=
-            "SELECT ?Self  ?Semantic_title ?Category ?Supercontext ?Pagename WHERE {{"+
-            "?Self  rdf:type category: ."+
-            "?Self swivt:page ?Pagename."+
+            "SELECT ?Self  ?Semantic_title ?Category ?Supercontext ?Pagename WHERE {"+
+            "{?Self  rdf:type category:Light_Context. BIND (category:Light_Context AS ?Category).} union {?Self  rdf:type category:Project. BIND (category:Project AS ?Category). } union {?Self  rdf:type category:Projecten.    BIND (category:Projecten AS ?Category). }"+
+            "optional { ?Self property:Supercontext ?Supercontext1."+
+            "?Supercontext1 property:Semantic_title ?Semantic_title2. bind(if (!bound(?Semantic_title2),\"unknown semantic title\",?Semantic_title2) as ?Supercontext2)}"+
             this.standardLine+
-            "BIND (category:Light_Context AS ?Category)."+
-            " optional { ?Self property:Supercontext ?Supercontext.}} union "+
-            "{"+
-            "?Self  rdf:type category:Project."+
-            this.standardLine+
-            "BIND (category:Project AS ?Category)."+
-            " optional { ?Self property:Supercontext ?Supercontext.}} union "+
-                //todo: het lijkt erop dat in de lijst de Projecten er weer uitgefilterd worden. Dan kan de onderstaande union weg. Checken bij Hans!
-                //antwoord: waarschijnlijk is dit een truc om alle supercontexten in de lijst te krijgen!
-            "{"+
-            "?Self  rdf:type category:Projecten."+
-            this.standardLine+
-            "BIND (category:Projecten AS ?Category)."+
-            " optional { ?Self property:Supercontext ?Supercontext.}}"+
+            "bind (if (bound(?Supercontext2),?Supercontext2,if (bound(?Supercontext1),?Supercontext1,\"no super\")) as ?Supercontext)"+
             "} order by ?Semantic_title ";
 
         this.callSparqlPrintout(sparqlquery, callQuery,function(queryresults){},{"Semantic title":[""],"Organization":[""],"Dct:date":[{raw:"1/1970/01/01",timestamp:"0"}],
