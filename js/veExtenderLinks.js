@@ -150,9 +150,18 @@ function SPARQLStore() {
     };
     //[[Category:Light Context||Project||Projecten]]|?Semantic title|?Category=Category|?Supercontext|sort=Semantic title
     this.getLinkPages=function(callQuery){
+        /*
+        dit kan volgens mij met de query (2X):
+         SELECT ?Self  ?Semantic_title ?Category   (?s2 as ?Supercontext)  WHERE {?Self  rdf:type ?Category. filter (?Category=category:Project || ?Category=category:Light_Context) ?Self swivt:page ?Pagename.
+         optional {?Self property:Semantic_title ?Semantic_title.}. optional { ?Self property:Supercontext ?Supercontext1.
+         optional {?Supercontext1 property:Semantic_title ?Semantic_title2.} bind(if (!bound(?Semantic_title2),"unknown semantic title",?Semantic_title2) as ?s2)}
+
+         }
+         */
         var sparqlquery=
             "SELECT ?Self  ?Semantic_title ?Category ?Supercontext ?Pagename WHERE {{"+
-            "?Self  rdf:type category:Light_Context."+
+            "?Self  rdf:type category: ."+
+            "?Self swivt:page ?Pagename."+
             this.standardLine+
             "BIND (category:Light_Context AS ?Category)."+
             " optional { ?Self property:Supercontext ?Supercontext.}} union "+
