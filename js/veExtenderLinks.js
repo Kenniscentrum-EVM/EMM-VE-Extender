@@ -596,8 +596,8 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                 setDisabledInputFields(dialogInstance.fieldset, true);
                 data.source = data.source.replace(/ /g, "_"); //convert whitespaces to underscores
                 var api = new mw.Api();
-                var query = dialogInstance.getEditQuery(data.source).replaceAll("-3A",":"); //getEditQuery retrieves the correct query for us.
-                console.log("execute query in EMMDialog.prototype.getReadyProcess: ",query);
+                var query = dialogInstance.getEditQuery(data.source); //getEditQuery retrieves the correct query for us.
+                //console.log("execute query in EMMDialog.prototype.getReadyProcess: ",query);
                 if (sparqlStore.sparqlActive){
                     sparqlStore.getEditData(data.source,resultFunction)
                 } else
@@ -964,8 +964,6 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
         suggestionObject.value = "";
         try {
             if (sparqlStore.sparqlActive) {
-                //todo: check what other characters must be changed. Likely you have to use - --> %, and encodeURI
-                //then check if result does not contain more % than before.
                 var self = resultSet[row].printouts["Self"][0].fulltext.replace("-3A", ":").replace("-27", "'");
                 try {
                     self = decodeURIComponent(resultSet[row].printouts["Pagename"][0].fulltext);
