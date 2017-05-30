@@ -185,12 +185,11 @@ function SPARQLStore() {
         var sparqlquery=
             ("SELECT ?Self  ?Dct__creator ?Dct__subject ?Dct__date ?Organization ?Semantic_title ?Hyperlink ?File_name ?Supercontext  ?Pagename WHERE "+
             ("{?Self swivt:page <#uristart#/index.php/"+page.replaceAll(" ","_")+">. ").replaceAll("#uristart#",this.uristart)+
-            "  ?Self swivt:page ?Pagename. "+
+            this.standardLine+
             "optional {?Self property:Dct-3Acreator ?Dct__creator.  } optional {"+
             "?Self  property:Dct-3Asubject ?Dct__subject.  } optional {"+
             "?Self  property:Dct-3Adate ?Dct__date.  } optional {"+
             "?Self  property:Dct-3Adate ?Dct__date.  } optional {"+
-            "?Self  property:Semantic_title ?Semantic_title.  } optional {"+
             "?Self  property:Hyperlink ?Hyperlink.  } optional {"+
             "?Self  property:Supercontext ?Supercontext.  } optional {"+
             "?Self  property:File_name ?File_name.  } optional {"+
