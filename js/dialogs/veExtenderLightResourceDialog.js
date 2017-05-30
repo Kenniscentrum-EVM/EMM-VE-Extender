@@ -117,7 +117,8 @@ function createLightResourceDialog(EMMDialog, resourceType) {
         };
 
         if (sparqlStore.sparqlActive){
-            sparqlStore.getLightContextProperties(this.suggestion.self,function(data){
+            console.log("self:",this.suggestion);
+            sparqlStore.getLightContextProperties(this.suggestion.data,function(data){
                 var resultSet=data.query.results;
                 var row=Object.keys(resultSet)[0];
                 thatdialog.suggestion = thatdialog.processSingleQueryResult( row, resultSet, null);
