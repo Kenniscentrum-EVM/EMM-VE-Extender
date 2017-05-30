@@ -184,7 +184,7 @@ function SPARQLStore() {
         //page=encodeURIComponent(page.replaceAll(" ","_")).replaceAll("%","-");
         var sparqlquery=
             ("SELECT ?Self  ?Dct__creator ?Dct__subject ?Dct__date ?Organization ?Semantic_title ?Hyperlink ?File_name ?Supercontext  ?Pagename WHERE "+
-            ("{?Self swivt:page <#uristart#/index.php/"+page.replaceAll(" ","_")+">. ").replaceAll("#uristart#",this.uristart)+
+            ("{?Self swivt:page <#uristart#/index.php/"+encodeURI(page.replaceAll(" ","_"))+">. ").replaceAll("'","%27").replaceAll("#uristart#",this.uristart)+
             this.standardLine+
             "optional {?Self property:Dct-3Acreator ?Dct__creator.  } optional {"+
             "?Self  property:Dct-3Asubject ?Dct__subject.  } optional {"+
