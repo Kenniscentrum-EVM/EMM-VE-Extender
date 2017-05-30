@@ -26,7 +26,7 @@ function SPARQLStore() {
         "PREFIX property: <#uristart#/index.php/Speciaal:URIResolver/Property-3A>"+
         "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>";
 
-    this.standardLine="  ?Self rdfs:label ?Pagename. "+
+    this.standardLine="  ?Self swivt:page ?Pagename. "+
         " optional {?Self property:Semantic_title ?Semantic_title.}";
     /**
      * exectue sparql-query on Sparql-store
@@ -178,20 +178,20 @@ function SPARQLStore() {
             "Dct:creator":[""],"Dct:subject":[""],"Self":[{fullurl:"",fulltext:""}],"Supercontext":[{fulltext:""}]});
     };
     this.getEditData=function(page,callQuery){
-        console.log("page:",page);
         this.getLightContextProperties(page.replaceAll("_"," "),callQuery);
     };
     this.getLightContextProperties=function(page,callQuery){
         //page=encodeURIComponent(page.replaceAll(" ","_")).replaceAll("%","-");
         var sparqlquery=
             ("SELECT ?Self  ?Dct__creator ?Dct__subject ?Dct__date ?Organization ?Semantic_title ?Hyperlink ?File_name ?Supercontext  ?Pagename WHERE "+
-            "{?Self rdfs:label \""+page.replaceAll("_"," ")+"\". "+
+            ("{?Self swivt:page <#uristart#/index.php/"+page.replaceAll(" ","_")+">. ").replaceAll("#uristart#",this.uristart)+
+            "  ?Self swivt:page ?Pagename. "+
             "optional {?Self property:Dct-3Acreator ?Dct__creator.  } optional {"+
             "?Self  property:Dct-3Asubject ?Dct__subject.  } optional {"+
             "?Self  property:Dct-3Adate ?Dct__date.  } optional {"+
-            "?Self  property:Dct-3Adate ?Dct__date.  }"+
-            this.standardLine+
-            " optional {?Self  property:Hyperlink ?Hyperlink.  } optional {"+
+            "?Self  property:Dct-3Adate ?Dct__date.  } optional {"+
+            "?Self  property:Semantic_title ?Semantic_title.  } optional {"+
+            "?Self  property:Hyperlink ?Hyperlink.  } optional {"+
             "?Self  property:Supercontext ?Supercontext.  } optional {"+
             "?Self  property:File_name ?File_name.  } optional {"+
             "?Self  property:Organization ?Organization.}}");//"File_name"
@@ -967,7 +967,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
             if (sparqlStore.sparqlActive) {
                 var self = resultSet[row].printouts["Self"][0].fulltext.replace("-3A", ":").replace("-27", "'");
                 try {
-                    self = decodeURIComponent(resultSet[row].printouts["Pagename"][0]);
+                    self = decodeURIComponent(resultSet[row].printouts["Pagename"][0].fulltext);
                 } catch (e) {
                     console.log("No Pagename property, using Self");
                 }
