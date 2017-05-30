@@ -7,6 +7,7 @@ String.prototype.replaceAll = function (search, replacement) {
 function isString (obj) {
     return (Object.prototype.toString.call(obj) === '[object String]');
 }
+
 function SPARQLStore() {
     this.datastore="portfolios";
     this.sparqlActive=true;
