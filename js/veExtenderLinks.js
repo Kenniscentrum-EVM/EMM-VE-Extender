@@ -49,7 +49,7 @@ function SPARQLStore() {
             var results={};
             for (var i =0;i<table.length;i++) {
                 var line = table[i];
-                var id = decodeURIComponent(self.pageName(line.Pagename.value.replaceAll("_"," ")));//self.pageName(line.Self.value).replaceAll("_"," ").replace("-3A",":");
+                var id = decodeURIComponent(self.pageName(line.Pagename.value.replaceAll("-3A", ":").replaceAll("__", ":").replaceAll("_", " ").replace("-27", "'")));//self.pageName(line.Self.value).replaceAll("_"," ").replace("-3A",":");
 
                 //do a clone of object
                 var printouts1 = JSON.parse( JSON.stringify( printoutsDefault ) );
@@ -59,14 +59,14 @@ function SPARQLStore() {
                     var newid=oldid;
 
                     newid=newid.replaceAll("__",":").replaceAll("_"," ");
-                    var value2 = line[oldid].value.replace("-3A",":");
+                    var value2 = line[oldid].value.replace("-3A",":").replace("%3B",";");
 
 
                     if (oldid=="Hyperlink"){
-                        printouts1[newid]=[decodeURI(value2.replace("-3A",":").replace("%3B",";"))];
+                        printouts1[newid]=[decodeURI(value2)];
                     } else
                     if (oldid=="Supercontext"){
-                        printouts1[newid]=[{fulltext:self.pageName(decodeURI(value2.replace("-3A",":").replace("%3B",";"))).replaceAll("_"," ")}];
+                        printouts1[newid]=[{fulltext:self.pageName(decodeURI(value2)).replaceAll("_"," ")}];
                     } else
                     if (line[oldid]["type"]=="uri"){
                         printouts1[newid]=[{fulltext:self.pageName(value2), fullurl:value2}];
@@ -86,14 +86,14 @@ function SPARQLStore() {
                         printouts1[newid]=[cNum((value2))];
                     } else
                     if (line[oldid]["type"]=="literal"){
-                        printouts1[newid]=[self.pageName(value2).replace("-3A",":")];
+                        printouts1[newid]=[self.pageName(value2)];
                     }
                     /*if (newid=="Semantic title"&&!(isString(printouts1[newid][0]))){
                         printouts1[newid][0] ="";
                         console.log("change type of Semantic title!");
                     }*/
                 }
-                var myid=id.replaceAll("-3A", ":").replaceAll("__", ":").replaceAll("_", " ");
+                var myid=id;
                 try{
                     //check if there is a previous printout
                     var previousprintouts=results[myid].printouts;
@@ -177,7 +177,7 @@ function SPARQLStore() {
             "Dct:creator":[""],"Dct:subject":[""],"Self":[{fullurl:"",fulltext:""}],"Supercontext":[{fulltext:""}]});
     };
     this.getEditData=function(page,callQuery){
-        this.getLightContextProperties(page.replaceAll("-3A",":").replaceAll("_"," "),callQuery);
+        this.getLightContextProperties(page.replaceAll("_"," "),callQuery);
     };
     this.getLightContextProperties=function(page,callQuery){
         //page=encodeURIComponent(page.replaceAll(" ","_")).replaceAll("%","-");
