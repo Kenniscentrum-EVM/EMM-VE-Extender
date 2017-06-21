@@ -40,6 +40,12 @@ class EMMVEExtenderExtension
 
     const EMM_ACCESS_CONTROL = "EMMAccessControl";
 
+    /*
+     //following code hides protecction-message from user
+    //todo: check with Hans if this is necessary
+     const ACCESSCONTROL_TAG = '<div style="display:none"><accesscontrol>';
+
+    const ACCESSCONTROL_ENDTAG = '</accesscontrol></div>';*/
     const ACCESSCONTROL_TAG = '<accesscontrol>';
 
     const ACCESSCONTROL_ENDTAG = '</accesscontrol>';
