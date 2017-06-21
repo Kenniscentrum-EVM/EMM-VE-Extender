@@ -78,18 +78,18 @@ function SPARQLStore() {
                             value2=value2+"/01/01";
                             var timestamp=parseInt((new Date(value2).getTime() / 1000).toFixed(0));
                             printouts1[newid]=[{raw:"1/"+value2,timestamp:timestamp.toString()}];
-                            console.log("date2:",printouts1[newid]);
+                            //console.log("date2:",printouts1[newid]);
                         } else
                         if (line[oldid]["datatype"]=="http://www.w3.org/2001/XMLSchema#date"){
                             value2=value2.replaceAll("-","/").replace("Z","");
                             if (value2.length<5)value2=value2+"/01/01";
                             var id3=parseInt((new Date(value2).getTime() / 1000).toFixed(0));
                             printouts1[newid]=[{raw:"1/"+value2,timestamp:id3.toString()}];
-                            console.log("date:",printouts1[newid]);
+                            //console.log("date:",printouts1[newid]);
                         } else
                         if (line[oldid]["type"]=="literal"){
                             printouts1[newid]=[self.pageName(value2)];
-                            console.log("date3:",printouts1[newid]);
+                            //console.log("date3:",printouts1[newid]);
                         }else
                         printouts1[newid]=[cNum((value2))];
                     }
