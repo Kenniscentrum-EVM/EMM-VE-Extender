@@ -38,7 +38,7 @@ $wgResourceModules['ext.EMMVEExtension'] = array(
 class EMMVEExtenderExtension
 {
 
-    const EMM_ACCESS_CONTROL = "EMMAccessControl";
+    const EMM_ACCESS_CONTROL = "EMM access control";
 
     /*
      //following code hides protecction-message from user
@@ -90,7 +90,12 @@ class EMMVEExtenderExtension
                 $pos+=+strlen(self::EMM_ACCESS_CONTROL);
                 $text = substr($data, $pos, (strpos($data, PHP_EOL, $pos)) - $pos);
                 $text = trim($text);
-                $text = ltrim($text, '=');
+                $text = rtrim($text, ',');
+                $text2 = ltrim($text, '=');
+                if ($text!=$text2)
+                    $text=$text2;
+                else
+                    $text="";
             }
 
             $textToDelete = self::get_all_between(self::ACCESSCONTROL_TAG, self::ACCESSCONTROL_ENDTAG, $data);
@@ -105,12 +110,17 @@ class EMMVEExtenderExtension
                 if (strlen($text)>0) {
 
                     //look for place where text should be inserted; after current template-call
-                    $pos2 = strpos($data, self::END_TEMPLATE, $pos) + 2;
+                    $pos2 = strpos($data, self::END_TEMPLATE, $pos)+2;
 
-                    // add/remove/replace tags and content
-                    $data = substr_replace($data, self::ACCESSCONTROL_TAG . $text . self::ACCESSCONTROL_ENDTAG, $pos2, 0);
-                    // the new wikitext ahs to be saved as a new Content object (Content doesn't support to replace/add content by itself)
+                    //is template already there? If not, put it on bottom of page
+                    $totalTag = self::ACCESSCONTROL_TAG . $text . self::ACCESSCONTROL_ENDTAG;
+                    if ($pos2>2)
+                        // add/remove/replace tags and content
+                        $data = substr_replace($data, $totalTag, $pos2, 0);
+                    else
+                        $data=$data.$totalTag;
                 }
+                // the new wikitext hss to be saved as a new Content object (Content doesn't support to replace/add content by itself)
                 $content = new WikitextContent($data);
                 wfDebug( 'access-control changed to:'.$text );
             }
