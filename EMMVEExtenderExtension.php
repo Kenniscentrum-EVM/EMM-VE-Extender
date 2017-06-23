@@ -7,7 +7,7 @@ $wgExtensionCredits['semantic'][] = array(
     'name' => 'EMM VE Extension',
 
     // A description of the extension, which will appear on Special:Version.
-    'description' => 'EMM VE Extension',
+    'description' => 'EMM VE Extension, add functionality to Visual Editor',
 
     // The version of the extension, which will appear on Special:Version.
     // This can be a number or a string.
