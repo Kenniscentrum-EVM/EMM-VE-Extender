@@ -16,6 +16,8 @@ function SPARQLStore() {
     var self=this;
 
     this.uristart=window.location.href.split("/index.php/")[0];
+    if (this.uristart.indexOf("portfoliotest") !== -1)this.datastore="portfolios";
+    if (this.uristart.indexOf("hzsandbox") !== -1)this.datastore="hzsandbox";
     this.prefix="PREFIX wiki: <#uristart#/index.php/Speciaal:URIResolver/>"+
         "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>"+
             "PREFIX address:<http://195.93.238.56/wiki/portfoliotest/wiki/index.php/>"+
@@ -82,10 +84,11 @@ function SPARQLStore() {
                         } else
                         if (line[oldid]["datatype"]=="http://www.w3.org/2001/XMLSchema#date"){
                             value2=value2.replaceAll("-","/").replace("Z","");
+                            console.log("date:",value2);
                             if (value2.length<5)value2=value2+"/01/01";
                             var id3=parseInt((new Date(value2).getTime() / 1000).toFixed(0));
                             printouts1[newid]=[{raw:"1/"+value2,timestamp:id3.toString()}];
-                            //console.log("date:",printouts1[newid]);
+                            console.log("date:",printouts1[newid]);
                         } else
                         if (line[oldid]["type"]=="literal"){
                             printouts1[newid]=[self.pageName(value2)];
@@ -988,7 +991,9 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
         return suggestionObject;
     };
 
-    /**  semanticAskQuery
+    EMMDialog.prototype.processSparql = function (sparqlFunction) {
+        sparqlStore.getHyperLinkPages(sparqlFunction)
+    };    /**  semanticAskQuery
      *  This method is responsible for executing a call to the mediawiki API of the type "ask"
      *  @param query {String} the query that is to be used in the API-call
      *  @param callback {function} a function that will be executed after the api-call is finished

@@ -258,7 +258,9 @@ function createFileDialog(LightResourceDialog) {
      */
     EMMFileDialog.prototype.processSingleQueryResult = function (row, resultSet, previousSuggestion) {
         var suggestionObject = LightResourceDialog.prototype.processSingleQueryResult.call(this, row, resultSet, previousSuggestion);
-        suggestionObject.filename = resultSet[row].printouts["File name"][0].fulltext.replace("Bestand:", "").replace("File:", "");
+        try {
+            suggestionObject.filename = resultSet[row].printouts["File name"][0].fulltext.replace("Bestand:", "").replace("File:", "");
+        }catch(e){}
         if (previousSuggestion != null) {
             if (previousSuggestion.semanticTitle.toLowerCase() == suggestionObject.semanticTitle.toLowerCase() && previousSuggestion.value == previousSuggestion.semanticTitle)
                 previousSuggestion.value = previousSuggestion.value + " (" + previousSuggestion.filename + ")";
