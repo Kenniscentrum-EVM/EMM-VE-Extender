@@ -42,11 +42,15 @@ function SPARQLStore() {
     this.callSparqlPrintout = function (sparqlquery, callQuery,setvar,printoutsDefault) {
         var myprefix=this.prefix;
         var serverAddress=mw.config.get( 'wgServer' );
-        var newURL = this.uristart.replace (/^[a-z]{4}\:\/{2}[a-z]{1,}\:[0-9]{1,4}.(.*)/, '$1');
+        //var newURL = this.uristart.replace (/^[a-z]{4}\:\/{2}[a-z]{1,}\:[0-9]{1,4}.(.*)/, '$1');
+        var URL = this.uristart;
+        var URLsplit = URL.split('/');
+        var host = URLsplit[0] + "//" + URLsplit[2] + "/";
+        var newURL = URL.replace(host, '');
         serverAddress=serverAddress+"/"+newURL;
         myprefix=myprefix.replaceAll("#uristart#",serverAddress);
         if (vagrant)
-            myprefix=myprefix.replaceAll(":5555",'');
+            myprefix=myprefix.replaceAll(":5555",'');//only necessary when wgServer variable not set in LocalSettings.php
         sparqlquery=
             myprefix+sparqlquery;
         //console.log("query:" + this.uristart+" ; "+sparqlquery);
