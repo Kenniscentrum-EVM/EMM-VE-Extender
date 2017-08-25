@@ -15,7 +15,7 @@ function SPARQLStore() {
     this.getsemanticresult=null;
     var self=this;
 
-    this.uristart=window.location.href.split("/index.php/")[0];
+    this.uristart=window.location.href.split("/index.php")[0];
     if (this.uristart.indexOf("portfoliotest") !== -1)this.datastore="portfolios";
     if (this.uristart.indexOf("hzsandbox") !== -1)this.datastore="hzsandbox";
     this.prefix="PREFIX wiki: <#uristart#/index.php/Speciaal:URIResolver/>"+
@@ -42,14 +42,22 @@ function SPARQLStore() {
             this.prefix+sparqlquery;
         //console.log("query:" + this.uristart+" ; "+sparqlquery);
         sparqlquery=sparqlquery.replaceAll("#uristart#",this.uristart);
+        sparqlquery=sparqlquery.replaceAll(":5555",'');
         console.log("query:" + sparqlquery);
-        var proxy = location.href.substring(0, window.location.href.lastIndexOf("/")) + '/Special:MyProxy';//Special Page Proxy
+        //console.log("uristart:" + this.uristart);
+        var proxy = location.href.substring(0, window.location.href.lastIndexOf("/")) + '/Speciaal:MyProxy';//Special Page Proxy
         //add query to address
         var url = proxy + '?' + "query=" + encodeURIComponent(sparqlquery) + "&dataset="+this.datastore;
-        //console.log("url:" + url);
-        $.get(url, function (json){
+        var url1 = 'http://145.19.82.55:3030/'+this.datastore+'/query?query=' + encodeURIComponent("PREFIX wiki: <http://localhost/wikis/hzportfolio/wiki/index.php/Speciaal:URIResolver/>PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX address:<http://195.93.238.56/wiki/portfoliotest/wiki/index.php/>PREFIX skos: <http://www.w3.org/2004/02/skos/core#>PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX owl: <http://www.w3.org/2002/07/owl#>PREFIX swivt: <http://semantic-mediawiki.org/swivt/1.0#>PREFIX category: <http://localhost/wikis/hzportfolio/wiki/index.php/Speciaal:URIResolver/Category-3A>PREFIX property: <http://localhost/wikis/hzportfolio/wiki/index.php/Speciaal:URIResolver/Property-3A>PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>SELECT ?Self  ?Semantic_title ?File_name ?Pagename WHERE {?Self  rdf:type category:Resource_Description.  ?Self swivt:page ?Pagename.  optional {?Self property:Semantic_title ?Semantic_title.} ?Self property:File_name ?File_name.} order by ?Semantic_title");
+        console.log("url1:" + url1);
+        /*$.get(url1, function (json){
+            console.log("results of sparql-query:");
+            console.log(json);
+                });*/
+
+        $.get(url1, function (json){
             var table = json.results.bindings;
-            console.log(table);
+            //console.log(table);
             var results={};
             for (var i =0;i<table.length;i++) {
                 var line = table[i];
