@@ -40,11 +40,16 @@ function SPARQLStore() {
      * @param getSemanticPrintouts
      */
     this.callSparqlPrintout = function (sparqlquery, callQuery,setvar,printoutsDefault) {
+        var myprefix=this.prefix;
+        var serverAddress=mw.config.get( 'wgServer' );
+        var newURL = this.uristart.replace (/^[a-z]{4}\:\/{2}[a-z]{1,}\:[0-9]{1,4}.(.*)/, '$1');
+        serverAddress=serverAddress+"/"+newURL;
+        myprefix=myprefix.replaceAll("#uristart#",serverAddress);
+        if (vagrant)
+            myprefix=myprefix.replaceAll(":5555",'');
         sparqlquery=
-            this.prefix+sparqlquery;
+            myprefix+sparqlquery;
         //console.log("query:" + this.uristart+" ; "+sparqlquery);
-        sparqlquery=sparqlquery.replaceAll("#uristart#",this.uristart);
-        sparqlquery=sparqlquery.replaceAll(":5555",'');
         console.log("query:" + sparqlquery);
         //console.log("uristart:" + this.uristart);
         var proxy = location.href.substring(0, window.location.href.lastIndexOf("/")) + '/Special:MyProxy';//Special Page Proxy
@@ -52,7 +57,7 @@ function SPARQLStore() {
         var url = proxy + '?' + "query=" + encodeURIComponent(sparqlquery) + "&dataset="+this.datastore;
         if (vagrant)
             url = 'http://145.19.82.55:3030/'+this.datastore+'/query?query=' + encodeURIComponent(sparqlquery);
-        console.log("url:" + url);
+        //console.log("url:" + url);
         $.get(url, function (json){
             var table = json.results.bindings;
             //console.log(table);
@@ -1007,10 +1012,10 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
     EMMDialog.prototype.semanticAskQuery = function (query, callback) {
         var dialogInstance = this;
         var api = new mw.Api();
-        console.log("query:",query);
+        console.log("semantic api-query:",query);
         var processQueryResults=function (data) {
             var res = data.query.results;
-            console.log("results:",data);
+            //console.log("results:",data);
             var arr = []; //array to store the results
             var previousSuggestion = null;
             var row;
