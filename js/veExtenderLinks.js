@@ -48,6 +48,14 @@ function SPARQLStore() {
         var host = URLsplit[0] + "//" + URLsplit[2] + "/";
         var newURL = URL.replace(host, '');
         serverAddress=serverAddress+"/"+newURL;
+        //variable set in LocalSettings.php by: $wgActionPaths["sparqlstore"] = "portfolios";
+        var wgActionPaths=mw.config.get( 'wgActionPaths' );
+        if (wgActionPaths["sparqlstore"]) {
+
+            this.datastore=wgActionPaths["sparqlstore"];
+            console.log("sparqlstore", wgActionPaths["sparqlstore"]);
+        }
+        var serverAddress=mw.config.get( 'wgServer' );
         myprefix=myprefix.replaceAll("#uristart#",serverAddress);
         if (vagrant)
             myprefix=myprefix.replaceAll(":5555",'');//only necessary when wgServer variable not set in LocalSettings.php
