@@ -1,6 +1,6 @@
 "use strict";
 
-var vagrant=true;
+var vagrant=false;
 
 String.prototype.replaceAll = function (search, replacement) {
     var target = this;
