@@ -10,6 +10,16 @@ function isString (obj) {
     return (Object.prototype.toString.call(obj) === '[object String]');
 }
 
+function debug(desc,myvar){
+    if (vagrant) {
+        var err = new Error();
+        try {
+            err = err.stack.split(/\r?\n/)[2];
+        }catch(e){console.log(e);}
+        console.log(desc,myvar,err);
+    }
+}
+
 function SPARQLStore() {
     this.datastore="portfolios";
     this.sparqlActive=true;
@@ -53,7 +63,7 @@ function SPARQLStore() {
         if (wgActionPaths["sparqlstore"]) {
 
             this.datastore=wgActionPaths["sparqlstore"];
-            console.log("sparqlstore", wgActionPaths["sparqlstore"]);
+            debug("sparqlstore", wgActionPaths["sparqlstore"]);
         }
         var serverAddress=mw.config.get( 'wgServer' );
         myprefix=myprefix.replaceAll("#uristart#",serverAddress);
@@ -67,12 +77,16 @@ function SPARQLStore() {
         var proxy = location.href.substring(0, window.location.href.lastIndexOf("/")) + '/Special:MyProxy';//Special Page Proxy
         //add query to address
         var url = proxy + '?' + "query=" + encodeURIComponent(sparqlquery) + "&dataset="+this.datastore;
-        if (vagrant)
-            url = 'http://145.19.82.55:3030/'+this.datastore+'/query?query=' + encodeURIComponent(sparqlquery);
+        //
+        if (vagrant) {
+            var localserver='192.168.2.105';
+            //var localserver='145.19.82.55';
+            url = 'http://'+localserver+':3030/' + this.datastore + '/query?query=' + encodeURIComponent(sparqlquery);
+        }
         //console.log("url:" + url);
         $.get(url, function (json){
             var table = json.results.bindings;
-            //console.log(table);
+            debug("table:",table);
             var results={};
             for (var i =0;i<table.length;i++) {
                 var line = table[i];
