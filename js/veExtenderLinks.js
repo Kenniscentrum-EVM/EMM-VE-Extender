@@ -10,15 +10,57 @@ function isString (obj) {
     return (Object.prototype.toString.call(obj) === '[object String]');
 }
 
+function GlobalSetting(){
+    var that = {}; // Create an empty object
+    that.getUrl=function(url,datastore,sparqlquery){
+        return url;
+    };
+    that.debug=function(desc,myvar){
+
+    };
+    that.isVagrant=function(){
+        return false;
+    };
+    return that;
+
+}
+function VagrantSetting(){
+    var that = GlobalSetting();
+    that.getUrl=function(url,datastore,sparqlquery){
+            //var localserver='192.168.2.105';//thuis
+            var localserver="145.19.86.169";//boulevard
+            //var localserver='145.19.82.55';//edisonweg
+            url = 'http://'+localserver+':3030/' + datastore + '/query?query=' + encodeURIComponent(sparqlquery);
+        return url;
+        }   ;
+
+
+    that.debug=function(desc,myvar){
+    };
+    that.isVagrant=function(){
+        return true;
+    };
+    return that;
+
+
+}
+
+var globalSetting = new GlobalSetting();
+if (vagrant)
+    globalSetting = new VagrantSetting();
+
 function debug(desc,myvar){
-    if (vagrant) {
+    if (globalSetting.isVagrant()) {
+        //globalSetting.debug(desc,myvar);
         var err = new Error();
         try {
             err = (err.stack.split(/\r?\n/)[2]);
             //debug("error",err);
             err = (err).substring(7).split(" ")[0];
-        }catch(e){debug(e);}
-        console.log(desc,myvar,err);
+        } catch (e) {
+            debug(e);
+        }
+        console.log(desc, myvar, err);
     }
 }
 
@@ -71,8 +113,8 @@ function SPARQLStore() {
             debug("sparqlstore:", wgActionPaths["sparqlstore"]);
         }
         myprefix=myprefix.replaceAll("#uristart#",serverAddress);
-        if (vagrant)
-            myprefix=myprefix.replaceAll(":5555",'');//only necessary when wgServer variable not set in LocalSettings.php
+        //if (vagrant)
+        //    myprefix=myprefix.replaceAll(":5555",'');//only necessary when wgServer variable not set in LocalSettings.php
         sparqlquery=
             myprefix+sparqlquery;
         //debug("query:" + this.uristart+" ; "+sparqlquery);
@@ -82,12 +124,8 @@ function SPARQLStore() {
         //add query to address
         var url = proxy + '?' + "query=" + encodeURIComponent(sparqlquery) + "&dataset="+this.datastore;
         //
-        if (vagrant) {
-            //var localserver='192.168.2.105';//thuis
-            var localserver="145.19.86.169";//boulevard
-            //var localserver='145.19.82.55';//edisonweg
-            url = 'http://'+localserver+':3030/' + this.datastore + '/query?query=' + encodeURIComponent(sparqlquery);
-        }
+
+        url=globalSetting.getUrl(url,this.datastore,sparqlquery);
         //debug("url:" + url);
         $.get(url, function (json){
             var table = json.results.bindings;
