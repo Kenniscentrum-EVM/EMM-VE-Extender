@@ -1,0 +1,21 @@
+cd /home/anton/drive_c/tocopy/DIO/git/EMM-VE-Extender/js
+#scp veExtenderLinks.js hz04@195.93.238.56:/home/hz04/mediawiki/core/extensions/EMM-VE-Extender/js/veExtenderLinks.js
+#scp veExtenderLanguage.js hz04@195.93.238.56:/home/hz04/mediawiki/core/extensions/EMM-VE-Extender/js/veExtenderLanguage.js
+#scp veExtender.js hz04@195.93.238.56:/home/hz04/mediawiki/core/extensions/EMM-VE-Extender/js/veExtender.js
+#scp dialogs/veExtenderLightResourceDialog.js hz04@195.93.238.56:/home/hz04/mediawiki/core/extensions/EMM-VE-Extender/js/dialogs/veExtenderLightResourceDialog.js
+#scp dialogs/veExtenderInternalLinkDialog.js hz04@195.93.238.56:/home/hz04/mediawiki/core/extensions/EMM-VE-Extender/js/dialogs/veExtenderInternalLinkDialog.js
+#scp dialogs/veExtenderFileDialog.js hz04@195.93.238.56:/home/hz04/mediawiki/core/extensions/EMM-VE-Extender/js/dialogs/veExtenderFileDialog.js
+#scp ../EMMVEExtenderExtension.php hz04@195.93.238.56:/home/hz04/mediawiki/core/extensions/EMM-VE-Extender/EMMVEExtenderExtension.php
+
+cp veExtenderLinks.js /home/anton/drive_c/tocopy/DIO/vagrant5/mediawiki/extensions/EMM-VE-Extender/js/veExtenderLinks.js
+sed -i 's/vagrant=false/vagrant=true/g' /home/anton/drive_c/tocopy/DIO/vagrant5/mediawiki/extensions/EMM-VE-Extender/js/veExtenderLinks.js
+ip_interface="`ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1  -d'/'`"
+sed -i "s/myhostipaddress/$ip_interface/g" /home/anton/drive_c/tocopy/DIO/vagrant5/mediawiki/extensions/EMM-VE-Extender/js/veExtenderLinks.js
+cp veExtenderLanguage.js /home/anton/drive_c/tocopy/DIO/vagrant5/mediawiki/extensions/EMM-VE-Extender/js/veExtenderLanguage.js
+cp veExtender.js /home/anton/drive_c/tocopy/DIO/vagrant5/mediawiki/extensions/EMM-VE-Extender/js/veExtender.js
+cp dialogs/veExtenderLightResourceDialog.js /home/anton/drive_c/tocopy/DIO/vagrant5/mediawiki/extensions/EMM-VE-Extender/js/dialogs/veExtenderLightResourceDialog.js
+cp dialogs/veExtenderInternalLinkDialog.js /home/anton/drive_c/tocopy/DIO/vagrant5/mediawiki/extensions/EMM-VE-Extender/js/dialogs/veExtenderInternalLinkDialog.js
+cp dialogs/veExtenderFileDialog.js /home/anton/drive_c/tocopy/DIO/vagrant5/mediawiki/extensions/EMM-VE-Extender/js/dialogs/veExtenderFileDialog.js
+cp ../EMMVEExtenderExtension.php /home/anton/drive_c/tocopy/DIO/vagrant5/mediawiki/extensions/EMM-VE-Extender/EMMVEExtenderExtension.php
+
+

@@ -1,6 +1,7 @@
 "use strict";
 
 var vagrant=false;
+var ipaddress="myhostipaddress";
 
 String.prototype.replaceAll = function (search, replacement) {
     var target = this;
@@ -28,7 +29,8 @@ function VagrantSetting(){
     var that = GlobalSetting();
     that.getUrl=function(url,datastore,sparqlquery){
             //var localserver='192.168.2.105';//thuis
-            var localserver="145.19.86.169";//boulevard
+            //var localserver="145.19.86.169";//boulevard
+        var localserver=ipaddress;;
             //var localserver='145.19.82.55';//edisonweg
             url = 'http://'+localserver+':3030/' + datastore + '/query?query=' + encodeURIComponent(sparqlquery);
         return url;
