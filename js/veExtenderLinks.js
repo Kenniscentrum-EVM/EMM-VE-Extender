@@ -14,8 +14,10 @@ function debug(desc,myvar){
     if (vagrant) {
         var err = new Error();
         try {
-            err = err.stack.split(/\r?\n/)[2];
-        }catch(e){console.log(e);}
+            err = (err.stack.split(/\r?\n/)[2]);
+            //debug("error",err);
+            err = (err).substring(7).split(" ")[0];
+        }catch(e){debug(e);}
         console.log(desc,myvar,err);
     }
 }
@@ -54,36 +56,39 @@ function SPARQLStore() {
         var serverAddress=mw.config.get( 'wgServer' );
         //var newURL = this.uristart.replace (/^[a-z]{4}\:\/{2}[a-z]{1,}\:[0-9]{1,4}.(.*)/, '$1');
         var URL = this.uristart;
+        //debug("URL",URL);
         var URLsplit = URL.split('/');
         var host = URLsplit[0] + "//" + URLsplit[2] + "/";
         var newURL = URL.replace(host, '');
+        //debug("newURL",newURL);
+
         serverAddress=serverAddress+"/"+newURL;
         //variable set in LocalSettings.php by: $wgActionPaths["sparqlstore"] = "portfolios";
         var wgActionPaths=mw.config.get( 'wgActionPaths' );
         if (wgActionPaths["sparqlstore"]) {
 
             this.datastore=wgActionPaths["sparqlstore"];
-            debug("sparqlstore", wgActionPaths["sparqlstore"]);
+            debug("sparqlstore:", wgActionPaths["sparqlstore"]);
         }
-        var serverAddress=mw.config.get( 'wgServer' );
         myprefix=myprefix.replaceAll("#uristart#",serverAddress);
         if (vagrant)
             myprefix=myprefix.replaceAll(":5555",'');//only necessary when wgServer variable not set in LocalSettings.php
         sparqlquery=
             myprefix+sparqlquery;
-        //console.log("query:" + this.uristart+" ; "+sparqlquery);
-        console.log("query:" + sparqlquery);
-        //console.log("uristart:" + this.uristart);
+        //debug("query:" + this.uristart+" ; "+sparqlquery);
+        debug("query:",sparqlquery);
+        //debug("uristart:" + this.uristart);
         var proxy = location.href.substring(0, window.location.href.lastIndexOf("/")) + '/Special:MyProxy';//Special Page Proxy
         //add query to address
         var url = proxy + '?' + "query=" + encodeURIComponent(sparqlquery) + "&dataset="+this.datastore;
         //
         if (vagrant) {
-            var localserver='192.168.2.105';
-            //var localserver='145.19.82.55';
+            //var localserver='192.168.2.105';//thuis
+            var localserver="145.19.86.169";//boulevard
+            //var localserver='145.19.82.55';//edisonweg
             url = 'http://'+localserver+':3030/' + this.datastore + '/query?query=' + encodeURIComponent(sparqlquery);
         }
-        //console.log("url:" + url);
+        //debug("url:" + url);
         $.get(url, function (json){
             var table = json.results.bindings;
             debug("table:",table);
@@ -95,7 +100,7 @@ function SPARQLStore() {
                 //do a clone of object
                 var printouts1 = JSON.parse( JSON.stringify( printoutsDefault ) );
 
-                //console.log("line1:",line);
+                //debug("line1:",line);
                 for (var oldid in line){
                     var newid=oldid;
 
@@ -117,25 +122,25 @@ function SPARQLStore() {
                             value2=value2+"/01/01";
                             var timestamp=parseInt((new Date(value2).getTime() / 1000).toFixed(0));
                             printouts1[newid]=[{raw:"1/"+value2,timestamp:timestamp.toString()}];
-                            //console.log("date2:",printouts1[newid]);
+                            //debug("date2:",printouts1[newid]);
                         } else
                         if (line[oldid]["datatype"]=="http://www.w3.org/2001/XMLSchema#date"){
                             value2=value2.replaceAll("-","/").replace("Z","");
-                            console.log("date:",value2);
+                            debug("date:",value2);
                             if (value2.length<5)value2=value2+"/01/01";
                             var id3=parseInt((new Date(value2).getTime() / 1000).toFixed(0));
                             printouts1[newid]=[{raw:"1/"+value2,timestamp:id3.toString()}];
-                            console.log("date:",printouts1[newid]);
+                            debug("date:",printouts1[newid]);
                         } else
                         if (line[oldid]["type"]=="literal"){
                             printouts1[newid]=[self.pageName(value2)];
-                            //console.log("date3:",printouts1[newid]);
+                            //debug("date3:",printouts1[newid]);
                         }else
                         printouts1[newid]=[cNum((value2))];
                     }
                     /*if (newid=="Semantic title"&&!(isString(printouts1[newid][0]))){
                         printouts1[newid][0] ="";
-                        console.log("change type of Semantic title!");
+                        debug("change type of Semantic title!");
                     }*/
                 }
                 var myid=id;
@@ -159,7 +164,7 @@ function SPARQLStore() {
 
                     }
                     //previousprintouts["Dct:subject"].push(printouts1["Dct:subject"][0])
-                    console.log("oldid-equal:",printouts1);
+                    debug("oldid-equal:",printouts1);
                 } catch(e) {
                     //if not, create new element in results
 
@@ -170,7 +175,7 @@ function SPARQLStore() {
                 }
             }
             var queryresults={query:{results:results}};
-            console.log(queryresults);
+            debug("queryresults:",queryresults);
             setvar(queryresults);
 
             if (sparqlStore.sparqlActive)
@@ -340,7 +345,7 @@ function SPARQLStore() {
             "} order by ?Semantic_title";
 
         this.callSparqlPrintout(sparqlquery, callQuery,function(queryresults){sparqlStore.getsuperresult=queryresults;},{});
-        //this.getProjects(function(data){console.log("data:",data);});
+        //this.getProjects(function(data){debug("data:",data);});
     };
 }
 var sparqlStore = new SPARQLStore();
@@ -641,7 +646,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                 data.source = data.source.replace(/ /g, "_"); //convert whitespaces to underscores
                 var api = new mw.Api();
                 var query = dialogInstance.getEditQuery(data.source); //getEditQuery retrieves the correct query for us.
-                //console.log("execute query in EMMDialog.prototype.getReadyProcess: ",query);
+                //debug("execute query in EMMDialog.prototype.getReadyProcess: ",query);
                 if (sparqlStore.sparqlActive){
                     sparqlStore.getEditData(data.source,resultFunction)
                 } else
@@ -1012,7 +1017,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                 try {
                     self = decodeURIComponent(resultSet[row].printouts["Pagename"][0].fulltext);
                 } catch (e) {
-                    console.log("No Pagename property, using Self");
+                    debug("error","No Pagename property, using Self");
                 }
                 suggestionObject.self = self;
             }
@@ -1038,10 +1043,10 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
     EMMDialog.prototype.semanticAskQuery = function (query, callback) {
         var dialogInstance = this;
         var api = new mw.Api();
-        console.log("semantic api-query:",query);
+        debug("semantic api-query:",query);
         var processQueryResults=function (data) {
             var res = data.query.results;
-            //console.log("results:",data);
+            //debug("results:",data);
             var arr = []; //array to store the results
             var previousSuggestion = null;
             var row;
