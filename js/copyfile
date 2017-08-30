@@ -1,5 +1,5 @@
 cd /home/anton/drive_c/tocopy/DIO/git/EMM-VE-Extender/js
-#scp veExtenderLinks.js hz04@195.93.238.56:/home/hz04/mediawiki/core/extensions/EMM-VE-Extender/js/veExtenderLinks.js
+scp veExtenderLinks.js hz04@195.93.238.56:/home/hz04/mediawiki/core/extensions/EMM-VE-Extender/js/veExtenderLinks.js
 #scp veExtenderLanguage.js hz04@195.93.238.56:/home/hz04/mediawiki/core/extensions/EMM-VE-Extender/js/veExtenderLanguage.js
 #scp veExtender.js hz04@195.93.238.56:/home/hz04/mediawiki/core/extensions/EMM-VE-Extender/js/veExtender.js
 #scp dialogs/veExtenderLightResourceDialog.js hz04@195.93.238.56:/home/hz04/mediawiki/core/extensions/EMM-VE-Extender/js/dialogs/veExtenderLightResourceDialog.js

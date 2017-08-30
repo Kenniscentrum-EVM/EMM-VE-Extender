@@ -1,7 +1,7 @@
 "use strict";
 
 var vagrant=false;
-var ipaddress="myhostipaddress";//in PHP-Storm:File/Settings/File Watchers (filetype:javascript, scope:Module 'EMM-VE-Extender', program: path-to-script
+var ipaddress="myhostipaddress";//in PHP-Storm:File/Settings/File Watchers (filetype:javascript, scope:Module 'EMM-VE-Extender', program: path-to-script)
 
 String.prototype.replaceAll = function (search, replacement) {
     var target = this;
@@ -57,7 +57,7 @@ function debug(desc,myvar){
             //debug("error",err);
             err = (err).substring(7).split(" ")[0];
         } catch (e) {
-            debug(e);
+            console.log(e);
         }
         console.log(desc, myvar, err);
     }
@@ -122,7 +122,16 @@ function SPARQLStore() {
         var proxy = location.href.substring(0, window.location.href.lastIndexOf("/")) + '/Special:MyProxy';//Special Page Proxy
         //add query to address
         var url = proxy + '?' + "query=" + encodeURIComponent(sparqlquery) + "&dataset="+this.datastore;
-        //
+        //to be used for direct call to sparql-store
+        //var url = "http://localhost:3030/" + this.datastore + '/query?' + "query=" + encodeURIComponent(sparqlquery);
+        //bovenstaande werkt niet.
+        //het volgende werkt wel:
+        //- query opbouwen uit prefixen, en select ?s ?p ?o where {?s ?p ?o.} limit 50
+        //- query opbouwen uit prefixen, en SELECT ?Self  ?Semantic_title ?Category ?Supercontext ?Pagename WHERE {?Self  rdf:type ?Category.} limit 50
+        //het volgende werkt NIET:
+        //- query opbouwen uit prefixen, en SELECT ?Self  ?Semantic_title ?Category ?Supercontext ?Pagename WHERE {?Self  rdf:type category:Light_Context.} limit 50
+        //het lijkt dat de -3A hier parten speelt. Raar is dat dit niet speelt bij de ontwikkel-versie, die werkt met dezelfde versie van fuseki!?
+
 
         url=globalSetting.getUrl(url,this.datastore,sparqlquery);
         //debug("url:" + url);
