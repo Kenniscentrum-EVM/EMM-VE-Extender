@@ -686,7 +686,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                     dialogInstance.validator.enable(); //enable validation again.
                     dialogInstance.validator.validateAll();
                     dialogInstance.validator.enableOnChange();
-                }
+                };
                 dialogInstance.executeModeChange(dialogInstance.modeEnum.EDIT_EXISTING, false);
                 setDisabledInputFields(dialogInstance.fieldset, true);
                 data.source = data.source.replace(/ /g, "_"); //convert whitespaces to underscores
@@ -700,14 +700,13 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                             resultFunction(resultdata);
                         else {
                             debug("no results for sparql, do ask-query!",resultdata);
-                            var temps=sparqlStore.sparqlActive;
                             sparqlStore.sparqlActive=false;
                             api.get({
                                 action: "ask",
                                 query: query
                             }).done(function (resultdata) {
                                 resultFunction(resultdata);
-                                sparqlStore.sparqlActive=temps;
+                                sparqlStore.sparqlActive=true;
                             });
                         }
                     })
