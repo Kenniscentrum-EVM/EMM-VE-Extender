@@ -699,7 +699,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                         if (resultdata.query.results.length > 0)
                             resultFunction(resultdata);
                         else {
-                            debug("no results for sparql, do ask-query!");
+                            debug("no results for sparql, do ask-query!",resultdata);
                             var temps=sparqlStore.sparqlActive;
                             sparqlStore.sparqlActive=false;
                             api.get({
