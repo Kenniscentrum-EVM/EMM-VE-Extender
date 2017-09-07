@@ -694,7 +694,23 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                 var query = dialogInstance.getEditQuery(data.source); //getEditQuery retrieves the correct query for us.
                 //debug("execute query in EMMDialog.prototype.getReadyProcess: ",query);
                 if (sparqlStore.sparqlActive){
-                    sparqlStore.getEditData(data.source,resultFunction)
+                    sparqlStore.getEditData(data.source,function (resultdata) {
+                        //debug("results in getEdit:",resultdata);
+                        if (resultdata.query.results.length > 0)
+                            resultFunction(resultdata);
+                        else {
+                            debug("no results for sparql, do ask-query!");
+                            var temps=sparqlStore.sparqlActive;
+                            sparqlStore.sparqlActive=false;
+                            api.get({
+                                action: "ask",
+                                query: query
+                            }).done(function (resultdata) {
+                                resultFunction(resultdata);
+                                sparqlStore.sparqlActive=temps;
+                            });
+                        }
+                    })
                 } else
                     api.get({
                         action: "ask",
