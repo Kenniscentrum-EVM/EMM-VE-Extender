@@ -116,7 +116,7 @@ function createLightResourceDialog(EMMDialog, resourceType) {
             thatdialog.subjectField.setValue(thatdialog.suggestion.subjects);
         };
 
-        if (sparqlStore.sparqlActive){
+        /*if (sparqlStore.sparqlActive){
             console.log("self:",this.suggestion);
             sparqlStore.getLightContextProperties(this.suggestion.data,function(data){
                 var resultSet=data.query.results;
@@ -126,7 +126,7 @@ function createLightResourceDialog(EMMDialog, resourceType) {
             });
 
         }
-        else {
+        else */{
             callFillFields();
         }
     };

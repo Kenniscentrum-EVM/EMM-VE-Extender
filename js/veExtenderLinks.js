@@ -29,7 +29,8 @@ function VagrantSetting(){
     var that = GlobalSetting();
     that.getUrl=function(url,datastore,sparqlquery){
         var localserver=ipaddress;
-        url = 'http://'+localserver+':3030/' + datastore + '/query?query=' + encodeURIComponent(sparqlquery);
+        //url = 'http://'+localserver+':3030/' + datastore + '/query?query=' + encodeURIComponent(sparqlquery);
+        url = 'http://localhost:5030/hzportfolio/query?query=' + encodeURIComponent(sparqlquery);
         return url;
         }   ;
 
@@ -693,7 +694,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                 var api = new mw.Api();
                 var query = dialogInstance.getEditQuery(data.source); //getEditQuery retrieves the correct query for us.
                 //debug("execute query in EMMDialog.prototype.getReadyProcess: ",query);
-                if (sparqlStore.sparqlActive){
+                /*if (sparqlStore.sparqlActive){
                     sparqlStore.getEditData(data.source,function (resultdata) {
                         //debug("results in getEdit:",resultdata);
                         if (resultdata.query.results.length > 0)
@@ -710,7 +711,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                             });
                         }
                     })
-                } else
+                } else*/
                     api.get({
                         action: "ask",
                         query: query
@@ -1287,12 +1288,45 @@ function initAutoComplete(data, dialogInstance) {
         lookup: data,
         triggerSelectOnValidInput: false,
         onSelect: function (suggestion) {
-            dialogInstance.suggestion = suggestion;
-            dialogInstance.isExistingResource = true;
-            dialogInstance.titleField.setValue(suggestion.semanticTitle);
-            inputField.blur();
-            dialogInstance.fillFields(suggestion);
-            dialogInstance.testAndChangeDialogMode();
+            console.log("suggest:",suggestion);//do ask-query, based on line 695
+            query=dialogInstance.getEditQuery(suggestion.data);
+                            //console.log("do query:",query);
+            var api = new mw.Api();
+            api.get({
+                action: "ask",
+                query: query
+            }).done(function(queryData){
+					//console.log("result:",queryData);
+					var suggestion2
+                    var res = queryData.query.results;
+                    for (var row in res) {
+                        console.log("row:",row);
+                        if (!res.hasOwnProperty(row)) { //seems to be required.
+                            continue;
+                        }
+                        suggestion2 = dialogInstance.processSingleQueryResult(row, res);
+                        if (suggestion == null) {
+                            mw.notify(OO.ui.deferMsg("visualeditor-emm-notification-err-invalidlink-body")(), {
+                                title: OO.ui.deferMsg("visualeditor-emm-notification-err-invalidlink-title")(),
+                                autoHide: false,
+                                type: "error"
+                            });
+                            dialogInstance.close();
+                            return;
+                        }
+
+
+                    }
+
+		            dialogInstance.suggestion = suggestion2;
+		            //console.log("found suggestion:",suggestion2);
+		            dialogInstance.isExistingResource = true;
+		            dialogInstance.titleField.setValue(suggestion.semanticTitle);
+		            inputField.blur();
+		            dialogInstance.fillFields(suggestion2);
+		            dialogInstance.testAndChangeDialogMode();
+		        }
+            );
         },
         appendTo: inputField.parentElement,
         maxHeight: 300

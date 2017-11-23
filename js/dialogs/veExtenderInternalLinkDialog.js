@@ -20,7 +20,7 @@ function createInternalLinkDialog(EMMDialog) {
     var EMMInternalLinkDialog = function () {
         EMMDialog.call(this);
         this.autoCompleteQuery = "[[Category:Light Context||Project||Projecten]]|?Semantic title|?Category=Category|?Supercontext|sort=Semantic title|order=asc|limit=10000";
-        this.editQuery = "[[PAGENAMEPARAMETER]] |?Semantic title|?Category=Category";
+        this.editQuery = "[[PAGENAMEPARAMETER]] |?Semantic title|?Category=Category|?Supercontext";
     };
     OO.inheritClass(EMMInternalLinkDialog, EMMDialog);
 
