@@ -201,14 +201,17 @@ function createFileDialog(LightResourceDialog) {
             query += "&Resource Description[created in page]=" + currentPageID;
         }
         //Gather the filename in different ways depending on whether it is an existing file or not.
-        var filename = "";
-        if (upload) {
-            filename = this.fileField.getValue().name;
-        } else {
-            filename = this.suggestion.data.replace("Bestand:", "").replace("File:", "");
-        }
-        //Expand the existing query with a file-specific part.
-        query += "&Resource Description[file name]=" + filename;
+        try{
+	        var filename = "";
+	        if (upload) {
+	            filename = this.fileField.getValue().name;
+	        } else {
+	            filename = this.suggestion.data.replace("Bestand:", "").replace("File:", "");
+	        }
+	        //Expand the existing query with a file-specific part.
+	        query += "&Resource Description[file name]=" + filename;
+	    } catch(e){}
+	    console.log("linkdata:",linkdata);
         this.executeQuery(query, insertCallback, linkdata, upload, newUploadVersion);
     };
 
@@ -229,10 +232,12 @@ function createFileDialog(LightResourceDialog) {
             target = linkdata;
         }
         console.log("Execute query",query);
+        console.log("Target:",target);
         //Handle uploading of a new file or new version of a file.
         if (upload) {
+        	uploadtarget=target
             this.uploadFile(newUploadVersion, function () {
-                semanticCreateWithFormQuery(query, insertCallback, target, "Resource Light");
+                semanticCreateWithFormQuery(query, insertCallback, uploadtarget, "Resource Light");
             });
         }
         else {
@@ -284,10 +289,12 @@ function createFileDialog(LightResourceDialog) {
      */
     EMMFileDialog.prototype.executeInsertAction = function (insertCallback, currentPageID, linkdata) {
         //See the documentation wiki for a visual representation of this if/else mess
+        console.log("linkdata:",linkdata);
         var dialogInstance = this;
         if (this.isExistingResource) {
             if (this.fileField.getValue() != null) {
                 //todo create a function for stripping a filename of "Bestand:" and "File:". Also make sure this is language independent
+                //console.log("filename:"+this.fileField.getValue().name+".");
                 if (this.fileField.getValue().name != this.suggestion.filename.replace("Bestand:", "").replace("File:", "").toLowerCase()) {
                     //Upload new file and create a new resource, because the file has a diffrent name.
                     //A diffrent filename will lead to a diffrent internal name for the File.
@@ -425,24 +432,28 @@ function createFileDialog(LightResourceDialog) {
      * @param {function} postUploadFunction - Function that will be executed after successfully executing the query.
      */
     EMMFileDialog.prototype.uploadFile = function (newUploadVersion, postUploadFunction) {
-        var dialogInstance = this;
-        var ignorewarnings = newUploadVersion ? 1 : 0;
-        var file = this.fileField.getValue();
-        var filedata = {
-            filename: file.name,
-            ignorewarnings: ignorewarnings
-        };
-        new mw.Api().upload(file, filedata).fail(function (status, exceptionobject) {
-            //Handle possible error messages and display them in a way the user understands them.
-            //If we're uploading a new version and the file already exists, ignore the error and insert a link anyway.
-            if (newUploadVersion && (status == "exists" || status == "exists-normalized")) {
-                postUploadFunction();
-            } else {
-                dialogInstance.handleUploadFail(status, exceptionobject);
-            }
-        }).done(function () {
-            postUploadFunction();
-        });
+    	try{
+	        var dialogInstance = this;
+	        var ignorewarnings = newUploadVersion ? 1 : 0;
+	        var file = this.fileField.getValue();
+	        var filedata = {
+	            filename: file.name,
+	            ignorewarnings: ignorewarnings
+	        };
+	        new mw.Api().upload(file, filedata).fail(function (status, exceptionobject) {
+	            //Handle possible error messages and display them in a way the user understands them.
+	            //If we're uploading a new version and the file already exists, ignore the error and insert a link anyway.
+	            if (newUploadVersion && (status == "exists" || status == "exists-normalized")) {
+	                postUploadFunction();
+	            } else {
+	                dialogInstance.handleUploadFail(status, exceptionobject);
+	            }
+	        }).done(function () {
+	            postUploadFunction();
+	        });
+	    } catch(e){
+	    	postUploadFunction();
+	    }
     };
 
     /**

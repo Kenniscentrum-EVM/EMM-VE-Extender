@@ -715,7 +715,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                         }
                     })
                 } else*/
-                console.log("do query:",query);
+                //console.log("do query:",query);
                     api.get({
                         action: "ask",
                         query: query
@@ -928,6 +928,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
             else {
                 linkData = "";
             }
+            console.log("linkdata:",linkData);
 
             /**
              * Callback function to be called after creating a new resource or editing an existing one
@@ -1292,39 +1293,29 @@ function initAutoComplete(data, dialogInstance) {
         lookup: data,
         triggerSelectOnValidInput: false,
         onSelect: function (suggestion) {
-            console.log("suggest:",suggestion);//do ask-query, based on line 695
             query=dialogInstance.getEditQuery(suggestion.data);
-                            console.log("do query:",query);
-                            var api = new mw.Api();
-                    api.get({
-                        action: "ask",
-                        query: query
-                    }).done(function(queryData){
-console.log("result:",queryData);
-var suggestion2
-                    var res = queryData.query.results;
-                    for (var row in res) {
-                        console.log("row:",row);
-                        if (!res.hasOwnProperty(row)) { //seems to be required.
-                            continue;
-                        }
-                        suggestion2 = dialogInstance.processSingleQueryResult(row, res);
-                        if (suggestion == null) {
-                            mw.notify(OO.ui.deferMsg("visualeditor-emm-notification-err-invalidlink-body")(), {
-                                title: OO.ui.deferMsg("visualeditor-emm-notification-err-invalidlink-title")(),
-                                autoHide: false,
-                                type: "error"
-                            });
-                            dialogInstance.close();
-                            return;
-                        }
+            //do ask-query for suggestion
+            var api = new mw.Api();
+            api.get({
+                action: "ask",
+                query: query
+            }).done(function(queryData){
+			//console.log("result:",queryData);
+				var suggestion2
+	            var res = queryData.query.results;
+	            for (var row in res) {
+	                //console.log("row:",row);
+	                if (!res.hasOwnProperty(row)) { //seems to be required.
+	                    continue;
+                }
+                suggestion2 = dialogInstance.processSingleQueryResult(row, res);
+            }
 
-
-                    }
-
+            linkdata=suggestion.data;
             dialogInstance.suggestion = suggestion2;
-            console.log("found suggestion:",suggestion2);*/
-            dialogInstance.isExistingResource = false;
+            dialogInstance.suggestion.data = linkdata;
+            console.log("found suggestion + link-data::",suggestion2);
+            dialogInstance.isExistingResource = true;
             dialogInstance.titleField.setValue(suggestion.semanticTitle);
             inputField.blur();
             dialogInstance.fillFields(suggestion);
