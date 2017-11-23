@@ -66,6 +66,7 @@ parameters = yaml.load(stream)['parameters']
 wikiurl=parameters.get('wikiurl',"http://localhost:5555/wikis/hzportfolio/wiki")
 sparqlport=parameters.get('sparqlport',"5030")
 wiki=wikiurl+"/index.php"
+fname=parameters.get('datafilename',"data.ttl")
 print("wiki url:",wikiurl)
 print("sparql port:",sparqlport)
 
@@ -78,7 +79,7 @@ PREFIX owl: <http://www.w3.org/2002/07/owl#>
 PREFIX swivt: <http://semantic-mediawiki.org/swivt/1.0#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 """.format(wiki)
-fh = open("data.ttl",'w')
+fh = open(fname,'w')
 fh.write(header)
 
 cmd = """<{0}> 
@@ -147,9 +148,6 @@ doCommand("[[Category:Resource Description]]|?Semantic title|?file name|?hyperli
   swivt:page  <{0}>;
 [6]
 [7]
-[8]
-[79]
-[10]
 [4]
   wiki:Property-3ADisplay_title_of  "{1}";
 [5]
@@ -159,9 +157,9 @@ doCommand("[[Category:Resource Description]]|?Semantic title|?file name|?hyperli
   """,
           [ #todo: date can also be: 1/2017/4/13 --> "2016-09-06Z"^^xsd:date
               #lambda x: "wiki:Property-3ADct-3Adate  \"" + simple(x["Dct:date"][0]['raw']+'"^^xsd:gYear'),
-           lambda y: codeTitle("wiki:Property-3ADct-3Acreator  ",y["Dct:creator"],False),
-           lambda y: codeTitle("wiki:Property-3ADct-3Asubject  wiki:" ,y["Dct:subject"],True),
-           lambda y: codeTitle("wiki:Property-Organization  ",y["Organization"],False),
+           #lambda y: codeTitle("wiki:Property-3ADct-3Acreator  ",y["Dct:creator"],False),
+           #lambda y: codeTitle("wiki:Property-3ADct-3Asubject  wiki:" ,y["Dct:subject"],True),
+           #lambda y: codeTitle("wiki:Property-Organization  ",y["Organization"],False),
 lambda y: codeTitle("wiki:Property-3ASupercontext  wiki:",y["Supercontext"],True),
            lambda y: codeTitle("wiki:Property-3AFile_name  wiki:",y["File name"],True),
 lambda y: "wiki:Property-3AHyperlink  <"+y["Hyperlink"][0]+">",
@@ -172,7 +170,7 @@ lambda y: "wiki:Property-3ASemantic_title  \"" + escapeQuote(y["Semantic title"]
 fh.close()
 print("--- %s seconds ---" % (time.time() - start_time))
 if not debug:
-    command = '''curl -X PUT  -H Content-Type:text/turtle  -T data.ttl  -G http://localhost:{0}/hzportfolio/data'''.format(sparqlport)
+    command = '''curl -X PUT  -H Content-Type:text/turtle  -T {0}  -G http://localhost:{1}/hzportfolio/data'''.format(fname,sparqlport)
     print(command)
     print(os.system(command))
 

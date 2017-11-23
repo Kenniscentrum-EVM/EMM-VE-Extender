@@ -1,7 +1,7 @@
 "use strict";
 
-var vagrant=false;
-var ipaddress="myhostipaddress";//in PHP-Storm:File/Settings/File Watchers (filetype:javascript, scope:Module 'EMM-VE-Extender', program: path-to-script)
+var vagrant=true;
+var ipaddress="172.28.128.1";//in PHP-Storm:File/Settings/File Watchers (filetype:javascript, scope:Module 'EMM-VE-Extender', program: path-to-script)
 
 String.prototype.replaceAll = function (search, replacement) {
     var target = this;
@@ -29,8 +29,8 @@ function VagrantSetting(){
     var that = GlobalSetting();
     that.getUrl=function(url,datastore,sparqlquery){
         var localserver=ipaddress;
-        //url = 'http://'+localserver+':3030/' + datastore + '/query?query=' + encodeURIComponent(sparqlquery);
         url = 'http://localhost:5030/hzportfolio/query?query=' + encodeURIComponent(sparqlquery);
+        console.log(url);
         return url;
         }   ;
 
@@ -660,10 +660,12 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
             if (data.source != null) //are we editing?
             {
                 var resultFunction=function (queryData) {
+                    console.log("result:",queryData);
                     dialogInstance.validator.disable(); //completely disable validation before we're going to fill the dialog.
                     dialogInstance.validator.disableOnChange();
                     var res = queryData.query.results;
                     for (var row in res) {
+                        console.log("row:",row);
                         if (!res.hasOwnProperty(row)) { //seems to be required.
                             continue;
                         }
@@ -706,12 +708,14 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                                 action: "ask",
                                 query: query
                             }).done(function (resultdata) {
+                                console.log(resultdata);
                                 resultFunction(resultdata);
                                 sparqlStore.sparqlActive=true;
                             });
                         }
                     })
                 } else*/
+                console.log("do query:",query);
                     api.get({
                         action: "ask",
                         query: query
@@ -1290,14 +1294,14 @@ function initAutoComplete(data, dialogInstance) {
         onSelect: function (suggestion) {
             console.log("suggest:",suggestion);//do ask-query, based on line 695
             query=dialogInstance.getEditQuery(suggestion.data);
-                            //console.log("do query:",query);
-            var api = new mw.Api();
-            api.get({
-                action: "ask",
-                query: query
-            }).done(function(queryData){
-					//console.log("result:",queryData);
-					var suggestion2
+                            console.log("do query:",query);
+                            var api = new mw.Api();
+                    api.get({
+                        action: "ask",
+                        query: query
+                    }).done(function(queryData){
+console.log("result:",queryData);
+var suggestion2
                     var res = queryData.query.results;
                     for (var row in res) {
                         console.log("row:",row);
@@ -1318,14 +1322,13 @@ function initAutoComplete(data, dialogInstance) {
 
                     }
 
-		            dialogInstance.suggestion = suggestion2;
-		            //console.log("found suggestion:",suggestion2);
-		            dialogInstance.isExistingResource = true;
-		            dialogInstance.titleField.setValue(suggestion.semanticTitle);
-		            inputField.blur();
-		            dialogInstance.fillFields(suggestion2);
-		            dialogInstance.testAndChangeDialogMode();
-		        }
+            dialogInstance.suggestion = suggestion2;
+            console.log("found suggestion:",suggestion2);*/
+            dialogInstance.isExistingResource = false;
+            dialogInstance.titleField.setValue(suggestion.semanticTitle);
+            inputField.blur();
+            dialogInstance.fillFields(suggestion);
+            dialogInstance.testAndChangeDialogMode();}
             );
         },
         appendTo: inputField.parentElement,
