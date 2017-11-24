@@ -172,7 +172,7 @@ def getRecentChanges():
     import datetime
     today = datetime.date.today()
     print (today) #rcstart={0}T00:00:00Z&
-    url = (wikiurl + "/api.php?action=query&list=recentchanges&rcprop=title&rclimit=100&format=json") .format(today) #&rclimit=500
+    url = (wikiurl + "/api.php?action=query&list=recentchanges&rcprop=title&rcstart={0}T00:00:00Z&format=json") .format(today) #&rclimit=500
     print(url)
     r = requests.get(url)
     data = json.loads(r.text)
@@ -184,15 +184,29 @@ def getRecentChanges():
         urls.add(title)
     urls=list(urls)
     possiblePages={"Resource Description","Light Context"}
-    pages=[]
+    pages=dict()
     print(len(urls))
+    totalNames=""
+    #todo: max of 19 items per time!?
     for item in urls:
         title=item
+        totalNames+="|"+urllib.parse.quote_plus(title)
         #https://www.projectenportfolio.nl/wiki/api.php?action=query&titles=PR%20SSM%2000020&prop=categories|pageprops
-        titleurl=(wikiurl + "/api.php?action=query&titles={0}&prop=categories|pageprops&format=json") .format(title)
-        r2 = requests.get(titleurl)
-        data = json.loads(r2.text)
-        page=data["query"]["pages"]
+    totalNames = totalNames[1:]
+    titleurl=(wikiurl + "/api.php?action=query&titles={0}&prop=categories|pageprops&format=json") .format(totalNames)
+    print(titleurl)
+    r2 = requests.get(titleurl)
+    data = json.loads(r2.text)
+    pagesreturn=data["query"]["pages"]
+    for key in pagesreturn:
+        #print(title)
+        page=pagesreturn[key]
+        #print(page)
+
+        #if not "title" in page:
+        #    print(page)
+        #    continue
+        title=page["title"]
         mypage={}
         mypage['id'] = title.replace(" ","_")
         mypage['displaytitle']=title
@@ -214,11 +228,30 @@ def getRecentChanges():
         if len(cats-possiblePages)==0:
             cats=list(possiblePages-cats)
             mypage["categories"]=cats
-            pages.append(mypage)
-    print(pages)
+            pages[key]=mypage
+
+            # &prop=revisions&rvprop=content
+
+    titleurl = (wikiurl + "/api.php?action=query&titles={0}&prop=revisions&rvprop=content&format=json").format(
+        totalNames)
+    r2 = requests.get(titleurl)
+    data = json.loads(r2.text)
+    contentJson = data["query"]["pages"]
+    #print(pages)
     #todo: check if property hyperlink or file name is in page......... Check with content!?
     #todo: can it be done with id? That is given by page-info!
-    for item in pages:
+    for key in pages:
+        item=pages[key]
+        hyperlink = False
+        pagename = False
+        if "Resource Description" in item["categories"]:
+            try:
+                content=content["revisions"][0]['*']
+                hyperlink="|hyperlink=" in content.lower()
+                pagename = "|page name=" in content.lower()
+                #print(hyperlink,pagename)
+            except:
+                pass
         cmd="""<{0}> 
   rdf:type  swivt:Subject;
   rdfs:label  "{1}";
@@ -226,7 +259,7 @@ def getRecentChanges():
   wiki:Property-3ADisplay_title_of  "{1}";
   wiki:Property-3ASelf  wiki:{2};
   wiki:Property-3ASemantic_title  "{3}";
-{4}
+{4}{5}
   .
 
   """
@@ -239,9 +272,14 @@ def getRecentChanges():
         cat="  rdf:type  wiki:Category-3A{0};\n"
         cats=""
         for c in item["categories"]:
-            cats+=cat.format(c)
-        formatted = cmd.format(url, label, lc, semanticTitle, cats)
-        print(formatted)
+            cats+=cat.format(c.replace(" ", "_"))
+        extra=""
+        if hyperlink:
+            extra+="  wiki:Property-3AHyperlink  \"zomaar\";  \n"
+        if pagename:
+            extra+="  wiki:Property-3APage name  \"zomaar\";\n  "
+        formatted = cmd.format(url, label, lc, semanticTitle, cats,extra)
+        #print(formatted)
 
         fh.write(formatted)
 
