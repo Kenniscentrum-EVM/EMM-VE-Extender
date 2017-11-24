@@ -28,7 +28,7 @@ wiki:Property-3ADct-3Adate-23aux  "2457856.5"^^xsd:double
 wiki:Property-3AFile_name  wiki:Bestand-3A141027agenda_programmagroep22.docx
 wiki:Property-3APagename  "Bestand:141027agenda programmagroep22.docx"
 """
-debug=False
+debug=True
 def codeTitle(prefix,title_,url):
     if debug:
         print(title_)
@@ -66,7 +66,6 @@ parameters = yaml.load(stream)['parameters']
 wikiurl=parameters.get('wikiurl',"http://localhost:5555/wikis/hzportfolio/wiki")
 sparqlport=parameters.get('sparqlport',"5030")
 wiki=wikiurl+"/index.php"
-fname=parameters.get('datafilename',"data.ttl")
 print("wiki url:",wikiurl)
 print("sparql port:",sparqlport)
 
@@ -79,7 +78,7 @@ PREFIX owl: <http://www.w3.org/2002/07/owl#>
 PREFIX swivt: <http://semantic-mediawiki.org/swivt/1.0#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 """.format(wiki)
-fh = open(fname,'w')
+fh = open("data.ttl",'w')
 fh.write(header)
 
 cmd = """<{0}> 
@@ -137,10 +136,11 @@ import time
 start_time = time.time()
 
 
-doCommand(query,cmd,f)
+#doCommand(query,cmd,f)
 print("--- %s seconds ---" % (time.time() - start_time))
-doCommand("[[Category:Resource Description]]|?Semantic title|?file name|?hyperlink|?Dct:creator|?Dct:date|?Organization|?Dct:subject|limit=10000",
-          """<{0}> 
+query="[[Category:Resource Description]]|?Semantic title|?file name|?hyperlink|?Dct:creator|?Dct:date|?Organization|?Dct:subject|limit=10000"
+cmd="""
+<{0}> 
   rdf:type  swivt:Subject;
   rdf:type  wiki:Category-3AResource_Description;
 [3]
@@ -154,23 +154,103 @@ doCommand("[[Category:Resource Description]]|?Semantic title|?file name|?hyperli
   wiki:Property-3ASelf  wiki:{2}
   .
 
-  """,
-          [ #todo: date can also be: 1/2017/4/13 --> "2016-09-06Z"^^xsd:date
+  """
+f=[ #todo: date can also be: 1/2017/4/13 --> "2016-09-06Z"^^xsd:date
               #lambda x: "wiki:Property-3ADct-3Adate  \"" + simple(x["Dct:date"][0]['raw']+'"^^xsd:gYear'),
-           #lambda y: codeTitle("wiki:Property-3ADct-3Acreator  ",y["Dct:creator"],False),
-           #lambda y: codeTitle("wiki:Property-3ADct-3Asubject  wiki:" ,y["Dct:subject"],True),
-           #lambda y: codeTitle("wiki:Property-Organization  ",y["Organization"],False),
+          # lambda y: codeTitle("wiki:Property-3ADct-3Acreator  ",y["Dct:creator"],False),
+          # lambda y: codeTitle("wiki:Property-3ADct-3Asubject  wiki:" ,y["Dct:subject"],True),
+          # lambda y: codeTitle("wiki:Property-Organization  ",y["Organization"],False),
 lambda y: codeTitle("wiki:Property-3ASupercontext  wiki:",y["Supercontext"],True),
            lambda y: codeTitle("wiki:Property-3AFile_name  wiki:",y["File name"],True),
 lambda y: "wiki:Property-3AHyperlink  <"+y["Hyperlink"][0]+">",
 lambda y: "wiki:Property-3ASemantic_title  \"" + escapeQuote(y["Semantic title"][0]) + "\"",
      lambda y: "wiki:Property-3AName  \"" + escapeQuote(y["Semantic title"][0]) + "\""]
-          )
+#doCommand(query,cmd,f)
 
+def getRecentChanges():
+    #https://www.projectenportfolio.nl/wiki/api.php?action=query&list=recentchanges&rcprop=title&rcstart=2017-11-24T00:00:00Z
+    import datetime
+    today = datetime.date.today()
+    print (today) #rcstart={0}T00:00:00Z&
+    url = (wikiurl + "/api.php?action=query&list=recentchanges&rcprop=title&rclimit=100&format=json") .format(today) #&rclimit=500
+    print(url)
+    r = requests.get(url)
+    data = json.loads(r.text)
+    # print(data)
+    result=data["query"]["recentchanges"]
+    urls=set()
+    for item in result:
+        title = item["title"]
+        urls.add(title)
+    urls=list(urls)
+    possiblePages={"Resource Description","Light Context"}
+    pages=[]
+    print(len(urls))
+    for item in urls:
+        title=item
+        #https://www.projectenportfolio.nl/wiki/api.php?action=query&titles=PR%20SSM%2000020&prop=categories|pageprops
+        titleurl=(wikiurl + "/api.php?action=query&titles={0}&prop=categories|pageprops&format=json") .format(title)
+        r2 = requests.get(titleurl)
+        data = json.loads(r2.text)
+        page=data["query"]["pages"]
+        mypage={}
+        mypage['id'] = title.replace(" ","_")
+        mypage['displaytitle']=title
+        for key in page:
+            try:
+                categories=page[key]["categories"]
+                cats=[]
+                for item in categories:
+                    cats.append(item["title"].replace("Category:","").replace("Categorie:",""))
+                mypage["categories"]=cats
+            except:
+                mypage["categories"] = []
+            try:
+                pageprops=page[key]["pageprops"]
+                mypage['displaytitle'] = pageprops['displaytitle']
+            except:
+                pass
+        cats=set(mypage["categories"])
+        if len(cats-possiblePages)==0:
+            cats=list(possiblePages-cats)
+            mypage["categories"]=cats
+            pages.append(mypage)
+    print(pages)
+    #todo: check if property hyperlink or file name is in page......... Check with content!?
+    #todo: can it be done with id? That is given by page-info!
+    for item in pages:
+        cmd="""<{0}> 
+  rdf:type  swivt:Subject;
+  rdfs:label  "{1}";
+  swivt:page  <{0}>;
+  wiki:Property-3ADisplay_title_of  "{1}";
+  wiki:Property-3ASelf  wiki:{2};
+  wiki:Property-3ASemantic_title  "{3}";
+{4}
+  .
+
+  """
+
+        lc=item["id"] #url
+        self1=encodeUrl(lc)
+        label=escapeQuote(item['displaytitle'])
+        url=wiki+"/"+item["id"]
+        semanticTitle=label
+        cat="  rdf:type  wiki:Category-3A{0};\n"
+        cats=""
+        for c in item["categories"]:
+            cats+=cat.format(c)
+        formatted = cmd.format(url, label, lc, semanticTitle, cats)
+        print(formatted)
+
+        fh.write(formatted)
+
+getRecentChanges()
+#rcstart="2017-11-21T16:18:06Z"
 fh.close()
 print("--- %s seconds ---" % (time.time() - start_time))
 if not debug:
-    command = '''curl -X PUT  -H Content-Type:text/turtle  -T {0}  -G http://localhost:{1}/hzportfolio/data'''.format(fname,sparqlport)
+    command = '''curl -X PUT  -H Content-Type:text/turtle  -T data.ttl  -G http://localhost:{0}/hzportfolio/data'''.format(sparqlport)
     print(command)
     print(os.system(command))
 
