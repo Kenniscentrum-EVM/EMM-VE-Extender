@@ -13,23 +13,7 @@ import datetime
 # [[Category:Resource Description]] [[Hyperlink::+]]|?Semantic title|?Hyperlink|?Dct:creator|?Dct:date|?Organization|?Dct:subject|sort=Semantic title|order=asc|limit=10000
 # [[Category:Resource Description]]|?Semantic title|?Dct:creator|?Dct:date|?Organization|?Dct:subject|?file name|?Hyperlink|sort=Semantic title|order=asc|limit=10000
 
-# for the Resource Description:
-"""
-rdf:type  swivt:Subject
-rdf:type  wiki:Category-3AResource_Description
-rdfs:label  "Bestand:141027agenda programmagroep22.docx"
-swivt:page  <https://www.projectenportfolio.nl/wiki/index.php/Bestand:141027agenda_programmagroep22.docx>
-wiki:Property-3ADct-3Acreator  "Cora Dourlein"
-wiki:Property-3ADct-3Adate  "2017-04-13Z"^^xsd:date
-wiki:Property-3ADct-3Atitle  "141027 Agenda programmagroep"
-wiki:Property-3ASemantic_title  "141027 Agenda programmagroep"
-wiki:Property-3ASelf  wiki:Bestand-3A141027agenda_programmagroep22.docx
-swivt:file  <https://www.projectenportfolio.nl/images/5/5b/141027agenda_programmagroep22.docx>
-wiki:Property-3ACreated_in_page  wiki:LC_00083
-wiki:Property-3ADct-3Adate-23aux  "2457856.5"^^xsd:double
-wiki:Property-3AFile_name  wiki:Bestand-3A141027agenda_programmagroep22.docx
-wiki:Property-3APagename  "Bestand:141027agenda programmagroep22.docx"
-"""
+
 debug=False
 def codeTitle(prefix,title_,url):
     if debug:
@@ -116,8 +100,13 @@ import time
 start_time = time.time()
 
 def saveAllResources():
+    """
+    dump two lists to SPARQL
+    :return:
+    """
     listdata = []
 
+    #save Light Context
     cmd = """<{0}> 
       rdf:type  swivt:Subject;
     [3]
@@ -142,6 +131,8 @@ def saveAllResources():
     # select ?p ?o where { <http://localhost:5555/wikis/hzportfolio/wiki/index.php/LC_00249> ?p ?o}
     doCommand(query,cmd,f,listdata)
     print("--- %s seconds ---" % (time.time() - start_time))
+
+    #save Resource Descriptions
     query="[[Category:Resource Description]]|?Semantic title|?file name|?hyperlink|?Dct:creator|?Dct:date|?Organization|?Dct:subject|limit=10000"
     cmd="""
     <{0}> 
@@ -170,14 +161,18 @@ def saveAllResources():
     lambda y: "wiki:Property-3ASemantic_title  \"" + escapeQuote(y["Semantic title"][0]) + "\"",
          lambda y: "wiki:Property-3AName  \"" + escapeQuote(y["Semantic title"][0]) + "\""]
     doCommand(query,cmd,f,listdata)
+
+    #save list of pagenames to file
     afile = open('save.pkl', 'wb')
     pickle.dump([datetime.datetime.utcnow(),listdata], afile)
     afile.close()
 
 def getRecentChanges():
+    #data must be added to SPARQL, do not overwrite it
     global method
     method = "POST"
 
+    #read list pagenames from file
     try:
         afile = open('save.pkl', 'rb')
         [prevdate,listdata]=pickle.load(afile)
@@ -186,9 +181,11 @@ def getRecentChanges():
         listdata={}
         prevdate=datetime.datetime.utcnow() - datetime.timedelta(days=3*365)
     print(prevdate)
-    #https://www.projectenportfolio.nl/wiki/api.php?action=query&list=recentchanges&rcprop=title&rcstart=2017-11-24T00:00:00Z
 
     today = datetime.datetime.utcnow().strftime("%Y-%m-%d")
+
+    #get list of recent changes
+    #https://www.projectenportfolio.nl/wiki/api.php?action=query&list=recentchanges&rcprop=title&rcstart=2017-11-24T00:00:00Z
     #print (today) #rcstart={0}T00:00:00Z&
     #timestamp example: "2017-11-23T10:56:43Z"
     #previous:&rcstart={0}T00:00:00Z
@@ -198,6 +195,8 @@ def getRecentChanges():
     data = json.loads(r.text)
     # print(data)
     result=data["query"]["recentchanges"]
+
+    #filter recent changes; compare date and check for uniqueness
     urls=set()
     maxdate=prevdate
     for item in result:
@@ -216,11 +215,15 @@ def getRecentChanges():
         #print(time)
         urls.add(title)
         print("add:"+title)
+
+    #nothing to do?
     if len(urls)==0:
 
         global debug
         debug=True
         return
+
+    #update pagenames on disk
     afile = open('save.pkl', 'wb')
     pickle.dump([maxdate,listdata], afile)
     afile.close()
@@ -232,45 +235,52 @@ def getRecentChanges():
     #max of 19 items per time!?
     for item in urls:
         title=item
+        #remnant of try to get more than one page per call
         totalNames = ""
         totalNames+="|"+urllib.parse.quote_plus(title)
         #https://www.projectenportfolio.nl/wiki/api.php?action=query&titles=PR%20SSM%2000020&prop=categories|pageprops
         totalNames = totalNames[1:]
+
+        #get page description(s)
         titleurl=(wikiurl + "/api.php?action=query&titles={0}&prop=categories|pageprops&format=json") .format(totalNames)
         print(titleurl)
         r2 = requests.get(titleurl)
         data = json.loads(r2.text)
         pagesreturn=data["query"]["pages"]
+        mypage = {}
         for key in pagesreturn:
             #print(title)
             page=pagesreturn[key]
-            #print(page)
+            print(page)
 
             #if not "title" in page:
             #    print(page)
             #    continue
             title=page["title"]
-            mypage={}
             mypage['id'] = title.replace(" ","_")
             #todo: semantic title is not set when it is saved as resource; only when updated with properties......
             mypage['displaytitle']=title
-            for key in page:
-                try:
-                    categories=page[key]["categories"]
-                    cats=[]
-                    for item in categories:
-                        cats.append(item["title"].replace("Category:","").replace("Categorie:",""))
-                    mypage["categories"]=cats
-                except:
-                    mypage["categories"] = []
-                try:
-                    pageprops=page[key]["pageprops"]
+            #for key in page:
+            if "categories" in page:
+                categories=page["categories"]
+                cats=[]
+                for item in categories:
+                    cats.append(item["title"].replace("Category:","").replace("Categorie:",""))
+                mypage["categories"]=cats
+            else:
+                mypage["categories"] = []
+            if "pageprops" in page:
+                pageprops=page["pageprops"]
+                #mypage['displaytitle'] = 'wiki:Property-3ADisplay_title_of  "{1}"'.format(escapeQuote(pageprops['displaytitle']))
+                if 'displaytitle' in pageprops:
                     mypage['displaytitle'] = pageprops['displaytitle']
-                except:
-                    pass
+            else:
+                pass
             cats=set(mypage["categories"])
-            if len(cats-possiblePages)==0:
-                cats=list(possiblePages-cats)
+            print("cats:",cats)
+            mypage["categories"]=[]
+            if len(cats)>0 and len(cats-possiblePages)==0:
+                cats=list(possiblePages.intersection(cats))
                 mypage["categories"]=cats
                 pages[key]=mypage
 
@@ -281,19 +291,36 @@ def getRecentChanges():
         r2 = requests.get(titleurl)
         data = json.loads(r2.text)
         contentJson = data["query"]["pages"]
-        #print(pages)
-        for key in pages:
-            item=pages[key]
+
+        for key in contentJson:
+            item=contentJson[key]
             hyperlink = False
             pagename = False
-            if "Resource Description" in item["categories"]:
-                try:
-                    content=content["revisions"][0]['*']
+            try:
+                content = item["revisions"][0]['*']
+                print("content:",content)
+                if "{{Light Context" in content:
+                    mypage["categories"] = list(set(mypage["categories"].append('Light Context')))
+                if "{{Resource Description" in content:
+                    print("inside")
+                    import re
+                    regex = r"(?<=\|title=).+$"
+
+                    matches = re.finditer(regex, content, re.MULTILINE)
+
+                    m=""
+                    for matchNum, match in enumerate(matches):
+                        mypage['displaytitle']=match.group()
+                    #print("title:",m)
+                    mypage["categories"]=list(set(mypage["categories"].append('Resource Description')))
+                    #cats.add('Resource Description')
+
                     hyperlink="|hyperlink=" in content.lower()
                     pagename = "|page name=" in content.lower()
                     #print(hyperlink,pagename)
-                except:
-                    pass
+            except:
+                pass
+
             cmd="""<{0}> 
       rdf:type  swivt:Subject;
       rdfs:label  "{1}";
@@ -306,6 +333,7 @@ def getRecentChanges():
     
       """
 
+            item=mypage
             lc=item["id"] #url
             self1=encodeUrl(lc)
             label=escapeQuote(item['displaytitle'])
@@ -321,7 +349,7 @@ def getRecentChanges():
             if pagename:
                 extra+="  wiki:Property-3APage name  \"zomaar\";\n  "
             formatted = cmd.format(url, label, lc, semanticTitle, cats,extra)
-            #print(formatted)
+            print(formatted)
 
             fh.write(formatted)
 try:
