@@ -300,7 +300,7 @@ function SPARQLStore() {
     this.getHyperLinkPages=function(callQuery){
         //rezources that have a Hyperlink
         var sparqlquery=
-            "SELECT ?Self  ?Semantic_title ?Dct__creator ?Dct__subject ?Dct__date ?Hyperlink ?Organization ?Pagename WHERE {"+
+            "SELECT ?Self  ?Semantic_title WHERE {"+
             "?Self  rdf:type category:Resource_Description."+
             this.standardLine+
             "?Self property:Hyperlink ?Hyperlink."+
@@ -314,7 +314,7 @@ function SPARQLStore() {
     this.getReferencePages=function(callQuery){
         //resources that have no filename, and no hyperlink
         var sparqlquery=
-            "SELECT ?Self  ?Semantic_title ?Dct__creator ?Dct__subject ?Dct__date ?Hyperlink ?File_name ?Organization ?Pagename WHERE {"+
+            "SELECT ?Self  ?Semantic_title  WHERE {"+
             "?Self  rdf:type category:Resource_Description."+
             this.standardLine+
                 " FILTER (NOT EXISTS {?Self property:File_name ?File_name.} && NOT EXISTS {?Self property:Hyperlink ?Hyperlink.}) "+
