@@ -1,6 +1,6 @@
 "use strict";
 
-var vagrant=false;
+var vagrant=true;
 var ipaddress="172.28.128.1";//in PHP-Storm:File/Settings/File Watchers (filetype:javascript, scope:Module 'EMM-VE-Extender', program: path-to-script)
 
 String.prototype.replaceAll = function (search, replacement) {
@@ -300,7 +300,7 @@ function SPARQLStore() {
     this.getHyperLinkPages=function(callQuery){
         //rezources that have a Hyperlink
         var sparqlquery=
-            "SELECT ?Self  ?Semantic_title ?Hyperlink WHERE {"+
+            "SELECT ?Self  ?Semantic_title ?Dct__creator ?Dct__subject ?Dct__date ?Hyperlink ?Organization ?Pagename WHERE {"+
             "?Self  rdf:type category:Resource_Description."+
             this.standardLine+
             "?Self property:Hyperlink ?Hyperlink."+
@@ -314,7 +314,7 @@ function SPARQLStore() {
     this.getReferencePages=function(callQuery){
         //resources that have no filename, and no hyperlink
         var sparqlquery=
-            "SELECT ?Self  ?Semantic_title  WHERE {"+
+            "SELECT ?Self  ?Semantic_title ?Dct__creator ?Dct__subject ?Dct__date ?Hyperlink ?File_name ?Organization ?Pagename WHERE {"+
             "?Self  rdf:type category:Resource_Description."+
             this.standardLine+
                 " FILTER (NOT EXISTS {?Self property:File_name ?File_name.} && NOT EXISTS {?Self property:Hyperlink ?Hyperlink.}) "+
