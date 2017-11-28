@@ -1,6 +1,6 @@
 "use strict";
 
-var vagrant=true;
+var vagrant=false;
 var ipaddress="172.28.128.1";//in PHP-Storm:File/Settings/File Watchers (filetype:javascript, scope:Module 'EMM-VE-Extender', program: path-to-script)
 
 String.prototype.replaceAll = function (search, replacement) {
@@ -29,7 +29,8 @@ function VagrantSetting(){
     var that = GlobalSetting();
     that.getUrl=function(url,datastore,sparqlquery){
         var localserver=ipaddress;
-        url = 'http://'+localserver+':3030/hzportfolio/query?query=' + encodeURIComponent(sparqlquery);
+        url = 'http://localhost:5030/hzportfolio/query?query=' + encodeURIComponent(sparqlquery);
+        //url = 'http://'+localserver+':3030/hzportfolio/query?query=' + encodeURIComponent(sparqlquery);
         console.log(url);
         return url;
         }   ;
