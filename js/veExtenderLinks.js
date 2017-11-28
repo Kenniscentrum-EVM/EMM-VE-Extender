@@ -29,7 +29,7 @@ function VagrantSetting(){
     var that = GlobalSetting();
     that.getUrl=function(url,datastore,sparqlquery){
         var localserver=ipaddress;
-        url = 'http://localhost:5030/hzportfolio/query?query=' + encodeURIComponent(sparqlquery);
+        url = 'http://'+localserver+':3030/hzportfolio/query?query=' + encodeURIComponent(sparqlquery);
         console.log(url);
         return url;
         }   ;
