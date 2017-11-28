@@ -50,6 +50,7 @@ parameters = yaml.load(stream)['parameters']
 method = "PUT"
 
 wikiurl=parameters.get('wikiurl',"http://localhost:5555/wikis/hzportfolio/wiki")
+wikiInSparql=parameters.get('wiki.in.sparql',"http://localhost:5555/wikis/hzportfolio/wiki/index.php")
 sparqlport=parameters.get('sparqlport',"5030")
 datastore=parameters.get('datastore',"hzportfolio")
 wiki=wikiurl+"/index.php"
@@ -64,7 +65,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX owl: <http://www.w3.org/2002/07/owl#>
 PREFIX swivt: <http://semantic-mediawiki.org/swivt/1.0#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-""".format(wiki)
+""".format(wikiInSparql)
 fh = open("data.ttl",'w')
 fh.write(header)
 
