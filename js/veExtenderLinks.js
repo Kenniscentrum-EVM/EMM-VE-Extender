@@ -300,7 +300,7 @@ function SPARQLStore() {
     this.getHyperLinkPages=function(callQuery){
         //rezources that have a Hyperlink
         var sparqlquery=
-            "SELECT ?Self  ?Semantic_title WHERE {"+
+            "SELECT ?Self  ?Semantic_title ?Hyperlink WHERE {"+
             "?Self  rdf:type category:Resource_Description."+
             this.standardLine+
             "?Self property:Hyperlink ?Hyperlink."+
