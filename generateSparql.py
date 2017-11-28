@@ -51,6 +51,7 @@ method = "PUT"
 
 wikiurl=parameters.get('wikiurl',"http://localhost:5555/wikis/hzportfolio/wiki")
 sparqlport=parameters.get('sparqlport',"5030")
+datastore=parameters.get('datastore',"hzportfolio")
 wiki=wikiurl+"/index.php"
 print("wiki url:",wikiurl)
 print("sparql port:",sparqlport)
@@ -365,8 +366,8 @@ fh.close()
 print("--- %s seconds ---" % (time.time() - start_time))
 #Use accessor.add(m) instead of putModel(m)
 if not debug:
-    command = '''curl -X {1}  -H Content-Type:text/turtle  -T data.ttl  -G http://localhost:{0}/hzportfolio/data'''.format(sparqlport,
-                                                                                                                           method)
+    command = '''curl -X {1}  -H Content-Type:text/turtle  -T data.ttl  -G http://localhost:{0}/{2}/data'''.format(sparqlport,
+                                                                                                                           method,datastore)
     print(command)
     print(os.system(command))
 
