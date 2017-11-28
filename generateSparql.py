@@ -316,6 +316,9 @@ def getRecentChanges():
                     #print("title:",m)
                     mypage["categories"]=list(set(mypage["categories"].append('Resource Description')))
                     #cats.add('Resource Description')
+            except:
+                    pass
+            try:
 
                     hyperlink="|hyperlink=" in content.lower()
                     pagename = "|page name=" in content.lower()
@@ -330,7 +333,8 @@ def getRecentChanges():
       wiki:Property-3ADisplay_title_of  "{1}";
       wiki:Property-3ASelf  wiki:{2};
       wiki:Property-3ASemantic_title  "{3}";
-    {4}{5}
+    {4}
+    {5}
       .
     
       """
