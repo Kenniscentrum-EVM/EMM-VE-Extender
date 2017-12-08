@@ -20,6 +20,7 @@ function createFileDialog(LightResourceDialog) {
         LightResourceDialog.call(this);
         this.autoCompleteQuery = "[[Category:Resource Description]] [[file name::+]] |?Semantic title|?Dct:creator|?Dct:date|?Organization|?Dct:subject|?file name|sort=Semantic title|order=asc|limit=10000";
         this.editQuery = "[[PAGENAMEPARAMETER]] |?Semantic title|?Dct:creator|?Dct:date|?Organization|?Dct:subject|?file name";
+        this.old_filename="";
     };
     OO.inheritClass(EMMFileDialog, LightResourceDialog);
 
@@ -208,6 +209,7 @@ function createFileDialog(LightResourceDialog) {
 	        } else {
 	            filename = this.suggestion.data.replace("Bestand:", "").replace("File:", "");
 	        }
+	        console.log("old filename:",this.old_filename,"new filename:",filename);
 	        //Expand the existing query with a file-specific part.
 	        query += "&Resource Description[file name]=" + filename;
 	    } catch(e){}
@@ -248,7 +250,9 @@ function createFileDialog(LightResourceDialog) {
     /**
      * Fill the fields of the dialog based on a file the user has selected from the autocomplete dropdown.
      */
-    EMMFileDialog.prototype.fillFields = function () {
+    EMMFileDialog.prototype.fillFields = function (suggestion) {
+        console.log("suggestion:",suggestion);
+        this.old_filename=suggestion.filename;
         LightResourceDialog.prototype.fillFields.call(this);
         this.validator.validateAll();
     };
@@ -436,8 +440,10 @@ function createFileDialog(LightResourceDialog) {
 	        var dialogInstance = this;
 	        var ignorewarnings = newUploadVersion ? 1 : 0;
 	        var file = this.fileField.getValue();
+                var newFileName=file.name;
+                if (this.old_filename.length>0) newFileName=this.old_filename;
 	        var filedata = {
-	            filename: file.name,
+	            filename: newFileName,
 	            ignorewarnings: ignorewarnings
 	        };
 	        new mw.Api().upload(file, filedata).fail(function (status, exceptionobject) {
