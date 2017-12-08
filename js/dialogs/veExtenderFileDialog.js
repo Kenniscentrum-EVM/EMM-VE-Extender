@@ -40,7 +40,10 @@ function createFileDialog(LightResourceDialog) {
     EMMFileDialog.prototype.setFileName = function (filename) {
         this.old_filename=filename;
         console.log("filename:",filename);
-        $(".oo-ui-selectFileWidget-selectButton .oo-ui-labelElement-label").text(filename);
+        if (filename.length>0)
+            $(".oo-ui-selectFileWidget-selectButton .oo-ui-labelElement-label").text(filename);
+        else
+            this.setPlaceholderOfTitlefield();
 
     };
 
@@ -48,6 +51,9 @@ function createFileDialog(LightResourceDialog) {
         sparqlStore.getResources(sparqlFunction)
     };
 
+    EMMFileDialog.prototype.setPlaceholderOfTitlefield = function () {
+        this.titleField.$element.find("input").prop("placeholder", OO.ui.deferMsg("visualeditor-emm-filedialog-titlefield-placeholder-def")());
+    };
     /**
      * Creates the input fields unique for a FileDialog, calls its parent method to create more generic fields.
      * The most generic fields are created in the constructor of EMMDialog.
@@ -60,7 +66,7 @@ function createFileDialog(LightResourceDialog) {
             showDropTarget: true
         });
         //Set the placeholder of titleField
-        this.titleField.$element.find("input").prop("placeholder", OO.ui.deferMsg("visualeditor-emm-filedialog-titlefield-placeholder-def")());
+        this.setPlaceholderOfTitlefield();
     };
 
     /**

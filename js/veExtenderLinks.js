@@ -1216,7 +1216,9 @@ function clearInputFields(fieldset, excludeNum, dialog) {
             //Apparently we also go trough some LabelWidgets in this loop, these things will break IE9 and IE10 .setValue(x) is called on them.
             if (fieldset.getItems()[i].getField() instanceof OO.ui.SelectFileWidget) {
                 console.log("clear file-widget");
-                dialog.setFileName("");
+                try {
+                    dialog.setFileName("");
+                } catch(e){}
                 fieldset.getItems()[i].getField().setValue(null);
             } else if (fieldset.getItems()[i].getField() instanceof OO.ui.CheckboxInputWidget) {
                 fieldset.getItems()[i].getField().setSelected(true);
