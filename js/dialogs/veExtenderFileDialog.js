@@ -196,7 +196,6 @@ function createFileDialog(LightResourceDialog) {
             var prefix=parts[0];
             
             if (VALID_PREFIXES.indexOf(prefix) > -1){
-                console.log(prefix);
                 this.file_prefix=prefix
                 filename=parts[parts.length-1];
             } else return filename;
