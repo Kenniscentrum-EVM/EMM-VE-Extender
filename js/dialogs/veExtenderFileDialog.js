@@ -39,7 +39,7 @@ function createFileDialog(LightResourceDialog) {
 
     EMMFileDialog.prototype.setFileName = function (filename) {
         this.old_filename=filename;
-        this.fileField.setValue(filename);
+        //this.fileField.setValue(filename);
         //this.fileField
     };
 
