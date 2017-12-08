@@ -1054,7 +1054,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                 hideAutoComplete(dialogInstance.titleField.$element.find("input"));
                 dialogInstance.validator.disable();
                 dialogInstance.validator.disableOnChange();
-                clearInputFields(dialogInstance.fieldset, null);
+                clearInputFields(dialogInstance.fieldset, null, dialogInstance);
                 dialogInstance.dialogMode = dialogInstance.modeEnum.INSERT_EXISTING;
                 dialogInstance.executeModeChange(dialogInstance.modeEnum.INSERT_EXISTING, false);
                 dialogInstance.validator.enableOnChange();
@@ -1202,7 +1202,7 @@ function setDisabledDialogElements(dialogInstance, value) {
  * @param {OO.ui.FieldsetLayout} fieldset - The fieldset whose input fields should be emptied
  * @param {int[]} excludeNum - The indices of the fields in the fieldset that should not be cleared
  */
-function clearInputFields(fieldset, excludeNum) {
+function clearInputFields(fieldset, excludeNum, dialog) {
     main:
         for (var i = 0; i < fieldset.getItems().length; i++) {
             if (excludeNum != null && excludeNum.length != 0) {
@@ -1216,6 +1216,7 @@ function clearInputFields(fieldset, excludeNum) {
             //Apparently we also go trough some LabelWidgets in this loop, these things will break IE9 and IE10 .setValue(x) is called on them.
             if (fieldset.getItems()[i].getField() instanceof OO.ui.SelectFileWidget) {
                 console.log("clear file-widget");
+                dialog.setFileName("");
                 fieldset.getItems()[i].getField().setValue(null);
             } else if (fieldset.getItems()[i].getField() instanceof OO.ui.CheckboxInputWidget) {
                 fieldset.getItems()[i].getField().setSelected(true);
