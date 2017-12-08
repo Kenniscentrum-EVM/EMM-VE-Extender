@@ -1,6 +1,6 @@
 "use strict";
 
-var vagrant=true;
+var vagrant=false;
 var ipaddress="172.28.128.1";//in PHP-Storm:File/Settings/File Watchers (filetype:javascript, scope:Module 'EMM-VE-Extender', program: path-to-script)
 
 String.prototype.replaceAll = function (search, replacement) {
