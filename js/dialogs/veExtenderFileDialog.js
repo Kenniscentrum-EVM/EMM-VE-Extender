@@ -37,6 +37,12 @@ function createFileDialog(LightResourceDialog) {
     };
     OO.inheritClass(EMMFileDialog, LightResourceDialog);
 
+    EMMFileDialog.prototype.setFileName = function (filename) {
+        this.old_filename=filename;
+        this.fileField.setValue(filename);
+        //this.fileField
+    };
+
     EMMFileDialog.prototype.processSparql = function (sparqlFunction) {
         sparqlStore.getResources(sparqlFunction)
     };
@@ -145,7 +151,8 @@ function createFileDialog(LightResourceDialog) {
                 input = this.titleField.$element.find('input');
                 input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-filedialog-titlefield-placeholder-new")());
                 if (clearInputFieldsBool) {
-                    this.old_filename="";
+                    this.setFileName("");
+                    //this.old_filename="";
                     if (this.suggestion != null) {
                         if (this.suggestion.value != this.titleField.value) {
                             clearInputFields(this.fieldset, [0, 1, 2]);
@@ -281,7 +288,7 @@ function createFileDialog(LightResourceDialog) {
     EMMFileDialog.prototype.fillFields = function (suggestion) {
         //console.log("suggestion:",suggestion);
         try{
-            this.old_filename=suggestion.filename;
+            this.setFileName(suggestion.filename);
         } catch(e){}
         LightResourceDialog.prototype.fillFields.call(this);
         this.validator.validateAll();
@@ -327,7 +334,7 @@ function createFileDialog(LightResourceDialog) {
         if (this.isExistingResource) {
             if (this.fileField.getValue() != null) {
 
-                this.old_filename=this.suggestion.filename;
+                this.setFileName(this.suggestion.filename);
                 if (this.fileField.getValue().name != this.getCleanFilename(this.suggestion.filename).toLowerCase()) {
                     //Upload new file and create a new resource, because the file has a diffrent name.
                     //A diffrent filename will lead to a diffrent internal name for the File.
