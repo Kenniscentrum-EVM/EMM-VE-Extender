@@ -445,7 +445,7 @@ function createFileDialog(LightResourceDialog) {
 	        var ignorewarnings = newUploadVersion ? 1 : 0;
 	        var file = this.fileField.getValue();
                 var newFileName=file.name;
-                if (this.old_filename.length>0) newFileName=this.old_filename;
+                //if (this.old_filename.length>0) newFileName=this.old_filename;
 	        var filedata = {
 	            filename: newFileName,
 	            ignorewarnings: ignorewarnings
