@@ -256,7 +256,7 @@ function createFileDialog(LightResourceDialog) {
         //Handle uploading of a new file or new version of a file.
         if (upload) {
         	uploadtarget=target
-            this.uploadFile(newUploadVersion, function (fname) {
+            this.uploadFile(this.existingresource, function (fname) {
                 semanticCreateWithFormQuery(query, insertCallback, localFilePrefix+":"+/*"Bestand:"+*/fname, "Resource Light");
             });
         }
