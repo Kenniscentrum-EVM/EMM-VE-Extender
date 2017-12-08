@@ -21,6 +21,7 @@ function createFileDialog(LightResourceDialog) {
         this.autoCompleteQuery = "[[Category:Resource Description]] [[file name::+]] |?Semantic title|?Dct:creator|?Dct:date|?Organization|?Dct:subject|?file name|sort=Semantic title|order=asc|limit=10000";
         this.editQuery = "[[PAGENAMEPARAMETER]] |?Semantic title|?Dct:creator|?Dct:date|?Organization|?Dct:subject|?file name";
         this.old_filename="";
+        this.file_prefix="Bestand";
     };
     OO.inheritClass(EMMFileDialog, LightResourceDialog);
 
@@ -178,7 +179,16 @@ function createFileDialog(LightResourceDialog) {
         else
             this.fileField.$element.find(".oo-ui-selectFileWidget-dropLabel").text(OO.ui.deferMsg("ooui-selectfile-dragdrop-placeholder")());
     };
-
+    EMMFileDialog.prototype.getCleanFilename = function (filename) {
+        parts=filename.split(":");
+        if (parts.length>1){
+            this.file_prefix=parts[0];
+            filename=parts[parts.length-1];
+            console.log("prefix set to:",this.file_prefix);
+        }
+        //filename.replace("Bestand:", "").replace("File:", "");
+        return filename;
+    }
     /**
      * Builds and executes a query that creates a new file resource or edits an existing one with the sfautoedit api-calll.
      * After the new file resource has been added, a link is then inserted into the page by executing insertCallback.
@@ -208,7 +218,7 @@ function createFileDialog(LightResourceDialog) {
 	        if (upload) {
 	            filename = this.fileField.getValue().name;
 	        } else {
-	            filename = this.suggestion.data.replace("Bestand:", "").replace("File:", "");
+	            filename = this.getCleanFilename(this.suggestion.data);
 	        }
 	        //Expand the existing query with a file-specific part.
 	        query += "&Resource Description[file name]=" + filename;
@@ -236,7 +246,7 @@ function createFileDialog(LightResourceDialog) {
         if (upload) {
         	uploadtarget=target
             this.uploadFile(newUploadVersion, function (fname) {
-                semanticCreateWithFormQuery(query, insertCallback, "Bestand:"+fname, "Resource Light");
+                semanticCreateWithFormQuery(query, insertCallback, this.file_prefix+":"+/*"Bestand:"+*/fname, "Resource Light");
             });
         }
         else {
@@ -267,7 +277,7 @@ function createFileDialog(LightResourceDialog) {
     EMMFileDialog.prototype.processSingleQueryResult = function (row, resultSet, previousSuggestion) {
         var suggestionObject = LightResourceDialog.prototype.processSingleQueryResult.call(this, row, resultSet, previousSuggestion);
         try {
-            suggestionObject.filename = resultSet[row].printouts["File name"][0].fulltext.replace("Bestand:", "").replace("File:", "");
+            suggestionObject.filename = this.getCleanFilename(resultSet[row].printouts["File name"][0].fulltext);
         }catch(e){}
         if (previousSuggestion != null) {
             if (previousSuggestion.semanticTitle.toLowerCase() == suggestionObject.semanticTitle.toLowerCase() && previousSuggestion.value == previousSuggestion.semanticTitle)
@@ -297,7 +307,7 @@ function createFileDialog(LightResourceDialog) {
             if (this.fileField.getValue() != null) {
                 //todo create a function for stripping a filename of "Bestand:" and "File:". Also make sure this is language independent
                 //console.log("filename:"+this.fileField.getValue().name+".");
-                if (this.fileField.getValue().name != this.suggestion.filename.replace("Bestand:", "").replace("File:", "").toLowerCase()) {
+                if (this.fileField.getValue().name != this.getCleanFilename(this.suggestion.filename).toLowerCase()) {
                     //Upload new file and create a new resource, because the file has a diffrent name.
                     //A diffrent filename will lead to a diffrent internal name for the File.
                     //Linkdata is left empty on purpose
