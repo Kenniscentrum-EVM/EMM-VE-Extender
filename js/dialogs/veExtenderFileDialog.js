@@ -438,6 +438,10 @@ function createFileDialog(LightResourceDialog) {
                 setDisabledDialogElements(dialogInstance, false);
         }
     };
+    function getExtension(filename){
+        var parts = filename.split('.');
+        return (parts.length > 1) ? parts.pop() : '';
+    }
 
     /**
      * Uploads a file to the wiki and executes the correct action after succeeding or failing
@@ -451,6 +455,14 @@ function createFileDialog(LightResourceDialog) {
 	        var file = this.fileField.getValue();
                 var newFileName=file.name;
                 if (this.old_filename.length>0) newFileName=this.old_filename;
+                    if (getExtension(file.name) !=getExtension(newFileName)){
+                    mw.notify("filetypes old and new files do not match", {
+                        autoHide: false,
+                        type: "error"
+                    });
+                    setDisabledDialogElements(dialogInstance, false);
+                    return;
+                }
 	        var filedata = {
 	            filename: newFileName,
 	            ignorewarnings: ignorewarnings
