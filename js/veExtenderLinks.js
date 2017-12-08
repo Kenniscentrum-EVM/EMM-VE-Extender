@@ -684,7 +684,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                         dialogInstance.suggestion = suggestion;
                         dialogInstance.titleField.setValue(suggestion.value);
                         setDisabledInputFields(dialogInstance.fieldset, false);
-                        dialogInstance.fillFields(); //fill our dialog.
+                        dialogInstance.fillFields(suggestion); //fill our dialog.
                         dialogInstance.isExistingResource = true;
                     }
                     dialogInstance.validator.enable(); //enable validation again.
