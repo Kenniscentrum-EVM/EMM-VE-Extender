@@ -186,6 +186,7 @@ function createFileDialog(LightResourceDialog) {
                     this.executeModeChange(this.modeEnum.INSERT_NEW, true);
                 break;
             case this.modeEnum.INSERT_NEW:
+                console.log("insert new:");
                 if (this.fileField.getValue() == null)
                     this.executeModeChange(this.modeEnum.INSERT_EXISTING, true);
                 break;
