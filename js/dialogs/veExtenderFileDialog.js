@@ -32,7 +32,7 @@ function createFileDialog(LightResourceDialog) {
         LightResourceDialog.call(this);
         this.autoCompleteQuery = "[[Category:Resource Description]] [[file name::+]] |?Semantic title|?Dct:creator|?Dct:date|?Organization|?Dct:subject|?file name|sort=Semantic title|order=asc|limit=10000";
         this.editQuery = "[[PAGENAMEPARAMETER]] |?Semantic title|?Dct:creator|?Dct:date|?Organization|?Dct:subject|?file name";
-        this.old_filename="";
+        this.setFileName("");
         this.file_prefix="Bestand";
     };
     OO.inheritClass(EMMFileDialog, LightResourceDialog);
