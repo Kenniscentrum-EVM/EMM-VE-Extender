@@ -184,7 +184,7 @@ function createFileDialog(LightResourceDialog) {
                 break;
         }
 
-        //todo this is done every keystroke, you'd much rather try to do this only once. Potential fix: add a new mode for when the dialog intially opens.
+        //todo this is done every keystroke, you'd much rather try to do this only once. Potential fix: add a new mode for when the dialog initially opens.
         if (this.isExistingResource)
             this.fileField.$element.find(".oo-ui-selectFileWidget-dropLabel").text(OO.ui.deferMsg("visualeditor-emm-filedialog-uploadnf")());
         else
@@ -320,8 +320,7 @@ function createFileDialog(LightResourceDialog) {
         var dialogInstance = this;
         if (this.isExistingResource) {
             if (this.fileField.getValue() != null) {
-                //todo create a function for stripping a filename of "Bestand:" and "File:". Also make sure this is language independent
-                //console.log("filename:"+this.fileField.getValue().name+".");
+
                 this.old_filename=this.suggestion.filename;
                 if (this.fileField.getValue().name != this.getCleanFilename(this.suggestion.filename).toLowerCase()) {
                     //Upload new file and create a new resource, because the file has a diffrent name.
@@ -485,8 +484,6 @@ function createFileDialog(LightResourceDialog) {
 	            //Handle possible error messages and display them in a way the user understands them.
 	            //If we're uploading a new version and the file already exists, ignore the error and insert a link anyway.
 	            if (newUploadVersion && (status == "exists" || status == "exists-normalized")) {
-	            //because an existing file was never overwritten, the follwing lines have been commented.
-	            //todo: check for correct value for newUploadVersion. Thhis must be nearly always true
 	                postUploadFunction(newFileName);
 	            } else {
 	                dialogInstance.handleUploadFail(status, exceptionobject);
