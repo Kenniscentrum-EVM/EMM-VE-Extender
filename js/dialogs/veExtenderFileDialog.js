@@ -236,7 +236,7 @@ function createFileDialog(LightResourceDialog) {
         if (upload) {
         	uploadtarget=target
             this.uploadFile(newUploadVersion, function (fname) {
-                semanticCreateWithFormQuery(query, insertCallback, fname, "Resource Light");
+                semanticCreateWithFormQuery(query, insertCallback, "Bestand:"+fname, "Resource Light");
             });
         }
         else {
