@@ -237,6 +237,7 @@ function createFileDialog(LightResourceDialog) {
      * @param {boolean} newUploadVersion - True if the upload is a new version of an existing file
      */
     EMMFileDialog.prototype.executeQuery = function (query, insertCallback, linkdata, upload, newUploadVersion) {
+        var localFilePrefix=this.file_prefix;
         var target = "";
         //Set the target of the api-call to the internal title of an existing file resource, if the file already exists.
         if (this.isExistingResource) {
@@ -246,7 +247,7 @@ function createFileDialog(LightResourceDialog) {
         if (upload) {
         	uploadtarget=target
             this.uploadFile(newUploadVersion, function (fname) {
-                semanticCreateWithFormQuery(query, insertCallback, this.file_prefix+":"+/*"Bestand:"+*/fname, "Resource Light");
+                semanticCreateWithFormQuery(query, insertCallback, localFilePrefix+":"+/*"Bestand:"+*/fname, "Resource Light");
             });
         }
         else {
