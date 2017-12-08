@@ -41,8 +41,7 @@ function createFileDialog(LightResourceDialog) {
         this.old_filename=filename;
         console.log("filename:",filename);
         $(".oo-ui-labelElement-label").text(filename);
-        //this.fileField.setValue(filename);
-        //this.fileField
+
     };
 
     EMMFileDialog.prototype.processSparql = function (sparqlFunction) {
