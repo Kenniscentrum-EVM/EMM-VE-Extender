@@ -39,7 +39,8 @@ function createFileDialog(LightResourceDialog) {
 
     EMMFileDialog.prototype.setFileName = function (filename) {
         this.old_filename=filename;
-        $(".oo-ui-selectFileWidget-dropLabel").text(filename);
+        console.log("filename:",filename);
+        $(".oo-ui-labelElement-label").text(filename);
         //this.fileField.setValue(filename);
         //this.fileField
     };
