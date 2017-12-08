@@ -132,6 +132,7 @@ function createFileDialog(LightResourceDialog) {
                 input = this.titleField.$element.find('input');
                 input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-filedialog-titlefield-placeholder-new")());
                 if (clearInputFieldsBool) {
+                    this.old_filename="";
                     if (this.suggestion != null) {
                         if (this.suggestion.value != this.titleField.value) {
                             clearInputFields(this.fieldset, [0, 1, 2]);
