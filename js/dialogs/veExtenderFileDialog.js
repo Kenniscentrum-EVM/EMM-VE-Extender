@@ -238,8 +238,10 @@ function createFileDialog(LightResourceDialog) {
         //Handle uploading of a new file or new version of a file.
         if (upload) {
         	uploadtarget=target
-            this.uploadFile(newUploadVersion, function () {
-                semanticCreateWithFormQuery(query, insertCallback, uploadtarget, "Resource Light");
+            this.uploadFile(newUploadVersion, function (fname) {
+                console.log("postupload",uploadtarget,fname);
+                console.log("fname:",fname);
+                semanticCreateWithFormQuery(query, insertCallback, fname, "Resource Light");
             });
         }
         else {
@@ -251,8 +253,10 @@ function createFileDialog(LightResourceDialog) {
      * Fill the fields of the dialog based on a file the user has selected from the autocomplete dropdown.
      */
     EMMFileDialog.prototype.fillFields = function (suggestion) {
-        console.log("suggestion:",suggestion);
-        this.old_filename=suggestion.filename;
+        //console.log("suggestion:",suggestion);
+        try{
+            this.old_filename=suggestion.filename;
+        } catch(e){};
         LightResourceDialog.prototype.fillFields.call(this);
         this.validator.validateAll();
     };
@@ -452,15 +456,15 @@ function createFileDialog(LightResourceDialog) {
 	            //if (newUploadVersion && (status == "exists" || status == "exists-normalized")) {
 	            //because an existing file was never overwritten, the follwing lines have been commented.
 	            //todo: check for correct value for newUploadVersion. Thhis must be nearly always true
-	                postUploadFunction();
+	                postUploadFunction(newFileName);
 	            //} else {
 	            //    dialogInstance.handleUploadFail(status, exceptionobject);
 	            //}
 	        }).done(function () {
-	            postUploadFunction();
+	            postUploadFunction(newFileName);
 	        });
 	    } catch(e){
-	    	postUploadFunction();
+	    	postUploadFunction(newFileName);
 	    }
     };
 
