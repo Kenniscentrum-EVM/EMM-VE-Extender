@@ -4,6 +4,16 @@
 "use strict";
 
 /**
+ * Helper function
+ * */
+function getExtension(filename){
+    var parts = filename.split('.');
+    var ext=(parts.length > 1) ? parts.pop() : '';
+    console.log(ext);
+    return ext;
+}
+
+/**
  * This function more or less functions like a factory. It receives a parent 'class', it then adds its own behavior on
  * top of the existing behavior. When done with modifying the 'class' this method then returns the modified class/function.
  * @param {EMMLightResourceDialog} LightResourceDialog - The 'class'-definition of EMMLightResourceDialog
@@ -438,10 +448,7 @@ function createFileDialog(LightResourceDialog) {
                 setDisabledDialogElements(dialogInstance, false);
         }
     };
-    function getExtension(filename){
-        var parts = filename.split('.');
-        return (parts.length > 1) ? parts.pop() : '';
-    }
+
 
     /**
      * Uploads a file to the wiki and executes the correct action after succeeding or failing
@@ -455,7 +462,7 @@ function createFileDialog(LightResourceDialog) {
 	        var file = this.fileField.getValue();
                 var newFileName=file.name;
                 if (this.old_filename.length>0) newFileName=this.old_filename;
-                    if (getExtension(file.name) !=getExtension(newFileName)){
+                if (getExtension(file.name) !=getExtension(newFileName)){
                     mw.notify("filetypes old and new files do not match", {
                         autoHide: false,
                         type: "error"
