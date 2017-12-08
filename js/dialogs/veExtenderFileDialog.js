@@ -9,7 +9,6 @@
 function getExtension(filename){
     var parts = filename.split('.');
     var ext=(parts.length > 1) ? parts.pop() : '';
-    console.log(ext);
     return ext;
 }
 
@@ -194,7 +193,6 @@ function createFileDialog(LightResourceDialog) {
         if (parts.length>1){
             this.file_prefix=parts[0];
             filename=parts[parts.length-1];
-            console.log("prefix set to:",this.file_prefix);
         }
         //filename.replace("Bestand:", "").replace("File:", "");
         return filename;
@@ -319,7 +317,6 @@ function createFileDialog(LightResourceDialog) {
                 //todo create a function for stripping a filename of "Bestand:" and "File:". Also make sure this is language independent
                 //console.log("filename:"+this.fileField.getValue().name+".");
                 this.old_filename=this.suggestion.filename;
-                console.log("old filename:",this.suggestion.filename);
                 if (this.fileField.getValue().name != this.getCleanFilename(this.suggestion.filename).toLowerCase()) {
                     //Upload new file and create a new resource, because the file has a diffrent name.
                     //A diffrent filename will lead to a diffrent internal name for the File.
@@ -485,8 +482,6 @@ function createFileDialog(LightResourceDialog) {
 	            //because an existing file was never overwritten, the follwing lines have been commented.
 	            //todo: check for correct value for newUploadVersion. Thhis must be nearly always true
 	                postUploadFunction(newFileName);
-                        console.log("status result:",status);
-                        console.log("ignorewarnings:",ignorewarnings);
 	            } else {
 	                dialogInstance.handleUploadFail(status, exceptionobject);
 	            }
