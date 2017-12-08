@@ -1,5 +1,6 @@
 /**
  * Created by Carlo Geertse on 12-10-2016.
+ * Updated by Anton Bil at 8-12-2017
  */
 "use strict";
 
@@ -190,19 +191,24 @@ function createFileDialog(LightResourceDialog) {
         else
             this.fileField.$element.find(".oo-ui-selectFileWidget-dropLabel").text(OO.ui.deferMsg("ooui-selectfile-dragdrop-placeholder")());
     };
+    /**
+     * get filename without prefix
+     * @param filename
+     * @returns {filename without prefix}
+     */
     EMMFileDialog.prototype.getCleanFilename = function (filename) {
-        parts=filename.split(":");
+        var parts=filename.split(":");
         if (parts.length>1){
             var prefix=parts[0];
             
             if (VALID_PREFIXES.indexOf(prefix) > -1){
-                this.file_prefix=prefix
+                this.file_prefix=prefix;
                 filename=parts[parts.length-1];
             } else return filename;
         }
         //filename.replace("Bestand:", "").replace("File:", "");
         return filename;
-    }
+    };
     /**
      * Builds and executes a query that creates a new file resource or edits an existing one with the sfautoedit api-calll.
      * After the new file resource has been added, a link is then inserted into the page by executing insertCallback.
@@ -259,7 +265,7 @@ function createFileDialog(LightResourceDialog) {
         }
         //Handle uploading of a new file or new version of a file.
         if (upload) {
-        	uploadtarget=target
+        	//uploadtarget=target
             this.uploadFile(newUploadVersion, function (fname) {
                 semanticCreateWithFormQuery(query, insertCallback, localFilePrefix+":"+/*"Bestand:"+*/fname, "Resource Light");
             });
@@ -276,7 +282,7 @@ function createFileDialog(LightResourceDialog) {
         //console.log("suggestion:",suggestion);
         try{
             this.old_filename=suggestion.filename;
-        } catch(e){};
+        } catch(e){}
         LightResourceDialog.prototype.fillFields.call(this);
         this.validator.validateAll();
     };
@@ -462,7 +468,7 @@ function createFileDialog(LightResourceDialog) {
     EMMFileDialog.prototype.uploadFile = function (newUploadVersion, postUploadFunction) {
     	try{
 	        var dialogInstance = this;
-                if (!newUploadVersion)
+            if (!newUploadVersion)
                     newUploadVersion=this.isExistingResource;
 	        var ignorewarnings = newUploadVersion ? 1 : 0;
 	        var file = this.fileField.getValue();

@@ -1294,7 +1294,7 @@ function initAutoComplete(data, dialogInstance) {
         lookup: data,
         triggerSelectOnValidInput: false,
         onSelect: function (suggestion) {
-            query=dialogInstance.getEditQuery(suggestion.data);
+            var query=dialogInstance.getEditQuery(suggestion.data);
             //do ask-query for suggestion
             var api = new mw.Api();
             api.get({
@@ -1302,7 +1302,7 @@ function initAutoComplete(data, dialogInstance) {
                 query: query
             }).done(function(queryData){
 			//console.log("result:",queryData);
-				var suggestion2
+				var suggestion2;
 	            var res = queryData.query.results;
 	            for (var row in res) {
 	                //console.log("row:",row);
@@ -1312,7 +1312,7 @@ function initAutoComplete(data, dialogInstance) {
                 suggestion2 = dialogInstance.processSingleQueryResult(row, res);
             }
 
-            linkdata=suggestion.data;
+            var linkdata=suggestion.data;
             dialogInstance.suggestion = suggestion2;
             dialogInstance.suggestion.data = linkdata;
             //console.log("found suggestion + link-data::",suggestion2);
