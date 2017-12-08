@@ -40,14 +40,9 @@ function createFileDialog(LightResourceDialog) {
     EMMFileDialog.prototype.setFileName = function (filename) {
         this.old_filename=filename;
         console.log("filename:",filename);
-        if (filename.length>0)
-            $(".oo-ui-selectFileWidget-selectButton .oo-ui-labelElement-label").text(filename);
-        else {
-            this.fileField.$element.find(".oo-ui-selectFileWidget-dropLabel").text(OO.ui.deferMsg("ooui-selectfile-dragdrop-placeholder")());
-            this.setPlaceholderOfTitlefield();
-        }
-
-
+        if (filename.length==0)
+            filename="Selecteer een bestand";
+        $(".oo-ui-selectFileWidget-selectButton .oo-ui-labelElement-label").text(filename);
     };
 
     EMMFileDialog.prototype.processSparql = function (sparqlFunction) {
