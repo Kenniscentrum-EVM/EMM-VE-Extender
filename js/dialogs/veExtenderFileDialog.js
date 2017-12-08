@@ -39,7 +39,6 @@ function createFileDialog(LightResourceDialog) {
 
     EMMFileDialog.prototype.setFileName = function (filename) {
         this.old_filename=filename;
-        console.log("filename:",filename);
         if (filename.length==0)
             filename="Selecteer een bestand";
         $(".oo-ui-selectFileWidget-selectButton .oo-ui-labelElement-label").text(filename);
@@ -152,12 +151,10 @@ function createFileDialog(LightResourceDialog) {
                 }
                 break;
             case this.modeEnum.INSERT_NEW:
-                //this.setFileName("");
                 this.$element.find(".oo-ui-processDialog-title").text(OO.ui.deferMsg("visualeditor-emm-filedialog-title-npage")());
                 input = this.titleField.$element.find('input');
                 input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-filedialog-titlefield-placeholder-new")());
                 if (clearInputFieldsBool) {
-                    console.log("clear inputs:");
                     this.setFileName("");
                     //this.old_filename="";
                     if (this.suggestion != null) {
@@ -190,7 +187,6 @@ function createFileDialog(LightResourceDialog) {
                     this.executeModeChange(this.modeEnum.INSERT_NEW, true);
                 break;
             case this.modeEnum.INSERT_NEW:
-                console.log("insert new:");
                 if (this.fileField.getValue() == null)
                     this.executeModeChange(this.modeEnum.INSERT_EXISTING, true);
                 break;
@@ -296,7 +292,6 @@ function createFileDialog(LightResourceDialog) {
     EMMFileDialog.prototype.fillFields = function (suggestion) {
         //console.log("suggestion:",suggestion);
         try{
-            console.log("fill:",suggestion);
             this.setFileName(suggestion.filename);
         } catch(e){}
         LightResourceDialog.prototype.fillFields.call(this);
