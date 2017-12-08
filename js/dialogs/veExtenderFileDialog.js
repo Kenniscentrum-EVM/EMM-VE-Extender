@@ -289,6 +289,7 @@ function createFileDialog(LightResourceDialog) {
     EMMFileDialog.prototype.fillFields = function (suggestion) {
         //console.log("suggestion:",suggestion);
         try{
+            console.log("fill:",suggestion);
             this.setFileName(suggestion.filename);
         } catch(e){}
         LightResourceDialog.prototype.fillFields.call(this);
