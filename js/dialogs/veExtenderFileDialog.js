@@ -318,6 +318,8 @@ function createFileDialog(LightResourceDialog) {
             if (this.fileField.getValue() != null) {
                 //todo create a function for stripping a filename of "Bestand:" and "File:". Also make sure this is language independent
                 //console.log("filename:"+this.fileField.getValue().name+".");
+                this.old_filename=this.suggestion.filename;
+                console.log("old filename:",this.suggestion.filename);
                 if (this.fileField.getValue().name != this.getCleanFilename(this.suggestion.filename).toLowerCase()) {
                     //Upload new file and create a new resource, because the file has a diffrent name.
                     //A diffrent filename will lead to a diffrent internal name for the File.
