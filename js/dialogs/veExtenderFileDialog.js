@@ -256,7 +256,7 @@ function createFileDialog(LightResourceDialog) {
         //Handle uploading of a new file or new version of a file.
         if (upload) {
         	uploadtarget=target
-            this.uploadFile(this.existingresource, function (fname) {
+            this.uploadFile(newUploadVersion, function (fname) {
                 semanticCreateWithFormQuery(query, insertCallback, localFilePrefix+":"+/*"Bestand:"+*/fname, "Resource Light");
             });
         }
@@ -460,6 +460,8 @@ function createFileDialog(LightResourceDialog) {
     EMMFileDialog.prototype.uploadFile = function (newUploadVersion, postUploadFunction) {
     	try{
 	        var dialogInstance = this;
+                if (!newUploadVersion)
+                    newUploadVersion=this.isExistingResource;
 	        var ignorewarnings = newUploadVersion ? 1 : 0;
 	        var file = this.fileField.getValue();
                 var newFileName=file.name;
