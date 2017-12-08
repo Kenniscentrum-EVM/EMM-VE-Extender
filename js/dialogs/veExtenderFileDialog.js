@@ -210,11 +210,9 @@ function createFileDialog(LightResourceDialog) {
 	        } else {
 	            filename = this.suggestion.data.replace("Bestand:", "").replace("File:", "");
 	        }
-	        console.log("old filename:",this.old_filename,"new filename:",filename);
 	        //Expand the existing query with a file-specific part.
 	        query += "&Resource Description[file name]=" + filename;
 	    } catch(e){}
-	    console.log("linkdata:",linkdata);
         this.executeQuery(query, insertCallback, linkdata, upload, newUploadVersion);
     };
 
@@ -234,14 +232,10 @@ function createFileDialog(LightResourceDialog) {
         if (this.isExistingResource) {
             target = linkdata;
         }
-        console.log("Execute query",query);
-        console.log("Target:",target);
         //Handle uploading of a new file or new version of a file.
         if (upload) {
         	uploadtarget=target
             this.uploadFile(newUploadVersion, function (fname) {
-                console.log("postupload",uploadtarget,fname);
-                console.log("fname:",fname);
                 semanticCreateWithFormQuery(query, insertCallback, fname, "Resource Light");
             });
         }
@@ -298,7 +292,6 @@ function createFileDialog(LightResourceDialog) {
      */
     EMMFileDialog.prototype.executeInsertAction = function (insertCallback, currentPageID, linkdata) {
         //See the documentation wiki for a visual representation of this if/else mess
-        console.log("linkdata:",linkdata);
         var dialogInstance = this;
         if (this.isExistingResource) {
             if (this.fileField.getValue() != null) {

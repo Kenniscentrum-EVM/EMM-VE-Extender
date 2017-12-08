@@ -31,7 +31,7 @@ function VagrantSetting(){
         var localserver=ipaddress;
         url = 'http://localhost:5030/hzportfolio/query?query=' + encodeURIComponent(sparqlquery);
         //url = 'http://'+localserver+':3030/hzportfolio/query?query=' + encodeURIComponent(sparqlquery);
-        console.log(url);
+        //console.log(url);
         return url;
         }   ;
 
@@ -661,12 +661,12 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
             if (data.source != null) //are we editing?
             {
                 var resultFunction=function (queryData) {
-                    console.log("result:",queryData);
+                    //console.log("result:",queryData);
                     dialogInstance.validator.disable(); //completely disable validation before we're going to fill the dialog.
                     dialogInstance.validator.disableOnChange();
                     var res = queryData.query.results;
                     for (var row in res) {
-                        console.log("row:",row);
+                        //console.log("row:",row);
                         if (!res.hasOwnProperty(row)) { //seems to be required.
                             continue;
                         }
@@ -929,7 +929,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
             else {
                 linkData = "";
             }
-            console.log("linkdata:",linkData);
+            //console.log("linkdata:",linkData);
 
             /**
              * Callback function to be called after creating a new resource or editing an existing one
@@ -1315,7 +1315,7 @@ function initAutoComplete(data, dialogInstance) {
             linkdata=suggestion.data;
             dialogInstance.suggestion = suggestion2;
             dialogInstance.suggestion.data = linkdata;
-            console.log("found suggestion + link-data::",suggestion2);
+            //console.log("found suggestion + link-data::",suggestion2);
             dialogInstance.isExistingResource = true;
             dialogInstance.titleField.setValue(suggestion.semanticTitle);
             inputField.blur();
