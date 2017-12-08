@@ -148,10 +148,12 @@ function createFileDialog(LightResourceDialog) {
                 }
                 break;
             case this.modeEnum.INSERT_NEW:
+                this.setFileName("");
                 this.$element.find(".oo-ui-processDialog-title").text(OO.ui.deferMsg("visualeditor-emm-filedialog-title-npage")());
                 input = this.titleField.$element.find('input');
                 input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-filedialog-titlefield-placeholder-new")());
                 if (clearInputFieldsBool) {
+                    console.log("clear inputs:");
                     this.setFileName("");
                     //this.old_filename="";
                     if (this.suggestion != null) {
