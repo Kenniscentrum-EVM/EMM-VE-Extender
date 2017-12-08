@@ -481,15 +481,15 @@ function createFileDialog(LightResourceDialog) {
 	        new mw.Api().upload(file, filedata).fail(function (status, exceptionobject) {
 	            //Handle possible error messages and display them in a way the user understands them.
 	            //If we're uploading a new version and the file already exists, ignore the error and insert a link anyway.
-	            //if (newUploadVersion && (status == "exists" || status == "exists-normalized")) {
+	            if (newUploadVersion && (status == "exists" || status == "exists-normalized")) {
 	            //because an existing file was never overwritten, the follwing lines have been commented.
 	            //todo: check for correct value for newUploadVersion. Thhis must be nearly always true
 	                postUploadFunction(newFileName);
                         console.log("status result:",status);
                         console.log("ignorewarnings:",ignorewarnings);
-	            //} else {
-	            //    dialogInstance.handleUploadFail(status, exceptionobject);
-	            //}
+	            } else {
+	                dialogInstance.handleUploadFail(status, exceptionobject);
+	            }
 	        }).done(function () {
 	            postUploadFunction(newFileName);
 	        });
