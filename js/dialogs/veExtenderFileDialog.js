@@ -3,6 +3,8 @@
  */
 "use strict";
 
+//valid prefixes for file; language-dependant
+const VALID_PREFIXES=["Bestand","File"];
 /**
  * Helper function
  * */
@@ -191,8 +193,13 @@ function createFileDialog(LightResourceDialog) {
     EMMFileDialog.prototype.getCleanFilename = function (filename) {
         parts=filename.split(":");
         if (parts.length>1){
-            this.file_prefix=parts[0];
-            filename=parts[parts.length-1];
+            var prefix=parts[0];
+            
+            if (VALID_PREFIXES.indexOf(prefix) > -1){
+                console.log(prefix);
+                this.file_prefix=prefix
+                filename=parts[parts.length-1];
+            } else return filename;
         }
         //filename.replace("Bestand:", "").replace("File:", "");
         return filename;
