@@ -42,8 +42,11 @@ function createFileDialog(LightResourceDialog) {
         console.log("filename:",filename);
         if (filename.length>0)
             $(".oo-ui-selectFileWidget-selectButton .oo-ui-labelElement-label").text(filename);
-        else
+        else {
+            this.fileField.$element.find(".oo-ui-selectFileWidget-dropLabel").text(OO.ui.deferMsg("ooui-selectfile-dragdrop-placeholder")());
             this.setPlaceholderOfTitlefield();
+        }
+
 
     };
 
@@ -154,7 +157,7 @@ function createFileDialog(LightResourceDialog) {
                 }
                 break;
             case this.modeEnum.INSERT_NEW:
-                this.setFileName("");
+                //this.setFileName("");
                 this.$element.find(".oo-ui-processDialog-title").text(OO.ui.deferMsg("visualeditor-emm-filedialog-title-npage")());
                 input = this.titleField.$element.find('input');
                 input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-filedialog-titlefield-placeholder-new")());
