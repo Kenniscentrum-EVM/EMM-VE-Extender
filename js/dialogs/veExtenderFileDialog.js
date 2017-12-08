@@ -462,6 +462,8 @@ function createFileDialog(LightResourceDialog) {
 	            //because an existing file was never overwritten, the follwing lines have been commented.
 	            //todo: check for correct value for newUploadVersion. Thhis must be nearly always true
 	                postUploadFunction(newFileName);
+                        console.log("status result:",status);
+                        console.log("ignorewarnings:",ignorewarnings);
 	            //} else {
 	            //    dialogInstance.handleUploadFail(status, exceptionobject);
 	            //}
