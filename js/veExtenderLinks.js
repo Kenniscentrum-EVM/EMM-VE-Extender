@@ -1054,7 +1054,9 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                 hideAutoComplete(dialogInstance.titleField.$element.find("input"));
                 dialogInstance.validator.disable();
                 dialogInstance.validator.disableOnChange();
+                //init variables to default value
                 clearInputFields(dialogInstance.fieldset, null, dialogInstance);
+                dialogInstance.initVariables();
                 dialogInstance.dialogMode = dialogInstance.modeEnum.INSERT_EXISTING;
                 dialogInstance.executeModeChange(dialogInstance.modeEnum.INSERT_EXISTING, false);
                 dialogInstance.validator.enableOnChange();
@@ -1099,6 +1101,9 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
         }
         suggestionObject.semanticTitle = suggestionObject.value;
         return suggestionObject;
+    };
+    EMMDialog.prototype.initVariables = function () {
+        //LightResourceDialog.prototype.initVariables.call(this);
     };
 
     EMMDialog.prototype.processSparql = function (sparqlFunction) {
@@ -1215,9 +1220,9 @@ function clearInputFields(fieldset, excludeNum, dialog) {
             }
             //Apparently we also go trough some LabelWidgets in this loop, these things will break IE9 and IE10 .setValue(x) is called on them.
             if (fieldset.getItems()[i].getField() instanceof OO.ui.SelectFileWidget) {
-                try {
-                    dialog.setFileName("");
-                } catch(e){}
+                //try {
+                //    dialog.setFileName("");
+                //} catch(e){}
                 fieldset.getItems()[i].getField().setValue(null);
             } else if (fieldset.getItems()[i].getField() instanceof OO.ui.CheckboxInputWidget) {
                 fieldset.getItems()[i].getField().setSelected(true);

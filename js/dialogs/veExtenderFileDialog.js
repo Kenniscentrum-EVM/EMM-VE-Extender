@@ -32,7 +32,7 @@ function createFileDialog(LightResourceDialog) {
         LightResourceDialog.call(this);
         this.autoCompleteQuery = "[[Category:Resource Description]] [[file name::+]] |?Semantic title|?Dct:creator|?Dct:date|?Organization|?Dct:subject|?file name|sort=Semantic title|order=asc|limit=10000";
         this.editQuery = "[[PAGENAMEPARAMETER]] |?Semantic title|?Dct:creator|?Dct:date|?Organization|?Dct:subject|?file name";
-        this.setFileName("");
+        this.initVariables();
         this.file_prefix="Bestand";
     };
     OO.inheritClass(EMMFileDialog, LightResourceDialog);
@@ -155,7 +155,7 @@ function createFileDialog(LightResourceDialog) {
                 input = this.titleField.$element.find('input');
                 input.prop("placeholder", OO.ui.deferMsg("visualeditor-emm-filedialog-titlefield-placeholder-new")());
                 if (clearInputFieldsBool) {
-                    this.setFileName("");
+                    this.initVariables();
                     //this.old_filename="";
                     if (this.suggestion != null) {
                         if (this.suggestion.value != this.titleField.value) {
@@ -285,7 +285,10 @@ function createFileDialog(LightResourceDialog) {
             semanticCreateWithFormQuery(query, insertCallback, target, "Resource Light");
         }
     };
-
+    EMMFileDialog.prototype.initVariables = function () {
+        this.setFileName("");
+        LightResourceDialog.prototype.initVariables.call(this);
+    };
     /**
      * Fill the fields of the dialog based on a file the user has selected from the autocomplete dropdown.
      */

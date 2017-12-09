@@ -103,6 +103,9 @@ function createLightResourceDialog(EMMDialog, resourceType) {
             (this.subjectField.getValue() != this.suggestion.subjects && !(this.subjectField.getValue() == "" && this.suggestion.subjects == null));
     };
 
+    EMMLightResourceDialog.prototype.initVariables = function () {
+        //LightResourceDialog.prototype.initVariables.call(this);
+    };
     /**
      * Fill the generic fields of a dialog handling a light resource based on a selected resource from the autocomplete dropdown.
      * Fields for a specific type of Light Resource should be filled in their own method.
