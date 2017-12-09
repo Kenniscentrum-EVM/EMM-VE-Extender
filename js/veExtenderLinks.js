@@ -1055,7 +1055,7 @@ function createDialog(dialogName, dialogMessage, resourceType, templateResult) {
                 dialogInstance.validator.disable();
                 dialogInstance.validator.disableOnChange();
                 //init variables to default value
-                clearInputFields(dialogInstance.fieldset, null, dialogInstance);
+                clearInputFields(dialogInstance.fieldset, null);
                 dialogInstance.initVariables();
                 dialogInstance.dialogMode = dialogInstance.modeEnum.INSERT_EXISTING;
                 dialogInstance.executeModeChange(dialogInstance.modeEnum.INSERT_EXISTING, false);
@@ -1207,7 +1207,7 @@ function setDisabledDialogElements(dialogInstance, value) {
  * @param {OO.ui.FieldsetLayout} fieldset - The fieldset whose input fields should be emptied
  * @param {int[]} excludeNum - The indices of the fields in the fieldset that should not be cleared
  */
-function clearInputFields(fieldset, excludeNum, dialog) {
+function clearInputFields(fieldset, excludeNum) {
     main:
         for (var i = 0; i < fieldset.getItems().length; i++) {
             if (excludeNum != null && excludeNum.length != 0) {
