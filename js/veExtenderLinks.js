@@ -123,9 +123,9 @@ function SPARQLStore() {
         //debug("uristart:" + this.uristart);
         var proxy = location.href.substring(0, window.location.href.lastIndexOf("/")) + '/Special:MyProxy';//Special Page Proxy
         //add query to address
-        var url = proxy + '?' + "query=" + encodeURIComponent(sparqlquery) + "&dataset="+this.datastore;
+        //var url = proxy + '?' + "query=" + encodeURIComponent(sparqlquery) + "&dataset="+this.datastore;
         //to be used for direct call to sparql-store
-        //var url = "http://localhost:3030/" + this.datastore + '/query?' + "query=" + encodeURIComponent(sparqlquery);
+        var url = URLsplit[0] + "//" + URLsplit[2] + ":3030/"+/*"http://localhost:3030/" + */this.datastore + '/query?' + "query=" + encodeURIComponent(sparqlquery);
         //bovenstaande werkt niet.
         //het volgende werkt wel:
         //- query opbouwen uit prefixen, en select ?s ?p ?o where {?s ?p ?o.} limit 50
@@ -136,7 +136,7 @@ function SPARQLStore() {
 
 
         url=globalSetting.getUrl(url,this.datastore,sparqlquery);
-        //debug("url:" + url);
+        debug("url:" + url);
         $.get(url, function (json){
             var table = json.results.bindings;
             debug("table:",table);
