@@ -40,7 +40,7 @@ function createFileDialog(LightResourceDialog) {
     EMMFileDialog.prototype.setFileName = function (filename) {
         this.old_filename=filename;
         if (filename.length==0)
-            filename="Selecteer een bestand";
+            filename=OO.ui.deferMsg("ooui-selectfile-button-select")();//"ooui-selectfile-button-select"
         $(".oo-ui-selectFileWidget-selectButton .oo-ui-labelElement-label").text(filename);
     };
 
